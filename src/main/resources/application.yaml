@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: SWP_SE1941JV_GR2_PLS
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://103.20.96.16:3308/SWP_DB
+    username: team_swp
+    password: Swp1941@
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+server:
+  port: 5555
+
+
+
+
