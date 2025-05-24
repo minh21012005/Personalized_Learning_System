@@ -83,8 +83,44 @@
             </div>
 
             <!-- Main Content Area -->
-            <div class="content">
 
+            <div class="content">
+                <div class="col-md-12 col-12 mx-auto">
+                    <h3>List grades
+
+                    </h3>
+                </div>
+                <div class="d-flex justify-content-end mb-3 me-3">
+                    <a href="/admin/grade/create" class="btn btn-primary btn-lg">Create</a>
+                </div>
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Grade ID</th>
+                            <th scope="col">Grade Name</th>
+                            <th scope="col">Status</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:choose>
+                            <c:when test="${not empty grades}">
+                                <c:forEach var="grade" items="${grades}">
+                                    <tr>
+                                        <td>${grade.gradeId}</td>
+                                        <td>${grade.gradeName}</td>
+                                        <td>${grade.status}</td>
+                                    </tr>
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                                <tr>
+                                    <td colspan="3" class="text-center">No grades found</td>
+                                </tr>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
             </div>
 
             <!-- Include Footer -->
