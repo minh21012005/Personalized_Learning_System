@@ -7,22 +7,22 @@
             </div>
             <ul class="nav flex-column p-3">
                 <li class="nav-item mb-2">
-                    <a class="nav-link text-white bg-primary rounded" href="#" style="padding: 8px 15px;">
+                    <a class="nav-link text-white bg-primary rounded" href="/admin" style="padding: 8px 15px;">
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
                 </li>
                 <li class="nav-item mb-2">
-                    <a class="nav-link text-white" href="#" style="padding: 8px 15px;">
+                    <a class="nav-link text-white" href="/admin/user" style="padding: 8px 15px;">
                         <i class="bi bi-person me-2"></i> User
                     </a>
                 </li>
                 <li class="nav-item mb-2">
-                    <a class="nav-link text-white" href="#" style="padding: 8px 15px;">
+                    <a class="nav-link text-white" href="/admin/grade" style="padding: 8px 15px;">
                         <i class="bi bi-book me-2"></i> Grades
                     </a>
                 </li>
                 <li class="nav-item mb-2">
-                    <a class="nav-link text-white" href="#" style="padding: 8px 15px;">
+                    <a class="nav-link text-white" href="/admin/subject" style="padding: 8px 15px;">
                         <i class="bi bi-journal-text me-2"></i> Subject
                     </a>
                 </li>
