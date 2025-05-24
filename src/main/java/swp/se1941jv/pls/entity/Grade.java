@@ -1,0 +1,31 @@
+package swp.se1941jv.pls.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.List;
+
+@Entity
+@Table(name = "grades")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Grade {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "grade_id")
+    Long gradeId;
+
+    @Column(name = "grade_name", columnDefinition = "NVARCHAR(255)")
+    String gradeName;
+
+    @Column(name = "status")
+    String status;
+
+    @OneToMany(mappedBy = "grade")
+    List<Subject> subjects;
+
+}
