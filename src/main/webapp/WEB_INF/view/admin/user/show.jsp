@@ -15,23 +15,17 @@
                     display: flex;
                     flex-direction: column;
                     overflow-x: hidden;
-                    /* Prevent horizontal scroll from fixed elements */
                 }
 
                 .sidebar {
                     position: fixed;
                     top: 55px;
-                    /* Below header height */
                     left: 0;
                     width: 250px;
-                    height: calc(100vh - 60px - 40px);
-                    /* Subtract header and footer heights */
+                    height: calc(100vh - 55px);
                     z-index: 1;
-                    /* Behind header and footer */
                     background-color: #212529;
-                    /* Dark background to match image */
                     overflow-y: auto;
-                    /* Scrollable if content exceeds height */
                 }
 
                 header {
@@ -40,33 +34,22 @@
                     left: 0;
                     right: 0;
                     z-index: 3;
-                    /* On top */
                     background-color: #212529;
-                    /* Dark background to match image */
                 }
 
                 .content {
                     margin-left: 250px;
-                    /* Match sidebar width */
                     margin-top: 60px;
-                    /* Space for header height */
                     padding: 20px;
                     flex: 1;
-                    /* Fill available space */
+                    min-height: calc(100vh - 60px);
+                    /* Ensure content pushes footer down */
                 }
 
                 footer {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    /* Extend over sidebar */
-                    right: 0;
-                    z-index: 2;
-                    /* Above sidebar, below header */
                     background-color: #212529;
-                    /* Dark background to match image */
                     height: 40px;
-                    /* Approximate footer height */
+                    width: 100%;
                 }
             </style>
         </head>
@@ -84,7 +67,53 @@
 
             <!-- Main Content Area -->
             <div class="content">
-
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Manage users</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active"><a href="/admin">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Users</li>
+                        </ol>
+                        <div class="mt-5">
+                            <div class="row col-12 mx-auto">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h3>Table users</h3>
+                                    <a href="/admin/user/create" class="btn btn-primary">Create a content manager</a>
+                                </div>
+                                <hr />
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Full Name</th>
+                                            <th scope="col">Role</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="user" items="${users}">
+                                            <tr>
+                                                <td>${user.userId}</td>
+                                                <td>${user.email}</td>
+                                                <td>${user.fullName}</td>
+                                                <td>${user.role.roleName}</td>
+                                                <td>
+                                                    <a href="/admin/user/${user.userId}"
+                                                        class="btn btn-success">view</a>
+                                                    <a href="/admin/user/update/${user.userId}"
+                                                        class="btn btn-warning mx-2">update</a>
+                                                    <a href="/admin/user/delete/${user.userId}"
+                                                        class="btn btn-danger">delete</a>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
             </div>
 
             <!-- Include Footer -->
