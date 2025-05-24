@@ -11,7 +11,8 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/img/logo.jpg">
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
+
     <!-- Custom CSS -->
     <style>
         body {
@@ -230,6 +231,6 @@
 </div>
 
 <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
