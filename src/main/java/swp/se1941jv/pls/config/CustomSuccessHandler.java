@@ -11,7 +11,6 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.stereotype.Component;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.service.UserService;
 
@@ -56,7 +55,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException, ServletException {
+            Authentication authentication) throws IOException, ServletException {
         String targetUrl = determineTargetUrl(authentication);
 
         HttpSession session = request.getSession(false);
@@ -69,7 +68,8 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
                 session.setAttribute("id", user.getUserId());
                 session.setAttribute("email", email);
                 // Có thể thêm thông tin khác nếu cần, ví dụ: cấp lớp của học sinh
-                // session.setAttribute("grade", user.getGrades() != null ? user.getGrades().get(0).getGradeName() : null);
+                // session.setAttribute("grade", user.getGrades() != null ?
+                // user.getGrades().get(0).getGradeName() : null);
             }
         }
 
