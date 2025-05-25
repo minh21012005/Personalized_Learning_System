@@ -69,7 +69,7 @@
                 <div class="content">
                     <main>
                         <div class="container-fluid px-4">
-                            <div class="mt-5">
+                            <div class="mt-4">
                                 <div class="row col-12 mx-auto">
                                     <div class="d-flex justify-content-between mb-3">
                                         <h3>Table users</h3>
@@ -102,7 +102,6 @@
                                                                 class="btn btn-warning btn-sm">Update</a>
                                                         </div>
                                                     </td>
-
                                                 </tr>
                                             </c:forEach>
                                         </tbody>

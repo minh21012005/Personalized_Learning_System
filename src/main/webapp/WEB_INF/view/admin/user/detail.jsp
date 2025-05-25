@@ -107,10 +107,9 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="mt-3">
+                                <div class="mt-3 mb-3">
                                     <a href="/admin/user" class="btn btn-primary">Back</a>
                                 </div>
-
                             </div>
                         </div>
                     </div>

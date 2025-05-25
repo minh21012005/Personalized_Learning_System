@@ -83,7 +83,7 @@
                     <div class="content">
                         <main>
                             <div class="container-fluid px-4">
-                                <div class="row mt">
+                                <div class="row mt-2">
                                     <div class="col-md-6 col-12 mx-auto">
                                         <h1>Create a user</h1>
                                         <hr />
@@ -181,8 +181,9 @@
                                                         id="avatarPreview" />
                                                 </div>
                                             </div>
-                                            <div class="mt-3">
+                                            <div class="mt-3 d-flex gap-2 mb-3">
                                                 <button type="submit" class="btn btn-primary">Create</button>
+                                                <a href="/admin/user" class="btn btn-secondary">Cancel</a>
                                             </div>
                                         </form:form>
                                     </div>
