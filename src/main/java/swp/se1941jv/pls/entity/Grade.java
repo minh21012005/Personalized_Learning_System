@@ -22,8 +22,8 @@ public class Grade {
     @Column(name = "grade_name", columnDefinition = "NVARCHAR(255)")
     String gradeName;
 
-    @Column(name = "status")
-    String status;
+    @Column(name = "is_active")
+    boolean isActive;
 
     @OneToMany(mappedBy = "grade")
     List<Subject> subjects;
