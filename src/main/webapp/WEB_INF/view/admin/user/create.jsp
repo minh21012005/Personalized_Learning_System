@@ -109,17 +109,17 @@
                                                 id="exampleInputPassword1" path="password" />
                                             ${errorPassword}
                                         </div>
-                                        <div class="mb-3">
-                                            <c:set var="errorFullName">
-                                                <form:errors path="fullName" cssClass="invalid-feedback" />
-                                            </c:set>
-                                            <label for="exampleInputName" class="form-label">Full name</label>
-                                            <form:input type="text"
-                                                class="form-control ${not empty errorFullName?'is-invalid':''}"
-                                                id="exampleInputName" path="fullName" />
-                                            ${errorFullName}
-                                        </div>
                                         <div class="row">
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <c:set var="errorFullName">
+                                                    <form:errors path="fullName" cssClass="invalid-feedback" />
+                                                </c:set>
+                                                <label for="exampleInputName" class="form-label">Full name</label>
+                                                <form:input type="text"
+                                                    class="form-control ${not empty errorFullName?'is-invalid':''}"
+                                                    id="exampleInputName" path="fullName" />
+                                                ${errorFullName}
+                                            </div>
                                             <div class="col-md-6 col-12 mb-3">
                                                 <c:set var="errorPhone">
                                                     <form:errors path="phoneNumber" cssClass="invalid-feedback" />
@@ -131,6 +131,8 @@
                                                     id="exampleInputPhoneNumber" path="phoneNumber" />
                                                 ${errorPhone}
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-md-6 col-12 mb-3">
                                                 <c:set var="errorDob">
                                                     <form:errors path="dob" cssClass="invalid-feedback" />
@@ -140,6 +142,19 @@
                                                     class="form-control ${not empty errorDob?'is-invalid':''}" id="dob"
                                                     path="dob" />
                                                 ${errorDob}
+                                            </div>
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <label class="form-label d-block">Status</label>
+                                                <div class="form-check form-check-inline">
+                                                    <form:radiobutton checked="true" path="isActive" value="true"
+                                                        cssClass="form-check-input" id="activeTrue" />
+                                                    <label class="form-check-label" for="activeTrue">Active</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <form:radiobutton path="isActive" value="false"
+                                                        cssClass="form-check-input" id="activeFalse" />
+                                                    <label class="form-check-label" for="activeFalse">Inactive</label>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row">
