@@ -60,22 +60,24 @@ public class SecurityConfiguration {
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                         .permitAll()
 
-                        .requestMatchers("/", "/login", "/register", "/client/**", "/css/**", "/js/**", "/product/**", "/img/**", "/lib/**")
+                        .requestMatchers("/", "/admin/**", "/login", "/register", "/client/**", "/css/**",
+                                "/js/**",
+                                "/product/**", "/img/**", "/lib/**")
                         .permitAll()
 
-                        .requestMatchers("/admin/**")
-                        .hasRole("ADMIN")
+                        // .requestMatchers("/admin/**")
+                        // .hasRole("ADMIN")
 
-                        .requestMatchers("/student/**")
-                        .hasAnyRole("STUDENT", "ADMIN")
+                        // .requestMatchers("/student/**")
+                        // .hasAnyRole("STUDENT", "ADMIN")
 
-                        .requestMatchers("/parent/**")
-                        .hasAnyRole("PARENT", "ADMIN")
+                        // .requestMatchers("/parent/**")
+                        // .hasAnyRole("PARENT", "ADMIN")
 
-                        .requestMatchers("/content-manager/**")
-                        .hasAnyRole("CONTENT_MANAGER", "ADMIN")
+                        // .requestMatchers("/content-manager/**")
+                        // .hasAnyRole("CONTENT_MANAGER", "ADMIN")
 
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
 
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)

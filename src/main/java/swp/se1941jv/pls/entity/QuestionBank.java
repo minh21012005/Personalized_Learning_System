@@ -29,8 +29,8 @@ public class QuestionBank extends BaseEntity {
     @Column(name = "answer", columnDefinition = "NVARCHAR(255)")
     String answer;
 
-    @Column(name = "status")
-    String status;
+    @Column(name = "is_active")
+    boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "level_question_id")

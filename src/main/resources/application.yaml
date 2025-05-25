@@ -10,15 +10,16 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-#    config session
   session:
     store-type: jdbc
     timeout: 30m
     jdbc:
       initialize-schema: always
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 server:
   port: 5555
-
-
-
-

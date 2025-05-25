@@ -28,8 +28,8 @@ public class Subject extends BaseEntity {
     @Column(name = "subject_image")
     String subjectImage;
 
-    @Column(name = "status")
-    String status;
+    @Column(name = "is_active")
+    boolean isActive;
 
     @OneToMany(mappedBy = "subject")
     List<PackageSubject> packageSubjects;
