@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,5 +71,12 @@ public class UserController {
         newUser.setRole(this.roleService.getRoleByName(newUser.getRole().getRoleName()));
         this.userService.saveUser(newUser);
         return "redirect:/admin/user";
+    }
+
+    @GetMapping("/admin/user/{id}")
+    public String getDetailUserPage(Model model, @PathVariable long id) {
+        User user = this.userService.getUserById(id);
+        model.addAttribute("user", user);
+        return "admin/user/detail";
     }
 }
