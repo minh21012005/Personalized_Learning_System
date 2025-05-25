@@ -87,38 +87,41 @@
                 <!-- Main Content Area -->
 
                 <div class="content">
-                    <div class="container mt-5">
-                        <div class="row">
-                            <div class="col-md-6 col-12 mx-auto">
-                                <h3>Create a grade </h3>
+                    <div class="container mt-2">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6 col-12">
+                                <h3 class="text-center mb-3">Create a grade</h3>
+
+                                <c:if test="${not empty error}">
+                                    <div class="alert alert-danger" role="alert">
+                                        ${error}
+                                    </div>
+                                </c:if>
+
+                                <form:form method="post" action="/admin/grade/create" modelAttribute="newGrade">
+                                    <div class="mb-3">
+                                        <label class="form-label">Grade name</label>
+                                        <form:input type="text" class="form-control" path="gradeName" />
+                                    </div>
+
+                                    <div class="d-flex">
+                                        <button type="submit" class="btn btn-primary">Create</button>
+                                        <a href="/admin/grade" class="btn btn-secondary ms-2">Cancel</a>
+                                    </div>
+                                </form:form>
                             </div>
-                            <c:if test="${not empty error}">
-                                <div class="alert alert-danger" role="alert">
-                                    ${error}
-                                </div>
-                            </c:if>
-                            <form:form method="post" action="/admin/grade/create" modelAttribute="newGrade">
-                                <div class="mb-3">
-                                    <label class="from-label">Grade name</label>
-                                    <form:input type="text" class="form-control" path="gradeName" />
-
-
-                                </div>
-
-
-                                <button type="submit" class="btn btn-primary">Create</button>
-                                <a href="/admin/grade" class="btn btn-secondary">Cancel</a>
-                            </form:form>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Include Footer -->
-                    <footer>
-                        <jsp:include page="../layout/footer.jsp" />
-                    </footer>
 
-                    <!-- Bootstrap 5 JS -->
-                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <!-- Include Footer -->
+                <footer>
+                    <jsp:include page="../layout/footer.jsp" />
+                </footer>
+
+                <!-- Bootstrap 5 JS -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             </body>
 
             </html>
