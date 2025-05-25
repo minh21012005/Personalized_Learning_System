@@ -1,11 +1,14 @@
 package swp.se1941jv.pls.controller.admin;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -95,7 +98,68 @@ public class UserController {
     @GetMapping("/admin/user/{id}")
     public String getDetailUserPage(Model model, @PathVariable long id) {
         User user = this.userService.getUserById(id);
+        if (user == null) {
+            return "error/404";
+        }
         model.addAttribute("user", user);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        model.addAttribute("dobFormatted", user.getDob().format(formatter));
         return "admin/user/detail";
+    }
+
+    @GetMapping("/admin/user/update/{id}")
+    public String getUpdateUserPage(Model model, @PathVariable long id) {
+        User user = this.userService.getUserById(id);
+        if (user == null) {
+            return "error/404";
+        }
+        model.addAttribute("user", user);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        model.addAttribute("dobFormatted", user.getDob().format(formatter));
+        return "admin/user/update";
+    }
+
+    @PostMapping("/admin/user/update")
+    public String updateUser(Model model, @ModelAttribute("user") @Valid User newUser,
+            BindingResult newUserBindingResult,
+            @RequestParam("file") MultipartFile file) {
+
+        // Kiểm tra email đã được dùng bởi user khác chưa
+        if (userService.existsByEmailAndUserIdNot(newUser.getEmail(), newUser.getUserId())) {
+            newUserBindingResult.rejectValue("email", "error.email", "Email đã được sử dụng bởi người dùng khác!");
+        }
+
+        // Kiểm tra số điện thoại đã được dùng bởi user khác chưa
+        if (userService.existsByPhoneNumberAndUserIdNot(newUser.getPhoneNumber(), newUser.getUserId())) {
+            newUserBindingResult.rejectValue("phoneNumber", "error.phoneNumber", "Số điện thoại đã được sử dụng!");
+        }
+
+        if (newUserBindingResult.hasErrors()) {
+            for (FieldError error : newUserBindingResult.getFieldErrors()) {
+                System.out.println("Lỗi ở field: " + error.getField());
+                System.out.println("Thông báo lỗi: " + error.getDefaultMessage());
+            }
+            return "admin/user/update";
+        }
+
+        // Có lỗi chuyển hướng về trang update
+        if (newUserBindingResult.hasErrors()) {
+            return "admin/user/update";
+        }
+
+        String contentType = file.getContentType();
+        if (!file.isEmpty() && !isImageFile(contentType)) {
+            model.addAttribute("fileError", "Chỉ được chọn ảnh định dạng PNG, JPG, JPEG!");
+            return "admin/user/update";
+        }
+
+        // save user
+        if (!file.isEmpty()) {
+            String avatar = this.uploadService.handleSaveUploadFile(file, "avatar");
+            newUser.setAvatar(avatar);
+        }
+        newUser.setRole(this.roleService.getRoleByName(newUser.getRole().getRoleName()));
+        this.userService.saveUser(newUser);
+        return "redirect:/admin/user";
     }
 }

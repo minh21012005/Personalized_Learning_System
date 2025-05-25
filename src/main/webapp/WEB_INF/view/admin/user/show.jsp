@@ -79,28 +79,30 @@
                                     <table class="table table-bordered table-hover">
                                         <thead>
                                             <tr>
-                                                <th scope="col">ID</th>
-                                                <th scope="col">Email</th>
-                                                <th scope="col">Full Name</th>
-                                                <th scope="col">Role</th>
-                                                <th scope="col">Action</th>
+                                                <th scope="col" class="text-center">ID</th>
+                                                <th scope="col" class="text-center">Email</th>
+                                                <th scope="col" class="text-center">Full Name</th>
+                                                <th scope="col" class="text-center">Role</th>
+                                                <th scope="col" class="text-center">Action</th>
                                             </tr>
+
                                         </thead>
                                         <tbody>
                                             <c:forEach var="user" items="${users}">
                                                 <tr>
-                                                    <td>${user.userId}</td>
+                                                    <td class="text-center">${user.userId}</td>
                                                     <td>${user.email}</td>
                                                     <td>${user.fullName}</td>
                                                     <td>${user.role.roleName}</td>
-                                                    <td>
-                                                        <a href="/admin/user/${user.userId}"
-                                                            class="btn btn-success">view</a>
-                                                        <a href="/admin/user/update/${user.userId}"
-                                                            class="btn btn-warning mx-2">update</a>
-                                                        <a href="/admin/user/delete/${user.userId}"
-                                                            class="btn btn-danger">delete</a>
+                                                    <td class="text-center">
+                                                        <div class="d-flex justify-content-center gap-2">
+                                                            <a href="/admin/user/${user.userId}"
+                                                                class="btn btn-success btn-sm">View</a>
+                                                            <a href="/admin/user/update/${user.userId}"
+                                                                class="btn btn-warning btn-sm">Update</a>
+                                                        </div>
                                                     </td>
+
                                                 </tr>
                                             </c:forEach>
                                         </tbody>

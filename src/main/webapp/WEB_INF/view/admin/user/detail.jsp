@@ -43,6 +43,8 @@
                         flex: 1;
                         padding: 20px;
                         background-color: #f8f9fa;
+                        display: flex;
+                        justify-content: center;
                     }
 
                     footer {
@@ -81,7 +83,36 @@
 
                     <!-- Main Content Area -->
                     <div class="content">
+                        <div style="width: 60%;">
+                            <div class="mt-3">
+                                <h2 class="text-center">User detail</h2>
+                                <hr />
+                                <div class="card">
+                                    <div class="card-header">
+                                        User Information
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Id: ${user.userId}</li>
+                                        <li class="list-group-item">Email: ${user.email}</li>
+                                        <li class="list-group-item">Full Name: ${user.fullName}</li>
+                                        <li class="list-group-item">Phone number: ${user.phoneNumber}</li>
+                                        <li class="list-group-item">Role: ${user.role.roleName}</li>
+                                        <li class="list-group-item">Date of Birth: ${dobFormatted}</li>
+                                        <li class="list-group-item">
+                                            <label for="avatarFile" class="form-label">Avatar:</label>
+                                            <div class="col-12 mt-3">
+                                                <img style="max-height: 250px" src="/img/avatar/${user.avatar}"
+                                                    alt="Image not found" />
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mt-3">
+                                    <a href="/admin/user" class="btn btn-primary">Back</a>
+                                </div>
 
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -66,4 +66,12 @@ public class UserService {
     public boolean existsByPhoneNumber(String phoneNumber) {
         return this.userRepository.existsByPhoneNumber(phoneNumber);
     }
+
+    public boolean existsByEmailAndUserIdNot(String email, long id) {
+        return this.userRepository.existsByEmailAndUserIdNot(email, id);
+    }
+
+    public boolean existsByPhoneNumberAndUserIdNot(String phoneNumber, long id) {
+        return this.userRepository.existsByPhoneNumberAndUserIdNot(phoneNumber, id);
+    }
 }
