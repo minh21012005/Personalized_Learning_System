@@ -172,6 +172,9 @@
                                                     <label for="avatarFile" class="form-label">Avatar:</label>
                                                     <input class="form-control" type="file" id="avatarFile" name="file"
                                                         accept=".png, .jpg, .jpeg" />
+                                                    <c:if test="${not empty fileError}">
+                                                        <div class="invalid-feedback d-block">${fileError}</div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="col-12 mt-3">
                                                     <img style="max-height: 250px; display: none;" alt="avatar preview"

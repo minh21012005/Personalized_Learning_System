@@ -58,12 +58,19 @@ public class UserController {
             newUserBindingResult.rejectValue("email", "error.newUser", "Email đã được sử dụng!");
         }
 
+        // Kiểm tra số điện thoại đã tồn tại
         if (this.userService.existsByPhoneNumber(newUser.getPhoneNumber())) {
             newUserBindingResult.rejectValue("phoneNumber", "error.newUser", "Số điện thoại đã được sử dụng!");
         }
 
         // Có lỗi chuyển hướng về trang create
         if (newUserBindingResult.hasErrors()) {
+            return "admin/user/create";
+        }
+
+        String contentType = file.getContentType();
+        if (!file.isEmpty() && !isImageFile(contentType)) {
+            model.addAttribute("fileError", "Chỉ được chọn ảnh định dạng PNG, JPG, JPEG!");
             return "admin/user/create";
         }
 
@@ -75,6 +82,14 @@ public class UserController {
         newUser.setRole(this.roleService.getRoleByName(newUser.getRole().getRoleName()));
         this.userService.saveUser(newUser);
         return "redirect:/admin/user";
+    }
+
+    // Hàm kiểm tra content type của file có phải là ảnh hợp lệ
+    private boolean isImageFile(String contentType) {
+        return contentType != null &&
+                (contentType.equals("image/png") ||
+                        contentType.equals("image/jpg") ||
+                        contentType.equals("image/jpeg"));
     }
 
     @GetMapping("/admin/user/{id}")
