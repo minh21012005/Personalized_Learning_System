@@ -14,6 +14,8 @@ import swp.se1941jv.pls.service.validator.Adult;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 @Entity
 @Table(name = "user")
 @Data
@@ -33,7 +35,7 @@ public class User extends BaseEntity {
     String email;
 
     @Column(name = "password", nullable = false)
-    @Size(min = 8, message = "Password phải có ít nhất 8 kí tự!")
+    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 kí tự!")
     @NotBlank(message = "Mật khẩu không được để trống hoặc chỉ chứa khoảng trắng!")
     String password;
 
@@ -47,8 +49,9 @@ public class User extends BaseEntity {
     @Column(name = "avatar")
     String avatar;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "dob")
-    @NotNull(message = "Date of Birth ko được để trống!")
+    @NotNull(message = "Ngày sinh ko được để trống!")
     @Past(message = "Ngày sinh phải trong quá khứ!")
     @Adult
     LocalDate dob;
