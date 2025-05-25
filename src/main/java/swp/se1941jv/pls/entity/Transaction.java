@@ -22,9 +22,6 @@ public class Transaction extends BaseEntity {
     @Column(name = "notes", columnDefinition = "NVARCHAR(255)")
     String notes;
 
-    @Column(name = "status")
-    String status;
-
     @Column(name = "amount")
     Double amount;
 

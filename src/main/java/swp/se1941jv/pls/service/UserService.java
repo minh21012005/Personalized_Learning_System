@@ -1,6 +1,5 @@
 package swp.se1941jv.pls.service;
 
-
 import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.entity.Role;
 import swp.se1941jv.pls.entity.User;
@@ -31,10 +30,10 @@ public class UserService {
     public User getUserByEmail(String email) {
         return this.userRepository.findByEmail(email);
     }
-//
-//    public List<User> getAllUsersByEmail(String email) {
-//        return this.userRepository.findAllByEmail(email);
-//    }
+    //
+    // public List<User> getAllUsersByEmail(String email) {
+    // return this.userRepository.findAllByEmail(email);
+    // }
 
     public User saveUser(User user) {
         return this.userRepository.save(user);
@@ -47,16 +46,24 @@ public class UserService {
     public void deleteUserById(Long id) {
         this.userRepository.deleteById(id);
     }
-//
-//    public Role getRoleByName(String name) {
-//        return this.roleRepository.findByRoleName(name);
-//    }
-//
-//    public boolean checkEmailExist(String email) {
-//        return this.userRepository.existsByEmail(email);
-//    }
+    //
+    // public Role getRoleByName(String name) {
+    // return this.roleRepository.findByRoleName(name);
+    // }
+    //
+    // public boolean checkEmailExist(String email) {
+    // return this.userRepository.existsByEmail(email);
+    // }
 
     public long countUsers() {
         return this.userRepository.count();
+    }
+
+    public boolean existsByEmail(String email) {
+        return this.userRepository.existsByEmail(email);
+    }
+
+    public boolean existsByPhoneNumber(String phoneNumber) {
+        return this.userRepository.existsByPhoneNumber(phoneNumber);
     }
 }

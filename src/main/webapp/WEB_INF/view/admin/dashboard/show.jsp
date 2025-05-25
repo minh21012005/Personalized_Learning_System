@@ -15,23 +15,17 @@
                     display: flex;
                     flex-direction: column;
                     overflow-x: hidden;
-                    /* Prevent horizontal scroll from fixed elements */
                 }
 
                 .sidebar {
                     position: fixed;
                     top: 55px;
-                    /* Below header height */
                     left: 0;
                     width: 250px;
-                    height: calc(100vh - 60px - 40px);
-                    /* Subtract header and footer heights */
+                    height: calc(100vh - 55px);
                     z-index: 1;
-                    /* Behind header and footer */
                     background-color: #212529;
-                    /* Dark background to match image */
                     overflow-y: auto;
-                    /* Scrollable if content exceeds height */
                 }
 
                 header {
@@ -40,33 +34,22 @@
                     left: 0;
                     right: 0;
                     z-index: 3;
-                    /* On top */
                     background-color: #212529;
-                    /* Dark background to match image */
                 }
 
                 .content {
                     margin-left: 250px;
-                    /* Match sidebar width */
                     margin-top: 60px;
-                    /* Space for header height */
                     padding: 20px;
                     flex: 1;
-                    /* Fill available space */
+                    min-height: calc(100vh - 60px);
+                    /* Ensure content pushes footer down */
                 }
 
                 footer {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    /* Extend over sidebar */
-                    right: 0;
-                    z-index: 2;
-                    /* Above sidebar, below header */
                     background-color: #212529;
-                    /* Dark background to match image */
                     height: 40px;
-                    /* Approximate footer height */
+                    width: 100%;
                 }
             </style>
         </head>
@@ -84,7 +67,6 @@
 
             <!-- Main Content Area -->
             <div class="content">
-
             </div>
 
             <!-- Include Footer -->

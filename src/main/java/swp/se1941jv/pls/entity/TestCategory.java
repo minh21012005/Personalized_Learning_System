@@ -22,9 +22,6 @@ public class TestCategory {
     @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     String name;
 
-    @Column(name = "status")
-    String status;
-
     @OneToMany(mappedBy = "testCategory")
     List<Test> tests;
 }
