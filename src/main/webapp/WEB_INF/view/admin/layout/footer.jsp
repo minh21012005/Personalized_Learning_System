@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <footer class="d-flex align-items-center p-2 bg-dark"
-            style="background-color: #1a252f; color: white; z-index: 2;">
+            style="background-color: #1a252f !important; color: white;">
             <div class="d-flex align-items-center">
                 <img src="https://via.placeholder.com/20" alt="User Icon"
                     style="width: 20px; height: 20px; margin-right: 5px;">

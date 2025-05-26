@@ -7,7 +7,7 @@
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>PLS - Create User</title>
+                <title>PLS - Update User</title>
                 <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
                     rel="stylesheet">
@@ -83,32 +83,24 @@
                     <div class="content">
                         <main>
                             <div class="container-fluid px-4">
-                                <div class="row mt-2">
+                                <div class="row mt-3">
                                     <div class="col-md-6 col-12 mx-auto">
-                                        <h1>Create a user</h1>
+                                        <h1>Update a user</h1>
                                         <hr />
-                                        <form:form method="post" action="/admin/user/create" modelAttribute="newUser"
+                                        <form:form method="post" action="/admin/user/update" modelAttribute="user"
                                             enctype="multipart/form-data">
+                                            <form:input type="hidden" path="userId" />
                                             <div class="mb-3">
                                                 <c:set var="errorEmail">
                                                     <form:errors path="email" cssClass="invalid-feedback" />
                                                 </c:set>
                                                 <label for="exampleInputEmail1" class="form-label">Email</label>
-                                                <form:input type="email"
+                                                <form:input type="email" readonly="true"
                                                     class="form-control ${not empty errorEmail?'is-invalid':''}"
                                                     id="exampleInputEmail1" path="email" />
                                                 ${errorEmail}
                                             </div>
-                                            <div class="mb-3">
-                                                <c:set var="errorPassword">
-                                                    <form:errors path="password" cssClass="invalid-feedback" />
-                                                </c:set>
-                                                <label for="exampleInputPassword1" class="form-label">Password</label>
-                                                <form:input type="password"
-                                                    class="form-control ${not empty errorPassword?'is-invalid':''}"
-                                                    id="exampleInputPassword1" path="password" />
-                                                ${errorPassword}
-                                            </div>
+                                            <form:input type="hidden" path="password" />
                                             <div class="row">
                                                 <div class="col-md-6 col-12 mb-3">
                                                     <c:set var="errorFullName">
@@ -160,7 +152,7 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6 col-12">
-                                                    <label for="select" class="form-lable mb-2">Role</label>
+                                                    <label for="select" class="form-label mb-2">Role</label>
                                                     <form:select class="form-select" aria-label="Default select example"
                                                         id="select" path="role.roleName">
                                                         <form:option value="ADMIN">ADMIN</form:option>
@@ -177,12 +169,22 @@
                                                     </c:if>
                                                 </div>
                                                 <div class="col-12 mt-3">
-                                                    <img style="max-height: 250px; display: none;" alt="Image not found"
-                                                        id="avatarPreview" />
+                                                    <c:choose>
+                                                        <c:when test="${not empty user.avatar}">
+                                                            <img style="max-height: 250px; display: block"
+                                                                alt="Image not found" id="avatarPreview"
+                                                                src="/img/avatar/${user.avatar}" />
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <img style="max-height: 250px; display: none"
+                                                                alt="Image not found" id="avatarPreview" src="#" />
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </div>
+                                                <form:input type="hidden" path="avatar" />
                                             </div>
                                             <div class="mt-3 d-flex gap-2 mb-3">
-                                                <button type="submit" class="btn btn-primary">Create</button>
+                                                <button type="submit" class="btn btn-primary">Update</button>
                                                 <a href="/admin/user" class="btn btn-secondary">Cancel</a>
                                             </div>
                                         </form:form>
