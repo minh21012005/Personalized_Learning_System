@@ -34,7 +34,7 @@ public class UserProfileController {
             return "redirect:/login";
         }
         User user = userService.getUserById(userId);
-        model.addAttribute("user", user);
+            model.addAttribute("user", user);
         return "client/profile/show";
     }
 
@@ -63,7 +63,7 @@ public class UserProfileController {
         }
 
         String contentType = file.getContentType();
-        if (!file.isEmpty() && !isImageFile(contentType)) {
+            if (!file.isEmpty() && !isImageFile(contentType)) {
             model.addAttribute("fileError", "Chỉ được chọn ảnh định dạng PNG, JPG, JPEG!");
             model.addAttribute("user", user);
             return "client/profile/show";
