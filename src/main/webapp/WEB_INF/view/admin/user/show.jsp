@@ -41,6 +41,8 @@
                     flex: 1;
                     padding: 20px;
                     background-color: #f8f9fa;
+                    padding-bottom: 80px;
+                    /* Prevent overlap with pagination */
                 }
 
                 footer {
@@ -48,6 +50,85 @@
                     color: white;
                     height: 40px;
                     width: 100%;
+                }
+
+                /* Ensure consistent table column widths */
+                .table-fixed {
+                    table-layout: fixed;
+                    width: 100%;
+                }
+
+                .table-fixed th,
+                .table-fixed td {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                /* Define specific widths for each column */
+                .col-id {
+                    width: 5%;
+                }
+
+                .col-email {
+                    width: 27.5%;
+                }
+
+                .col-fullname {
+                    width: 27.5%;
+                }
+
+                .col-role {
+                    width: 20%;
+                }
+
+                .col-action {
+                    width: 20%;
+                }
+
+                /* Style for pagination container */
+                .pagination-container {
+                    position: fixed;
+                    bottom: 50px;
+                    /* Position above the footer (footer height is 40px) */
+                    left: 250px;
+                    /* Offset by sidebar width */
+                    width: calc(100% - 250px);
+                    /* Span remaining width */
+                    max-width: 1140px;
+                    /* Match container-fluid max-width */
+                    background-color: #f8f9fa;
+                    /* Match content background */
+                    padding: 10px 20px;
+                    z-index: 1000;
+                    /* Ensure it appears above other content */
+                }
+
+                /* Tùy chỉnh phân trang */
+                .pagination .page-link {
+                    color: black;
+                    /* Màu chữ đen */
+                    border: 1px solid #dee2e6;
+                }
+
+                .pagination .page-link:hover {
+                    background-color: #e9ecef;
+                    color: black;
+                }
+
+                .pagination .page-item.active .page-link {
+                    background-color: #d3d3d3;
+                    /* Màu nền mới cho trang hiện tại */
+                    border-color: #d3d3d3;
+                    color: black;
+                    /* Giữ chữ đen */
+                }
+
+                .pagination .page-item.disabled .page-link {
+                    color: #6c757d;
+                    pointer-events: none;
+                    background-color: #fff;
+                    border-color: #dee2e6;
                 }
             </style>
         </head>
@@ -71,30 +152,49 @@
                         <div class="container-fluid px-4">
                             <div class="mt-4">
                                 <div class="row col-12 mx-auto">
-                                    <div class="d-flex justify-content-between mb-3">
-                                        <h3>Table users</h3>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <!-- Bộ lọc role -->
+                                        <form action="/admin/user" method="get" class="d-flex align-items-center gap-2">
+                                            <label for="role" class="mb-0 fw-bold">Role:</label>
+                                            <select name="role" id="role" class="form-select form-select-sm w-auto">
+                                                <option value="">All</option>
+                                                <c:forEach var="r" items="${roles}">
+                                                    <c:choose>
+                                                        <c:when test="${r.roleName eq selectedRole}">
+                                                            <option value="${r.roleName}" selected>${r.roleName}
+                                                            </option>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <option value="${r.roleName}">${r.roleName}</option>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </c:forEach>
+                                            </select>
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+                                        </form>
+                                        <!-- Nút tạo user -->
                                         <a href="/admin/user/create" class="btn btn-primary">Create User</a>
                                     </div>
+
                                     <hr />
-                                    <table class="table table-bordered table-hover">
+                                    <table class="table table-bordered table-hover table-fixed">
                                         <thead>
                                             <tr>
-                                                <th scope="col" class="text-center">ID</th>
-                                                <th scope="col" class="text-center">Email</th>
-                                                <th scope="col" class="text-center">Full Name</th>
-                                                <th scope="col" class="text-center">Role</th>
-                                                <th scope="col" class="text-center">Action</th>
+                                                <th scope="col" class="text-center col-id">ID</th>
+                                                <th scope="col" class="text-center col-email">Email</th>
+                                                <th scope="col" class="text-center col-fullname">Full Name</th>
+                                                <th scope="col" class="text-center col-role">Role</th>
+                                                <th scope="col" class="text-center col-action">Action</th>
                                             </tr>
-
                                         </thead>
                                         <tbody>
                                             <c:forEach var="user" items="${users}">
                                                 <tr>
-                                                    <td class="text-center">${user.userId}</td>
-                                                    <td>${user.email}</td>
-                                                    <td>${user.fullName}</td>
-                                                    <td>${user.role.roleName}</td>
-                                                    <td class="text-center">
+                                                    <td class="text-center col-id">${user.userId}</td>
+                                                    <td class="col-email">${user.email}</td>
+                                                    <td class="col-fullname">${user.fullName}</td>
+                                                    <td class="col-role">${user.role.roleName}</td>
+                                                    <td class="text-center col-action">
                                                         <div class="d-flex justify-content-center gap-2">
                                                             <a href="/admin/user/${user.userId}"
                                                                 class="btn btn-success btn-sm">View</a>
@@ -106,6 +206,36 @@
                                             </c:forEach>
                                         </tbody>
                                     </table>
+                                    <div class="pagination-container">
+                                        <c:set var="queryString" value="" />
+                                        <c:if test="${not empty selectedRole}">
+                                            <c:set var="queryString" value="&role=${selectedRole}" />
+                                        </c:if>
+                                        <nav aria-label="Page navigation example">
+                                            <ul class="pagination justify-content-center">
+                                                <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
+                                                    <a class="page-link"
+                                                        href="/admin/user?page=${currentPage - 1}${queryString}"
+                                                        aria-label="Previous">
+                                                        <span aria-hidden="true">«</span>
+                                                    </a>
+                                                </li>
+                                                <c:forEach begin="1" end="${totalPage}" varStatus="loop">
+                                                    <li class="page-item ${loop.index eq currentPage ? 'active' : ''}">
+                                                        <a class="page-link"
+                                                            href="/admin/user?page=${loop.index}${queryString}">${loop.index}</a>
+                                                    </li>
+                                                </c:forEach>
+                                                <li class="page-item ${currentPage eq totalPage ? 'disabled' : ''}">
+                                                    <a class="page-link"
+                                                        href="/admin/user?page=${currentPage + 1}${queryString}"
+                                                        aria-label="Next">
+                                                        <span aria-hidden="true">»</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
                     </main>

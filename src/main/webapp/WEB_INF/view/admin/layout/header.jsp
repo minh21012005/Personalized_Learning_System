@@ -3,7 +3,8 @@
         <header class="d-flex justify-content-between align-items-center p-2 bg-dark"
             style="background-color: #1a252f;">
             <div class="d-flex align-items-center ms-3">
-                <img src="/img/favicon.ico" alt="Logo" style="width: 30px; height: 30px; margin-right: 10px;">
+                <img src="/img/favicon.ico" class="ms-5" alt="Logo"
+                    style="width: 30px; height: 30px; margin-right: 10px;">
                 <span class="text-white fs-3 fw-bold">PLS</span>
             </div>
             <div class="dropdown">

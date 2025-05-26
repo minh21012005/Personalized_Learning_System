@@ -2,8 +2,11 @@ package swp.se1941jv.pls.controller.admin;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
+import swp.se1941jv.pls.entity.Role;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.service.RoleService;
 import swp.se1941jv.pls.service.UploadService;
@@ -28,7 +32,7 @@ public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
-    private UploadService uploadService;
+    private final UploadService uploadService;
 
     public UserController(UserService userService, PasswordEncoder passwordEncoder, RoleService roleService,
             UploadService uploadService) {
@@ -39,9 +43,54 @@ public class UserController {
     }
 
     @GetMapping("/admin/user")
-    public String getUserPage(Model model) {
-        List<User> users = this.userService.getAllUsers();
+    public String getUserPage(@RequestParam Optional<String> page,
+            @RequestParam Optional<String> role, Model model) {
+        int pageNumber;
+        if (page.isPresent()) {
+            try {
+                pageNumber = Integer.parseInt(page.get());
+            } catch (Exception e) {
+                pageNumber = 1;
+            }
+        } else {
+            pageNumber = 1;
+        }
+        int pageSize = 8;
+
+        // Get all roles to validate the provided role
+        List<Role> roles = roleService.getAllRoles();
+
+        // Check if role is valid
+        String roleFilter = null;
+        if (role.isPresent()) {
+            boolean isValidRole = roles.stream()
+                    .anyMatch(r -> r.getRoleName().equals(role.get()));
+            if (isValidRole) {
+                roleFilter = role.get();
+            }
+        }
+
+        // Create Pageable for total pages
+        Pageable tempPageable = PageRequest.of(0, pageSize);
+        int totalPage = this.userService.getAllUsers(tempPageable).getTotalPages();
+
+        // Check if pageNumber is valid
+        if (pageNumber < 1 || (pageNumber > totalPage && totalPage > 0)) {
+            return "error/404";
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<User> pageUser = userService.findUsersWithRole(roleFilter, pageable);
+        totalPage = pageUser.getTotalPages();
+
+        List<User> users = pageUser.getContent();
+
         model.addAttribute("users", users);
+        model.addAttribute("roles", roles);
+        model.addAttribute("currentPage", pageNumber);
+        model.addAttribute("totalPage", totalPage);
+        model.addAttribute("selectedRole", roleFilter != null ? roleFilter : "");
+
         return "admin/user/show";
     }
 

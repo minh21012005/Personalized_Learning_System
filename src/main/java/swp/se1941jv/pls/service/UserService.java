@@ -1,10 +1,13 @@
 package swp.se1941jv.pls.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.entity.Role;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.repository.RoleRepository;
 import swp.se1941jv.pls.repository.UserRepository;
+import swp.se1941jv.pls.service.specification.UserSpecification;
 
 import java.util.List;
 
@@ -25,6 +28,10 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return this.userRepository.findAll();
+    }
+
+    public Page<User> getAllUsers(Pageable pageable) {
+        return this.userRepository.findAll(pageable);
     }
 
     public User getUserByEmail(String email) {
@@ -74,4 +81,9 @@ public class UserService {
     public boolean existsByPhoneNumberAndUserIdNot(String phoneNumber, long id) {
         return this.userRepository.existsByPhoneNumberAndUserIdNot(phoneNumber, id);
     }
+
+    public Page<User> findUsersWithRole(String roleName, Pageable pageable) {
+        return userRepository.findAll(UserSpecification.hasRole(roleName), pageable);
+    }
+
 }
