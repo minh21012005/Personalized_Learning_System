@@ -44,7 +44,9 @@ public class User extends BaseEntity {
 
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     @NotBlank(message = "Tên không được để trống!")
-    String fullName;
+    @Size(min = 2, max = 100, message = "Tên phải có độ dài từ 2 đến 100 ký tự!")
+    @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên chỉ được chứa chữ cái và dấu cách!")
+    private String fullName;
 
     @Column(name = "avatar")
     String avatar;
@@ -58,8 +60,8 @@ public class User extends BaseEntity {
 
     @Column(name = "phone_number", nullable = false, unique = true)
     @NotBlank(message = "Số điện thoại không được để trống!")
-    @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại phải bắt đầu bằng 0 và gồm đúng 10 chữ số!")
-    String phoneNumber;
+    @Pattern(regexp = "^(03[2-9]|05[6-9]|07[0-9]|08[1-9]|09[0-9])\\d{7}$", message = "Số điện thoại không hợp lệ! Phải bắt đầu bằng các đầu số Việt Nam hợp lệ và gồm đúng 10 chữ số.")
+    private String phoneNumber;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
