@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,7 +37,7 @@ public class UserController {
     private final UploadService uploadService;
 
     public UserController(UserService userService, PasswordEncoder passwordEncoder, RoleService roleService,
-            UploadService uploadService) {
+                          UploadService uploadService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
@@ -44,7 +46,8 @@ public class UserController {
 
     @GetMapping("/admin/user")
     public String getUserPage(@RequestParam Optional<String> page,
-            @RequestParam Optional<String> role, Model model) {
+                              @RequestParam Optional<String> role, Model model) {
+
         int pageNumber;
         if (page.isPresent()) {
             try {
@@ -102,8 +105,8 @@ public class UserController {
 
     @PostMapping("/admin/user/create")
     public String createUser(Model model, @ModelAttribute("newUser") @Valid User newUser,
-            BindingResult newUserBindingResult,
-            @RequestParam("file") MultipartFile file) {
+                             BindingResult newUserBindingResult,
+                             @RequestParam("file") MultipartFile file) {
 
         // Kiểm tra nếu email đã tồn tại
         if (this.userService.existsByEmail(newUser.getEmail())) {
@@ -170,8 +173,8 @@ public class UserController {
 
     @PostMapping("/admin/user/update")
     public String updateUser(Model model, @ModelAttribute("user") @Valid User newUser,
-            BindingResult newUserBindingResult,
-            @RequestParam("file") MultipartFile file) {
+                             BindingResult newUserBindingResult,
+                             @RequestParam("file") MultipartFile file) {
 
         // Kiểm tra email đã được dùng bởi user khác chưa
         if (userService.existsByEmailAndUserIdNot(newUser.getEmail(), newUser.getUserId())) {
