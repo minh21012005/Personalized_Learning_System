@@ -106,7 +106,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Active</label>
-                                    <form:select path="${grade.isIsActive}" class="form-control">
+                                    <form:select path="active" class="form-control">
                                         <form:option value="true">True</form:option>
                                         <form:option value="false">False</form:option>
                                     </form:select>

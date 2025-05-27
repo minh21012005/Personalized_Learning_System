@@ -3,12 +3,17 @@ package swp.se1941jv.pls.controller.content_manager;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Subject;
@@ -26,10 +31,25 @@ public class GradeController {
 
     }
 
+    // @GetMapping("/content-manager/grade")
+    // public String getGradePage(Model model) {
+    // List<Grade> grades = this.gradeService.getAllGrades();
+    // model.addAttribute("grades", grades);
+    // return "content-manager/grade/show";
+    // }
     @GetMapping("/content-manager/grade")
-    public String getGradePage(Model model) {
-        List<Grade> grades = this.gradeService.getAllGrades();
-        model.addAttribute("grades", grades);
+    public String getGradePage(Model model,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String isActive) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Grade> gradePage = this.gradeService.getFilteredGrades(keyword, isActive, pageable);
+
+        model.addAttribute("grades", gradePage.getContent());
+        model.addAttribute("currentPage", gradePage.getNumber());
+        model.addAttribute("totalPages", gradePage.getTotalPages());
+        model.addAttribute("totalItems", gradePage.getTotalElements());
+
         return "content-manager/grade/show";
     }
 
@@ -70,22 +90,30 @@ public class GradeController {
     }
 
     @GetMapping(value = "/content-manager/grade/view/{gradeId}")
-    public String viewSubjectsByGrade(Model model, @PathVariable long gradeId) {
+    public String viewSubjectsByGrade(Model model,
+            @PathVariable Long gradeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String keyword) {
+        Pageable pageable = PageRequest.of(page, 10); // Không cần sort
         try {
             Grade grade = this.gradeService.findById(gradeId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
-            List<Subject> subjects = subjectService.getSubjectsByGradeId(gradeId, true);
+            Page<Subject> subjectPage = this.subjectService.getSubjectsByGradeId(gradeId, true, keyword, pageable);
 
             if (!grade.isActive()) {
                 model.addAttribute("warning", "⚠ Khối lớp này đã ngừng hoạt động. Dữ liệu chỉ để tham khảo.");
             }
 
             model.addAttribute("grade", grade);
-            model.addAttribute("subjects", subjects);
+            model.addAttribute("subjects", subjectPage.getContent());
+            model.addAttribute("currentPage", subjectPage.getNumber());
+            model.addAttribute("totalPages", subjectPage.getTotalPages());
+            model.addAttribute("totalItems", subjectPage.getTotalElements());
+            model.addAttribute("pageable", pageable);
+            model.addAttribute("keyword", keyword);
         } catch (IllegalArgumentException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
-            model.addAttribute("grade", null);
-            model.addAttribute("subjects", Collections.emptyList());
+            model.addAttribute("subjects", java.util.Collections.emptyList());
         }
         return "content-manager/grade/view";
     }

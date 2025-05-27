@@ -90,7 +90,28 @@
 
                     </h3>
                 </div>
-                <div class="d-flex justify-content-end mb-3 me-3">
+                <!-- Search and Filter Form -->
+
+
+                <div class="d-flex justify-content-between mb-3 me-3">
+                    <form action="/content-manager/grade" method="get" class="d-flex">
+                        <label for="keyword" class="visually-hidden">Tìm kiếm theo tên khối lớp</label>
+                        <input type="text" id="keyword" name="keyword" class="form-control me-2"
+                            placeholder="Tìm kiếm theo tên khối lớp" value="${param.keyword}">
+
+
+                        <select id="isActive" name="isActive" class="form-select me-2">
+                            <option value="" <c:if test="${empty param.isActive}">selected</c:if>>Tất cả
+                            </option>
+                            <option value="true" <c:if test="${param.isActive eq 'true'}">selected</c:if>>Active
+                            </option>
+                            <option value="false" <c:if test="${param.isActive eq 'false'}">selected</c:if>
+                                >InActive</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a href="/content-manager/grade" class="btn btn-secondary ms-2">Delete Filter</a>
+                    </form>
                     <a href="/content-manager/grade/create" class="btn btn-primary btn-lg">Create</a>
                 </div>
                 <table class="table table-bordered table-hover">
@@ -99,8 +120,7 @@
                             <th>Grade ID</th>
                             <th>Grade Name</th>
                             <th>Active</th>
-                            <th> Action</th>
-
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -113,29 +133,58 @@
                                         <td>${grade.active}</td>
                                         <td>
                                             <a href="/content-manager/grade/view/${grade.gradeId}"
-                                                class="btn btn-success"> View</a>
+                                                class="btn btn-success">View</a>
                                             <a href="/content-manager/grade/update/${grade.gradeId}"
-                                                class="btn btn-warning mx-2">
-                                                Update</a>
+                                                class="btn btn-warning mx-2">Update</a>
                                             <a href="/content-manager/grade/delete/${grade.gradeId}"
-                                                class="btn btn-danger">
-                                                Delete</a>
-
+                                                class="btn btn-danger">Delete</a>
                                         </td>
-
                                     </tr>
                                 </c:forEach>
                             </c:when>
                             <c:otherwise>
                                 <tr>
-                                    <td colspan="3" class="text-center">No grades found</td>
+                                    <td colspan="4" class="text-center">No grades found</td>
                                 </tr>
                             </c:otherwise>
                         </c:choose>
                     </tbody>
                 </table>
-            </div>
 
+                <!-- Pagination -->
+                <c:if test="${totalPages > 1}">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                    href="/content-manager/grade?page=${currentPage - 1}&keyword=${param.keyword}&isActive=${param.isActive}"
+                                    aria-label="Previous">
+                                    <span aria-hidden="true">«</span>
+                                </a>
+                            </li>
+                            <c:forEach begin="0" end="${totalPages - 1}" var="i">
+                                <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                    <a class="page-link"
+                                        href="/content-manager/grade?page=${i}&keyword=${param.keyword}&isActive=${param.isActive}">${i
+                                        + 1}</a>
+                                </li>
+                            </c:forEach>
+                            <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                    href="/content-manager/grade?page=${currentPage + 1}&keyword=${param.keyword}&isActive=${param.isActive}"
+                                    aria-label="Next">
+                                    <span aria-hidden="true">»</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </c:if>
+
+                <!-- Total Grades -->
+                <div class="text-center">
+                    <p>Total grades: ${totalItems}</p>
+                </div>
+            </div>
             <!-- Include Footer -->
             <footer>
                 <jsp:include page="../layout/footer.jsp" />

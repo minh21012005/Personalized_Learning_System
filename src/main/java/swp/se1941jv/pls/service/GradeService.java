@@ -3,6 +3,8 @@ package swp.se1941jv.pls.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import swp.se1941jv.pls.entity.Grade;
@@ -43,4 +45,20 @@ public class GradeService {
         return this.gradeRepository.findById(gradeId);
     }
 
+    public Page<Grade> getAllGrades(Pageable pageable) {
+        return this.gradeRepository.findAll(pageable);
+    }
+
+    public Page<Grade> getFilteredGrades(String keyword, String isActive, Pageable pageable) {
+        if (keyword != null && !keyword.trim().isEmpty() && isActive != null && !isActive.isEmpty()) {
+            return gradeRepository.findByGradeNameContainingIgnoreCaseAndIsActive(
+                    keyword, Boolean.parseBoolean(isActive), pageable);
+        } else if (keyword != null && !keyword.trim().isEmpty()) {
+            return gradeRepository.findByGradeNameContainingIgnoreCase(keyword, pageable);
+        } else if (isActive != null && !isActive.isEmpty()) {
+            return gradeRepository.findByIsActive(Boolean.parseBoolean(isActive), pageable);
+        } else {
+            return gradeRepository.findAll(pageable);
+        }
+    }
 }
