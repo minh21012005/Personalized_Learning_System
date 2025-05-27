@@ -18,8 +18,8 @@ public class GradeService {
 
     }
 
-    public List<Grade> getByStatus(String status) {
-        return this.gradeRepository.findByStatus(status);
+    public List<Grade> getByStatus(boolean isActive) {
+        return this.gradeRepository.findByIsActive(isActive);
     }
 
     public List<Grade> getAllGrades() {
@@ -31,9 +31,16 @@ public class GradeService {
         if (existingGrade != null) {
             throw new IllegalArgumentException("Grade name '" + grade.getGradeName() + "' already exists.");
         }
-        if (grade.getStatus() == null) {
-            grade.setStatus("active");
-        }
+
         return this.gradeRepository.save(grade);
     }
+
+    public void deleteById(long gradeId) {
+        this.gradeRepository.deleteById(gradeId);
+    }
+
+    public Optional<Grade> findById(long gradeId) {
+        return this.gradeRepository.findById(gradeId);
+    }
+
 }

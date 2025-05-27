@@ -91,14 +91,15 @@
                     </h3>
                 </div>
                 <div class="d-flex justify-content-end mb-3 me-3">
-                    <a href="/admin/grade/create" class="btn btn-primary btn-lg">Create</a>
+                    <a href="/content-manager/grade/create" class="btn btn-primary btn-lg">Create</a>
                 </div>
                 <table class="table table-bordered table-hover">
                     <thead class="table-dark">
                         <tr>
-                            <th scope="col">Grade ID</th>
-                            <th scope="col">Grade Name</th>
-                            <th scope="col">Status</th>
+                            <th>Grade ID</th>
+                            <th>Grade Name</th>
+                            <th>Active</th>
+                            <th> Action</th>
 
                         </tr>
                     </thead>
@@ -109,7 +110,19 @@
                                     <tr>
                                         <td>${grade.gradeId}</td>
                                         <td>${grade.gradeName}</td>
-                                        <td>${grade.status}</td>
+                                        <td>${grade.active}</td>
+                                        <td>
+                                            <a href="/content-manager/grade/view/${grade.gradeId}"
+                                                class="btn btn-success"> View</a>
+                                            <a href="/content-manager/grade/update/${grade.gradeId}"
+                                                class="btn btn-warning mx-2">
+                                                Update</a>
+                                            <a href="/content-manager/grade/delete/${grade.gradeId}"
+                                                class="btn btn-danger">
+                                                Delete</a>
+
+                                        </td>
+
                                     </tr>
                                 </c:forEach>
                             </c:when>

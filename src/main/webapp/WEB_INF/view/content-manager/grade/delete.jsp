@@ -87,33 +87,30 @@
                 <!-- Main Content Area -->
 
                 <div class="content">
-                    <div class="container mt-2">
-                        <div class="row justify-content-center">
-                            <div class="col-md-6 col-12">
-                                <h3 class="text-center mb-3">Create a grade</h3>
+                    <div class="row">
+                        <div class="col-12 mx-auto">
+                            <div class="d-flex justify-content-between">
+                                <h3> Delete the user with id = ${gradeId}</h3>
 
-                                <c:if test="${not empty error}">
-                                    <div class="alert alert-danger" role="alert">
-                                        ${error}
-                                    </div>
-                                </c:if>
 
-                                <form:form method="post" action="/admin/grade/create" modelAttribute="newGrade">
-                                    <div class="mb-3">
-                                        <label class="form-label">Grade name</label>
-                                        <form:input type="text" class="form-control" path="gradeName" />
-                                    </div>
-
-                                    <div class="d-flex">
-                                        <button type="submit" class="btn btn-primary">Create</button>
-                                        <a href="/admin/grade" class="btn btn-secondary ms-2">Cancel</a>
-                                    </div>
-                                </form:form>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                            <hr />
+                            <div class="alert alert-danger">
+                                Are you sure to delete this user ?
+                            </div>
+                            <form:form method="post" action="/content-manager/grade/delete" modelAttribute="newGrade">
+                                <div class="mb-3" style="display: none;"> <label class="from-label">Id: </label>
+                                    <form:input value="${gradeId}" type="text" class="form-control" path="gradeId" />
 
+
+                                </div>
+                                <button class="btn btn-danger">Confirm</button>
+                            </form:form>
+                        </div>
+
+                    </div>
+
+                </div>
 
                 <!-- Include Footer -->
                 <footer>
