@@ -96,6 +96,8 @@ public class UserController {
 
     @GetMapping("admin/user/create")
     public String getUserCreatePage(Model model) {
+        List<Role> roles = roleService.getAllRoles();
+        model.addAttribute("roles", roles);
         model.addAttribute("newUser", new User());
         return "admin/user/create";
     }
@@ -162,6 +164,8 @@ public class UserController {
         if (user == null) {
             return "error/404";
         }
+        List<Role> roles = this.roleService.getAllRoles();
+        model.addAttribute("roles", roles);
         model.addAttribute("user", user);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         model.addAttribute("dobFormatted", user.getDob().format(formatter));

@@ -160,12 +160,11 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6 col-12">
-                                                    <label for="select" class="form-lable mb-2">Role</label>
+                                                    <label for="select" class="form-label mb-2">Role</label>
                                                     <form:select class="form-select" aria-label="Default select example"
                                                         id="select" path="role.roleName">
-                                                        <form:option value="ADMIN">ADMIN</form:option>
-                                                        <form:option value="CONTENT_MANAGER">CONTENT MANAGER
-                                                        </form:option>
+                                                        <form:options items="${roles}" itemValue="roleName"
+                                                            itemLabel="roleName" />
                                                     </form:select>
                                                 </div>
                                                 <div class="col-md-6 col-12">
