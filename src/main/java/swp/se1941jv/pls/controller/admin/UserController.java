@@ -36,7 +36,7 @@ public class UserController {
     private final UploadService uploadService;
 
     public UserController(UserService userService, PasswordEncoder passwordEncoder, RoleService roleService,
-            UploadService uploadService) {
+                          UploadService uploadService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
@@ -100,8 +100,8 @@ public class UserController {
 
     @PostMapping("/admin/user/create")
     public String createUser(Model model, @ModelAttribute("newUser") @Valid User newUser,
-            BindingResult newUserBindingResult,
-            @RequestParam("file") MultipartFile file) {
+                             BindingResult newUserBindingResult,
+                             @RequestParam("file") MultipartFile file) {
 
         // Kiểm tra nếu email đã tồn tại
         if (this.userService.existsByEmail(newUser.getEmail())) {
@@ -172,8 +172,8 @@ public class UserController {
 
     @PostMapping("/admin/user/update")
     public String updateUser(Model model, @ModelAttribute("user") @Valid User newUser,
-            BindingResult newUserBindingResult,
-            @RequestParam("file") MultipartFile file) {
+                             BindingResult newUserBindingResult,
+                             @RequestParam("file") MultipartFile file) {
 
         // Kiểm tra email đã được dùng bởi user khác chưa
         if (userService.existsByEmailAndUserIdNot(newUser.getEmail(), newUser.getUserId())) {
