@@ -13,73 +13,47 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 	<!-- Custom CSS -->
 	<style>
-		body {
+		.profile-page body {
 			background-color: #f5f5f5;
 		}
-		.sidebar {
+		.profile-page .sidebar {
 			background-color: #fff;
 			border-radius: 10px;
 			padding: 20px;
 			height: fit-content;
 			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 		}
-		.main-content {
+		.profile-page .main-content {
 			background-color: #fff;
 			border-radius: 10px;
 			padding: 20px;
 			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 		}
-		.profile-img {
-			width: 100px;
-			height: 100px;
-			border-radius: 50%;
-			object-fit: cover;
-		}
-		.share-profile-btn {
-			border: 1px solid #ddd;
-			border-radius: 5px;
-			padding: 5px 10px;
-			font-size: 14px;
-			color: #333;
-			background-color: #f8f9fa;
-		}
-		.nav-link {
+		.profile-page .nav-link {
 			color: #333;
 			padding: 10px 10px;
 			border-radius: 5px;
 		}
-		.nav-link.active {
+		.profile-page .nav-link.active {
 			background-color: #343a40;
 			color: #fff;
 		}
-		.form-section {
+		.profile-page .form-section {
 			background-color: #ffffff;
 			border: #e2e8f0 1px solid;
 			border-radius: 10px;
 			padding: 20px;
 		}
-		.form__item:focus {
-			box-shadow: none;
-		}
-		.image-preview {
-			background-color: #e9ecef;
-			border-radius: 10px;
-			height: 200px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin-bottom: 20px;
-		}
-		.image-preview i {
+		.profile-page .image-preview i {
 			font-size: 50px;
 			color: #adb5bd;
 		}
-		.btn-save-image {
+		.profile-page .btn-save-image {
 			background-color: #343a40;
 			color: #fff;
 			border-radius: 5px;
 		}
-		.btn-upload {
+		.profile-page .btn-upload {
 			border: 1px solid #ddd;
 			border-radius: 5px;
 			padding: 5px 10px;
@@ -90,35 +64,16 @@
 	</style>
 </head>
 <body>
-	<header>
-		<jsp:include page="../layout/header.jsp"/>
-	</header>
+<header>
+	<jsp:include page="../layout/header.jsp"/>
+</header>
 
+<div class="profile-page">
 	<div class="container py-5">
 		<div class="row">
 			<!-- Sidebar -->
 			<div class="col-md-3">
-				<div class="sidebar">
-					<div class="text-center">
-						<c:choose>
-							<c:when test="${not empty user.avatar}">
-								<img style="max-height: 250px; display: block"
-									 alt="Image not found" id="avatarPreview"
-									 src="/img/avatar/${user.avatar}" />
-							</c:when>
-							<c:otherwise>
-								<img style="max-height: 250px; display: none"
-									 alt="Image not found" id="avatarPreview" src="#" />
-							</c:otherwise>
-						</c:choose>
-						<h5 class="mt-3">${user.fullName}</h5>
-					</div>
-					<ul class="nav flex-column mt-4">
-						<li class="nav-item">
-							<a href="#" class="nav-link active">Profile</a>
-						</li>
-					</ul>
-				</div>
+				<jsp:include page="../layout/sidebar.jsp"/>
 			</div>
 
 			<!-- Main Content -->
@@ -201,12 +156,13 @@
 			</div>
 		</div>
 	</div>
+</div>
 
-	<footer>
-		<jsp:include page="../layout/footer.jsp" />
-	</footer>
+<footer>
+	<jsp:include page="../layout/footer.jsp" />
+</footer>
 
-	<!-- jQuery -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Bootstrap JS and Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

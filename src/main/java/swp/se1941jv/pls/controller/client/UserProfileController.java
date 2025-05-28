@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import swp.se1941jv.pls.dto.request.PasswordChangeRequest;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.service.UploadService;
 import swp.se1941jv.pls.service.UserService;
@@ -95,6 +96,47 @@ public class UserProfileController {
         model.addAttribute("user", currentUser);
         model.addAttribute("success", "Cập nhật thành công!");
         return "client/profile/show";
+    }
+
+    @GetMapping("/profile/change-password")
+    public String showChangePasswordForm(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("id");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("passwordChangeRequest", new PasswordChangeRequest());
+        return "client/profile/change-password";
+    }
+
+    @PostMapping("/profile/change-password")
+    public String changePassword(
+            HttpSession session,
+            @ModelAttribute("passwordChangeRequest") @Valid PasswordChangeRequest passwordChangeRequest,
+            BindingResult bindingResult,
+            Model model) {
+
+        Long userId = (Long) session.getAttribute("id");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        User currentUser = userService.getUserById(userId);
+
+        // Kiểm tra mật khẩu cũ
+        if (!userService.verifyPassword(userId, passwordChangeRequest.getOldPassword())) {
+            bindingResult.rejectValue("oldPassword", "error.oldPassword", "Mật khẩu cũ không đúng!");
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("passwordChangeRequest", passwordChangeRequest);
+            return "client/profile/change-password";
+        }
+
+        // Cập nhật mật khẩu mới
+        userService.updatePassword(userId, passwordChangeRequest.getNewPassword());
+
+        model.addAttribute("success", "Đổi mật khẩu thành công!");
+        return "client/profile/change-password";
     }
 
     private boolean isImageFile(String contentType) {
