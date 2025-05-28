@@ -9,10 +9,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import swp.se1941jv.pls.service.validator.Adult;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "user")
@@ -33,7 +34,7 @@ public class User extends BaseEntity {
     String email;
 
     @Column(name = "password", nullable = false)
-    @Size(min = 8, message = "Password phải có ít nhất 8 kí tự!")
+    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 kí tự!")
     @NotBlank(message = "Mật khẩu không được để trống hoặc chỉ chứa khoảng trắng!")
     String password;
 
@@ -42,21 +43,23 @@ public class User extends BaseEntity {
 
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     @NotBlank(message = "Tên không được để trống!")
-    String fullName;
+    @Size(min = 2, max = 100, message = "Tên phải có độ dài từ 2 đến 100 ký tự!")
+    @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên chỉ được chứa chữ cái và dấu cách!")
+    private String fullName;
 
     @Column(name = "avatar")
     String avatar;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "dob")
-    @NotNull(message = "Date of Birth ko được để trống!")
+    @NotNull(message = "Ngày sinh ko được để trống!")
     @Past(message = "Ngày sinh phải trong quá khứ!")
-    @Adult
     LocalDate dob;
 
     @Column(name = "phone_number", nullable = false, unique = true)
     @NotBlank(message = "Số điện thoại không được để trống!")
-    @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại phải bắt đầu bằng 0 và gồm đúng 10 chữ số!")
-    String phoneNumber;
+    @Pattern(regexp = "^(03[2-9]|05[6-9]|07[0-9]|08[1-9]|09[0-9])\\d{7}$", message = "Số điện thoại không hợp lệ! Phải bắt đầu bằng các đầu số Việt Nam hợp lệ và gồm đúng 10 chữ số.")
+    private String phoneNumber;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")

@@ -60,13 +60,13 @@ public class SecurityConfiguration {
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                         .permitAll()
 
-                        .requestMatchers("/", "/admin/**", "/login", "/register", "/client/**", "/css/**",
+                        .requestMatchers("/", "/login", "/register", "/client/**", "/css/**",
                                 "/js/**",
                                 "/product/**", "/img/**", "/lib/**")
                         .permitAll()
 
-                        // .requestMatchers("/admin/**")
-                        // .hasRole("ADMIN")
+                         .requestMatchers("/admin/**")
+                         .hasRole("ADMIN")
 
                         // .requestMatchers("/student/**")
                         // .hasAnyRole("STUDENT", "ADMIN")
@@ -77,7 +77,7 @@ public class SecurityConfiguration {
                         // .requestMatchers("/content-manager/**")
                         // .hasAnyRole("CONTENT_MANAGER", "ADMIN")
 
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
 
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
