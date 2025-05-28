@@ -68,6 +68,10 @@
                     height: 40px;
                     /* Approximate footer height */
                 }
+
+                .form-control {
+                    width: 225%;
+                }
             </style>
         </head>
 
