@@ -29,10 +29,10 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     protected String determineTargetUrl(final Authentication authentication) {
         Map<String, String> roleTargetUrlMap = new HashMap<>();
-        roleTargetUrlMap.put("STUDENT", "/student");
-        roleTargetUrlMap.put("PARENT", "/parent");
-        roleTargetUrlMap.put("CONTENT_MANAGER", "/content-manager");
-        roleTargetUrlMap.put("ADMIN", "/admin");
+        roleTargetUrlMap.put("ROLE_STUDENT", "/student");
+        roleTargetUrlMap.put("ROLE_PARENT", "/parent");
+        roleTargetUrlMap.put("ROLE_CONTENT_MANAGER", "/content-manager");
+        roleTargetUrlMap.put("ROLE_ADMIN", "/admin");
 
         final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (final GrantedAuthority grantedAuthority : authorities) {
