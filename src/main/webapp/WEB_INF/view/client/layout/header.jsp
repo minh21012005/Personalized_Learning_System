@@ -4,7 +4,7 @@
 <style>
     .header-nav {
         color: #64748B;
-        border-bottom: 1px solid #E2E8F0
+        border-bottom: 1px solid #E2E8F0;
     }
     a:hover {
         text-decoration: none;
@@ -28,44 +28,61 @@
         border: 1px solid #ddd;
     }
     .header-icon {
-        padding: 0.5rem; /* Adjust padding for the link */
+        padding: 0.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
     }
     .header-icon i {
-        font-size: 1.5rem; /* Icon size */
-        line-height: 1; /* Ensure proper alignment */
-        transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for background and color */
-        padding: 0.5rem; /* Add padding to create space for the background */
-        border-radius: 50%; /* Make the background circular */
-        display: inline-flex; /* Ensure the icon takes up only its own space */
+        font-size: 1.5rem;
+        line-height: 1;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        padding: 0.5rem;
+        border-radius: 50%;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
     }
     .header-icon:hover i {
-        background-color: #334155; /* Background color on hover */
-        color: white; /* Change icon color to white for better contrast */
+        background-color: #334155;
+        color: white;
     }
     .dropdown-item {
-        transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for dropdown items */
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
     .dropdown-item:hover {
-        background-color: #343a40; /* Background color on hover */
-        color: white; /* Text color on hover */
-        transition: background-color 0.3s ease, color 0.3s ease;
+        background-color: #343a40;
+        color: white;
+    }
+    /* Hide icons and show links for small screens */
+    @media (max-width: 767.98px) {
+        .header-icon {
+            display: none;
+        }
+        .user-dropdown-icon {
+            display: none;
+        }
+        .nav-link-text {
+            display: block;
+        }
+    }
+    /* Show icons and hide links for larger screens */
+    @media (min-width: 768px) {
+        .nav-link-text {
+            display: none;
+        }
+        .header-icon {
+            display: flex;
+        }
+        .user-dropdown-icon {
+            display: flex;
+        }
     }
 </style>
 <nav class="navbar navbar-expand-md navbar bg-white color header-nav">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">
-            <img
-                    src="/img/logo.jpg"
-                    alt="PLS logo"
-                    width="50"
-                    height="50"
-
-            />
+            <img src="/img/logo.jpg" alt="PLS logo" width="50" height="50" />
         </a>
         <button
                 class="navbar-toggler"
@@ -112,14 +129,40 @@
                         <li><a class="dropdown-item" href="#">Lớp 12</a></li>
                     </ul>
                 </li>
+                <li class="nav-item me-4">
+                    <a class="nav-link nav-link-text" href="#">Danh sách yêu thích</a>
+                </li>
+                <li class="nav-item me-4">
+                    <a class="nav-link nav-link-text" href="#">Giỏ hàng</a>
+                </li>
+                <li class="nav-item me-4">
+                    <a class="nav-link nav-link-text" href="#">Thông báo</a>
+                </li>
+                <%
+                    String fullName = (String) session.getAttribute("fullName");
+                    String role = (String) session.getAttribute("role");
+                    if (fullName != null) {
+                %>
+                <li class="nav-item me-4">
+                    <a class="nav-link nav-link-text" href="<%= role != null && role.equals("STUDENT") ? "/student/profile" : "/parent/profile" %>">Thông tin cá nhân</a>
+                </li>
+                <li class="nav-item me-4">
+                    <a class="nav-link nav-link-text" href="/logout">Đăng xuất</a>
+                </li>
+                <%
+                } else {
+                %>
+                <li class="nav-item me-4">
+                    <a class="nav-link nav-link-text" href="/login">Đăng nhập</a>
+                </li>
+                <%
+                    }
+                %>
             </ul>
 
             <!-- Conditional rendering based on login status -->
             <%
-                // Check if user session attributes exist
-                String fullName = (String) session.getAttribute("fullName");
                 String avatar = (String) session.getAttribute("avatar");
-                String role = (String) session.getAttribute("role");
                 if (fullName == null) {
             %>
             <!-- Show login button if user is not logged in -->
@@ -128,28 +171,31 @@
             </button>
             <%
             } else {
-                // Get the first letter of the fullName for fallback
                 String initial = fullName != null && !fullName.isEmpty() ? fullName.substring(0, 1).toUpperCase() : "U";
             %>
             <!-- Icons and user profile -->
             <ul class="navbar-nav ms-auto d-flex align-items-center">
+                <!-- Wishlist -->
                 <li class="nav-item">
                     <a class="nav-link header-icon" href="#" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Danh sách yêu thích">
                         <i class="bi bi-heart"></i>
                     </a>
                 </li>
+                <!-- Cart -->
                 <li class="nav-item">
                     <a class="nav-link header-icon" href="#" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Giỏ hàng">
                         <i class="bi bi-cart"></i>
                     </a>
                 </li>
+                <!-- Notifications -->
                 <li class="nav-item">
                     <a class="nav-link header-icon" href="#" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Thông báo">
                         <i class="bi bi-bell"></i>
                     </a>
                 </li>
+                <!-- User Profile -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle user-dropdown-icon" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <% if (avatar != null && !avatar.isEmpty()) { %>
                         <img src="/img/avatar/<%= avatar %>" alt="User Avatar" class="user-avatar" />
                         <% } else { %>
@@ -157,12 +203,12 @@
                         <% } %>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <%if (role != null && !role.isEmpty()){ %>
-                            <%if (role.equals("STUDENT")){%>
-                                <li><a class="dropdown-item" href="/student/profile">Thông tin cá nhân</a></li>
-                            <% } else { %>
-                                <li><a class="dropdown-item" href="/parent/profile">Thông tin cá nhân</a></li>
-                            <% } %>
+                        <% if (role != null && !role.isEmpty()) { %>
+                        <% if (role.equals("STUDENT")) { %>
+                        <li><a class="dropdown-item" href="/student/profile">Thông tin cá nhân</a></li>
+                        <% } else { %>
+                        <li><a class="dropdown-item" href="/parent/profile">Thông tin cá nhân</a></li>
+                        <% } %>
                         <% } %>
                         <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
                     </ul>

@@ -1,12 +1,25 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<style>
+    .sidebar-image {
+        box-sizing: border-box;
+        width: 100%;
+    }
+    #avatarSideBar {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 250px;
+        object-fit: contain;
+    }
+</style>
 <div class="sidebar">
-    <div class="text-center">
+    <div class="text-center sidebar-image">
         <c:choose>
             <c:when test="${not empty user.avatar}">
-                <img style="max-height: 250px; display: block"
-                     alt="Image not found" id="avatarPreview"
+                <img style="max-height: 250px; display: block; width: 100%"
+                     alt="Image not found" id="avatarSideBar"
                      src="/img/avatar/${user.avatar}" />
             </c:when>
             <c:otherwise>
