@@ -30,10 +30,9 @@ public class GradeService {
 
     public Grade saveGrade(Grade grade) {
         Grade existingGrade = gradeRepository.findByGradeName(grade.getGradeName());
-        if (existingGrade != null) {
+        if (existingGrade != null && !existingGrade.getGradeId().equals(grade.getGradeId())) {
             throw new IllegalArgumentException("Grade name '" + grade.getGradeName() + "' already exists.");
         }
-
         return this.gradeRepository.save(grade);
     }
 
@@ -61,4 +60,5 @@ public class GradeService {
             return gradeRepository.findAll(pageable);
         }
     }
+
 }

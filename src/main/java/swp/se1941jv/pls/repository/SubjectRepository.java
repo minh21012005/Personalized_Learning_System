@@ -22,4 +22,10 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
         Page<Subject> findByGradeGradeIdAndIsActive(Long gradeId, boolean isActive, Pageable pageable);
 
+        // Thêm phương thức cho Subject hàng chờ
+        Page<Subject> findByGradeIsNullAndIsActiveAndSubjectNameContainingIgnoreCase(
+                        boolean isActive, String subjectName, Pageable pageable);
+
+        Page<Subject> findByGradeIsNullAndIsActive(boolean isActive, Pageable pageable);
+
 }

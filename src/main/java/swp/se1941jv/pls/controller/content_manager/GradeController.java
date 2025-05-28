@@ -91,8 +91,8 @@ public class GradeController {
 
     @GetMapping(value = "/content-manager/grade/view/{gradeId}")
     public String viewSubjectsByGrade(Model model,
-            @PathVariable Long gradeId,
             @RequestParam(defaultValue = "0") int page,
+            @PathVariable Long gradeId,
             @RequestParam(required = false) String keyword) {
         Pageable pageable = PageRequest.of(page, 10); // Không cần sort
         try {
@@ -116,5 +116,81 @@ public class GradeController {
             model.addAttribute("subjects", java.util.Collections.emptyList());
         }
         return "content-manager/grade/view";
+    }
+
+    @GetMapping("/content-manager/grade/update/{gradeId}")
+    public String getUpdateGradePage(Model model, @PathVariable Long gradeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") int pendingPage,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String pendingKeyword) {
+        try {
+            Grade grade = this.gradeService.findById(gradeId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
+            Pageable pageable = PageRequest.of(page, 10);
+            Pageable pendingPageable = PageRequest.of(pendingPage, 10);
+            Page<Subject> subjectPage = this.subjectService.getSubjectsByGradeId(gradeId, true, keyword, pageable);
+            Page<Subject> pendingSubjectPage = this.subjectService.getPendingSubjects(true, pendingKeyword,
+                    pendingPageable);
+
+            if (!grade.isActive()) {
+                model.addAttribute("warning",
+                        "⚠ Khối lớp này đã ngừng hoạt động. Không thể chỉnh sửa danh sách môn học.");
+            }
+
+            model.addAttribute("grade", grade);
+            model.addAttribute("subjects", subjectPage.getContent());
+            model.addAttribute("currentPage", subjectPage.getNumber());
+            model.addAttribute("totalPages", subjectPage.getTotalPages());
+            model.addAttribute("totalItems", subjectPage.getTotalElements());
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("pendingSubjects", pendingSubjectPage.getContent());
+            model.addAttribute("pendingCurrentPage", pendingSubjectPage.getNumber());
+            model.addAttribute("pendingTotalPages", pendingSubjectPage.getTotalPages());
+            model.addAttribute("pendingTotalItems", pendingSubjectPage.getTotalElements());
+            model.addAttribute("pendingKeyword", pendingKeyword);
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("subjects", java.util.Collections.emptyList());
+            model.addAttribute("pendingSubjects", java.util.Collections.emptyList());
+        }
+        return "content-manager/grade/update";
+    }
+
+    @PostMapping("/content-manager/grade/update")
+    public String postUpdateGrade(Model model, @ModelAttribute("grade") Grade grade,
+            @RequestParam(required = false) List<Long> removeSubjectIds,
+            @RequestParam(required = false) List<Long> addSubjectIds) {
+        try {
+            Grade existingGrade = gradeService.findById(grade.getGradeId())
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
+
+            // Cập nhật thông tin Grade
+            existingGrade.setGradeName(grade.getGradeName());
+            existingGrade.setActive(grade.isActive());
+            gradeService.saveGrade(existingGrade);
+
+            // Chỉ xử lý Subject nếu Grade active
+            if (existingGrade.isActive()) {
+                // Xóa liên kết Subject
+                if (removeSubjectIds != null) {
+                    for (Long subjectId : removeSubjectIds) {
+                        subjectService.updateSubjectGrade(subjectId, null);
+                    }
+                }
+                // Thêm liên kết Subject
+                if (addSubjectIds != null) {
+                    for (Long subjectId : addSubjectIds) {
+                        subjectService.updateSubjectGrade(subjectId, grade.getGradeId());
+                    }
+                }
+            }
+
+            return "redirect:/content-manager/grade";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("grade", grade);
+            return "content-manager/grade/update";
+        }
     }
 }
