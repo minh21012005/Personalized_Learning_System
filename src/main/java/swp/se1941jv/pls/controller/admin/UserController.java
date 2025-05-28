@@ -57,6 +57,10 @@ public class UserController {
             newUserBindingResult.rejectValue("email", "error.newUser", "Email đã được sử dụng!");
         }
 
+        if (this.userService.existsByPhoneNumber(newUser.getPhoneNumber())) {
+            newUserBindingResult.rejectValue("phoneNumber", "error.newUser", "Số điện thoại đã được sử dụng!");
+        }
+
         // Có lỗi chuyển hướng về trang create
         if (newUserBindingResult.hasErrors()) {
             return "admin/user/create";
