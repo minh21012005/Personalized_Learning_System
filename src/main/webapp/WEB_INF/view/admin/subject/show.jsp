@@ -84,7 +84,36 @@
 
             <!-- Main Content Area -->
             <div class="content">
+               
+<c:if test="${not empty successMessage}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                ${successMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessageGlobal}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${errorMessageGlobal}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
 
+        <c:choose>
+            <c:when test="${not empty viewName}">
+                <%-- Bao gồm file JSP nội dung chính --%>
+                <%-- Đường dẫn này sẽ là tương đối với thư mục WEB-INF/view/ --%>
+                <jsp:include page="${viewName}.jsp" />
+            </c:when>
+            <c:otherwise>
+                <p>Welcome to the Admin!</p> <%-- Hoặc một nội dung mặc định nào đó --%>
+            </c:otherwise>
+        </c:choose>
             </div>
 
             <!-- Include Footer -->

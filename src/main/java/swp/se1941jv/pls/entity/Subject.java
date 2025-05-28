@@ -8,10 +8,14 @@ import java.util.List;
 
 @Entity
 @Table(name = "subjects")
-@Data
+//@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = {"packageSubjects", "chapters", "subjectTests", "grade"})
+@EqualsAndHashCode(exclude = {"packageSubjects", "chapters", "subjectTests", "grade"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Subject extends BaseEntity {
     @Id
@@ -29,7 +33,7 @@ public class Subject extends BaseEntity {
     String subjectImage;
 
     @Column(name = "is_active")
-    boolean isActive;
+    Boolean isActive;
 
     @OneToMany(mappedBy = "subject")
     List<PackageSubject> packageSubjects;
@@ -43,4 +47,5 @@ public class Subject extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "grade_id")
     Grade grade;
+
 }

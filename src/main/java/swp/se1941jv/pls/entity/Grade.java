@@ -8,10 +8,14 @@ import java.util.List;
 
 @Entity
 @Table(name = "grades")
-@Data
+// @Data
+@Getter // Sử dụng @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = {"subjects"}) // Exclude trường 'subjects' khỏi toString()
+@EqualsAndHashCode(exclude = {"subjects"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Grade {
     @Id
@@ -27,5 +31,7 @@ public class Grade {
 
     @OneToMany(mappedBy = "grade")
     List<Subject> subjects;
+
+    
 
 }

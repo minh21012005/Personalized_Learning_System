@@ -9,6 +9,7 @@ import java.util.List;
 @Entity
 @Table(name = "lessons")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
