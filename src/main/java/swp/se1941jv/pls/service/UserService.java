@@ -86,6 +86,7 @@ public class UserService {
         return this.userRepository.existsByPhoneNumberAndUserIdNot(phoneNumber, id);
     }
 
+
     public boolean verifyPassword(Long userId, String password) {
         User user = getUserById(userId);
         if (user == null) {
@@ -103,6 +104,10 @@ public class UserService {
     }
     public Page<User> findUsersWithRole(String roleName, Pageable pageable) {
         return userRepository.findAll(UserSpecification.hasRole(roleName), pageable);
+
+    public Page<User> findUsersWithFilters(String roleName, String fullName, Pageable pageable) {
+        return this.userRepository.findAll(UserSpecification.findUsersWithFilters(roleName, fullName), pageable);
+
     }
 
 }

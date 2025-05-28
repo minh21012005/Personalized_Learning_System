@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.repository.UserRepository;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,22 +25,27 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username);
         if (user == null) {
-            throw new UsernameNotFoundException("Không tìm thấy người dùng với email : " + username);
+            throw new UsernameNotFoundException("Không tìm thấy người dùng với email: " + username);
         }
 
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        // Add roles as authorities
+        // Thêm vai trò vào authorities
         if (user.getRole() != null) {
-            authorities.add(new SimpleGrantedAuthority(user.getRole().getRoleName()));
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName()));
         } else {
             throw new UsernameNotFoundException("Người dùng không có vai trò: " + username);
         }
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails(
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                true, // enabled
+                true, // accountNonExpired
+                true, // credentialsNonExpired
+                user.getIsActive(), // accountNonLocked
+                authorities,
+                user.getUserId() // userId
         );
     }
 }

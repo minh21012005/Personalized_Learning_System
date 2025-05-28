@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,7 +36,7 @@ public class UserController {
     private final UploadService uploadService;
 
     public UserController(UserService userService, PasswordEncoder passwordEncoder, RoleService roleService,
-            UploadService uploadService) {
+                          UploadService uploadService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
@@ -44,23 +45,20 @@ public class UserController {
 
     @GetMapping("/admin/user")
     public String getUserPage(@RequestParam Optional<String> page,
-            @RequestParam Optional<String> role, Model model) {
+            @RequestParam Optional<String> role,
+            @RequestParam Optional<String> name,
+            Model model) {
         int pageNumber;
-        if (page.isPresent()) {
-            try {
-                pageNumber = Integer.parseInt(page.get());
-            } catch (Exception e) {
-                pageNumber = 1;
-            }
-        } else {
+        try {
+            pageNumber = page.map(Integer::parseInt).orElse(1);
+        } catch (Exception e) {
             pageNumber = 1;
         }
+
         int pageSize = 8;
 
-        // Get all roles to validate the provided role
         List<Role> roles = roleService.getAllRoles();
 
-        // Check if role is valid
         String roleFilter = null;
         if (role.isPresent()) {
             boolean isValidRole = roles.stream()
@@ -70,18 +68,15 @@ public class UserController {
             }
         }
 
-        // Create Pageable for total pages
-        Pageable tempPageable = PageRequest.of(0, pageSize);
-        int totalPage = this.userService.getAllUsers(tempPageable).getTotalPages();
+        String nameFilter = name.orElse(null);
 
-        // Check if pageNumber is valid
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "userId"));
+        Page<User> pageUser = userService.findUsersWithFilters(roleFilter, nameFilter, pageable);
+        int totalPage = pageUser.getTotalPages();
+
         if (pageNumber < 1 || (pageNumber > totalPage && totalPage > 0)) {
             return "error/404";
         }
-
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
-        Page<User> pageUser = userService.findUsersWithRole(roleFilter, pageable);
-        totalPage = pageUser.getTotalPages();
 
         List<User> users = pageUser.getContent();
 
@@ -90,20 +85,23 @@ public class UserController {
         model.addAttribute("currentPage", pageNumber);
         model.addAttribute("totalPage", totalPage);
         model.addAttribute("selectedRole", roleFilter != null ? roleFilter : "");
+        model.addAttribute("paramName", nameFilter);
 
         return "admin/user/show";
     }
 
     @GetMapping("admin/user/create")
     public String getUserCreatePage(Model model) {
+        List<Role> roles = roleService.getAllRoles();
+        model.addAttribute("roles", roles);
         model.addAttribute("newUser", new User());
         return "admin/user/create";
     }
 
     @PostMapping("/admin/user/create")
     public String createUser(Model model, @ModelAttribute("newUser") @Valid User newUser,
-            BindingResult newUserBindingResult,
-            @RequestParam("file") MultipartFile file) {
+                             BindingResult newUserBindingResult,
+                             @RequestParam("file") MultipartFile file) {
 
         // Kiểm tra nếu email đã tồn tại
         if (this.userService.existsByEmail(newUser.getEmail())) {
@@ -117,11 +115,13 @@ public class UserController {
 
         // Có lỗi chuyển hướng về trang create
         if (newUserBindingResult.hasErrors()) {
+            model.addAttribute("roles", this.roleService.getAllRoles());
             return "admin/user/create";
         }
 
         String contentType = file.getContentType();
         if (!file.isEmpty() && !isImageFile(contentType)) {
+            model.addAttribute("roles", this.roleService.getAllRoles());
             model.addAttribute("fileError", "Chỉ được chọn ảnh định dạng PNG, JPG, JPEG!");
             return "admin/user/create";
         }
@@ -162,6 +162,8 @@ public class UserController {
         if (user == null) {
             return "error/404";
         }
+        List<Role> roles = this.roleService.getAllRoles();
+        model.addAttribute("roles", roles);
         model.addAttribute("user", user);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         model.addAttribute("dobFormatted", user.getDob().format(formatter));
@@ -170,8 +172,8 @@ public class UserController {
 
     @PostMapping("/admin/user/update")
     public String updateUser(Model model, @ModelAttribute("user") @Valid User newUser,
-            BindingResult newUserBindingResult,
-            @RequestParam("file") MultipartFile file) {
+                             BindingResult newUserBindingResult,
+                             @RequestParam("file") MultipartFile file) {
 
         // Kiểm tra email đã được dùng bởi user khác chưa
         if (userService.existsByEmailAndUserIdNot(newUser.getEmail(), newUser.getUserId())) {
@@ -183,21 +185,15 @@ public class UserController {
             newUserBindingResult.rejectValue("phoneNumber", "error.phoneNumber", "Số điện thoại đã được sử dụng!");
         }
 
-        if (newUserBindingResult.hasErrors()) {
-            for (FieldError error : newUserBindingResult.getFieldErrors()) {
-                System.out.println("Lỗi ở field: " + error.getField());
-                System.out.println("Thông báo lỗi: " + error.getDefaultMessage());
-            }
-            return "admin/user/update";
-        }
-
         // Có lỗi chuyển hướng về trang update
         if (newUserBindingResult.hasErrors()) {
+            model.addAttribute("roles", this.roleService.getAllRoles());
             return "admin/user/update";
         }
 
         String contentType = file.getContentType();
         if (!file.isEmpty() && !isImageFile(contentType)) {
+            model.addAttribute("roles", this.roleService.getAllRoles());
             model.addAttribute("fileError", "Chỉ được chọn ảnh định dạng PNG, JPG, JPEG!");
             return "admin/user/update";
         }
