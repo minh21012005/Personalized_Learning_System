@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import swp.se1941jv.pls.service.validator.Adult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,7 +54,6 @@ public class User extends BaseEntity {
     @Column(name = "dob")
     @NotNull(message = "Ngày sinh ko được để trống!")
     @Past(message = "Ngày sinh phải trong quá khứ!")
-    @Adult
     LocalDate dob;
 
     @Column(name = "phone_number", nullable = false, unique = true)

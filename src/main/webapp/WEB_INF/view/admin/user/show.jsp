@@ -154,8 +154,9 @@
                                 <div class="row col-12 mx-auto">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <!-- Bộ lọc role -->
-                                        <form action="/admin/user" method="get" class="d-flex align-items-center gap-2">
-                                            <label for="role" class="mb-0 fw-bold">Role:</label>
+                                        <form action="/admin/user" method="get"
+                                            class="d-flex align-items-center gap-2 flex-wrap">
+                                            <label for="role" class="mb-0 fw-bold me-2">Role:</label>
                                             <select name="role" id="role" class="form-select form-select-sm w-auto">
                                                 <option value="">All</option>
                                                 <c:forEach var="r" items="${roles}">
@@ -170,8 +171,16 @@
                                                     </c:choose>
                                                 </c:forEach>
                                             </select>
+
+                                            <label for="name" class="mb-0 fw-bold me-2">Full name:</label>
+                                            <input type="text" id="name" name="name"
+                                                class="form-control form-control-sm w-auto" value="${param.name}"
+                                                placeholder="Enter name">
+
                                             <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
                                         </form>
+
+
                                         <!-- Nút tạo user -->
                                         <a href="/admin/user/create" class="btn btn-primary">Create User</a>
                                     </div>
@@ -208,8 +217,13 @@
                                     </table>
                                     <div class="pagination-container">
                                         <c:set var="queryString" value="" />
+
                                         <c:if test="${not empty selectedRole}">
-                                            <c:set var="queryString" value="&role=${selectedRole}" />
+                                            <c:set var="queryString" value="${queryString}&role=${selectedRole}" />
+                                        </c:if>
+
+                                        <c:if test="${not empty paramName}">
+                                            <c:set var="queryString" value="${queryString}&name=${paramName}" />
                                         </c:if>
                                         <nav aria-label="Page navigation example">
                                             <ul class="pagination justify-content-center">

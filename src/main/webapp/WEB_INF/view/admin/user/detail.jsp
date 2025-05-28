@@ -98,6 +98,8 @@
                                         <li class="list-group-item">Phone number: ${user.phoneNumber}</li>
                                         <li class="list-group-item">Role: ${user.role.roleName}</li>
                                         <li class="list-group-item">Date of Birth: ${dobFormatted}</li>
+                                        <li class="list-group-item">Status: ${user.isActive ? 'Active' : 'Inactive'}
+                                        </li>
                                         <li class="list-group-item">
                                             <label for="avatarFile" class="form-label">Avatar:</label>
                                             <div class="col-12 mt-3">

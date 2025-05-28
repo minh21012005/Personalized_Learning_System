@@ -82,8 +82,8 @@ public class UserService {
         return this.userRepository.existsByPhoneNumberAndUserIdNot(phoneNumber, id);
     }
 
-    public Page<User> findUsersWithRole(String roleName, Pageable pageable) {
-        return userRepository.findAll(UserSpecification.hasRole(roleName), pageable);
+    public Page<User> findUsersWithFilters(String roleName, String fullName, Pageable pageable) {
+        return this.userRepository.findAll(UserSpecification.findUsersWithFilters(roleName, fullName), pageable);
     }
 
 }
