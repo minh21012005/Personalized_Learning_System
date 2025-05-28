@@ -67,6 +67,8 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
                 session.setAttribute("avatar", user.getAvatar());
                 session.setAttribute("id", user.getUserId());
                 session.setAttribute("email", email);
+                session.setAttribute("dob", user.getDob());
+                session.setAttribute("role", user.getRole().getRoleName());
                 // Có thể thêm thông tin khác nếu cần, ví dụ: cấp lớp của học sinh
                 // session.setAttribute("grade", user.getGrades() != null ?
                 // user.getGrades().get(0).getGradeName() : null);

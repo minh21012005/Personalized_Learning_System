@@ -1,0 +1,1083 @@
+/* Import font Inter */
+@import url("https://fonts.googleapis.com/css?family=Inter:400,500,700");
+
+/* Reset styles */
+* {
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    height: 100%;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+a:hover {
+    text-decoration: underline;
+}
+button:focus-visible {
+    outline: 2px solid #4a90e2 !important;
+    outline: -webkit-focus-ring-color auto 5px !important;
+}
+
+/* Header styles */
+.homescreen .site-header {
+    background-color: #ffffff;
+    font-family: "Inter", Helvetica;
+}
+
+.homescreen .brand-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(51, 65, 85, 1);
+}
+
+.homescreen .nav-item .nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(51, 65, 85, 1);
+}
+
+.homescreen .search-bar {
+    max-width: 622px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+}
+
+.homescreen .search-placeholder {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(51, 65, 85, 1);
+}
+
+.homescreen .auth-nav {
+    gap: 24px;
+}
+
+.homescreen .icon-cart-wrapper img {
+    width: 24px;
+    height: 24px;
+}
+
+.homescreen .login-button {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(51, 65, 85, 1);
+    border: 1px solid #334155;
+    padding: 10px;
+    border-radius: 0;
+}
+
+.homescreen .signup-button {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: rgba(51, 65, 85, 1);
+    padding: 10px;
+    border-radius: 0;
+}
+
+.homescreen .header-divider {
+    height: 1px;
+    background-color: rgba(226, 232, 240, 1);
+}
+
+/* Footer styles */
+.homescreen .site-footer {
+    background-color: rgba(30, 41, 59, 1);
+    font-family: "Inter", Helvetica;
+}
+
+.homescreen .footer-description {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(203, 213, 225, 1);
+    line-height: 150%;
+}
+
+.homescreen .links-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(241, 245, 249, 1);
+    line-height: 160%;
+}
+
+.homescreen .link-item {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(203, 213, 225, 1);
+    line-height: 160%;
+}
+
+/* Main content styles (giữ từ trước) */
+.homescreen {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+}
+
+.homescreen .overlap-wrapper {
+    background-color: #ffffff;
+    overflow: hidden;
+    width: 1440px;
+    height: 4058px;
+}
+
+.homescreen .overlap {
+    position: relative;
+    width: 1441px;
+    height: 4074px;
+}
+
+.homescreen .main-frame {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    position: absolute;
+    top: 64px;
+    left: 0;
+}
+
+.homescreen .hero-section {
+    position: relative;
+    width: 1440px;
+    height: 600px;
+    background-color: #ffffff;
+}
+
+.homescreen .hero-content {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    position: absolute;
+    top: 168px;
+    left: 80px;
+}
+
+.homescreen .hero-text {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .hero-title {
+    position: relative;
+    width: 483px;
+    margin-top: -1.00px;
+    font-family: "Inter", Helvetica;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 1);
+    font-size: 40px;
+    letter-spacing: 0px;
+    line-height: 120%;
+    font-style: normal;
+}
+
+.homescreen .hero-description {
+    position: relative;
+    width: 592px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 16px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    font-style: normal;
+}
+
+.homescreen .cta-button {
+    all: unset;
+    box-sizing: border-box;
+    height: 48px;
+    padding: 10px 24px;
+    background-color: rgba(59, 130, 246, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    border-radius: 8px;
+}
+
+.homescreen .button-label {
+    color: #ffffff;
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .hero-graphic {
+    position: absolute;
+    width: 513px;
+    height: 536px;
+    top: 40px;
+    left: 796px;
+}
+
+.homescreen .graphic-overlap {
+    position: absolute;
+    width: 499px;
+    height: 382px;
+    top: 0;
+    left: 0;
+}
+
+.homescreen .dot-pattern-1 {
+    display: flex;
+    flex-wrap: wrap;
+    width: 68px;
+    align-items: flex-start;
+    gap: 7px 12px;
+    position: absolute;
+    top: 38px;
+    left: 233px;
+}
+
+.homescreen .dot {
+    position: relative;
+    width: 4px;
+    height: 4px;
+    background-color: rgba(226, 232, 240, 1);
+    border-radius: 2px;
+}
+
+.homescreen .dot-pattern-2 {
+    display: flex;
+    flex-wrap: wrap;
+    width: 68px;
+    align-items: flex-start;
+    gap: 7px 12px;
+    position: absolute;
+    top: 176px;
+    left: 16px;
+    transform: rotate(-81.92deg);
+}
+
+.homescreen .graphic-circle {
+    position: absolute;
+    width: 217px;
+    height: 217px;
+    top: 45px;
+    left: 267px;
+    background-color: rgba(96, 165, 250, 1);
+    border-radius: 543.38px;
+    background-image: url(https://c.animaapp.com/mb5881k9TTFl8D/img/image-8-1.png);
+    background-size: cover;
+    background-position: 50% 50%;
+}
+
+.homescreen .image-container {
+    position: absolute;
+    width: 205px;
+    height: 205px;
+    top: 163px;
+    left: 50px;
+    background-color: rgba(248, 113, 113, 1);
+    border-radius: 581.07px;
+    overflow: hidden;
+}
+
+.homescreen .main-image {
+    position: absolute;
+    width: 184px;
+    height: 205px;
+    top: 0;
+    left: 0;
+}
+
+.homescreen .secondary-image {
+    position: absolute;
+    width: 184px;
+    height: 142px;
+    top: 107px;
+    left: 50px;
+}
+
+.homescreen .ellipse-1 {
+    position: absolute;
+    width: 237px;
+    height: 114px;
+    top: 268px;
+    left: 33px;
+}
+
+.homescreen .ellipse-2 {
+    position: absolute;
+    width: 153px;
+    height: 249px;
+    top: 25px;
+    left: 346px;
+}
+
+.homescreen .additional-image {
+    position: absolute;
+    width: 174px;
+    height: 165px;
+    top: 0;
+    left: 289px;
+}
+
+.homescreen .small-circle {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    top: 261px;
+    left: 291px;
+    background-color: rgba(15, 23, 42, 1);
+    border-radius: 17.5px;
+}
+
+.homescreen .polygon {
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    top: 269px;
+    left: 299px;
+}
+
+.homescreen .community-section {
+    position: absolute;
+    width: 311px;
+    height: 239px;
+    top: 297px;
+    left: 202px;
+}
+
+.homescreen .community-image {
+    position: absolute;
+    width: 222px;
+    height: 222px;
+    top: 0;
+    left: 72px;
+    background-color: rgba(250, 204, 21, 1);
+    border-radius: 630.68px;
+    overflow: hidden;
+}
+
+.homescreen .community-img {
+    position: absolute;
+    width: 222px;
+    height: 211px;
+    top: 11px;
+    left: 0;
+    object-fit: cover;
+}
+
+.homescreen .community-info {
+    position: absolute;
+    width: 167px;
+    height: 104px;
+    top: 102px;
+    left: 0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.homescreen .avatar-group {
+    display: inline-flex;
+    align-items: flex-start;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+}
+
+.homescreen .avatar {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    margin-top: -2.00px;
+    margin-bottom: -2.00px;
+    margin-left: -15px;
+    object-fit: cover;
+}
+
+.homescreen .avatar:first-child {
+    margin-left: -3.00px;
+}
+
+.homescreen .avatar:last-child {
+    margin-right: -1.00px;
+}
+
+.homescreen .community-text {
+    position: absolute;
+    width: 143px;
+    top: 61px;
+    left: 12px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 12px;
+    letter-spacing: 0px;
+    line-height: normal;
+    font-style: normal;
+}
+
+.homescreen .ellipse-3 {
+    position: absolute;
+    width: 150px;
+    height: 213px;
+    top: 26px;
+    left: 161px;
+}
+
+.homescreen .stats-section {
+    display: flex;
+    width: 1441px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px 80px;
+    position: relative;
+    flex: 0 0 auto;
+    background-color: rgba(248, 250, 252, 1);
+}
+
+.homescreen .stat-item {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .stat-number {
+    margin-top: -1.00px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 32px;
+    letter-spacing: 0px;
+    line-height: 130%;
+    white-space: nowrap;
+    position: relative;
+    width: fit-content;
+    font-style: normal;
+}
+
+.homescreen .stat-description {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 14px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .divider {
+    position: relative;
+    width: 4px;
+    height: 55px;
+}
+
+.homescreen .category-section,
+.homescreen .courses-section,
+.homescreen .instructors-section {
+    display: flex;
+    flex-direction: column;
+    width: 1280px;
+    align-items: flex-start;
+    gap: 24px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .section-header {
+    display: flex;
+    width: 1280px;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .section-title {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 24px;
+    letter-spacing: 0px;
+    line-height: 140%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .see-all-button {
+    all: unset;
+    box-sizing: border-box;
+    height: 48px;
+    padding: 10px 24px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    border-radius: 8px;
+}
+
+.homescreen .category-list {
+    display: flex;
+    width: 1280px;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .category-card {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 24px 93px;
+    position: relative;
+    flex: 0 0 auto;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #e2e8f0;
+    box-shadow: 0px 0px 8px rgba(59, 130, 246, 0.12);
+}
+
+.homescreen .category-content {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .category-icon {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background-color: rgba(224, 242, 254, 1);
+    border-radius: 100px;
+}
+
+.homescreen .icon-img {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    top: 30px;
+    left: 30px;
+}
+
+.homescreen .category-name {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 20px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .course-count {
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 16px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    white-space: nowrap;
+    position: relative;
+    width: fit-content;
+    font-style: normal;
+}
+
+.homescreen .course-list,
+.homescreen .instructor-list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.homescreen .course-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    position: relative;
+    flex: 0 0 auto;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #e2e8f0;
+    box-shadow: 0px 0px 8px rgba(59, 130, 246, 0.12);
+}
+
+.homescreen .course-content {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .course-image {
+    position: relative;
+    width: 266px;
+    height: 139px;
+    object-fit: cover;
+}
+
+.homescreen .course-details {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .course-info {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .course-title {
+    position: relative;
+    width: 258px;
+    margin-top: -1.00px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 18px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    font-style: normal;
+}
+
+.homescreen .instructor-name {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 14px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .course-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .ratings {
+    display: inline-flex;
+    align-items: flex-start;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .star-icon {
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+
+.homescreen .star {
+    position: absolute;
+    width: 18px;
+    height: 17px;
+    top: 1px;
+    left: 1px;
+}
+
+.homescreen .rating-count {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 12px;
+    letter-spacing: 0px;
+    line-height: normal;
+    font-style: normal;
+}
+
+.homescreen .course-duration {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 14px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .course-price {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 20px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .instructor-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    position: relative;
+    flex: 0 0 auto;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #e2e8f0;
+    box-shadow: 0px 0px 8px rgba(59, 130, 246, 0.12);
+}
+
+.homescreen .instructor-image {
+    position: relative;
+    width: 177px;
+    height: 132px;
+}
+
+.homescreen .instructor-details {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .instructor-info {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .instructor-name {
+    color: rgba(15, 23, 42, 1);
+    position: relative;
+    width: fit-content;
+    margin-top: -1.00px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .instructor-title {
+    position: relative;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 14px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .instructor-stats {
+    display: flex;
+    width: 180px;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .rating-value {
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(15, 23, 42, 1);
+    font-size: 12px;
+    letter-spacing: 0px;
+    line-height: normal;
+    position: relative;
+    width: fit-content;
+    font-style: normal;
+}
+
+.homescreen .student-count {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 12px;
+    letter-spacing: 0px;
+    line-height: normal;
+    font-style: normal;
+}
+
+.homescreen .testimonials-section {
+    position: relative;
+    width: 1440px;
+    height: 512px;
+    background-color: rgba(248, 250, 252, 1);
+    overflow: hidden;
+}
+
+.homescreen .testimonial-list {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: absolute;
+    top: 172px;
+    left: 80px;
+}
+
+.homescreen .testimonial-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 24px;
+    position: relative;
+    flex: 0 0 auto;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #e2e8f0;
+    box-shadow: 0px 0px;
+}
+
+.homescreen .quote-icon {
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+
+.homescreen .testimonial-text {
+    position: relative;
+    width: 384px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: #000000;
+    font-size: 16px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    font-style: normal;
+}
+
+.homescreen .testimonial-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .author-avatar {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+}
+
+.homescreen .author-info {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .author-name {
+    color: #000000;
+    position: relative;
+    width: fit-content;
+    margin-top: -1.00px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .author-title {
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(51, 65, 85, 1);
+    font-size: 14px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .testimonial-nav {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 24px;
+    position: absolute;
+    top: 94px;
+    left: 1232px;
+}
+
+.homescreen .nav-button {
+    height: 40px;
+    padding: 10px 16px;
+    flex: 0 0 auto;
+    background-color: rgba(148, 163, 184, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    border-radius: 8px;
+}
+
+.homescreen .nav-icon {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    margin-top: -2.00px;
+    margin-bottom: -2.00px;
+}
+
+.homescreen .cta-section {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .cta-block {
+    display: flex;
+    width: 1123px;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .cta-image {
+    position: relative;
+    width: 400px;
+    height: 425px;
+    background-image: url(https://c.animaapp.com/mb5881k9TTFl8D/img/image-10.png);
+    background-size: cover;
+    background-position: 50% 50%;
+}
+
+.homescreen .cta-content {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 16px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .cta-text {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.homescreen .cta-title {
+    position: relative;
+    width: fit-content;
+    margin-top: -1.00px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: #000000;
+    font-size: 20px;
+    letter-spacing: 0px;
+    line-height: 150%;
+    white-space: nowrap;
+    font-style: normal;
+}
+
+.homescreen .cta-description {
+    position: relative;
+    width: 549px;
+    font-family: "Inter", Helvetica;
+    font-weight: 400;
+    color: rgba(29, 41, 57, 1);
+    font-size: 16px;
+    letter-spacing: 0px;
+    line-height: 160%;
+    font-style: normal;
+}
+
+.homescreen .arrow-icon {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}

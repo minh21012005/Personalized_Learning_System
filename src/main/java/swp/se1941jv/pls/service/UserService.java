@@ -1,7 +1,9 @@
 package swp.se1941jv.pls.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.entity.Role;
 import swp.se1941jv.pls.entity.User;
@@ -16,6 +18,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
@@ -82,8 +86,28 @@ public class UserService {
         return this.userRepository.existsByPhoneNumberAndUserIdNot(phoneNumber, id);
     }
 
+
+    public boolean verifyPassword(Long userId, String password) {
+        User user = getUserById(userId);
+        if (user == null) {
+            return false;
+        }
+        return passwordEncoder.matches(password, user.getPassword());
+    }
+
+    public void updatePassword(Long userId, String newPassword) {
+        User user = getUserById(userId);
+        if (user != null) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        }
+    }
+    public Page<User> findUsersWithRole(String roleName, Pageable pageable) {
+        return userRepository.findAll(UserSpecification.hasRole(roleName), pageable);
+
     public Page<User> findUsersWithFilters(String roleName, String fullName, Pageable pageable) {
         return this.userRepository.findAll(UserSpecification.findUsersWithFilters(roleName, fullName), pageable);
+
     }
 
 }
