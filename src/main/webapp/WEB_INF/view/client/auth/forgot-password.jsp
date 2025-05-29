@@ -134,6 +134,10 @@
                 <div class="mb-3">
                     <input type="email" class="form-control" name="email" placeholder="Email" required>
                 </div>
+                <div>
+                    <input type="hidden" name="${_csrf.parameterName}"
+                           value="${_csrf.token}"/>
+                </div>
                 <button type="submit" class="btn btn-primary btn-submit">Gửi liên kết</button>
             </form>
 
