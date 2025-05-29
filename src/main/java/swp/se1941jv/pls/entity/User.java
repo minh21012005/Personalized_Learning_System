@@ -50,7 +50,6 @@ public class User extends BaseEntity {
     @Column(name = "avatar")
     String avatar;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "dob")
     @NotNull(message = "Ngày sinh ko được để trống!")
     @Past(message = "Ngày sinh phải trong quá khứ!")
