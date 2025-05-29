@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.repository;
 
+
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -27,5 +28,13 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
                         boolean isActive, String subjectName, Pageable pageable);
 
         Page<Subject> findByGradeIsNullAndIsActive(boolean isActive, Pageable pageable);
+
+
+ @Query("SELECT s FROM Subject s WHERE " +
+           "(:subjectName IS NULL OR LOWER(s.subjectName) LIKE LOWER(CONCAT('%', :subjectName, '%'))) AND " +
+           "(:gradeId IS NULL OR s.grade.gradeId = :gradeId)")
+    Page<Subject> findByFilter(@Param("subjectName") String subjectName,
+                               @Param("gradeId") Long gradeId,
+                               Pageable pageable);
 
 }

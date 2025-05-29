@@ -11,6 +11,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -41,16 +42,18 @@ public class User extends BaseEntity {
     @Column(name = "is_active")
     Boolean isActive;
 
+    @Column(name = "email_verify")
+    Boolean emailVerify;
+
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     @NotBlank(message = "Tên không được để trống!")
-    @Size(min = 2, max = 100, message = "Tên phải có độ dài từ 2 đến 100 ký tự!")
+    @Size(min = 2, max = 50, message = "Tên phải có độ dài từ 2 đến 50 ký tự!")
     @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên chỉ được chứa chữ cái và dấu cách!")
     private String fullName;
 
     @Column(name = "avatar")
     String avatar;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "dob")
     @NotNull(message = "Ngày sinh ko được để trống!")
     @Past(message = "Ngày sinh phải trong quá khứ!")
@@ -86,6 +89,13 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "userCreated")
     List<Transaction> transactions;
+
+
+    @Column(name = "reset_password_token")
+    String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiry")
+    LocalDateTime resetPasswordTokenExpiry;
 
     // public boolean hasRole(String roleName) {
     // return this.role != null && this.role.getRoleName().equals(roleName);

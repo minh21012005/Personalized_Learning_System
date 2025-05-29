@@ -7,7 +7,7 @@
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>PLS - Update User</title>
+                <title>PLS - Cập nhật tài khoản</title>
                 <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
                     rel="stylesheet">
@@ -85,7 +85,7 @@
                             <div class="container-fluid px-4">
                                 <div class="row mt-3">
                                     <div class="col-md-6 col-12 mx-auto">
-                                        <h1>Update a user</h1>
+                                        <h1>Cập nhật tài khoản</h1>
                                         <hr />
                                         <form:form method="post" action="/admin/user/update" modelAttribute="user"
                                             enctype="multipart/form-data">
@@ -106,7 +106,7 @@
                                                     <c:set var="errorFullName">
                                                         <form:errors path="fullName" cssClass="invalid-feedback" />
                                                     </c:set>
-                                                    <label for="exampleInputName" class="form-label">Full name</label>
+                                                    <label for="exampleInputName" class="form-label">Họ và tên</label>
                                                     <form:input type="text"
                                                         class="form-control ${not empty errorFullName?'is-invalid':''}"
                                                         id="exampleInputName" path="fullName" />
@@ -116,8 +116,8 @@
                                                     <c:set var="errorPhone">
                                                         <form:errors path="phoneNumber" cssClass="invalid-feedback" />
                                                     </c:set>
-                                                    <label for="exampleInputPhoneNumber" class="form-label">Phone
-                                                        number</label>
+                                                    <label for="exampleInputPhoneNumber" class="form-label">Số điện
+                                                        thoại</label>
                                                     <form:input type="text"
                                                         class="form-control ${not empty errorPhone?'is-invalid':''}"
                                                         id="exampleInputPhoneNumber" path="phoneNumber" />
@@ -129,14 +129,14 @@
                                                     <c:set var="errorDob">
                                                         <form:errors path="dob" cssClass="invalid-feedback" />
                                                     </c:set>
-                                                    <label for="dob" class="form-label">Date of birth</label>
+                                                    <label for="dob" class="form-label">Ngày sinh</label>
                                                     <form:input type="date"
                                                         class="form-control ${not empty errorDob?'is-invalid':''}"
                                                         id="dob" path="dob" />
                                                     ${errorDob}
                                                 </div>
                                                 <div class="col-md-6 col-12 mb-3">
-                                                    <label class="form-label d-block">Status</label>
+                                                    <label class="form-label d-block">Trạng thái</label>
                                                     <div class="form-check form-check-inline">
                                                         <form:radiobutton checked="true" path="isActive" value="true"
                                                             cssClass="form-check-input" id="activeTrue" />
@@ -152,11 +152,11 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6 col-12">
-                                                    <label for="select" class="form-label mb-2">Role</label>
+                                                    <label for="select" class="form-label mb-2">Vai trò</label>
                                                     <form:select class="form-select" aria-label="Default select example"
                                                         id="select" path="role.roleName">
                                                         <form:options items="${roles}" itemValue="roleName"
-                                                            itemLabel="roleName" />
+                                                            itemLabel="roleDescription" />
                                                     </form:select>
                                                 </div>
                                                 <div class="col-md-6 col-12">
@@ -183,8 +183,8 @@
                                                 <form:input type="hidden" path="avatar" />
                                             </div>
                                             <div class="mt-3 d-flex gap-2 mb-3">
-                                                <button type="submit" class="btn btn-primary">Update</button>
-                                                <a href="/admin/user" class="btn btn-secondary">Cancel</a>
+                                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                                <a href="/admin/user" class="btn btn-secondary">Hủy</a>
                                             </div>
                                         </form:form>
                                     </div>

@@ -60,7 +60,7 @@ public class SecurityConfiguration {
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                         .permitAll()
 
-                        .requestMatchers("/", "/login", "/register", "/client/**", "/css/**",
+                        .requestMatchers("/", "/login", "/register", "/forgot-password/**","/client/**", "/css/**",
                                 "/js/**",
                                 "/product/**", "/img/**", "/lib/**", "/admin/**")
                         .permitAll()
@@ -68,8 +68,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
 
-                        // .requestMatchers("/student/**")
-                        // .hasAnyRole("STUDENT", "ADMIN")
+                         .requestMatchers("/student/**")
+                         .hasAnyRole("STUDENT", "ADMIN")
 
                         // .requestMatchers("/parent/**")
                         // .hasAnyRole("PARENT", "ADMIN")

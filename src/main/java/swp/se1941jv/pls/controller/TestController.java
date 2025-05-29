@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class TestController {
-    @RequestMapping("/")
-    public String getHomePage(Model model) {
-        return "hello";
-    }
+//    @RequestMapping("/")
+//    public String getHomePage(Model model) {
+//        return "hello";
+//    }
 
 }
