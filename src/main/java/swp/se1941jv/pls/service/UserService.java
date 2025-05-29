@@ -50,6 +50,8 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
+
+
     public User getUserById(Long id) {
         return this.userRepository.findById(id).orElse(null);
     }
@@ -57,14 +59,14 @@ public class UserService {
     public void deleteUserById(Long id) {
         this.userRepository.deleteById(id);
     }
-    //
-    // public Role getRoleByName(String name) {
-    // return this.roleRepository.findByRoleName(name);
-    // }
-    //
-    // public boolean checkEmailExist(String email) {
-    // return this.userRepository.existsByEmail(email);
-    // }
+
+    public Role getRoleByName(String name) {
+        return this.roleRepository.findByRoleName(name);
+    }
+
+    public boolean checkEmailExist(String email) {
+        return this.userRepository.existsByEmail(email);
+    }
 
     public long countUsers() {
         return this.userRepository.count();

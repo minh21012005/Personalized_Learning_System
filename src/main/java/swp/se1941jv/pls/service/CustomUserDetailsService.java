@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new CustomUserDetails(
                 user.getEmail(),
                 user.getPassword(),
-                true, // enabled
+                user.getEmailVerify(), // enabled
                 true, // accountNonExpired
                 true, // credentialsNonExpired
                 user.getIsActive(), // accountNonLocked
