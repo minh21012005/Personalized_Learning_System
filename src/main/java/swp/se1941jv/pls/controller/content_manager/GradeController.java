@@ -44,6 +44,12 @@ public class GradeController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String isActive) {
         Pageable pageable = PageRequest.of(page, 10);
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.isEmpty()) {
+                keyword = null;
+            }
+        }
         Page<Grade> gradePage = this.gradeService.getFilteredGrades(keyword, isActive, pageable);
 
         model.addAttribute("grades", gradePage.getContent());
@@ -63,31 +69,26 @@ public class GradeController {
 
     @PostMapping("/admin/grade/create")
     public String postCreateUserPage(Model model, @ModelAttribute("newGrade") Grade newGrade) {
+        String name = newGrade.getGradeName();
+
+        if (name == null || name.trim().isEmpty()) {
+            model.addAttribute("error", "Tên không được để trống hoặc toàn khoảng trắng.");
+            return "admin/grade/create";
+        }
+        if (!name.matches("[A-Za-z0-9\\s]+")) {
+            model.addAttribute("error", "Tên chỉ được chứa chữ cái, số và khoảng trắng.");
+            return "admin/grade/create";
+        }
+
         try {
+            newGrade.setGradeName(newGrade.getGradeName().trim());
             this.gradeService.saveGrade(newGrade);
             return "redirect:/admin/grade";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("newGrade", newGrade);
             return "admin/grade/create";
         }
 
-    }
-
-    @RequestMapping(value = "/admin/grade/delete/{gradeId}")
-    public String deleteUser(Model model, @PathVariable long gradeId) {
-
-        model.addAttribute("gradeId", gradeId);
-
-        model.addAttribute("newGrade", new Grade());
-        return "admin/grade/delete";
-    }
-
-    @PostMapping(value = "/admin/grade/delete")
-    public String postDeleteUser(Model model, @ModelAttribute("newGrade") Grade grade) {
-
-        this.gradeService.deleteById(grade.getGradeId());
-        return "redirect:/admin/grade";
     }
 
     @GetMapping(value = "/admin/grade/view/{gradeId}")
@@ -95,7 +96,13 @@ public class GradeController {
             @RequestParam(defaultValue = "0") int page,
             @PathVariable Long gradeId,
             @RequestParam(required = false) String keyword) {
-        Pageable pageable = PageRequest.of(page, 10); // Không cần sort
+        Pageable pageable = PageRequest.of(page, 10);
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.isEmpty()) {
+                keyword = null;
+            }
+        }
         try {
             Grade grade = this.gradeService.findById(gradeId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
@@ -126,6 +133,7 @@ public class GradeController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String pendingKeyword) {
         try {
+
             Grade grade = this.gradeService.findById(gradeId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
             Pageable pageable = PageRequest.of(page, 10);
@@ -169,24 +177,22 @@ public class GradeController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String pendingKeyword) {
         try {
-            // Fetch the existing grade
+
             Grade existingGrade = gradeService.findById(grade.getGradeId())
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
 
-            // Update grade details
             existingGrade.setGradeName(grade.getGradeName());
             existingGrade.setActive(grade.isActive());
             gradeService.saveGrade(existingGrade);
 
-            // Process subject changes only if the grade is active
             if (existingGrade.isActive()) {
-                // Remove subjects from the grade
+
                 if (removeSubjectIds != null && !removeSubjectIds.isEmpty()) {
                     for (Long subjectId : removeSubjectIds) {
                         subjectService.updateSubjectGrade(subjectId, null);
                     }
                 }
-                // Add subjects to the grade
+
                 if (addSubjectIds != null && !addSubjectIds.isEmpty()) {
                     for (Long subjectId : addSubjectIds) {
                         subjectService.updateSubjectGrade(subjectId, grade.getGradeId());
@@ -195,7 +201,7 @@ public class GradeController {
             } else if ((removeSubjectIds != null && !removeSubjectIds.isEmpty()) ||
                     (addSubjectIds != null && !addSubjectIds.isEmpty())) {
                 model.addAttribute("error", "error");
-                // Reload data to maintain page state
+
                 Pageable pageable = PageRequest.of(page, 10);
                 Pageable pendingPageable = PageRequest.of(pendingPage, 10);
                 model.addAttribute("grade", existingGrade);
@@ -226,7 +232,6 @@ public class GradeController {
                 return "admin/grade/update";
             }
 
-            // Redirect with pagination and filter parameters
             return "redirect:/admin/grade/update/" + grade.getGradeId() +
                     "?page=" + page +
                     "&pendingPage=" + pendingPage +
@@ -234,7 +239,7 @@ public class GradeController {
                     (pendingKeyword != null ? "&pendingKeyword=" + pendingKeyword : "");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
-            // Reload data to maintain page state
+
             Pageable pageable = PageRequest.of(page, 10);
             Pageable pendingPageable = PageRequest.of(pendingPage, 10);
             model.addAttribute("grade", grade);

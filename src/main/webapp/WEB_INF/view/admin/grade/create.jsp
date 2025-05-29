@@ -90,7 +90,7 @@
                     <div class="container mt-5">
                         <div class="row">
                             <div class="col-md-6 col-12 mx-auto">
-                                <h3>Create a grade </h3>
+                                <h3>Tạo thêm khối </h3>
                             </div>
                             <c:if test="${not empty error}">
                                 <div class="alert alert-danger" role="alert">
@@ -114,8 +114,8 @@
 
 
 
-                                <button type="submit" class="btn btn-primary">Create</button>
-                                <a href="/admin/grade" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Lưu</button>
+                                <a href="/admin/grade" class="btn btn-secondary">Hủy</a>
                             </form:form>
                         </div>
                     </div>
