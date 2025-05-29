@@ -41,6 +41,9 @@ public class User extends BaseEntity {
     @Column(name = "is_active")
     Boolean isActive;
 
+    @Column(name = "email_verify")
+    Boolean emailVerify;
+
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     @NotBlank(message = "Tên không được để trống!")
     @Size(min = 2, max = 50, message = "Tên phải có độ dài từ 2 đến 50 ký tự!")
