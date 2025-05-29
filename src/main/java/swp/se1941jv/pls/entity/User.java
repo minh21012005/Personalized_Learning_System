@@ -43,7 +43,7 @@ public class User extends BaseEntity {
 
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     @NotBlank(message = "Tên không được để trống!")
-    @Size(min = 2, max = 100, message = "Tên phải có độ dài từ 2 đến 100 ký tự!")
+    @Size(min = 2, max = 50, message = "Tên phải có độ dài từ 2 đến 50 ký tự!")
     @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên chỉ được chứa chữ cái và dấu cách!")
     private String fullName;
 

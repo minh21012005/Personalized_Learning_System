@@ -7,7 +7,7 @@
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>PLS - User Details</title>
+                <title>PLS - Chi tiết tài khoản</title>
                 <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
                     rel="stylesheet">
@@ -85,20 +85,20 @@
                     <div class="content">
                         <div style="width: 60%;">
                             <div class="mt-3">
-                                <h2 class="text-center">User detail</h2>
+                                <h2 class="text-center">Chi tiết tài khoản</h2>
                                 <hr />
                                 <div class="card">
                                     <div class="card-header">
-                                        User Information
+                                        Thông tin người dùng
                                     </div>
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item">Id: ${user.userId}</li>
                                         <li class="list-group-item">Email: ${user.email}</li>
-                                        <li class="list-group-item">Full Name: ${user.fullName}</li>
-                                        <li class="list-group-item">Phone number: ${user.phoneNumber}</li>
-                                        <li class="list-group-item">Role: ${user.role.roleName}</li>
-                                        <li class="list-group-item">Date of Birth: ${dobFormatted}</li>
-                                        <li class="list-group-item">Status: ${user.isActive ? 'Active' : 'Inactive'}
+                                        <li class="list-group-item">Họ và tên: ${user.fullName}</li>
+                                        <li class="list-group-item">Số điện thoại: ${user.phoneNumber}</li>
+                                        <li class="list-group-item">Vai trò: ${user.role.roleDescription}</li>
+                                        <li class="list-group-item">Ngày sinh: ${dobFormatted}</li>
+                                        <li class="list-group-item">Trạng thái: ${user.isActive ? 'Active' : 'Inactive'}
                                         </li>
                                         <li class="list-group-item">
                                             <label for="avatarFile" class="form-label">Avatar:</label>
@@ -110,7 +110,7 @@
                                     </ul>
                                 </div>
                                 <div class="mt-3 mb-3">
-                                    <a href="/admin/user" class="btn btn-primary">Back</a>
+                                    <a href="/admin/user" class="btn btn-primary">Quay lại</a>
                                 </div>
                             </div>
                         </div>
