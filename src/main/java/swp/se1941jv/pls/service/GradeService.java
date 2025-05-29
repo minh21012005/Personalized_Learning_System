@@ -28,12 +28,24 @@ public class GradeService {
         return this.gradeRepository.findAll();
     }
 
-    public Grade saveGrade(Grade grade) {
-        Grade existingGrade = gradeRepository.findByGradeName(grade.getGradeName());
-        if (existingGrade != null && !existingGrade.getGradeId().equals(grade.getGradeId())) {
-            throw new IllegalArgumentException("Grade name '" + grade.getGradeName() + "' already exists.");
+    public Grade saveGrade(Grade grade, String name, boolean active) {
+        boolean isExist = this.gradeRepository.existsByGradeName(grade.getGradeName());
+        if (isExist) {
+            throw new IllegalArgumentException("Khối lớp: '" + name + "' đã tồn tại.");
+        } else {
+            grade.setGradeName(name);
+            grade.setActive(active);
+            return this.gradeRepository.save(grade);
         }
-        return this.gradeRepository.save(grade);
+    }
+
+    public Grade saveGrade(Grade grade) {
+        boolean isExist = this.gradeRepository.existsByGradeName(grade.getGradeName());
+        if (isExist) {
+            throw new IllegalArgumentException("Khối lớp '" + grade.getGradeName() + "' đã tồn tại.");
+        } else {
+            return this.gradeRepository.save(grade);
+        }
     }
 
     public void deleteById(long gradeId) {

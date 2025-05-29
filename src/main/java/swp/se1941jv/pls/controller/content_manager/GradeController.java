@@ -181,9 +181,7 @@ public class GradeController {
             Grade existingGrade = gradeService.findById(grade.getGradeId())
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
 
-            existingGrade.setGradeName(grade.getGradeName());
-            existingGrade.setActive(grade.isActive());
-            gradeService.saveGrade(existingGrade);
+            gradeService.saveGrade(existingGrade, grade.getGradeName(), grade.isActive());
 
             if (existingGrade.isActive()) {
 

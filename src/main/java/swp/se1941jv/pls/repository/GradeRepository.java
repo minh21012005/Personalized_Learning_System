@@ -14,6 +14,8 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
 
     Grade findByGradeName(String gradeName);
 
+    boolean existsByGradeName(String gradeName);
+
     Page<Grade> findByGradeNameContainingIgnoreCaseAndIsActive(String gradeName, boolean isActive, Pageable pageable);
 
     Page<Grade> findByGradeNameContainingIgnoreCase(String gradeName, Pageable pageable);
