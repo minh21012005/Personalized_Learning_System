@@ -24,17 +24,17 @@
             </c:when>
             <c:otherwise>
                 <img style="max-height: 250px; display: none"
-                     alt="Image not found" id="avatarPreview" src="#" />
+                     alt="Image not found"  src="#" />
             </c:otherwise>
         </c:choose>
         <h5 class="mt-3">${user.fullName}</h5>
     </div>
     <ul class="nav flex-column mt-4">
         <li class="nav-item">
-            <a href="/student/profile" class="nav-link">Hồ sơ</a>
+            <a href="/account/profile" class="nav-link">Hồ sơ</a>
         </li>
         <li class="nav-item">
-            <a href="/profile/change-password" class="nav-link">Bảo mật</a>
+            <a href="/account/profile/change-password" class="nav-link">Thay đổi mật khẩu</a>
         </li>
     </ul>
 </div>

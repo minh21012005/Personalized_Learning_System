@@ -27,10 +27,9 @@ public class UserProfileController {
         this.uploadService = uploadService;
     }
 
-    @GetMapping("/student/profile")
-    public String getStudentProfile(HttpSession session, Model model) {
+    @GetMapping("/account/profile")
+    public String getProfile(HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("id");
-        System.out.printf("User id: "+ userId);
         if (userId == null) {
             return "redirect:/login";
         }
@@ -39,8 +38,8 @@ public class UserProfileController {
         return "client/profile/show";
     }
 
-    @PostMapping("/student/profile")
-    public String updateStudentProfile(
+    @PostMapping("/account/profile")
+    public String updateProfile(
             HttpSession session,
             @ModelAttribute("user") @Valid User user,
             BindingResult bindingResult,
@@ -85,6 +84,9 @@ public class UserProfileController {
             String avatar = uploadService.handleSaveUploadFile(file, "avatar");
             currentUser.setAvatar(avatar);
             session.setAttribute("avatar", avatar);
+        } else {
+            currentUser.setAvatar(null);
+            session.setAttribute("avatar", null);
         }
 
         userService.saveUser(currentUser);
@@ -98,17 +100,19 @@ public class UserProfileController {
         return "client/profile/show";
     }
 
-    @GetMapping("/profile/change-password")
+    @GetMapping("/account/profile/change-password")
     public String showChangePasswordForm(HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("id");
         if (userId == null) {
             return "redirect:/login";
         }
+        User user = userService.getUserById(userId);
+        model.addAttribute("user", user);
         model.addAttribute("passwordChangeRequest", new PasswordChangeRequest());
         return "client/profile/change-password";
     }
 
-    @PostMapping("/profile/change-password")
+    @PostMapping("/account/profile/change-password")
     public String changePassword(
             HttpSession session,
             @ModelAttribute("passwordChangeRequest") @Valid PasswordChangeRequest passwordChangeRequest,
@@ -121,12 +125,17 @@ public class UserProfileController {
         }
 
         User currentUser = userService.getUserById(userId);
+        model.addAttribute("user", currentUser);
 
         // Kiểm tra mật khẩu cũ
         if (!userService.verifyPassword(userId, passwordChangeRequest.getOldPassword())) {
             bindingResult.rejectValue("oldPassword", "error.oldPassword", "Mật khẩu cũ không đúng!");
         }
-
+        // Kiểm tra độ mạnh của mật khẩu mới
+        if (!userService.isStrongPassword(passwordChangeRequest.getNewPassword())) {
+            bindingResult.rejectValue("newPassword", "error.newPassword",
+                    "Mật khẩu mới phải có ít nhất 8 ký tự, chứa chữ hoa, chữ thường, số và ký tự đặc biệt!");
+        }
         if (bindingResult.hasErrors()) {
             model.addAttribute("passwordChangeRequest", passwordChangeRequest);
             return "client/profile/change-password";
