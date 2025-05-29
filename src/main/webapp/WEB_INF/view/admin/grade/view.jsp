@@ -120,13 +120,13 @@
                         <h2 class="text-center mb-4">Danh sách môn học của ${grade.gradeName}</h2>
                         <!-- Filter Form -->
                         <div class="filter-form">
-                            <form action="/content-manager/grade/view/${grade.gradeId}" method="get" class="d-flex">
+                            <form action="/admin/grade/view/${grade.gradeId}" method="get" class="d-flex">
                                 <label for="keyword" class="visually-hidden">Tìm kiếm theo tên môn học</label>
                                 <input type="text" id="keyword" name="keyword" class="form-control me-2"
                                     placeholder="Tìm kiếm theo tên môn học" value="${keyword}">
                                 <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                                <a href="/content-manager/grade/view/${grade.gradeId}"
-                                    class="btn btn-secondary ms-2">Xóa bộ lọc</a>
+                                <a href="/admin/grade/view/${grade.gradeId}" class="btn btn-secondary ms-2">Xóa bộ
+                                    lọc</a>
                             </form>
                         </div>
                         <table class="table table-bordered table-hover">
@@ -162,7 +162,7 @@
                                 <ul class="pagination">
                                     <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
                                         <a class="page-link"
-                                            href="/content-manager/grade/view/${grade.gradeId}?page=${currentPage - 1}&size=${pageable.size}&sort=${pageable.sort}&keyword=${keyword}"
+                                            href="/admin/grade/view/${grade.gradeId}?page=${currentPage - 1}&size=${pageable.size}&sort=${pageable.sort}&keyword=${keyword}"
                                             aria-label="Trang trước">
                                             <span aria-hidden="true">«</span>
                                         </a>
@@ -170,13 +170,13 @@
                                     <c:forEach begin="0" end="${totalPages - 1}" var="i">
                                         <li class="page-item ${currentPage == i ? 'active' : ''}">
                                             <a class="page-link"
-                                                href="/content-manager/grade/view/${grade.gradeId}?page=${i}&size=${pageable.size}&sort=${pageable.sort}&keyword=${keyword}">${i
+                                                href="/admin/grade/view/${grade.gradeId}?page=${i}&size=${pageable.size}&sort=${pageable.sort}&keyword=${keyword}">${i
                                                 + 1}</a>
                                         </li>
                                     </c:forEach>
                                     <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
                                         <a class="page-link"
-                                            href="/content-manager/grade/view/${grade.gradeId}?page=${currentPage + 1}&size=${pageable.size}&sort=${pageable.sort}&keyword=${keyword}"
+                                            href="/admin/grade/view/${grade.gradeId}?page=${currentPage + 1}&size=${pageable.size}&sort=${pageable.sort}&keyword=${keyword}"
                                             aria-label="Trang sau">
                                             <span aria-hidden="true">»</span>
                                         </a>
@@ -184,7 +184,7 @@
                                 </ul>
                             </nav>
                         </c:if>
-                        <a href="/content-manager/grade" class="btn btn-primary btn-back">Quay lại</a>
+                        <a href="/admin/grade" class="btn btn-primary btn-back">Quay lại</a>
                     </c:if>
                 </div>
             </div>

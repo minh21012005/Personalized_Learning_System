@@ -98,7 +98,7 @@
 
 
                 <div class="d-flex justify-content-between mb-3 me-3">
-                    <form action="/content-manager/grade" method="get" class="d-flex">
+                    <form action="/admin/grade" method="get" class="d-flex">
                         <label for="keyword" class="visually-hidden">Tìm kiếm theo tên khối lớp</label>
                         <input type="text" id="keyword" name="keyword" class="form-control me-2"
                             placeholder="Tìm kiếm theo tên khối lớp" value="${param.keyword}">
@@ -114,9 +114,9 @@
                         </select>
 
                         <button type="submit" class="btn btn-primary">Search</button>
-                        <a href="/content-manager/grade" class="btn btn-secondary ms-2">Delete Filter</a>
+                        <a href="/admin/grade" class="btn btn-secondary ms-2">Delete Filter</a>
                     </form>
-                    <a href="/content-manager/grade/create" class="btn btn-primary btn-lg">Create</a>
+                    <a href="/admin/grade/create" class="btn btn-primary btn-lg">Create</a>
                 </div>
                 <table class="table table-bordered table-hover">
                     <thead class="table-dark">
@@ -136,11 +136,11 @@
                                         <td>${grade.gradeName}</td>
                                         <td>${grade.active}</td>
                                         <td>
-                                            <a href="/content-manager/grade/view/${grade.gradeId}"
+                                            <a href="/admin/grade/view/${grade.gradeId}"
                                                 class="btn btn-success">View</a>
-                                            <a href="/content-manager/grade/update/${grade.gradeId}"
+                                            <a href="/admin/grade/update/${grade.gradeId}"
                                                 class="btn btn-warning mx-2">Update</a>
-                                            <a href="/content-manager/grade/delete/${grade.gradeId}"
+                                            <a href="/admin/grade/delete/${grade.gradeId}"
                                                 class="btn btn-danger">Delete</a>
                                         </td>
                                     </tr>
@@ -161,7 +161,7 @@
                         <ul class="pagination">
                             <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
                                 <a class="page-link"
-                                    href="/content-manager/grade?page=${currentPage - 1}&keyword=${param.keyword}&isActive=${param.isActive}"
+                                    href="/admin/grade?page=${currentPage - 1}&keyword=${param.keyword}&isActive=${param.isActive}"
                                     aria-label="Previous">
                                     <span aria-hidden="true">«</span>
                                 </a>
@@ -169,13 +169,13 @@
                             <c:forEach begin="0" end="${totalPages - 1}" var="i">
                                 <li class="page-item ${currentPage == i ? 'active' : ''}">
                                     <a class="page-link"
-                                        href="/content-manager/grade?page=${i}&keyword=${param.keyword}&isActive=${param.isActive}">${i
+                                        href="/admin/grade?page=${i}&keyword=${param.keyword}&isActive=${param.isActive}">${i
                                         + 1}</a>
                                 </li>
                             </c:forEach>
                             <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
                                 <a class="page-link"
-                                    href="/content-manager/grade?page=${currentPage + 1}&keyword=${param.keyword}&isActive=${param.isActive}"
+                                    href="/admin/grade?page=${currentPage + 1}&keyword=${param.keyword}&isActive=${param.isActive}"
                                     aria-label="Next">
                                     <span aria-hidden="true">»</span>
                                 </a>

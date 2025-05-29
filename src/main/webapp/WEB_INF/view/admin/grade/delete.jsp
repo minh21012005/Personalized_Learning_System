@@ -87,46 +87,38 @@
                 <!-- Main Content Area -->
 
                 <div class="content">
-                    <div class="container mt-5">
-                        <div class="row">
-                            <div class="col-md-6 col-12 mx-auto">
-                                <h3>Create a grade </h3>
+                    <div class="row">
+                        <div class="col-12 mx-auto">
+                            <div class="d-flex justify-content-between">
+                                <h3> Delete the user with id = ${gradeId}</h3>
+
+
                             </div>
-                            <c:if test="${not empty error}">
-                                <div class="alert alert-danger" role="alert">
-                                    ${error}
-                                </div>
-                            </c:if>
-                            <form:form method="post" action="/content-manager/grade/create" modelAttribute="newGrade">
-                                <div class="mb-3">
-                                    <label class="from-label">Grade name</label>
-                                    <form:input type="text" class="form-control" path="gradeName" />
+                            <hr />
+                            <div class="alert alert-danger">
+                                Are you sure to delete this user ?
+                            </div>
+                            <form:form method="post" action="/admin/grade/delete" modelAttribute="newGrade">
+                                <div class="mb-3" style="display: none;"> <label class="from-label">Id: </label>
+                                    <form:input value="${gradeId}" type="text" class="form-control" path="gradeId" />
 
 
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Active</label>
-                                    <form:select path="active" class="form-control">
-                                        <form:option value="true">True</form:option>
-                                        <form:option value="false">False</form:option>
-                                    </form:select>
-                                </div>
-
-
-
-                                <button type="submit" class="btn btn-primary">Create</button>
-                                <a href="/content-manager/grade" class="btn btn-secondary">Cancel</a>
+                                <button class="btn btn-danger">Confirm</button>
                             </form:form>
                         </div>
+
                     </div>
 
-                    <!-- Include Footer -->
-                    <footer>
-                        <jsp:include page="../layout/footer.jsp" />
-                    </footer>
+                </div>
 
-                    <!-- Bootstrap 5 JS -->
-                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <!-- Include Footer -->
+                <footer>
+                    <jsp:include page="../layout/footer.jsp" />
+                </footer>
+
+                <!-- Bootstrap 5 JS -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             </body>
 
             </html>

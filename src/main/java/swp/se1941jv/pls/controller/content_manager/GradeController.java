@@ -19,6 +19,7 @@ import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.service.GradeService;
 import swp.se1941jv.pls.service.SubjectService;
+import org.springframework.transaction.annotation.Transactional;
 
 @Controller
 public class GradeController {
@@ -31,13 +32,13 @@ public class GradeController {
 
     }
 
-    // @GetMapping("/content-manager/grade")
+    // @GetMapping("/admin/grade")
     // public String getGradePage(Model model) {
     // List<Grade> grades = this.gradeService.getAllGrades();
     // model.addAttribute("grades", grades);
-    // return "content-manager/grade/show";
+    // return "admin/grade/show";
     // }
-    @GetMapping("/content-manager/grade")
+    @GetMapping("/admin/grade")
     public String getGradePage(Model model,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) String keyword,
@@ -50,46 +51,46 @@ public class GradeController {
         model.addAttribute("totalPages", gradePage.getTotalPages());
         model.addAttribute("totalItems", gradePage.getTotalElements());
 
-        return "content-manager/grade/show";
+        return "admin/grade/show";
     }
 
-    @RequestMapping("/content-manager/grade/create")
+    @RequestMapping("/admin/grade/create")
     public String getCreateUserPage(Model model) {
 
         model.addAttribute("newGrade", new Grade());
-        return "content-manager/grade/create";
+        return "admin/grade/create";
     }
 
-    @PostMapping("/content-manager/grade/create")
+    @PostMapping("/admin/grade/create")
     public String postCreateUserPage(Model model, @ModelAttribute("newGrade") Grade newGrade) {
         try {
             this.gradeService.saveGrade(newGrade);
-            return "redirect:/content-manager/grade";
+            return "redirect:/admin/grade";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("newGrade", newGrade);
-            return "content-manager/grade/create";
+            return "admin/grade/create";
         }
 
     }
 
-    @RequestMapping(value = "/content-manager/grade/delete/{gradeId}")
+    @RequestMapping(value = "/admin/grade/delete/{gradeId}")
     public String deleteUser(Model model, @PathVariable long gradeId) {
 
         model.addAttribute("gradeId", gradeId);
 
         model.addAttribute("newGrade", new Grade());
-        return "content-manager/grade/delete";
+        return "admin/grade/delete";
     }
 
-    @PostMapping(value = "/content-manager/grade/delete")
+    @PostMapping(value = "/admin/grade/delete")
     public String postDeleteUser(Model model, @ModelAttribute("newGrade") Grade grade) {
 
         this.gradeService.deleteById(grade.getGradeId());
-        return "redirect:/content-manager/grade";
+        return "redirect:/admin/grade";
     }
 
-    @GetMapping(value = "/content-manager/grade/view/{gradeId}")
+    @GetMapping(value = "/admin/grade/view/{gradeId}")
     public String viewSubjectsByGrade(Model model,
             @RequestParam(defaultValue = "0") int page,
             @PathVariable Long gradeId,
@@ -115,10 +116,10 @@ public class GradeController {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("subjects", java.util.Collections.emptyList());
         }
-        return "content-manager/grade/view";
+        return "admin/grade/view";
     }
 
-    @GetMapping("/content-manager/grade/update/{gradeId}")
+    @GetMapping("/admin/grade/update/{gradeId}")
     public String getUpdateGradePage(Model model, @PathVariable Long gradeId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "0") int pendingPage,
@@ -154,43 +155,113 @@ public class GradeController {
             model.addAttribute("subjects", java.util.Collections.emptyList());
             model.addAttribute("pendingSubjects", java.util.Collections.emptyList());
         }
-        return "content-manager/grade/update";
+        return "admin/grade/update";
     }
 
-    @PostMapping("/content-manager/grade/update")
-    public String postUpdateGrade(Model model, @ModelAttribute("grade") Grade grade,
+    @PostMapping("/admin/grade/update")
+    public String postUpdateGrade(
+            Model model,
+            @ModelAttribute("grade") Grade grade,
             @RequestParam(required = false) List<Long> removeSubjectIds,
-            @RequestParam(required = false) List<Long> addSubjectIds) {
+            @RequestParam(required = false) List<Long> addSubjectIds,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") int pendingPage,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String pendingKeyword) {
         try {
+            // Fetch the existing grade
             Grade existingGrade = gradeService.findById(grade.getGradeId())
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
 
-            // Cập nhật thông tin Grade
+            // Update grade details
             existingGrade.setGradeName(grade.getGradeName());
             existingGrade.setActive(grade.isActive());
             gradeService.saveGrade(existingGrade);
 
-            // Chỉ xử lý Subject nếu Grade active
+            // Process subject changes only if the grade is active
             if (existingGrade.isActive()) {
-                // Xóa liên kết Subject
-                if (removeSubjectIds != null) {
+                // Remove subjects from the grade
+                if (removeSubjectIds != null && !removeSubjectIds.isEmpty()) {
                     for (Long subjectId : removeSubjectIds) {
                         subjectService.updateSubjectGrade(subjectId, null);
                     }
                 }
-                // Thêm liên kết Subject
-                if (addSubjectIds != null) {
+                // Add subjects to the grade
+                if (addSubjectIds != null && !addSubjectIds.isEmpty()) {
                     for (Long subjectId : addSubjectIds) {
                         subjectService.updateSubjectGrade(subjectId, grade.getGradeId());
                     }
                 }
+            } else if ((removeSubjectIds != null && !removeSubjectIds.isEmpty()) ||
+                    (addSubjectIds != null && !addSubjectIds.isEmpty())) {
+                model.addAttribute("error", "error");
+                // Reload data to maintain page state
+                Pageable pageable = PageRequest.of(page, 10);
+                Pageable pendingPageable = PageRequest.of(pendingPage, 10);
+                model.addAttribute("grade", existingGrade);
+                model.addAttribute("subjects",
+                        subjectService.getSubjectsByGradeId(grade.getGradeId(), true, keyword,
+                                pageable).getContent());
+                model.addAttribute("currentPage", page);
+                model.addAttribute("totalPages", subjectService
+                        .getSubjectsByGradeId(grade.getGradeId(), true, keyword,
+                                pageable)
+                        .getTotalPages());
+                model.addAttribute("totalItems", subjectService
+                        .getSubjectsByGradeId(grade.getGradeId(), true, keyword,
+                                pageable)
+                        .getTotalElements());
+                model.addAttribute("keyword", keyword);
+                model.addAttribute("pendingSubjects",
+                        subjectService.getPendingSubjects(true, pendingKeyword,
+                                pendingPageable).getContent());
+                model.addAttribute("pendingCurrentPage", pendingPage);
+                model.addAttribute("pendingTotalPages",
+                        subjectService.getPendingSubjects(true, pendingKeyword,
+                                pendingPageable).getTotalPages());
+                model.addAttribute("pendingTotalItems",
+                        subjectService.getPendingSubjects(true, pendingKeyword,
+                                pendingPageable).getTotalElements());
+                model.addAttribute("pendingKeyword", pendingKeyword);
+                return "admin/grade/update";
             }
 
-            return "redirect:/content-manager/grade";
+            // Redirect with pagination and filter parameters
+            return "redirect:/admin/grade/update/" + grade.getGradeId() +
+                    "?page=" + page +
+                    "&pendingPage=" + pendingPage +
+                    (keyword != null ? "&keyword=" + keyword : "") +
+                    (pendingKeyword != null ? "&pendingKeyword=" + pendingKeyword : "");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
+            // Reload data to maintain page state
+            Pageable pageable = PageRequest.of(page, 10);
+            Pageable pendingPageable = PageRequest.of(pendingPage, 10);
             model.addAttribute("grade", grade);
-            return "content-manager/grade/update";
+            model.addAttribute("subjects",
+                    subjectService.getSubjectsByGradeId(grade.getGradeId(), true, keyword,
+                            pageable).getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages",
+                    subjectService.getSubjectsByGradeId(grade.getGradeId(), true, keyword,
+                            pageable).getTotalPages());
+            model.addAttribute("totalItems", subjectService
+                    .getSubjectsByGradeId(grade.getGradeId(), true, keyword,
+                            pageable)
+                    .getTotalElements());
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("pendingSubjects",
+                    subjectService.getPendingSubjects(true, pendingKeyword,
+                            pendingPageable).getContent());
+            model.addAttribute("pendingCurrentPage", pendingPage);
+            model.addAttribute("pendingTotalPages",
+                    subjectService.getPendingSubjects(true, pendingKeyword,
+                            pendingPageable).getTotalPages());
+            model.addAttribute("pendingTotalItems",
+                    subjectService.getPendingSubjects(true, pendingKeyword,
+                            pendingPageable).getTotalElements());
+            model.addAttribute("pendingKeyword", pendingKeyword);
+            return "admin/grade/update";
         }
     }
 }
