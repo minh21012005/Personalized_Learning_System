@@ -50,25 +50,23 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Select</th>
                                     <th>Subject Name</th>
                                     <th>Description</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="assignedSubjects">
                                 <c:forEach var="subject" items="${subjects}">
                                     <tr>
                                         <td>
+                                            <input type="checkbox" name="removeSubjectIds"
+                                                value="${subject.subjectId}" />
+                                        </td>
+                                        <td>
                                             <c:out value="${subject.subjectName}" />
                                         </td>
                                         <td>
                                             <c:out value="${subject.subjectDescription}" />
-                                        </td>
-                                        <td>
-                                            <c:if test="${grade.active}">
-                                                <button type="button" class="btn btn-danger btn-sm"
-                                                    onclick="removeSubject('${subject.subjectId}', '${grade.gradeId}')">Remove</button>
-                                            </c:if>
                                         </td>
                                     </tr>
                                 </c:forEach>
@@ -95,25 +93,22 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Select</th>
                                     <th>Subject Name</th>
                                     <th>Description</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="unassignedSubjects">
                                 <c:forEach var="subject" items="${pendingSubjects}">
                                     <tr>
                                         <td>
+                                            <input type="checkbox" name="addSubjectIds" value="${subject.subjectId}" />
+                                        </td>
+                                        <td>
                                             <c:out value="${subject.subjectName}" />
                                         </td>
                                         <td>
                                             <c:out value="${subject.subjectDescription}" />
-                                        </td>
-                                        <td>
-                                            <c:if test="${grade.active}">
-                                                <button type="button" class="btn btn-success btn-sm"
-                                                    onclick="addSubject('${subject.subjectId}', '${grade.gradeId}')">Add</button>
-                                            </c:if>
                                         </td>
                                     </tr>
                                 </c:forEach>
@@ -157,30 +152,10 @@
                         });
                     });
 
-                    // Functions to handle add/remove subjects
-                    function addSubject(subjectId, gradeId) {
-                        const page = encodeURIComponent('${currentPage}' || '0');
-                        const pendingPage = encodeURIComponent('${pendingCurrentPage}' || '0');
-                        const keyword = encodeURIComponent('${keyword}' || '');
-                        const pendingKeyword = encodeURIComponent('${pendingKeyword}' || '');
-                        fetch('${pageContext.request.contextPath}/admin/grade/update', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `gradeId=${gradeId}&addSubjectIds=${subjectId}&page=${page}&pendingPage=${pendingPage}&keyword=${keyword}&pendingKeyword=${pendingKeyword}`
-                        }).then(() => location.reload()).catch(error => console.error('Error:', error));
-                    }
 
-                    function removeSubject(subjectId, gradeId) {
-                        const page = encodeURIComponent('${currentPage}' || '0');
-                        const pendingPage = encodeURIComponent('${pendingCurrentPage}' || '0');
-                        const keyword = encodeURIComponent('${keyword}' || '');
-                        const pendingKeyword = encodeURIComponent('${pendingKeyword}' || '');
-                        fetch('${pageContext.request.contextPath}/admin/grade/update', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `gradeId=${gradeId}&removeSubjectIds=${subjectId}&page=${page}&pendingPage=${pendingPage}&keyword=${keyword}&pendingKeyword=${pendingKeyword}`
-                        }).then(() => location.reload()).catch(error => console.error('Error:', error));
-                    }
+
+
+
                 </script>
             </body>
 
