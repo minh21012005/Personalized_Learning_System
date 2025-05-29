@@ -67,7 +67,7 @@
                                         <td>
                                             <c:if test="${grade.active}">
                                                 <button type="button" class="btn btn-danger btn-sm"
-                                                    onclick="removeSubject(${subject.subjectId}, ${grade.gradeId})">Remove</button>
+                                                    onclick="removeSubject('${subject.subjectId}', '${grade.gradeId}')">Remove</button>
                                             </c:if>
                                         </td>
                                     </tr>
@@ -111,8 +111,8 @@
                                         </td>
                                         <td>
                                             <c:if test="${grade.active}">
-                                                <button type="button" class="btn btn-primary btn-sm"
-                                                    onclick="addSubject(${subject.subjectId}, ${grade.gradeId})">Add</button>
+                                                <button type="button" class="btn btn-success btn-sm"
+                                                    onclick="addSubject('${subject.subjectId}', '${grade.gradeId}')">Add</button>
                                             </c:if>
                                         </td>
                                     </tr>
