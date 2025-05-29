@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Quên mật khẩu - Hệ thống Học tập Cá nhân hóa</title>
+    <title>Xác thực Email - Hệ thống Học tập Cá nhân hóa</title>
     <link href="/css/styles.css" rel="stylesheet">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <!-- Bootstrap CSS -->
@@ -25,7 +25,7 @@
             align-items: center;
             justify-content: center;
         }
-        .forgot-password-container {
+        .verify-email-container {
             background-color: white;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -33,11 +33,11 @@
             max-width: 900px;
             width: 100%;
         }
-        .forgot-password-left {
+        .verify-email-left {
             padding: 40px;
             background-color: #fff;
         }
-        .forgot-password-right {
+        .verify-email-right {
             background: linear-gradient(135deg, #045bd8 0%, #2a5298 100%);
             color: white;
             padding: 40px;
@@ -54,19 +54,6 @@
             font-weight: 600;
             color: #333;
         }
-        .form-control {
-            border-radius: 5px;
-            padding: 12px;
-            border: 1px solid #ddd;
-        }
-        .btn-submit {
-            background-color: #045bd8;
-            border: none;
-            padding: 12px;
-            border-radius: 5px;
-            font-weight: 500;
-            width: 100%;
-        }
         .login-link {
             text-align: center;
             margin-top: 20px;
@@ -78,11 +65,11 @@
         .login-link a:hover {
             text-decoration: underline;
         }
-        .forgot-password-right h3 {
+        .verify-email-right h3 {
             font-size: 24px;
             font-weight: 500;
         }
-        .forgot-password-right p {
+        .verify-email-right p {
             font-size: 14px;
             opacity: 0.8;
         }
@@ -121,25 +108,14 @@
 </head>
 <body>
 <div class="container-fluid">
-    <div class="forgot-password-container d-flex">
-        <!-- Left: Forgot Password Form -->
-        <div class="forgot-password-left col-md-6">
+    <div class="verify-email-container d-flex">
+        <!-- Left: Verification Result -->
+        <div class="verify-email-left col-md-6">
             <div class="logo">
                 <img src="/img/logo.jpg" alt="PLS Logo">
             </div>
-            <h2 class="mt-3">Quên mật khẩu</h2>
-            <p class="text-muted mb-4">Nhập email của bạn để nhận liên kết đặt lại mật khẩu.</p>
-
-            <form method="post" action="/forgot-password">
-                <div class="mb-3">
-                    <input type="email" class="form-control" name="email" placeholder="Email" required>
-                </div>
-                <div>
-                    <input type="hidden" name="${_csrf.parameterName}"
-                           value="${_csrf.token}"/>
-                </div>
-                <button type="submit" class="btn btn-primary btn-submit">Gửi liên kết</button>
-            </form>
+            <h2 class="mt-3">Xác thực Email</h2>
+            <p class="text-muted mb-4">Kết quả xác thực email của bạn.</p>
 
             <c:if test="${not empty message}">
                 <div class="message">${message}</div>
@@ -150,14 +126,14 @@
 
             <!-- Link to Login -->
             <div class="login-link">
-                <p>Đã nhớ mật khẩu? <a href="/login">Đăng nhập</a></p>
+                <p><a href="/login">Quay lại Đăng nhập</a></p>
             </div>
         </div>
 
         <!-- Right: Promotional Section -->
-        <div class="forgot-password-right col-md-6">
-            <h3>Hỗ trợ bạn mọi lúc.</h3>
-            <p>Chúng tôi ở đây để giúp bạn khôi phục tài khoản một cách nhanh chóng và an toàn.</p>
+        <div class="verify-email-right col-md-6">
+            <h3>Chào mừng đến với hệ thống!</h3>
+            <p>Xác thực email để bắt đầu hành trình học tập của bạn.</p>
             <div class="dots">
                 <div class="dot active"></div>
                 <div class="dot"></div>

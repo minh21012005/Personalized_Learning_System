@@ -23,7 +23,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder,EmailService emailService) {
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -69,6 +69,15 @@ public class AuthController {
         newUser.setRole(selectedRole);
 
         this.userService.saveUser(newUser);
+
+        // Tạo token xác thực email và gửi email
+        String token = userService.generateEmailVerifyToken(newUser);
+        try {
+            emailService.sendEmailVerificationEmail(newUser.getEmail(), token);
+            model.addAttribute("message", "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản của bạn.");
+        } catch (MessagingException e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi gửi email xác thực. Vui lòng thử lại sau.");
+        }
 
         return "redirect:/login";
     }
@@ -146,6 +155,20 @@ public class AuthController {
 
         model.addAttribute("message", "Mật khẩu của bạn đã được đặt lại thành công. Vui lòng đăng nhập.");
         return "client/auth/login";
+    }
+
+    @GetMapping("/verify-email")
+    public String verifyEmail(@RequestParam("token") String token, Model model) {
+        User user = userService.findUserByEmailVerifyToken(token);
+        if (user == null) {
+            model.addAttribute("error", "Liên kết không hợp lệ hoặc đã hết hạn.");
+            return "client/auth/verify-email";
+        }
+
+        // Xác thực email và xóa token
+        userService.clearEmailVerifyToken(user);
+        model.addAttribute("message", "Email của bạn đã được xác thực thành công. Bạn có thể đăng nhập ngay bây giờ.");
+        return "redirect:/login";
     }
 
 }
