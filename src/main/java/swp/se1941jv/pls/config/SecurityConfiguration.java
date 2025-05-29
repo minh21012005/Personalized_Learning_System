@@ -69,7 +69,7 @@ public class SecurityConfiguration {
                          .hasRole("ADMIN")
 
                          .requestMatchers("/student/**")
-                         .hasAnyAuthority("STUDENT", "ADMIN")
+                         .hasAnyRole("STUDENT", "ADMIN")
 
                         // .requestMatchers("/parent/**")
                         // .hasAnyRole("PARENT", "ADMIN")
