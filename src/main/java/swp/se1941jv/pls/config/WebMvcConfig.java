@@ -44,10 +44,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/lib/**").addResourceLocations("/resources/lib/");
     }
 
-    @Bean("myAppLocaleResolver") // SỬA Ở ĐÂY: Đặt tên khác cho bean
-    public LocaleResolver localeResolver() { // Tên phương thức có thể giữ nguyên
+    @Bean("myAppLocaleResolver") 
+    public LocaleResolver localeResolver() { 
         SessionLocaleResolver slr = new SessionLocaleResolver();
-        slr.setDefaultLocale(new Locale("vi")); // Đặt ngôn ngữ mặc định là Tiếng Việt
+        slr.setDefaultLocale(new Locale("vi")); 
         return slr;
     }
 

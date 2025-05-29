@@ -11,7 +11,7 @@
         <div class="col-auto" style="min-width: 180px;">
             <select name="filterGradeId" id="filterGradeId" class="form-select form-select-sm">
                 <option value=""><spring:message code="subject.filter.allGrades"/></option>
-                <c:forEach var="grade" items="${grades}"> <%-- Đảm bảo 'grades' được truyền từ controller cho filter --%>
+                <c:forEach var="grade" items="${gradesForFilter}">
                     <option value="${grade.gradeId}" ${grade.gradeId == filterGradeId ? 'selected' : ''}>
                         <c:out value="${grade.gradeName}"/>
                     </option>
@@ -115,7 +115,7 @@
                 <td>
                     <c:choose>
                         <c:when test="${not empty subject.subjectImage}">
-                            <img src="<c:url value='/resources/img/${subjectImageFolder}/${subject.subjectImage}'/>"
+                            <img src="/img/subjectImg/${subject.subjectImage}"
                                  alt="${subject.subjectName}" class="subject-img-thumbnail"/>
                         </c:when>
                         <c:otherwise>
@@ -167,9 +167,8 @@
     </table>
 </div>
 
-<%-- PHẦN PHÂN TRANG --%>
 <c:if test="${subjectPage.totalPages > 0}">
-    <div class="pagination-wrapper text-center"> <%-- Sử dụng class pagination-wrapper đã định nghĩa trong show.jsp --%>
+    <div class="pagination-wrapper text-center">
         <div class="mb-2">
             <small><spring:message code="subject.list.showingItems" arguments="${subjectPage.numberOfElements},${subjectPage.totalElements},${subjectPage.number + 1},${subjectPage.totalPages}"/></small>
         </div>
