@@ -13,41 +13,47 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <!-- Custom CSS -->
     <style>
-        .profile-page body {
+        ul {
+            margin: 0;
+        }
+        .change-password-page body {
             background-color: #f5f5f5;
         }
-        .profile-page .sidebar {
+        .change-password-page .sidebar {
             background-color: #fff;
             border-radius: 10px;
             padding: 20px;
             height: fit-content;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .profile-page .main-content {
+        .change-password-page .password-change-content {
             background-color: #fff;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .profile-page .nav-link {
+        .change-password-page .nav-link {
             color: #333;
             padding: 10px 10px;
             border-radius: 5px;
         }
-        .profile-page .nav-link.active {
+        .change-password-page .nav-link.active {
             background-color: #343a40;
             color: #fff;
         }
-        .profile-page .form-section {
+        .change-password-page .password-form-section {
             background-color: #ffffff;
             border: #e2e8f0 1px solid;
             border-radius: 10px;
             padding: 20px;
         }
-        .profile-page .btn-save {
+        .change-password-page .btn-save-password {
             background-color: #343a40;
             color: #fff;
             border-radius: 5px;
+        }
+        .change-password-page .form-item {
+            /* Có thể thêm style nếu cần */
         }
     </style>
 </head>
@@ -56,7 +62,7 @@
     <jsp:include page="../layout/header.jsp"/>
 </header>
 
-<div class="profile-page">
+<div class="change-password-page mt-5">
     <div class="container py-5">
         <div class="row">
             <!-- Sidebar -->
@@ -66,41 +72,47 @@
 
             <!-- Main Content -->
             <div class="col-md-9">
-                <div class="main-content">
+                <div class="password-change-content">
                     <h3>Đổi mật khẩu</h3>
                     <c:if test="${not empty error}">
-                        <div class="alert alert-danger mt-3">${error}</div>
+                        <div class="alert alert-danger mt-3 alert-dismissible fade show" role="alert">
+                                ${error}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     </c:if>
                     <c:if test="${not empty success}">
-                        <div class="alert alert-success mt-3" id="successAlert">${success}</div>
+                        <div class="alert alert-success mt-3 alert-dismissible fade show" role="alert" id="successAlert">
+                                ${success}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     </c:if>
-                    <form:form action="/profile/change-password" method="post" modelAttribute="passwordChangeRequest" id="changePasswordForm">
-                        <div class="form-section">
-                            <div class="row d-flex justify-content-center">
-                                <div class="col-md-7 text-center mb-3">
+                    <form:form action="/account/profile/change-password" method="post" modelAttribute="passwordChangeRequest" id="changePasswordForm">
+                        <div class="password-form-section">
+                            <div class="row d-flex justify-content-lg-start" style="width: 80%">
+                                <div class="col-md-7 mb-3">
                                     <label for="oldPassword" class="form-label">Mật khẩu cũ</label>
-                                    <form:input type="password" class="form-control form__item" id="oldPassword" path="oldPassword" required="true" />
+                                    <form:input type="password" class="form-control form-item" id="oldPassword" path="oldPassword"  required="true" />
                                     <c:set var="errorOldPassword">
                                         <form:errors path="oldPassword" cssClass="text-danger" />
                                     </c:set>
                                         ${errorOldPassword}
                                 </div>
-                                <div class="col-md-7 text-center mb-3">
+                                <div class="col-md-7  mb-3">
                                     <label for="newPassword" class="form-label">Mật khẩu mới</label>
-                                    <form:input type="password" class="form-control form__item" id="newPassword" path="newPassword" required="true" />
+                                    <form:input type="password" class="form-control form-item" id="newPassword" path="newPassword"  required="true" />
                                     <c:set var="errorNewPassword">
                                         <form:errors path="newPassword" cssClass="text-danger" />
                                     </c:set>
                                         ${errorNewPassword}
                                 </div>
-                                <div class="col-md-7 text-center mb-3">
+                                <div class="col-md-7  mb-3">
                                     <label for="confirmNewPassword" class="form-label">Nhập lại mật khẩu mới</label>
-                                    <input type="password" class="form-control form__item" id="confirmNewPassword" name="confirmNewPassword" required="true" />
+                                    <input type="password" class="form-control form-item" id="confirmNewPassword" name="confirmNewPassword" required="true" />
                                     <div id="confirmPasswordError" class="text-danger" style="display: none;">Mật khẩu nhập lại không khớp!</div>
                                 </div>
                             </div>
                             <div class="col-md-2 mt-2 d-flex justify-content-center">
-                                <button type="submit" class="btn btn-save">Lưu thay đổi</button>
+                                <button type="submit" class="btn btn-save-password">Lưu thay đổi</button>
                             </div>
                         </div>
                     </form:form>

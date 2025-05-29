@@ -12,6 +12,7 @@ import swp.se1941jv.pls.repository.UserRepository;
 import swp.se1941jv.pls.service.specification.UserSpecification;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -21,9 +22,33 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // Regex để kiểm tra mật khẩu mạnh
+    private static final String PASSWORD_PATTERN =
+            "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_+=\\[\\]{}|;:'\",.<>?/]).{8,}$";
+
+    private static final Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+
     public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+    }
+
+    /**
+     * Kiểm tra xem mật khẩu có mạnh không dựa trên các tiêu chí:
+     * - Ít nhất 8 ký tự
+     * - Chứa ít nhất một chữ cái viết hoa (A-Z)
+     * - Chứa ít nhất một chữ cái viết thường (a-z)
+     * - Chứa ít nhất một chữ số (0-9)
+     * - Chứa ít nhất một ký tự đặc biệt (!@#$%^&*()-_+=[]{}|;:'",.<>?/)
+     *
+     * @param password Mật khẩu cần kiểm tra
+     * @return true nếu mật khẩu mạnh, false nếu không
+     */
+    public boolean isStrongPassword(String password) {
+        if (password == null) {
+            return false;
+        }
+        return pattern.matcher(password).matches();
     }
 
     public UserRepository getUserRepository() {

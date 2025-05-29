@@ -11,8 +11,15 @@
 	<link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
 	<!-- Bootstrap Icons -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+	<%--Font-awesome--%>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSF7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 	<!-- Custom CSS -->
 	<style>
+		ul {
+			margin: 0;
+		}
 		.profile-page body {
 			background-color: #f5f5f5;
 		}
@@ -61,6 +68,12 @@
 			color: #333;
 			background-color: #f8f9fa;
 		}
+		.profile-page .btn-remove-image {
+			background-color: #dc3545;
+			color: #fff;
+			border-radius: 5px;
+			margin-top: 10px;
+		}
 	</style>
 </head>
 <body>
@@ -68,7 +81,7 @@
 	<jsp:include page="../layout/header.jsp"/>
 </header>
 
-<div class="profile-page">
+<div class="profile-page mt-5">
 	<div class="container py-5">
 		<div class="row">
 			<!-- Sidebar -->
@@ -79,7 +92,7 @@
 			<!-- Main Content -->
 			<div class="col-md-9">
 				<div class="main-content">
-					<form:form action="/student/profile" method="post" modelAttribute="user" enctype="multipart/form-data">
+					<form:form action="/account/profile" method="post" modelAttribute="user" enctype="multipart/form-data">
 						<div class="form-section">
 							<div class="row">
 								<div class="col-md-6 mb-3">
@@ -120,7 +133,7 @@
 
 						<!-- Image Preview and Upload -->
 						<div class="form-section">
-							<div class="row mt-4">
+							<div class="row">
 								<div class="col-md-6 col-12">
 									<label for="avatarFile" class="form-label">Avatar:</label>
 									<input class="form-control" type="file" id="avatarFile" name="file"
@@ -141,13 +154,20 @@
 												 alt="Image not found" id="avatarPreview" src="#" />
 										</c:otherwise>
 									</c:choose>
+									<!-- Remove Image Button -->
+									<div class="mt-2">
+										<button type="button" class="btn btn-remove-image" id="removeImageBtn" style="display: ${not empty user.avatar ? 'inline-block' : 'none'}">Xóa ảnh</button>
+									</div>
 								</div>
 							</div>
 							<c:if test="${not empty success}">
-								<div class="alert alert-success mt-3">${success}</div>
+								<div class="alert alert-success mt-3 alert-dismissible fade show" role="alert">
+										${success}
+									<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+								</div>
 							</c:if>
 						</div>
-						<form:input type="hidden" path="avatar" />
+						<form:input type="hidden" path="avatar" id="avatarInput" />
 						<div class="col-md-2 mt-2 d-flex align-items-end">
 							<button type="submit" class="btn btn-save-image">Lưu thay đổi</button>
 						</div>
@@ -170,10 +190,26 @@
 <script>
 	$(document).ready(() => {
 		const avatarFile = $("#avatarFile");
+		const avatarPreview = $("#avatarPreview");
+		const removeImageBtn = $("#removeImageBtn");
+		const avatarInput = $("#avatarInput");
+
+		// Xử lý khi chọn ảnh mới
 		avatarFile.change(function (e) {
-			const imgURL = URL.createObjectURL(e.target.files[0]);
-			$("#avatarPreview").attr("src", imgURL);
-			$("#avatarPreview").css({ "display": "block" });
+			if (e.target.files.length > 0) {
+				const imgURL = URL.createObjectURL(e.target.files[0]);
+				avatarPreview.attr("src", imgURL).css({ "display": "block" });
+				removeImageBtn.css({ "display": "inline-block" });
+				avatarInput.val(""); // Xóa giá trị avatar cũ để ưu tiên file mới
+			}
+		});
+
+		// Xử lý khi nhấn nút xóa ảnh
+		removeImageBtn.click(function () {
+			avatarPreview.attr("src", "#").css({ "display": "none" });
+			avatarFile.val(""); // Xóa file đã chọn
+			avatarInput.val(""); // Đặt avatar về rỗng để backend xóa avatar
+			removeImageBtn.css({ "display": "none" });
 		});
 	});
 </script>
