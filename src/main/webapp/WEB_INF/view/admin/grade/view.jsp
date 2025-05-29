@@ -147,8 +147,8 @@
                                                 alt="Image not found" class="img-fluid rounded border" />
                                         </td>
                                         <td>
-                                            <span class="badge ${subject.active ? 'bg-success' : 'bg-secondary'}">
-                                                ${subject.active ? 'true' : 'false'}
+                                            <span class="badge ${subject.isActive ? 'bg-success' : 'bg-secondary'}">
+                                                ${subject.isActive ? 'true' : 'false'}
                                             </span>
                                         </td>
                                     </tr>

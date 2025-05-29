@@ -40,9 +40,9 @@ public class GradeController {
     // }
     @GetMapping("/admin/grade")
     public String getGradePage(Model model,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String isActive) {
+                               @RequestParam(defaultValue = "0") int page,
+                               @RequestParam(required = false) String keyword,
+                               @RequestParam(required = false) String isActive) {
         Pageable pageable = PageRequest.of(page, 10);
         if (keyword != null) {
             keyword = keyword.trim();
@@ -93,9 +93,9 @@ public class GradeController {
 
     @GetMapping(value = "/admin/grade/view/{gradeId}")
     public String viewSubjectsByGrade(Model model,
-            @RequestParam(defaultValue = "0") int page,
-            @PathVariable Long gradeId,
-            @RequestParam(required = false) String keyword) {
+                                      @RequestParam(defaultValue = "0") int page,
+                                      @PathVariable Long gradeId,
+                                      @RequestParam(required = false) String keyword) {
         Pageable pageable = PageRequest.of(page, 10);
         if (keyword != null) {
             keyword = keyword.trim();
@@ -128,10 +128,10 @@ public class GradeController {
 
     @GetMapping("/admin/grade/update/{gradeId}")
     public String getUpdateGradePage(Model model, @PathVariable Long gradeId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "0") int pendingPage,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String pendingKeyword) {
+                                     @RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = "0") int pendingPage,
+                                     @RequestParam(required = false) String keyword,
+                                     @RequestParam(required = false) String pendingKeyword) {
         try {
 
             Grade grade = this.gradeService.findById(gradeId)
@@ -181,7 +181,9 @@ public class GradeController {
             Grade existingGrade = gradeService.findById(grade.getGradeId())
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
 
-            gradeService.saveGrade(existingGrade, grade.getGradeName(), grade.isActive());
+            existingGrade.setGradeName(grade.getGradeName());
+            existingGrade.setActive(grade.isActive());
+            gradeService.saveGrade(existingGrade);
 
             if (existingGrade.isActive()) {
 
