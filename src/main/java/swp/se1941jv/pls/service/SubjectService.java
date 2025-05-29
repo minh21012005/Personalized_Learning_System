@@ -9,15 +9,36 @@ import java.util.Optional;
 
 //import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.repository.SubjectRepository;
+
+@Service
+public class SubjectService {
+    private final SubjectRepository subjectRepository;
+
+    public SubjectService(SubjectRepository subjectRepository) {
+        this.subjectRepository = subjectRepository;
+    }
 
 
+    public Page<Subject> getAllSubjects(String filterName, Long filterGradeId, Pageable pageable) {
+        String searchName = (filterName != null && filterName.trim().isEmpty()) ? null : filterName;
+        return subjectRepository.findByFilter(searchName, filterGradeId, pageable);
+    }
 
-public interface SubjectService {
-    //List<Subject> getAllSubjects();
-    Page<Subject> getAllSubjects(String filterName, Long filterGradeId, Pageable pageable);
-    Optional<Subject> getSubjectById(Long id);
-    
-    void deleteSubjectById(Long id); 
-    Subject saveSubject(Subject subject) throws IOException;
+
+    public Optional<Subject> getSubjectById(Long id) {
+        return subjectRepository.findById(id);
+    }
+
+
+    public Subject saveSubject(Subject subject) {
+        return subjectRepository.save(subject);
+    }
+
+
+    public void deleteSubjectById(Long id) {
+        subjectRepository.deleteById(id);
+    }
 }

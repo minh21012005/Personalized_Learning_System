@@ -1,13 +1,44 @@
 package swp.se1941jv.pls.service;
 
+import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.entity.Grade;
+import swp.se1941jv.pls.repository.GradeRepository;
+
 import java.util.List;
 import java.util.Optional;
 
-public interface GradeService {
-    List<Grade> getAllGrades();
-    List<Grade> getActiveGrades();
-    Optional<Grade> getGradeById(Long id);
-    Grade saveGrade(Grade grade);
-    void deleteGradeById(Long id);
+@Service
+public class GradeService {
+    private final GradeRepository gradeRepository;
+
+
+    public GradeService(GradeRepository gradeRepository) {
+        this.gradeRepository = gradeRepository;
+    }
+
+    
+    public List<Grade> getAllGrades() {
+        return gradeRepository.findAll();
+    }
+
+    
+    public Optional<Grade> getGradeById(Long id) {
+        return gradeRepository.findById(id);
+    }
+
+    
+    public Grade saveGrade(Grade grade) {
+        return gradeRepository.save(grade);
+    }
+
+    
+    public void deleteGradeById(Long id) {
+        gradeRepository.deleteById(id);
+    }
+
+    
+    public List<Grade> getActiveGrades() {
+        return gradeRepository.findByIsActiveTrue();
+    }
+
 }
