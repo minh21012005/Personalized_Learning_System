@@ -406,7 +406,10 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                     <li><a class="dropdown-item" href="/account/profile">Thông tin cá nhân</a></li>
-                    <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
+                    <li><form method="post" action="/logout">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <button class="dropdown-item">Logout</button>
+                    </form></li>
                 </ul>
             </div>
             <%

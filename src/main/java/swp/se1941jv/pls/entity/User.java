@@ -11,6 +11,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -88,6 +89,13 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "userCreated")
     List<Transaction> transactions;
+
+
+    @Column(name = "reset_password_token")
+    String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiry")
+    LocalDateTime resetPasswordTokenExpiry;
 
     // public boolean hasRole(String roleName) {
     // return this.role != null && this.role.getRoleName().equals(roleName);

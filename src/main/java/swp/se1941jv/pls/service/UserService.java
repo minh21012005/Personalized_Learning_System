@@ -11,8 +11,10 @@ import swp.se1941jv.pls.repository.RoleRepository;
 import swp.se1941jv.pls.repository.UserRepository;
 import swp.se1941jv.pls.service.specification.UserSpecification;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -136,6 +138,35 @@ public class UserService {
     public Page<User> findUsersWithFilters(String roleName, String fullName, Pageable pageable) {
         return this.userRepository.findAll(UserSpecification.findUsersWithFilters(roleName, fullName), pageable);
 
+    }
+
+    // Tạo token reset password và lưu vào user
+    public String generateResetPasswordToken(User user) {
+        String token = UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1)); // Token hết hạn sau 1 giờ
+        this.saveUser(user);
+        return token;
+    }
+
+    // Tìm user bằng token reset password
+    public User findUserByResetPasswordToken(String token) {
+        User user = userRepository.findByResetPasswordToken(token);
+        if (user == null || user.getResetPasswordTokenExpiry() == null) {
+            return null;
+        }
+        // Kiểm tra xem token có hết hạn không
+        if (user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+            return null; // Token đã hết hạn
+        }
+        return user;
+    }
+
+    // Xóa token sau khi reset password thành công
+    public void clearResetPasswordToken(User user) {
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        this.saveUser(user);
     }
 
 }
