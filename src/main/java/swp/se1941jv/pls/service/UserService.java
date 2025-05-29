@@ -169,4 +169,35 @@ public class UserService {
         this.saveUser(user);
     }
 
+
+    // Tạo token xác thực email và lưu vào user
+    public String generateEmailVerifyToken(User user) {
+        String token = UUID.randomUUID().toString();
+        user.setEmailVerifyToken(token);
+        user.setEmailVerifyTokenExpiry(LocalDateTime.now().plusHours(24)); // Token hết hạn sau 24 giờ
+        this.saveUser(user);
+        return token;
+    }
+
+    // Tìm user bằng token xác thực email
+    public User findUserByEmailVerifyToken(String token) {
+        User user = userRepository.findByEmailVerifyToken(token);
+        if (user == null || user.getEmailVerifyTokenExpiry() == null) {
+            return null;
+        }
+        // Kiểm tra xem token có hết hạn không
+        if (user.getEmailVerifyTokenExpiry().isBefore(LocalDateTime.now())) {
+            return null; // Token đã hết hạn
+        }
+        return user;
+    }
+
+    // Xóa token xác thực email sau khi xác thực thành công
+    public void clearEmailVerifyToken(User user) {
+        user.setEmailVerifyToken(null);
+        user.setEmailVerifyTokenExpiry(null);
+        user.setEmailVerify(true); // Đánh dấu email đã được xác thực
+        this.saveUser(user);
+    }
+
 }

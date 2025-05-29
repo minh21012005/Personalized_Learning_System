@@ -97,6 +97,12 @@ public class User extends BaseEntity {
     @Column(name = "reset_password_token_expiry")
     LocalDateTime resetPasswordTokenExpiry;
 
+    @Column(name = "email_verify_token")
+    String emailVerifyToken;
+
+    @Column(name = "email_verify_token_expiry")
+    LocalDateTime emailVerifyTokenExpiry;
+
     // public boolean hasRole(String roleName) {
     // return this.role != null && this.role.getRoleName().equals(roleName);
     // }
