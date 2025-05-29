@@ -6,7 +6,7 @@
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>PLS - Manage Users</title>
+            <title>PLS - Quản lí người dùng</title>
             <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
             <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
             <style>
@@ -156,33 +156,33 @@
                                         <!-- Bộ lọc role -->
                                         <form action="/admin/user" method="get"
                                             class="d-flex align-items-center gap-2 flex-wrap">
-                                            <label for="role" class="mb-0 fw-bold me-2">Role:</label>
+                                            <label for="role" class="mb-0 fw-bold me-2">Vai trò:</label>
                                             <select name="role" id="role" class="form-select form-select-sm w-auto">
-                                                <option value="">All</option>
+                                                <option value="">Tất cả</option>
                                                 <c:forEach var="r" items="${roles}">
                                                     <c:choose>
                                                         <c:when test="${r.roleName eq selectedRole}">
-                                                            <option value="${r.roleName}" selected>${r.roleName}
+                                                            <option value="${r.roleName}" selected>${r.roleDescription}
                                                             </option>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <option value="${r.roleName}">${r.roleName}</option>
+                                                            <option value="${r.roleName}">${r.roleDescription}</option>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </c:forEach>
                                             </select>
 
-                                            <label for="name" class="mb-0 fw-bold me-2">Full name:</label>
+                                            <label for="name" class="mb-0 fw-bold me-2">Họ và tên:</label>
                                             <input type="text" id="name" name="name"
                                                 class="form-control form-control-sm w-auto" value="${param.name}"
-                                                placeholder="Enter name">
+                                                placeholder="Tìm theo tên...">
 
-                                            <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
                                         </form>
 
 
                                         <!-- Nút tạo user -->
-                                        <a href="/admin/user/create" class="btn btn-primary">Create User</a>
+                                        <a href="/admin/user/create" class="btn btn-primary">Tạo tài khoản</a>
                                     </div>
 
                                     <hr />
@@ -191,9 +191,9 @@
                                             <tr>
                                                 <th scope="col" class="text-center col-id">ID</th>
                                                 <th scope="col" class="text-center col-email">Email</th>
-                                                <th scope="col" class="text-center col-fullname">Full Name</th>
-                                                <th scope="col" class="text-center col-role">Role</th>
-                                                <th scope="col" class="text-center col-action">Action</th>
+                                                <th scope="col" class="text-center col-fullname">Họ và tên</th>
+                                                <th scope="col" class="text-center col-role">Vai trò</th>
+                                                <th scope="col" class="text-center col-action">Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -202,13 +202,13 @@
                                                     <td class="text-center col-id">${user.userId}</td>
                                                     <td class="col-email">${user.email}</td>
                                                     <td class="col-fullname">${user.fullName}</td>
-                                                    <td class="col-role">${user.role.roleName}</td>
+                                                    <td class="col-role">${user.role.roleDescription}</td>
                                                     <td class="text-center col-action">
                                                         <div class="d-flex justify-content-center gap-2">
                                                             <a href="/admin/user/${user.userId}"
-                                                                class="btn btn-success btn-sm">View</a>
+                                                                class="btn btn-success btn-sm">Chi tiết</a>
                                                             <a href="/admin/user/update/${user.userId}"
-                                                                class="btn btn-warning btn-sm">Update</a>
+                                                                class="btn btn-warning btn-sm">Cập nhật</a>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -225,30 +225,34 @@
                                         <c:if test="${not empty paramName}">
                                             <c:set var="queryString" value="${queryString}&name=${paramName}" />
                                         </c:if>
-                                        <nav aria-label="Page navigation example">
-                                            <ul class="pagination justify-content-center">
-                                                <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
-                                                    <a class="page-link"
-                                                        href="/admin/user?page=${currentPage - 1}${queryString}"
-                                                        aria-label="Previous">
-                                                        <span aria-hidden="true">«</span>
-                                                    </a>
-                                                </li>
-                                                <c:forEach begin="1" end="${totalPage}" varStatus="loop">
-                                                    <li class="page-item ${loop.index eq currentPage ? 'active' : ''}">
+                                        <c:if test="${totalPage >1}">
+                                            <nav aria-label="Page navigation example">
+                                                <ul class="pagination justify-content-center">
+                                                    <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
                                                         <a class="page-link"
-                                                            href="/admin/user?page=${loop.index}${queryString}">${loop.index}</a>
+                                                            href="/admin/user?page=${currentPage - 1}${queryString}"
+                                                            aria-label="Previous">
+                                                            <span aria-hidden="true">«</span>
+                                                        </a>
                                                     </li>
-                                                </c:forEach>
-                                                <li class="page-item ${currentPage eq totalPage ? 'disabled' : ''}">
-                                                    <a class="page-link"
-                                                        href="/admin/user?page=${currentPage + 1}${queryString}"
-                                                        aria-label="Next">
-                                                        <span aria-hidden="true">»</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </nav>
+                                                    <c:forEach begin="1" end="${totalPage}" varStatus="loop">
+                                                        <li
+                                                            class="page-item ${loop.index eq currentPage ? 'active' : ''}">
+                                                            <a class="page-link"
+                                                                href="/admin/user?page=${loop.index}${queryString}">${loop.index}</a>
+                                                        </li>
+                                                    </c:forEach>
+                                                    <li class="page-item ${currentPage eq totalPage ? 'disabled' : ''}">
+                                                        <a class="page-link"
+                                                            href="/admin/user?page=${currentPage + 1}${queryString}"
+                                                            aria-label="Next">
+                                                            <span aria-hidden="true">»</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </c:if>
+
                                     </div>
                                 </div>
                             </div>
