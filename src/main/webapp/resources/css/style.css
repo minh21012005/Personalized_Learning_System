@@ -7,23 +7,31 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    ul {
+        margin: 0;
+    }
+    *::before {
+        box-sizing: unset;
+    }
 }
 html, body {
     height: 100%;
+    overflow: hidden;
 }
 a {
     text-decoration: none;
     color: inherit;
 }
-a:hover {
-    text-decoration: underline;
-}
+
 button:focus-visible {
     outline: 2px solid #4a90e2 !important;
     outline: -webkit-focus-ring-color auto 5px !important;
 }
 
 /* Header styles */
+.homescreen {
+    margin-top: 200px;
+}
 .homescreen .site-header {
     background-color: #ffffff;
     font-family: "Inter", Helvetica;
@@ -125,13 +133,13 @@ button:focus-visible {
     background-color: #ffffff;
     overflow: hidden;
     width: 1440px;
-    height: 4058px;
+    height: 3600px;
 }
 
 .homescreen .overlap {
     position: relative;
     width: 1441px;
-    height: 4074px;
+    height: 3600px;
 }
 
 .homescreen .main-frame {

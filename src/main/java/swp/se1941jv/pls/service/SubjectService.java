@@ -18,6 +18,6 @@ public interface SubjectService {
     Page<Subject> getAllSubjects(String filterName, Long filterGradeId, Pageable pageable);
     Optional<Subject> getSubjectById(Long id);
     
-    void deleteSubjectById(Long id); // Thêm hàm delete cho tiện
+    void deleteSubjectById(Long id); 
     Subject saveSubject(Subject subject) throws IOException;
 }

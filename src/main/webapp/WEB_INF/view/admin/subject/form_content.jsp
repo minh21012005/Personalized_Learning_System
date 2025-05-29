@@ -3,17 +3,16 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-
 <div class="row justify-content-center">
     <div class="col-md-10 col-lg-8">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
-                <%-- Sử dụng spring:message cho pageTitle nếu nó là key, hoặc giữ nguyên nếu nó là text đã dịch --%>
+                
                 <h3 class="mb-0"><spring:message code="${pageTitle}" text="${pageTitle != null ? pageTitle : 'Subject Form'}"/></h3>
             </div>
             <div class="card-body">
                 <form:form modelAttribute="subject" action="${pageContext.request.contextPath}/admin/subject/save" method="post" enctype="multipart/form-data" cssClass="needs-validation" novalidate="novalidate">
-                    <form:hidden path="subjectId"/>
+                    <form:hidden path="subjectId"/> 
 
                     <div class="mb-3">
                         <form:label path="subjectName" cssClass="form-label"><spring:message code="subject.form.name.label"/> <span class="text-danger">*</span></form:label>
@@ -29,8 +28,8 @@
 
                     <div class="mb-3">
                         <form:label path="grade.gradeId" cssClass="form-label"><spring:message code="subject.form.grade.label"/> <span class="text-danger">*</span></form:label>
+
                         <form:select path="grade.gradeId" cssClass="form-select ${status.hasError('grade') || status.hasError('grade.gradeId') ? 'is-invalid' : ''}" required="required">
-                            <%-- Lấy giá trị message ra một biến trước --%>
                             <spring:message code="subject.form.grade.select" var="selectGradeLabelText" text="-- Select Grade --"/>
                             <form:option value="" label="-- ${selectGradeLabelText} --"/>
                             <form:options items="${grades}" itemValue="gradeId" itemLabel="gradeName"/>
@@ -40,17 +39,18 @@
 
                     <div class="mb-3">
                         <label for="imageFile" class="form-label"><spring:message code="subject.form.image.label"/></label>
-                        <input type="file" name="imageFile" class="form-control" id="imageFile" accept="image/*" />
+                        <input type="file" name="imageFile" class="form-control ${not empty imageFileError ? 'is-invalid' : ''}" id="imageFile" accept="image/*" />
                         <small class="form-text text-muted"><spring:message code="subject.form.image.help"/></small>
+                        <c:if test="${not empty imageFileError}">
+                            <div class="invalid-feedback d-block">${imageFileError}</div>
+                        </c:if>
 
-                        <%-- Hiển thị ảnh hiện tại khi Edit hoặc khi có lỗi validation và ảnh đã được gán --%>
-                        <c:set var="imageToDisplay" value="${not empty currentSubjectImage ? currentSubjectImage : subject.subjectImage}"/>
-                        <c:if test="${not empty imageToDisplay && subject.subjectId != null}">
+                        <c:set var="imageToShow" value="${not empty currentSubjectImage ? currentSubjectImage : subject.subjectImage}" />
+                        <c:if test="${not empty imageToShow}">
                             <div class="mt-2">
                                 <p class="mb-1"><spring:message code="subject.form.image.current"/></p>
-                                <%-- SỬA ĐƯỜNG DẪN ẢNH --%>
-                                <img src="<c:url value='/resources/img/${subjectImageFolder}/${imageToDisplay}'/>"
-                                     alt="Current Subject" class="current-img-preview"/>
+                                <img src="/img/subjectImg/${subject.subjectImage}"
+                                     alt="Current Subject" class="current-img-preview img-thumbnail" style="max-width: 150px; max-height: 150px;"/>
                             </div>
                         </c:if>
                     </div>
@@ -82,11 +82,11 @@
       Array.prototype.slice.call(forms)
         .forEach(function (form) {
           form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
+            if (!form.checkValidity()) { 
               event.preventDefault()
               event.stopPropagation()
             }
-            form.classList.add('was-validated')
+            form.classList.add('was-validated') 
           }, false)
         })
     })()

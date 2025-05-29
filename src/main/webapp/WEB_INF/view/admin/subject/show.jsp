@@ -62,7 +62,7 @@
             width: 100%;
         }
 
-        /* --- CSS CHO BẢNG DỮ LIỆU --- */
+        
         .table {
             background-color: #ffffff;
             font-size: 1rem;
@@ -159,14 +159,14 @@
             color: #212529;
         }
 
-        /* Nút disabled (bao gồm cả First/Previous khi ở trang đầu, Next/Last khi ở trang cuối) */
+        
         .pagination .page-item.disabled .page-link {
-            color: #adb5bd; /* MÀU XÁM NHẠT HƠN CHO KÝ HIỆU/SỐ TRANG BỊ VÔ HIỆU HÓA */
+            color: #adb5bd; 
             pointer-events: none;
-            background-color: #ffffff; /* Nền trắng */
+            background-color: #ffffff; 
             border-color: #dee2e6;
         }
-        /* --- KẾT THÚC CSS CHO PHÂN TRANG --- */
+        
 
     </style>
 </head>

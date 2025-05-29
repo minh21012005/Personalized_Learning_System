@@ -2,12 +2,13 @@ package swp.se1941jv.pls.service.impl;
 
 
 import org.springframework.stereotype.Service;
-import swp.se1941jv.pls.entity.Grade; // Đảm bảo import đúng Grade entity của bạn
-import swp.se1941jv.pls.repository.GradeRepository; // Import GradeRepository
-import swp.se1941jv.pls.service.GradeService; // Import GradeService interface
+import swp.se1941jv.pls.entity.Grade;
+import swp.se1941jv.pls.repository.GradeRepository;
+import swp.se1941jv.pls.service.GradeService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GradeServiceImpl implements GradeService {
@@ -21,7 +22,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     public List<Grade> getAllGrades() {
-        return gradeRepository.findAll(); // Lấy tất cả các Grade từ repository
+        return gradeRepository.findAll();
     }
 
     @Override
@@ -31,7 +32,6 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     public Grade saveGrade(Grade grade) {
-        // Bạn có thể thêm logic xử lý trước khi lưu ở đây nếu cần
         return gradeRepository.save(grade);
     }
 
@@ -40,5 +40,10 @@ public class GradeServiceImpl implements GradeService {
         gradeRepository.deleteById(id);
     }
 
-    // Triển khai các phương thức khác nếu có
+    @Override
+    public List<Grade> getActiveGrades() {
+         return gradeRepository.findByIsActiveTrue();
+    }
+
+
 }
