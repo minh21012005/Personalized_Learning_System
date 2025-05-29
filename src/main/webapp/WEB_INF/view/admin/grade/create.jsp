@@ -99,7 +99,7 @@
                             </c:if>
                             <form:form method="post" action="/admin/grade/create" modelAttribute="newGrade">
                                 <div class="mb-3">
-                                    <label class="from-label">Grade name</label>
+                                    <label class="from-label">Tên khối</label>
                                     <form:input type="text" class="form-control" path="gradeName" />
 
 

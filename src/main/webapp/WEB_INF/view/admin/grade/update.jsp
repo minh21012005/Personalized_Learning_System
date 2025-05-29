@@ -103,7 +103,7 @@
                         </c:if>
 
                         <!-- Section 1: Edit Grade Name and Status -->
-                        <h2>Edit Grade</h2>
+                        <h2>Chỉnh sửa khổi</h2>
                         <form:form id="gradeForm" action="${pageContext.request.contextPath}/admin/grade/update"
                             method="post" modelAttribute="grade">
                             <form:hidden path="gradeId" />
@@ -126,7 +126,7 @@
                             </div>
 
                             <!-- Section 2: Assigned Subjects -->
-                            <h2>Assigned Subjects</h2>
+                            <h2>Danh sách môn học trong khối</h2>
                             <div class="mb-3">
                                 <input type="text" class="form-control" id="searchAssigned"
                                     placeholder="Tìm tên môn học">

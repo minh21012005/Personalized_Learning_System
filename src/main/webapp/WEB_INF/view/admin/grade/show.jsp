@@ -87,17 +87,17 @@
             <!-- Main Content -->
             <div class="content">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="mb-0">Grade List</h3>
+                    <h3 class="mb-0">Danh sách khối lớp</h3>
                     <a href="/admin/grade/create" class="btn btn-primary btn-lg">
-                        <i class="bi bi-plus-lg"></i> Create
+                        <i class="bi bi-plus-lg"></i> Thêm mới
                     </a>
                 </div>
 
                 <!-- Search + Filter Form -->
                 <form action="/admin/grade" method="get" class="row g-2 align-items-center mb-4">
                     <div class="col-md-4">
-                        <input type="text" id="keyword" name="keyword" class="form-control"
-                            placeholder="Search by Grade Name" value="${param.keyword}">
+                        <input type="text" id="keyword" name="keyword" class="form-control" placeholder="Tìm theo tên"
+                            value="${param.keyword}">
                     </div>
                     <div class="col-md-3">
                         <select id="isActive" name="isActive" class="form-select">
@@ -188,7 +188,7 @@
 
                 <!-- Total Count -->
                 <div class="text-center mt-3">
-                    <p>Total Grades: <strong>${totalItems}</strong></p>
+                    <p>Tổng số khối: <strong>${totalItems}</strong></p>
                 </div>
             </div>
 
