@@ -217,7 +217,7 @@
             <!-- Form Email/Mật khẩu -->
             <form action="/login" method="post">
                 <c:if test="${param.error != null}">
-                    <div class="my-2" style="color: red;">Sai mật khẩu hoặc Email không tồn tại.
+                    <div class="my-2" style="color: red;">Sai mật khẩu hoặc Email không tồn tại. Hoặc tài khoản chưa được kích hoạt.
                     </div>
                 </c:if>
                 <c:if test="${param.logout != null}">

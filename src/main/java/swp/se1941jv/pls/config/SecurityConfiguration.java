@@ -62,7 +62,7 @@ public class SecurityConfiguration {
 
                         .requestMatchers("/", "/login", "/register", "/verify-email/**", "/forgot-password/**","/client/**", "/css/**",
                                 "/js/**",
-                                "/product/**", "/img/**", "/lib/**", "/admin/**")
+                                "/product/**", "/img/**", "/lib/**")
                         .permitAll()
 
                         .requestMatchers("/admin/**")
@@ -77,7 +77,7 @@ public class SecurityConfiguration {
                         // .requestMatchers("/admin/**")
                         // .hasAnyRole("CONTENT_MANAGER", "ADMIN")
 
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
 
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
