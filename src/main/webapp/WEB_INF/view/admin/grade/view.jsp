@@ -143,7 +143,7 @@
                                         <td>${subject.subjectName}</td>
                                         <td>${subject.subjectDescription}</td>
                                         <td>
-                                            <img style="max-height: 250px" src="/img/subjectImg/${subject.subjectName}"
+                                            <img style="max-height: 50px" src="/img/subjectImg/${subject.subjectImage}"
                                                 alt="Image not found" class="img-fluid rounded border" />
                                         </td>
                                         <td>

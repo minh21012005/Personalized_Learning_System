@@ -194,6 +194,11 @@
 		const removeImageBtn = $("#removeImageBtn");
 		const avatarInput = $("#avatarInput");
 
+		// Khởi tạo avatarInput với tên file ảnh hiện tại
+		<c:if test="${not empty user.avatar}">
+		avatarInput.val("${user.avatar}");
+		</c:if>
+
 		// Xử lý khi chọn ảnh mới
 		avatarFile.change(function (e) {
 			if (e.target.files.length > 0) {

@@ -80,13 +80,17 @@ public class UserProfileController {
         currentUser.setEmail(user.getEmail());
         currentUser.setPhoneNumber(user.getPhoneNumber());
 
-        if (!file.isEmpty()) {
+        // Xử lý ảnh đại diện
+        if (file != null && !file.isEmpty()) {
+            // Upload file mới
             String avatar = uploadService.handleSaveUploadFile(file, "avatar");
             currentUser.setAvatar(avatar);
             session.setAttribute("avatar", avatar);
         } else {
-            currentUser.setAvatar(null);
-            session.setAttribute("avatar", null);
+            // Giữ hoặc xóa ảnh dựa trên giá trị user.getAvatar()
+            String avatar = user.getAvatar();
+            currentUser.setAvatar(avatar); // Giữ ảnh hiện tại hoặc xóa nếu avatar rỗng
+            session.setAttribute("avatar", avatar);
         }
 
         userService.saveUser(currentUser);

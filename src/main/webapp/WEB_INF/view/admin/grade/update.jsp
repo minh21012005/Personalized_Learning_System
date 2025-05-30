@@ -213,7 +213,7 @@
 
                             <!-- Save Button -->
                             <button type="submit" class="btn btn-success">Lưu</button>
-                            <a href="/admin/grade" class="btn btn-secondary">Hủy</a>
+                    <a href="/admin/grade" class="btn btn-secondary">Quay lại</a>
                         </form:form>
                     </div>
                 </div>
