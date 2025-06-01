@@ -168,7 +168,7 @@ public class AuthController {
         // Xác thực email và xóa token
         userService.clearEmailVerifyToken(user);
         model.addAttribute("message", "Email của bạn đã được xác thực thành công. Bạn có thể đăng nhập ngay bây giờ.");
-        return "redirect:/login";
+        return "client/auth/verify-email";
     }
 
 }

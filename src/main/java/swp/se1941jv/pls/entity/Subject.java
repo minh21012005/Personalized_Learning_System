@@ -50,7 +50,6 @@ public class Subject extends BaseEntity {
     @OneToMany(mappedBy = "subject")
     List<SubjectTest> subjectTests;
 
-    @NotNull(message = "Bạn phải chọn một Lớp!")
     @ManyToOne
     @JoinColumn(name = "grade_id")
     Grade grade;

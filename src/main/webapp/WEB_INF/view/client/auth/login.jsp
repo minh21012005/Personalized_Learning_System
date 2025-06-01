@@ -185,6 +185,11 @@
             margin: 0 5px;
         }
 
+        .message {
+            margin-top: 20px;
+            color: #28a745;
+        }
+
         .dot.active {
             background-color: white;
         }
@@ -223,6 +228,9 @@
                 <c:if test="${param.logout != null}">
                     <div class="my-2" style="color: green;"> Đăng Xuất thành công.
                     </div>
+                </c:if>
+                <c:if test="${not empty message}">
+                    <div class="message">${message}</div>
                 </c:if>
                 <div class="mb-3">
                     <input type="email" class="form-control" name="username" placeholder="Email" required>
