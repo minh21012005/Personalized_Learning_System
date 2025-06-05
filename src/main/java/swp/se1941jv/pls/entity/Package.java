@@ -32,7 +32,7 @@ public class Package extends BaseEntity {
     Integer durationDays;
 
     @Column(name = "is_active")
-    boolean isActive;
+    Boolean isActive;
 
     @OneToMany(mappedBy = "pkg")
     List<UserPackage> userPackages;

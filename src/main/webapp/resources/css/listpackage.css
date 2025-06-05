@@ -143,7 +143,6 @@ body {
     font-weight: 500;
 }
 
-
 /* Main Content Styles */
 .main-content {
     padding: 2rem 0;
@@ -152,13 +151,6 @@ body {
 .page-title {
     font-size: 2rem;
     margin-bottom: 1.5rem;
-}
-
-.search-filter-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
 }
 
 .filter-button {
@@ -170,54 +162,168 @@ body {
     display: flex;
     align-items: center;
     color: var(--grey-800);
-    /* Cập nhật: chữ xanh than */
     font-weight: 500;
 }
 
 .filter-button svg {
     color: var(--grey-800);
-    /* Cập nhật: biểu tượng xanh than */
+}
+
+.search-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: nowrap;
+}
+
+.search-wrapper {
+    flex-grow: 1;
+    max-width: 900px;
+}
+
+.search-form {
+    width: 100%;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .search-bar {
+    margin-left: 20%;
     flex-grow: 1;
-    max-width: 600px;
     display: flex;
     align-items: center;
-    border: 1px solid var(--border-color);
-    border-radius: 0.25rem;
-    padding: 0.5rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    background-color: var(--background-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar:hover,
+.search-bar:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
 }
 
 .search-bar input {
     border: none;
     outline: none;
     width: 100%;
-    margin-left: 0.5rem;
+    margin-left: 0.75rem;
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    color: var(--text-color);
+    background-color: transparent;
+}
+
+.search-button {
+    margin-left: 1.5%;
+    padding: 8px 22px;
+    font-size: 16px;
+    font-weight: 500;
+    background-color: var(--grey-700);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    white-space: nowrap;
+}
+
+.search-button:hover {
+    background-color: var(--grey-800);
+    transform: scale(1.05);
 }
 
 .sort-dropdown {
+    color: var(--grey-800);
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.sort-label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.sort-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sort-option {
     display: flex;
     align-items: center;
-    color: var(--grey-800);
-    /* Cập nhật: chữ xanh than */
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.sort-option input[type="radio"] {
+    accent-color: var(--primary-color);
+}
+
+/* Tiêu đề giống phần sắp xếp */
+.filter-title {
+    font-size: 18px;
     font-weight: 500;
-}
-
-.sort-dropdown select {
-    margin-left: 0.5rem;
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 0.25rem;
     color: var(--grey-900);
-    /* Cập nhật: chữ đen */
+    margin-bottom: 0.5rem;
+    font-family: var(--font-sans);
 }
 
-/* Cập nhật màu chữ trong filter checkbox */
-.filter-section li,
-.filter-section label {
+/* Bỏ thụt đầu dòng và đồng bộ màu chữ */
+.filter-options {
+    list-style-type: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.filter-options li {
+    margin-bottom: 0.25rem;
+    padding-left: 0;
+}
+
+.filter-options label {
     color: var(--grey-800);
-    /* Cập nhật: xanh than */
+    font-weight: 500;
+    font-family: var(--font-sans);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Tiêu đề giống các filter khác */
+.filter-section h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--grey-900);
+}
+
+.choices__inner {
+    border-radius: 8px !important;
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+}
+
+.choices__list--dropdown {
+    border-radius: 8px !important;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+.choices__list--multiple .choices__item {
+    background-color: var(--grey-700) !important;
+    color: white !important;
+    border-radius: 16px !important;
 }
 
 .content-wrapper {
@@ -240,21 +346,24 @@ body {
     font-family: var(--font-sans);
     font-weight: 500;
     color: var(--grey-900);
-    /* Cập nhật: tiêu đề filter đen đậm */
 }
 
 .filter-section ul {
     list-style-type: none;
+    padding-left: 0;
+    margin-left: 0;
 }
 
 .filter-section li {
     margin-bottom: 0.25rem;
+    padding-left: 0;
 }
 
 .course-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    flex: 1;
 }
 
 .pagination {
@@ -270,14 +379,11 @@ body {
     background-color: var(--background-color);
     cursor: pointer;
     color: var(--grey-800);
-    /* Cập nhật: chữ xanh than */
 }
 
 .pagination .active {
     background-color: var(--grey-800);
-    /* Cập nhật: nền xanh than */
     color: #FFFFFF;
-    /* Cập nhật: chữ trắng */
 }
 
 /* Footer */
@@ -285,7 +391,6 @@ body {
     background-color: var(--grey-800);
     color: var(--grey-300);
     padding: 60px 20px;
-    /* Giảm padding trên/dưới để footer gọn hơn */
 }
 
 .footer-content {
@@ -293,26 +398,22 @@ body {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 30px;
-    /* Giảm gap để nội dung sát nhau hơn */
     align-items: flex-start;
 }
 
 .company-info {
     flex: 1;
     max-width: 350px;
-    /* Giảm max-width để gọn hơn */
 }
 
 .footer-logo {
     margin-bottom: 15px;
     width: 120px;
-    /* Tăng kích thước logo footer */
 }
 
 .footer-links {
     display: flex;
     gap: 40px;
-    /* Giảm gap giữa các cột */
     flex-wrap: wrap;
 }
 
@@ -320,7 +421,6 @@ body {
     color: var(--grey-100);
     margin-bottom: 15px;
     font-size: 16px;
-    /* Giảm kích thước tiêu đề */
     font-weight: 600;
 }
 
@@ -333,57 +433,12 @@ body {
     color: var(--grey-300);
     text-decoration: none;
     line-height: 1.8;
-    /* Giảm line-height để các link sát nhau hơn */
     font-size: 14px;
-    /* Giảm kích thước chữ */
 }
 
 .social-icons {
     margin-top: 15px;
     width: 100px;
-    /* Điều chỉnh kích thước icon mạng xã hội */
-}
-
-.search-filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.search-bar {
-    flex-grow: 1;
-    max-width: 600px;
-    display: flex;
-    align-items: center;
-    border: 1.5px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0.4rem 0.75rem;
-    background-color: var(--background-color);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.search-bar:hover,
-.search-bar:focus-within {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-}
-
-.search-bar .icon {
-    font-size: 1.2rem;
-    color: var(--primary-color);
-    flex-shrink: 0;
-}
-
-.search-bar input {
-    border: none;
-    outline: none;
-    width: 100%;
-    margin-left: 0.75rem;
-    font-size: 1rem;
-    font-family: var(--font-sans);
-    color: var(--text-color);
-    background-color: transparent;
 }
 
 /* Course Card Styles */
@@ -399,15 +454,16 @@ body {
 
 .course-bottom {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     margin-top: 12px;
+    gap: 8px;
 }
 
 .course-price {
     font-weight: bold;
     color: #000;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .add-to-cart-btn {
@@ -428,7 +484,6 @@ body {
     background-color: #1a1c30;
 }
 
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .content-wrapper {
@@ -445,5 +500,24 @@ body {
 
     .footer-content {
         flex-direction: column;
+    }
+
+    .search-filter-bar {
+        flex-wrap: wrap;
+    }
+
+    .search-container {
+        width: 100%;
+        flex-wrap: nowrap;
+    }
+
+    .search-bar {
+        margin-left: 0;
+        width: 100%;
+        max-width: none;
+    }
+
+    .search-button {
+        margin-left: 0;
     }
 }
