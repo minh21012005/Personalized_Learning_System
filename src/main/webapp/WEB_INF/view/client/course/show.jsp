@@ -66,6 +66,7 @@
                                 <h1 class="page-title">Tất cả khóa học</h1>
                                 <div class="search-filter-bar">
                                     <form action="/course" method="get" class="filter-form">
+                                        <input type="hidden" name="course" value="${param.course}">
                                         <input type="hidden" value="${param.grades}" name="grades" id="grades">
                                         <input type="hidden" value="${param.subjects}" name="subjects" id="subjects">
                                         <input type="hidden" value="${param.sort}" name="sort" id="sort">
@@ -90,6 +91,9 @@
                                                     </svg>
                                                     <input type="text" name="course" value="${param.course}"
                                                         placeholder="Tìm theo khóa học...">
+                                                    <input type="hidden" name="grades" value="${param.grades}">
+                                                    <input type="hidden" name="subjects" value="${param.subjects}">
+                                                    <input type="hidden" name="sort" value="${param.sort}">
                                                 </div>
                                                 <button type="submit" class="search-button">Tìm</button>
                                             </div>
