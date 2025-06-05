@@ -18,6 +18,7 @@ public class SubjectService {
     public SubjectService(SubjectRepository subjectRepository) {
         this.subjectRepository = subjectRepository;
     }
+
     public List<Subject> getSubjectsByGradeId(Long gradeId, boolean isActive) {
         return subjectRepository.findByGradeIdAndIsActive(gradeId, isActive);
     }
@@ -53,27 +54,26 @@ public class SubjectService {
         subjectRepository.save(subject);
     }
 
-    
     public Page<Subject> getAllSubjects(String filterName, Long filterGradeId, Pageable pageable) {
         String searchName = (filterName != null && filterName.trim().isEmpty()) ? null : filterName;
         return subjectRepository.findByFilter(searchName, filterGradeId, pageable);
     }
 
-    
     public Optional<Subject> getSubjectById(Long id) {
         return subjectRepository.findById(id);
     }
 
-    
     public Subject saveSubject(Subject subject) {
         return subjectRepository.save(subject);
     }
 
-    
     public void deleteSubjectById(Long id) {
         subjectRepository.deleteById(id);
     }
 
+    public List<Subject> findAllSubjects() {
 
+        return subjectRepository.findAll();
+    }
 
 }
