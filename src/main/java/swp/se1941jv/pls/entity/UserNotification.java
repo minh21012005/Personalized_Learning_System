@@ -25,4 +25,8 @@ public class UserNotification {
     @MapsId("notificationId")
     @JoinColumn(name = "notification_id")
     Notification notification;
+
+
+    @Column(name = "is_read")
+    Boolean read;
 }
