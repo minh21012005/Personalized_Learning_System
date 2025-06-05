@@ -25,6 +25,9 @@ public class Package extends BaseEntity {
     @Column(name = "description", columnDefinition = "NVARCHAR(255)")
     String description;
 
+    @Column(name = "image")
+    String image;
+
     @Column(name = "price")
     Double price;
 
@@ -32,7 +35,7 @@ public class Package extends BaseEntity {
     Integer durationDays;
 
     @Column(name = "is_active")
-    boolean isActive;
+    boolean active;
 
     @OneToMany(mappedBy = "pkg")
     List<UserPackage> userPackages;
