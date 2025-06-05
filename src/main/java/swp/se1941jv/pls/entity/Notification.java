@@ -31,6 +31,12 @@ public class Notification extends BaseEntity {
     @Column(name = "link")
     String link;
 
+    @Column(name = "target_type", nullable = false)
+    String targetType;
+
+    @Column(name = "target_value")
+    Long targetValue;
+
     @OneToMany(mappedBy = "notification")
     List<UserNotification> userNotifications;
 }
