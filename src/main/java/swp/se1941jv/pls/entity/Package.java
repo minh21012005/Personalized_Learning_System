@@ -25,6 +25,9 @@ public class Package extends BaseEntity {
     @Column(name = "description", columnDefinition = "NVARCHAR(255)")
     String description;
 
+    @Column(name = "image")
+    String image;
+
     @Column(name = "price")
     Double price;
 
