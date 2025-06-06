@@ -24,7 +24,7 @@ public class PackageService {
         return this.packageRepository.findAll();
     }
 
-    public Page<Package> findAllwithPageable(String courseFilter,
+    public Page<Package> findWithFilterPagination(String courseFilter,
             List<String> selectedGrades,
             List<String> selectedSubjects,
             Pageable pageable) {

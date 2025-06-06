@@ -75,7 +75,7 @@ public class PackageController {
                 : new ArrayList<>();
 
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sortObj);
-        Page<Package> pagePackage = this.packageService.findAllwithPageable(courseFilter, selectedGrades,
+        Page<Package> pagePackage = this.packageService.findWithFilterPagination(courseFilter, selectedGrades,
                 selectedSubjects,
                 pageable);
 
