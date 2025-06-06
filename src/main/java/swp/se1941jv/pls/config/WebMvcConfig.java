@@ -44,24 +44,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/lib/**").addResourceLocations("/resources/lib/");
     }
 
-    @Bean("myAppLocaleResolver") 
-    public LocaleResolver localeResolver() { 
-        SessionLocaleResolver slr = new SessionLocaleResolver();
-        slr.setDefaultLocale(new Locale("vi")); 
-        return slr;
-    }
-
-       @Bean
-    public LocaleChangeInterceptor localeChangeInterceptor() {
-        LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
-        lci.setParamName("lang");
-        return lci;
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(localeChangeInterceptor());
-    }
-
-
 }

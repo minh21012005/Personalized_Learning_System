@@ -19,11 +19,23 @@ public class Notification extends BaseEntity {
     @Column(name = "notification_id")
     Long notificationId;
 
+    @Column(name = "title")
+    String title;
+
     @Column(name = "content", columnDefinition = "NVARCHAR(255)")
     String content;
 
-    @Column(name = "is_read")
-    Boolean isRead;
+    @Column(name = "thumbnail")
+    String thumbnail;
+
+    @Column(name = "link")
+    String link;
+
+    @Column(name = "target_type", nullable = false)
+    String targetType;
+
+    @Column(name = "target_value")
+    Long targetValue;
 
     @OneToMany(mappedBy = "notification")
     List<UserNotification> userNotifications;

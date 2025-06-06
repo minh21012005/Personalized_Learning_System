@@ -36,10 +36,11 @@ public class Package extends BaseEntity {
     @Size(max = 2000, message = "Mô tả không được vượt quá 1000 ký tự")
     @NotBlank(message = "Mô tả không được để trống")
     String description;
+    @Column(name = "image")
+    String image;
 
     @Column(name = "price")
     @Min(value = 1000, message = "Giá phải lớn hơn 0")
-
     @NotNull(message = "Giá không được để trống")
     Double price;
 
@@ -50,8 +51,8 @@ public class Package extends BaseEntity {
     Integer durationDays;
 
     @Column(name = "is_active")
-    @NotNull(message = "Trạng thái không được để trống")
-    boolean isActive;
+
+    boolean active;
 
     @OneToMany(mappedBy = "pkg")
     List<UserPackage> userPackages;
