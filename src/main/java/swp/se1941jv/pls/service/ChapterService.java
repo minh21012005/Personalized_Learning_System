@@ -51,4 +51,12 @@ public class ChapterService {
         }
         return chapterRepository.findAll(spec, pageable);
     }
+
+    public void updateChaptersStatus(List<Long> chapterIds) {
+        List<Chapter> chapters = chapterRepository.findAllById(chapterIds);
+        for (Chapter chapter : chapters) {
+            chapter.setStatus(!chapter.getStatus()); // Đảo trạng thái
+        }
+        chapterRepository.saveAll(chapters);
+    }
 }

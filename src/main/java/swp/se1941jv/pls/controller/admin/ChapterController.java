@@ -167,4 +167,26 @@ public class ChapterController {
 
         return "redirect:/admin/subject/" + subjectId;
     }
+
+
+    @PostMapping("admin/subject/{id}/chapters/update-status")
+    public String updateChapterStatus(
+            @PathVariable("id") Long subjectId,
+            @RequestParam("chapterIds") List<Long> chapterIds,
+            RedirectAttributes redirectAttributes
+    ) {
+        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
+        if (subject.isEmpty()) {
+            return "error/404";
+        }
+
+        try {
+            chapterService.updateChaptersStatus(chapterIds);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái chương học thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+        }
+
+        return "redirect:/admin/subject/" + subjectId + "/chapters";
+    }
 }

@@ -192,11 +192,22 @@
                         </c:if>
                         <%--ERROR MESSAGE--%>
 
+                        <%-- THÊM MỚI: Nút Kích hoạt và form gửi chapterIds --%>
+                        <div class="mb-3">
+                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post">
+                                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-success btn-sm" onclick="toggleChapters()">Kích hoạt/Ẩn</button>
+                            </form>
+                        </div>
+                        <%-- /THÊM MỚI --%>
+
                         <%--TABLE--%>
                         <table class="table table-bordered table-hover table-fixed">
                             <thead>
                             <tr>
-                                <th scope="col" class="text-center col-1">ID</th>
+                                <th scope="col" class="text-center col-1">
+                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)">
+                                </th>
                                 <th scope="col" class="text-center  col-2">Tên chương học</th>
                                 <th scope="col" class="text-center  col-6">Mô tả về chương học</th>
                                 <th scope="col" class="text-center  col-2">Trạng thái</th>
@@ -208,7 +219,11 @@
                             <c:if test="${not empty chapters}">
                                 <c:forEach var="chapter" items="${chapters}">
                                     <tr>
-                                        <td class="text-center col-1">${chapter.chapterId}</td>
+                                        <td class="text-center checkbox-header">
+                                            <input type="checkbox" name="chapterIds" form="toggleStatusForm"
+                                                   value="${chapter.chapterId}" data-status="${chapter.status}"
+                                                   onchange="handleCheckboxChange(this)">
+                                        </td>
                                         <td class="col-2">${chapter.chapterName}</td>
                                         <td class="col-5">${chapter.chapterDescription}</td>
                                         <td class="text-center col-2">${chapter.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
@@ -290,6 +305,72 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<%-- THÊM MỚI: JavaScript để kiểm tra checkbox và trạng thái --%>
+<script>
+    let currentStatus = null; // Lưu trạng thái hiện tại của checkbox được chọn
 
+    function toggleChapters() {
+        const checkboxes = document.querySelectorAll('input[name="chapterIds"]:checked');
+        if (checkboxes.length === 0) {
+            alert('Vui lòng chọn ít nhất một chương để thay đổi trạng thái!');
+            return false;
+        }
+        return true;
+    }
+
+    function toggleSelectAll(source) {
+        const checkboxes = document.querySelectorAll('input[name="chapterIds"]');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+        if (source.checked) {
+            if (currentStatus === null) {
+                alert('Vui lòng chọn ít nhất một chương trước khi chọn tất cả!');
+                source.checked = false;
+                return;
+            }
+            checkboxes.forEach(checkbox => {
+                if (checkbox.dataset.status === currentStatus) {
+                    checkbox.checked = true;
+                }
+            });
+        } else {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.disabled = false;
+            });
+            currentStatus = null;
+            selectAllCheckbox.checked = false;
+        }
+    }
+
+    function handleCheckboxChange(checkbox) {
+        const checkboxes = document.querySelectorAll('input[name="chapterIds"]');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+        if (checkbox.checked && currentStatus === null) {
+            currentStatus = checkbox.dataset.status;
+        }
+
+        checkboxes.forEach(cb => {
+            if (currentStatus !== null && cb.dataset.status !== currentStatus) {
+                cb.checked = false;
+                cb.disabled = true;
+            } else {
+                cb.disabled = false;
+            }
+        });
+
+        const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked);
+        if (checkedCheckboxes.length === 0) {
+            currentStatus = null;
+            checkboxes.forEach(cb => cb.disabled = false);
+            selectAllCheckbox.checked = false;
+        } else {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked || cb.disabled);
+            selectAllCheckbox.checked = allChecked;
+        }
+    }
+</script>
+<%-- /THÊM MỚI --%>
 </body>
 </html>
