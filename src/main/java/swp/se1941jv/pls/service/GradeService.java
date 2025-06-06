@@ -59,28 +59,20 @@ public class GradeService {
         }
     }
 
-    
-
-
-    
     public Optional<Grade> getGradeById(Long id) {
         return gradeRepository.findById(id);
     }
 
-    
-
-
-    
     public void deleteGradeById(Long id) {
         gradeRepository.deleteById(id);
     }
 
-    
     public List<Grade> getActiveGrades() {
         return gradeRepository.findByIsActiveTrue();
     }
 
-
-
+    public List<Grade> getAllGradesIsActive() {
+        return gradeRepository.findByIsActiveTrue(); // Chỉ lấy các Grade đang hoạt động
+    }
 
 }

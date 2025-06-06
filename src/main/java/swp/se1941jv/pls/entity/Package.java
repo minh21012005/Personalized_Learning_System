@@ -35,11 +35,15 @@ public class Package extends BaseEntity {
     Integer durationDays;
 
     @Column(name = "is_active")
-    boolean active;
+    Boolean isActive;
 
     @OneToMany(mappedBy = "pkg")
     List<UserPackage> userPackages;
 
     @OneToMany(mappedBy = "pkg")
     List<PackageSubject> packageSubjects;
+
+    @ManyToOne()
+    @JoinColumn(name = "grade_id")
+    Grade grade;
 }

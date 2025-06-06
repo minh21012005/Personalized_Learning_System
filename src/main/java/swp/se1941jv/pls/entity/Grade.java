@@ -9,13 +9,13 @@ import java.util.List;
 @Entity
 @Table(name = "grades")
 // @Data
-@Getter 
+@Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = {"subjects"}) 
-@EqualsAndHashCode(exclude = {"subjects"})
+@ToString(exclude = { "subjects" })
+@EqualsAndHashCode(exclude = { "subjects" })
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Grade {
     @Id
@@ -32,5 +32,7 @@ public class Grade {
     @OneToMany(mappedBy = "grade")
     List<Subject> subjects;
 
+    @OneToMany(mappedBy = "grade")
+    List<Package> packages;
 
 }
