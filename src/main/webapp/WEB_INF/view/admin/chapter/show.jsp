@@ -54,6 +54,51 @@
             height: 40px;
             width: 100%;
         }
+
+        * Style for pagination container */
+        .pagination-container {
+            position: fixed;
+            bottom: 50px;
+            /* Position above the footer (footer height is 40px) */
+            left: 250px;
+            /* Offset by sidebar width */
+            width: calc(100% - 250px);
+            /* Span remaining width */
+            max-width: 1140px;
+            /* Match container-fluid max-width */
+            background-color: #f8f9fa;
+            /* Match content background */
+            padding: 10px 20px;
+            z-index: 1000;
+            /* Ensure it appears above other content */
+        }
+
+        /* Tùy chỉnh phân trang */
+        .pagination .page-link {
+            color: black;
+            /* Màu chữ đen */
+            border: 1px solid #dee2e6;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+            color: black;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #d3d3d3;
+            /* Màu nền mới cho trang hiện tại */
+            border-color: #d3d3d3;
+            color: black;
+            /* Giữ chữ đen */
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
         @media (max-width: 767.98px) {
             .sidebar {
                 width: 200px;
@@ -64,9 +109,11 @@
                 transform: translateX(-100%);
                 z-index: 1000;
             }
+
             .sidebar.active {
                 transform: translateX(0);
             }
+
             .content {
                 padding: 15px;
             }
@@ -98,28 +145,39 @@
                             <h3>Danh sách chương học trong ${subject.subjectName}</h3>
                         </div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                            <!-- Bộ lọc theo tên chương học -->
-                            <form action="/admin/subject/${subject.subjectId}" method="get"
+                            <!-- Bộ lọc -->
+                            <form action="/admin/subject/${subject.subjectId}/chapters" method="get"
                                   class="d-flex flex-column flex-md-row align-items-md-center  mb-2 mb-md-0">
                                 <label for="chapterName" class="mb-0 fw-bold me-md-2">Tìm chương:</label>
-                                <div class="d-flex gap-2 ">
+                                <div class="d-flex gap-2 me-md-2 ">
                                     <input type="text" id="chapterName" name="chapterName"
                                            class="form-control form-control-sm"
                                            value="${param.chapterName}"
                                            placeholder="Tìm theo tên chương...">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
                                 </div>
+                                <label for="status" class="mb-0 fw-bold me-md-2">Trạng thái:</label>
+                                <div class="d-flex gap-2 me-md-2">
+                                    <select id="status" name="status" class="form-control form-control-sm">
+                                        <option value="" ${param.status == null ? 'selected' : ''}>Tất cả</option>
+                                        <option value="true" ${param.status == 'true' ? 'selected' : ''}>Đang hoạt động</option>
+                                        <option value="false" ${param.status == 'false' ? 'selected' : ''}>Không hoạt động</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
                             </form>
+                            <!-- Bộ lọc -->
 
                             <!-- Nút tạo chương học mới -->
-                            <a href="/admin/subject/${subject.subjectId}/save" class="btn btn-primary">Tạo chương học mới</a>
+                            <a href="/admin/subject/${subject.subjectId}/chapters/save" class="btn btn-primary">Tạo
+                                chương học mới</a>
                         </div>
 
                         <%--SUCESS MESSAGE--%>
                         <c:if test="${not empty successMessage}">
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     ${successMessage}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
                             </div>
                         </c:if>
                         <%--SUCESS MESSAGE--%>
@@ -128,7 +186,8 @@
                         <c:if test="${not empty errorMessage}">
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     ${errorMessage}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
                             </div>
                         </c:if>
                         <%--ERROR MESSAGE--%>
@@ -138,36 +197,79 @@
                             <thead>
                             <tr>
                                 <th scope="col" class="text-center col-1">ID</th>
-                                <th scope="col" class="text-center  col-3">Tên chương học</th>
+                                <th scope="col" class="text-center  col-2">Tên chương học</th>
                                 <th scope="col" class="text-center  col-6">Mô tả về chương học</th>
-                                <th scope="col" class="text-center  col-2">Thao tác</th>
+                                <th scope="col" class="text-center  col-2">Trạng thái</th>
+                                <th scope="col" class="text-center  col-1">Thao tác</th>
 
                             </tr>
                             </thead>
                             <tbody>
-                                <c:if test="${not empty chapters}">
-                                    <c:forEach var="chapter" items="${chapters}">
-                                        <tr>
-                                            <td class="text-center col-1">${chapter.chapterId}</td>
-                                            <td class="col-3">${chapter.chapterName}</td>
-                                            <td class="col-6">${chapter.chapterDescription}</td>
-                                            <td class="text-center">
-                                                <a href="/admin/subject/${subject.subjectId}/save?chapterId=${chapter.chapterId}"
-                                                   class="btn btn-warning btn-sm">
-                                                    Cập nhật
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </c:if>
-                                <c:if test="${empty chapters}">
+                            <c:if test="${not empty chapters}">
+                                <c:forEach var="chapter" items="${chapters}">
                                     <tr>
-                                        <td colspan="4" class="text-center">Chưa có chương học nào.</td>
+                                        <td class="text-center col-1">${chapter.chapterId}</td>
+                                        <td class="col-2">${chapter.chapterName}</td>
+                                        <td class="col-5">${chapter.chapterDescription}</td>
+                                        <td class="text-center col-2">${chapter.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
+                                        <td class="text-center col-2">
+                                            <a href="/admin/subject/${subject.subjectId}/chapters/save?chapterId=${chapter.chapterId}"
+                                               class="btn btn-warning btn-sm">
+                                                Cập nhật
+                                            </a>
+                                        </td>
                                     </tr>
-                                </c:if>
+                                </c:forEach>
+                            </c:if>
+                            <c:if test="${empty chapters}">
+                                <tr>
+                                    <td colspan="4" class="text-center">Chưa có chương học nào.</td>
+                                </tr>
+                            </c:if>
                             </tbody>
                         </table>
                         <%--TABLE--%>
+
+                        <%--PHÂN TRANG--%>
+                        <div class="pagination-container">
+                            <c:set var="queryString" value=""/>
+
+                            <c:if test="${not empty chapterName}">
+                                <c:set var="queryString" value="${queryString}&role=${chapterName}"/>
+                            </c:if>
+
+                            <c:if test="${not empty status}">
+                                <c:set var="queryString" value="${queryString}&name=${status}"/>
+                            </c:if>
+                            <c:if test="${totalPages >1}">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
+                                            <a class="page-link"
+                                               href="/admin/subject/48/chapters?page=${currentPage - 1}${queryString}"
+                                               aria-label="Previous">
+                                                <span aria-hidden="true">«</span>
+                                            </a>
+                                        </li>
+                                        <c:forEach begin="1" end="${totalPages}" varStatus="loop">
+                                            <li
+                                                    class="page-item ${loop.index eq currentPage ? 'active' : ''}">
+                                                <a class="page-link"
+                                                   href="/admin/subject/48/chapters?page=${loop.index}${queryString}">${loop.index}</a>
+                                            </li>
+                                        </c:forEach>
+                                        <li class="page-item ${currentPage eq totalPages ? 'disabled' : ''}">
+                                            <a class="page-link"
+                                               href="/admin/subject/48/chapters?page=${currentPage + 1}${queryString}"
+                                               aria-label="Next">
+                                                <span aria-hidden="true">»</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </c:if>
+                        </div>
+                        <%--PHÂN TRANG--%>
 
                     </div>
                 </div>
@@ -178,9 +280,6 @@
 
 </div>
 <%--    MAIN CONTAINER--%>
-
-
-
 
 
 <!-- Footer -->

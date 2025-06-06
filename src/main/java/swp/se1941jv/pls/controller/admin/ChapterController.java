@@ -1,6 +1,10 @@
 package swp.se1941jv.pls.controller.admin;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,24 +29,58 @@ public class ChapterController {
         this.chapterService = chapterService;
     }
 
-    @GetMapping("admin/subject/{id}")
+    @GetMapping("admin/subject/{id}/chapters")
     public String getDetailSubjectPage(
             Model model,
-            @PathVariable("id") Long id) {
+            @PathVariable("id") Long id,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Optional<String> page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") Optional<String> size,
+            @RequestParam(value = "chapterName") Optional<String> chapterName,
+            @RequestParam(value = "status") Optional<Boolean> status
+
+    ) {
         Optional<Subject> subject = subjectService.getSubjectById(id);
         if (subject.isEmpty()) {
             return "error/404";
         }
-        List<Chapter> chapters = chapterService.getChaptersBySubject(subject.get());
 
+        int pageNumber;
+        try {
+            pageNumber = page.map(Integer::parseInt).orElse(1);
+        } catch (Exception e) {
+            pageNumber = 1;
+        }
+
+        int pageSize;
+        try {
+            pageSize = size.map(Integer::parseInt).orElse(1);
+        } catch (Exception e) {
+            pageSize = 1;
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "chapterId"));
+
+        // Lấy giá trị status
+        Boolean chapterStatus = status.orElse(null); // null nghĩa là không lọc theo status
+        String searchName = chapterName.orElse(""); // Chuỗi rỗng nghĩa là không lọc theo tên
+
+
+        Page<Chapter> chapters = chapterService.findChapters(id,searchName, chapterStatus,pageable);
+
+
+            // Truyền dữ liệu vào model để hiển thị trên JSP
         model.addAttribute("subject", subject.get());
-        model.addAttribute("chapters", chapters);
-        model.addAttribute("newChapter", new Chapter());
+        model.addAttribute("chapters", chapters.getContent());
+        model.addAttribute("currentPage", pageNumber);
+        model.addAttribute("totalPages", chapters.getTotalPages());
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("chapterName", searchName);
+        model.addAttribute("status", chapterStatus);
 
         return "admin/chapter/show";
     }
 
-    @GetMapping("admin/subject/{id}/save")
+    @GetMapping("admin/subject/{id}/chapters/save")
     public String saveChapterToSubjectPage(
             Model model,
             @PathVariable("id") Long subjectId,
@@ -71,7 +109,7 @@ public class ChapterController {
         return "admin/chapter/save";
     }
 
-    @PostMapping("admin/subject/{id}/save")
+    @PostMapping("admin/subject/{id}/chapters/save")
     public String saveChapterToSubject(
             Model model,
             @PathVariable("id") Long subjectId,

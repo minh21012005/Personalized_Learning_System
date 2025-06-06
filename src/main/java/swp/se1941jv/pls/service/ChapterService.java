@@ -1,9 +1,13 @@
 package swp.se1941jv.pls.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.repository.ChapterRepository;
+import swp.se1941jv.pls.service.specification.ChapterSpecifications;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,5 +33,22 @@ public class ChapterService {
 
     public Optional<Chapter> getChapterByChapterId(Long chapterId) {
         return chapterRepository.getChapterByChapterId(chapterId);
+    }
+
+    public Page<Chapter> findChapters(Long subjectId, String chapterName, Boolean status, Pageable pageable) {
+        Specification<Chapter> spec = Specification.where(null);
+        if(subjectId != null){
+            spec = spec.and(ChapterSpecifications.hasSubjectId(subjectId));
+        }
+
+        if (chapterName != null && !chapterName.isEmpty()) {
+            spec = spec.and(ChapterSpecifications.hasName(chapterName));
+
+        }
+
+        if (status != null) {
+            spec = spec.and(ChapterSpecifications.hasStatus(status));
+        }
+        return chapterRepository.findAll(spec, pageable);
     }
 }
