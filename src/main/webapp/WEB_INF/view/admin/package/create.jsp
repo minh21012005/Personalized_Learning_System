@@ -41,6 +41,13 @@
                         /* Scrollable if content exceeds height */
                     }
 
+                    .placeholder-message {
+                        padding: 10px;
+                        margin-top: 8px;
+                        background-color: #f8f9fa;
+                        border-radius: 5px;
+                        font-size: 0.95rem;
+                    }
 
                     header {
                         position: fixed;
@@ -114,7 +121,8 @@
                                     ${error}
                                 </div>
                             </c:if>
-                            <form:form method="post" action="/admin/package/create" modelAttribute="newPackage">
+                            <form:form method="post" action="/admin/package/create" modelAttribute="newPackage"
+                                enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <c:set var="errorName">
                                         <form:errors path="name" cssClass="invalid-feedback" />
@@ -165,26 +173,67 @@
                                     </div>
                                 </div>
 
-
+                                <div class="mb-3">
+                                    <c:set var="errorGrade">
+                                        <form:errors path="grade.gradeId" cssClass="invalid-feedback" />
+                                    </c:set>
+                                    <label for="gradeId" class="form-label">Khối lớp</label>
+                                    <form:select path="grade.gradeId"
+                                        class="form-select ${not empty errorGrade ? 'is-invalid' : ''}" id="gradeId"
+                                        onchange="this.form.submit()">
+                                        <form:option value="" label="-- Chọn khối lớp --" />
+                                        <c:forEach var="grade" items="${grades}">
+                                            <form:option value="${grade.gradeId}">${grade.gradeName}</form:option>
+                                        </c:forEach>
+                                    </form:select>
+                                    ${errorGrade}
+                                </div>
 
 
                         </div>
                         <div class="mb-3">
+                            <c:set var="errorGrade">
+                                <form:errors path="grade.gradeId" cssClass="invalid-feedback" />
+                            </c:set>
                             <label for="subjects" class="form-label">Môn học</label>
                             <select name="subjects" id="subjects" multiple class="form-select">
                                 <c:choose>
                                     <c:when test="${not empty subjects}">
                                         <c:forEach var="subject" items="${subjects}">
-                                            <option value="${subject.subjectId}">${subject.subjectName}</option>
+                                            <option value="${subject.subjectId}">
+                                                ${subject.subjectName}</option>
                                         </c:forEach>
                                     </c:when>
                                     <c:otherwise>
-                                        <option value="" disabled>Không có môn học nào</option>
+
                                     </c:otherwise>
                                 </c:choose>
                             </select>
+                            <c:if test="${empty subjects}">
+                                <div class="text-muted text-center placeholder-message">
+                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách mon học đang trống
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty subjectsError}">
+                                <div class="invalid-feedback">${subjectsError}</div>
+                            </c:if>
+                        </div>
+                        <div class="mb-3">
+                            <c:set var="errorImage">
+                                <form:errors path="image" cssClass="invalid-feedback" />
+                            </c:set>
+                            <label for="image" class="form-label">Avatar (bắt buộc):</label>
+                            <input class="form-control ${not empty errorImage ? 'is-invalid' : ''}" type="file"
+                                id="image" name="file" accept=".png, .jpg, .jpeg" required />
+                            ${errorImage}
                         </div>
 
+
+
+
+                        <div class="col-12 mt-3">
+                            <img style="max-height: 250px; display: none;" alt="Image not found" id="image" />
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label d-block">Trạng thái</label>
