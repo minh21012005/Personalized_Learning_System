@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.controller.admin;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,25 +13,31 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
+import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.service.SubjectService;
+import swp.se1941jv.pls.service.GradeService;
 import swp.se1941jv.pls.service.PackageService;
 
 @Controller
 public class PackageController {
     private final SubjectService subjectService;
     private final PackageService packageService;
+    private final GradeService gradeService;
 
-    public PackageController(SubjectService subjectService, PackageService packageService) {
+    public PackageController(SubjectService subjectService, PackageService packageService, GradeService gradeService) {
         this.subjectService = subjectService;
         this.packageService = packageService;
+        this.gradeService = gradeService;
 
     }
 
     @GetMapping("/admin/package/create")
     public String getCreatePackage(Model model) {
         List<Subject> subjects = this.subjectService.findAllSubjects();
+        List<Grade> grades = this.gradeService.getAllGradesIsActive();
+        model.addAttribute("grades", grades);
         model.addAttribute("subjects", subjects);
         model.addAttribute("newPackage", new Package());
         return "admin/package/create";

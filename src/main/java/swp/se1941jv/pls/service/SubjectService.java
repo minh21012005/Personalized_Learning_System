@@ -76,4 +76,9 @@ public class SubjectService {
         return subjectRepository.findAll();
     }
 
+    public List<Subject> fetchAllSubjects() {
+        return this.subjectRepository.findByIsActiveTrue();
+
+    }
+
 }

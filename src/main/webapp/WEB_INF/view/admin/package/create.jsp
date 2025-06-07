@@ -165,107 +165,120 @@
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label for="packageSubjects"> Subjects</label>
-                                    <select name="subjects" id="subjects" multiple>
-                                        <c:forEach var="subject" items="${subjects}">
-                                            <option value="${subject.subjectId}"> ${subject.subjectName}
-                                            </option>
-
-
-                                        </c:forEach>
-                                    </select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label d-block">Trạng thái</label>
-                                    <div class="form-check form-check-inline">
-                                        <form:radiobutton path="active" value="true" cssClass="form-check-input"
-                                            id="activeTrue" />
-                                        <label class="form-check-label" for="activeTrue">Active</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <form:radiobutton path="active" value="false" cssClass="form-check-input"
-                                            id="activeFalse" />
-                                        <label class="form-check-label" for="activeFalse">Inactive</label>
-                                    </div>
-                                </div>
 
 
 
-
-
-
-                                <button type="submit" class="btn btn-primary">Lưu</button>
-                                <a href="/admin/grade" class="btn btn-secondary">Hủy</a>
-                            </form:form>
                         </div>
+                        <div class="mb-3">
+                            <label for="subjects" class="form-label">Môn học</label>
+                            <select name="subjects" id="subjects" multiple class="form-select">
+                                <c:choose>
+                                    <c:when test="${not empty subjects}">
+                                        <c:forEach var="subject" items="${subjects}">
+                                            <option value="${subject.subjectId}">${subject.subjectName}</option>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <option value="" disabled>Không có môn học nào</option>
+                                    </c:otherwise>
+                                </c:choose>
+                            </select>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Trạng thái</label>
+                            <div class="form-check form-check-inline">
+                                <form:radiobutton path="active" value="true" cssClass="form-check-input"
+                                    id="activeTrue" />
+                                <label class="form-check-label" for="activeTrue">Active</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <form:radiobutton path="active" value="false" cssClass="form-check-input"
+                                    id="activeFalse" />
+                                <label class="form-check-label" for="activeFalse">Inactive</label>
+                            </div>
+                        </div>
+
+
+
+
+
+
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                        <a href="/admin/grade" class="btn btn-secondary">Hủy</a>
+                        </form:form>
                     </div>
+                </div>
 
 
-                    <!-- Include Footer -->
-                    <footer>
-                        <jsp:include page="../layout/footer.jsp" />
-                    </footer>
+                <!-- Include Footer -->
+                <footer>
+                    <jsp:include page="../layout/footer.jsp" />
+                </footer>
 
-                    <!-- End of <body> -->
-                    <script
-                        src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@4.0.1/dist/js/multi-select-tag.min.js"></script>
-                    <!-- Bootstrap 5 JS -->
-                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <!-- End of <body> -->
+                <script
+                    src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@4.0.1/dist/js/multi-select-tag.min.js"></script>
+                <!-- Bootstrap 5 JS -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+                <script>
+                    var tagSelector = new MultiSelectTag('subjects', {
+                        maxSelection: 5,              // default unlimited.
+                        required: true,               // default false.
+                        placeholder: 'Search tags',   // default 'Search'.
+                        onChange: function (selected) { // Callback when selection changes.
+                            console.log('Selection changed:', selected);
+                        }
+                    }
+
+                    );
+
+
+                    // Ngăn người dùng thêm giá trị tùy ý
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const searchInput = document.querySelector('.multi-select-tag .search-input');
+                        if (searchInput) {
+                            searchInput.addEventListener('keydown', function (e) {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault(); // Ngăn hành vi mặc định của Enter
+                                    if (!this.value || !Array.from(document.getElementById('subjects').options).some(opt => opt.text.toLowerCase().includes(this.value.toLowerCase()))) {
+                                        this.value = ''; // Xóa giá trị nếu không hợp lệ
+                                    }
+                                }
+                            });
+                        }
+                    });
+                </script>
+                <script>
+                    // Hàm chung để ngăn dấu chấm/phẩy và chỉ giữ số nguyên
+                    function restrictToIntegers(inputElement) {
+                        // Ngăn nhập dấu chấm và dấu phẩy
+                        inputElement.addEventListener("keypress", function (e) {
+                            if (e.key === '.' || e.key === ',') {
+                                e.preventDefault();
+                            }
+                        });
+
+                        // Chỉ giữ lại số nguyên
+                        inputElement.addEventListener("input", function () {
+                            let value = this.value.replace(/\D/g, ''); // Chỉ giữ lại số
+                            this.value = value;
+                        });
+                    }
+
+                    // Áp dụng cho trường price
+                    restrictToIntegers(document.getElementById("price"));
+
+                    // Áp dụng cho trường durationDays
+                    restrictToIntegers(document.getElementById("durationDays"));
+
+
+                </script>
 
             </body>
 
-            <script>
-                var tagSelector = new MultiSelectTag('subjects', {
-                    maxSelection: 5,              // default unlimited.
-                    required: true,               // default false.
-                    placeholder: 'Search tags',   // default 'Search'.
-                    onChange: function (selected) { // Callback when selection changes.
-                        console.log('Selection changed:', selected);
-                    }
-                }
 
-                );
-
-
-                // Ngăn người dùng thêm giá trị tùy ý
-                document.addEventListener('DOMContentLoaded', function () {
-                    const searchInput = document.querySelector('.multi-select-tag .search-input');
-                    if (searchInput) {
-                        searchInput.addEventListener('keydown', function (e) {
-                            if (e.key === 'Enter') {
-                                e.preventDefault(); // Ngăn hành vi mặc định của Enter
-                                if (!this.value || !Array.from(document.getElementById('subjects').options).some(opt => opt.text.toLowerCase().includes(this.value.toLowerCase()))) {
-                                    this.value = ''; // Xóa giá trị nếu không hợp lệ
-                                }
-                            }
-                        });
-                    }
-                });
-            </script>
-            <script>
-                // Hàm chung để ngăn dấu chấm/phẩy và chỉ giữ số nguyên
-                function restrictToIntegers(inputElement) {
-                    // Ngăn nhập dấu chấm và dấu phẩy
-                    inputElement.addEventListener("keypress", function (e) {
-                        if (e.key === '.' || e.key === ',') {
-                            e.preventDefault();
-                        }
-                    });
-
-                    // Chỉ giữ lại số nguyên
-                    inputElement.addEventListener("input", function () {
-                        let value = this.value.replace(/\D/g, ''); // Chỉ giữ lại số
-                        this.value = value;
-                    });
-                }
-
-                // Áp dụng cho trường price
-                restrictToIntegers(document.getElementById("price"));
-
-                // Áp dụng cho trường durationDays
-                restrictToIntegers(document.getElementById("durationDays"));
-            </script>
 
             </html>

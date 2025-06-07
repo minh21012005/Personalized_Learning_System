@@ -1,6 +1,5 @@
 package swp.se1941jv.pls.repository;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +21,9 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     Page<Grade> findByGradeNameContainingIgnoreCase(String gradeName, Pageable pageable);
 
     Page<Grade> findByIsActive(boolean isActive, Pageable pageable);
+
     List<Grade> findByIsActiveTrue();
-List<Grade> findByIsActiveFalse();
+
+    List<Grade> findByIsActiveFalse();
 
 }
