@@ -146,7 +146,7 @@
                                                 <img src="hinh-khoa-hoc.jpg" alt="Course Image" class="course-img">
                                                 <h3 class="course-title">${pkg.name}</h3>
                                                 <p class="course-author">Tác giả: </p>
-                                                <p class="course-info">Các môn học: </p>
+                                                <!-- <p class="course-info">Khối: ${pkg.grade.gradeName} </p> -->
                                                 <div class="mt-auto course-bottom">
                                                     <span class="course-price">
                                                         <fmt:formatNumber value="${pkg.price}" type="number"
@@ -185,7 +185,8 @@
                                                 <a class="page-link"
                                                     href="/course?page=${currentPage - 1}${queryString}"
                                                     aria-label="Previous">
-                                                    <span aria-hidden="true">«</span>
+                                                    <span aria-hidden="true">
+                                                        < </span>
                                                 </a>
                                             </li>
                                             <c:forEach begin="1" end="${totalPage}" varStatus="loop">
@@ -198,7 +199,7 @@
                                                 <a class="page-link"
                                                     href="/course?page=${currentPage + 1}${queryString}"
                                                     aria-label="Next">
-                                                    <span aria-hidden="true">»</span>
+                                                    <span aria-hidden="true">></span>
                                                 </a>
                                             </li>
                                         </ul>
@@ -251,5 +252,8 @@
                         <script
                             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
                     </body>
+                    <script>
+                        lucide.createIcons();
+                    </script>
 
                     </html>

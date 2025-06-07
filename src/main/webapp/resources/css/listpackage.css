@@ -359,13 +359,6 @@ body {
     padding-left: 0;
 }
 
-.course-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    flex: 1;
-}
-
 .pagination {
     display: flex;
     justify-content: center;
@@ -441,7 +434,13 @@ body {
     width: 100px;
 }
 
-/* Course Card Styles */
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    flex: 1;
+}
+
 .course-card {
     border: 1px solid #eee;
     padding: 16px;
@@ -450,6 +449,27 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-width: 0;
+    /* Prevents overflow issues */
+    width: 100%;
+    /* Ensures cards take full available width */
+    box-sizing: border-box;
+    /* Ensures padding is included in width */
+}
+
+.course-title {
+    white-space: normal;
+    /* Allows text to wrap */
+    overflow: hidden;
+    /* Hides overflow text */
+    text-overflow: ellipsis;
+    /* Adds ellipsis for long text */
+    display: -webkit-box;
+    /* For multi-line truncation */
+    -webkit-line-clamp: 2;
+    /* Limits to 2 lines */
+    -webkit-box-orient: vertical;
+    /* Vertical orientation for text */
 }
 
 .course-bottom {
