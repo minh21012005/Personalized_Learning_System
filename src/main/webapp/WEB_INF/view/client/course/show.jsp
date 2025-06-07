@@ -65,7 +65,7 @@
                             <div class="container">
                                 <h1 class="page-title">Tất cả khóa học</h1>
                                 <div class="search-filter-bar">
-                                    <form action="/course" method="get" class="filter-form">
+                                    <form action="/parent/course" method="get" class="filter-form">
                                         <input type="hidden" name="course" value="${param.course}">
                                         <input type="hidden" value="${param.grades}" name="grades" id="grades">
                                         <input type="hidden" value="${param.subjects}" name="subjects" id="subjects">
@@ -80,7 +80,7 @@
                                         </button>
                                     </form>
                                     <div class="search-wrapper">
-                                        <form action="/course" method="get" class="search-form">
+                                        <form action="/parent/course" method="get" class="search-form">
                                             <div class="search-container">
                                                 <div class="search-bar">
                                                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="25"
@@ -144,7 +144,9 @@
                                         <c:forEach var="pkg" items="${packages}">
                                             <div class="course-card">
                                                 <img src="hinh-khoa-hoc.jpg" alt="Course Image" class="course-img">
-                                                <h3 class="course-title">${pkg.name}</h3>
+                                                <a href="/parent/course/detail/${pkg.packageId}">
+                                                    <h3 class="course-title">${pkg.name}</h3>
+                                                </a>
                                                 <p class="course-author">Tác giả: </p>
                                                 <!-- <p class="course-info">Khối: ${pkg.grade.gradeName} </p> -->
                                                 <div class="mt-auto course-bottom">
@@ -183,7 +185,7 @@
                                         <ul class="pagination justify-content-center">
                                             <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
                                                 <a class="page-link"
-                                                    href="/course?page=${currentPage - 1}${queryString}"
+                                                    href="/parent/course?page=${currentPage - 1}${queryString}"
                                                     aria-label="Previous">
                                                     <span aria-hidden="true">
                                                         < </span>
@@ -192,12 +194,12 @@
                                             <c:forEach begin="1" end="${totalPage}" varStatus="loop">
                                                 <li class="page-item ${loop.index eq currentPage ? 'active' : ''}">
                                                     <a class="page-link"
-                                                        href="/course?page=${loop.index}${queryString}">${loop.index}</a>
+                                                        href="/parent/course?page=${loop.index}${queryString}">${loop.index}</a>
                                                 </li>
                                             </c:forEach>
                                             <li class="page-item ${currentPage eq totalPage ? 'disabled' : ''}">
                                                 <a class="page-link"
-                                                    href="/course?page=${currentPage + 1}${queryString}"
+                                                    href="/parent/course?page=${currentPage + 1}${queryString}"
                                                     aria-label="Next">
                                                     <span aria-hidden="true">></span>
                                                 </a>

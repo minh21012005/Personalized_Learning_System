@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Redirect to new URL
             const queryString = buildQueryString(params);
-            window.location.href = '/course' + (queryString ? '?' + queryString : '');
+            window.location.href = '/parent/course' + (queryString ? '?' + queryString : '');
         } catch (error) {
             console.error('Error processing filter form submission:', error);
         }
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Redirect to new URL
             const queryString = buildQueryString(params);
-            window.location.href = '/course' + (queryString ? '?' + queryString : '');
+            window.location.href = '/parent/course' + (queryString ? '?' + queryString : '');
         } catch (error) {
             console.error('Error processing search form submission:', error);
         }

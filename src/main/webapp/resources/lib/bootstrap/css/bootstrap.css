@@ -381,12 +381,16 @@ sup {
 }
 
 a {
-  color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
-  text-decoration: underline;
+  color: #0F172A;
+  text-decoration: none;
+  /* Bỏ gạch chân ở đây */
 }
 
 a:hover {
-  --bs-link-color-rgb: var(--bs-link-hover-color-rgb);
+  color: #1E293B;
+  /* Thêm màu hover tùy ý */
+  text-decoration: none;
+  /* Đảm bảo hover cũng không có gạch chân */
 }
 
 a:not([href]):not([class]),
@@ -394,6 +398,7 @@ a:not([href]):not([class]):hover {
   color: inherit;
   text-decoration: none;
 }
+
 
 pre,
 code,

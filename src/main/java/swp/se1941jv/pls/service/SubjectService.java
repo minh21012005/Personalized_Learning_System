@@ -75,4 +75,8 @@ public class SubjectService {
         return this.subjectRepository.findByIsActiveTrue();
     }
 
+    public Optional<Subject> findById(long id) {
+        return this.subjectRepository.findById(id);
+    }
+
 }
