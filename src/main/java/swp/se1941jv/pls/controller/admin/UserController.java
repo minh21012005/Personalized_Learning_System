@@ -44,9 +44,9 @@ public class UserController {
     }
 
     @GetMapping("/admin/user")
-    public String getUserPage(@RequestParam Optional<String> page,
-            @RequestParam Optional<String> role,
-            @RequestParam Optional<String> name,
+        public String getUserPage(@RequestParam Optional<String> page,
+                @RequestParam Optional<String> role,
+                @RequestParam Optional<String> name,
             Model model) {
         int pageNumber;
         try {

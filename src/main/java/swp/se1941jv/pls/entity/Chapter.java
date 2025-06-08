@@ -26,6 +26,9 @@ public class Chapter extends BaseEntity {
     @Column(name = "chapter_description", columnDefinition = "NVARCHAR(255)")
     String chapterDescription;
 
+    @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    Boolean status;
+
     @ManyToOne
     @JoinColumn(name = "subject_id")
     Subject subject;
