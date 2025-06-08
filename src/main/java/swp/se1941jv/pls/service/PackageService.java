@@ -72,4 +72,28 @@ public class PackageService {
 
         return savedPackage;
     }
+
+    public Page<Package> getFilteredPackage(String keyword, String isActive, Long gradeId, Pageable pageable) {
+        if (gradeId != null && keyword != null && isActive != null && !isActive.isEmpty()) {
+            return packageRepository.findByGradeGradeIdAndActiveAndNameContainingIgnoreCase(gradeId,
+                    Boolean.parseBoolean(isActive), keyword,
+                    pageable);
+        } else if (gradeId != null && keyword != null) {
+            return packageRepository.findByGradeGradeIdAndNameContainingIgnoreCase(gradeId, keyword, pageable);
+        } else if (gradeId != null && isActive != null && !isActive.isEmpty()) {
+            return packageRepository.findByGradeGradeIdAndActive(gradeId, Boolean.parseBoolean(isActive), pageable);
+        } else if (gradeId != null) {
+            return packageRepository.findByGradeGradeId(gradeId, pageable);
+        } else if (keyword != null && isActive != null && !isActive.isEmpty()) {
+            return packageRepository.findByNameContainingIgnoreCaseAndActive(keyword, Boolean.parseBoolean(isActive),
+                    pageable);
+        } else if (keyword != null) {
+            return packageRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        } else if (isActive != null && !isActive.isEmpty()) {
+            return packageRepository.findByActive(Boolean.parseBoolean(isActive), pageable);
+        } else {
+            return packageRepository.findAll(pageable);
+        }
+    }
+
 }

@@ -24,6 +24,15 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
     // Trả về tất cả (không lọc theo keyword hoặc isActive)
     Page<Package> findAll(Pageable pageable);
 
+    Page<Package> findByGradeGradeIdAndActive(Long gradeId, boolean active, Pageable pageable);
+
+    Page<Package> findByGradeGradeIdAndNameContainingIgnoreCase(Long gradeId, String name, Pageable pageable);
+
+    Page<Package> findByGradeGradeId(Long gradeId, Pageable pageable);
+
+    Page<Package> findByGradeGradeIdAndActiveAndNameContainingIgnoreCase(Long gradeId, boolean active, String name,
+            Pageable pageable);
+
     // Truy vấn nâng cao với Specification
     Page<Package> findAll(Specification<Package> spec, Pageable pageable);
 }

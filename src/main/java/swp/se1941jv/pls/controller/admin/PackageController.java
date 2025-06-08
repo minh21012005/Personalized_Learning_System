@@ -1,10 +1,20 @@
 package swp.se1941jv.pls.controller.admin;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,6 +46,33 @@ public class PackageController {
         this.packageService = packageService;
         this.gradeService = gradeService;
         this.uploadService = uploadService;
+
+    }
+
+    @GetMapping("/admin/package")
+    public String getPackagePage(Model model,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String isActive,
+            @RequestParam(required = false) Long gradeId) {
+
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "packageId"));
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.isEmpty()) {
+                keyword = null;
+            }
+        }
+
+        Page<Package> packagePage = this.packageService.getFilteredPackage(keyword, isActive, gradeId, pageable);
+        List<Grade> grades = this.gradeService.getAllGradesIsActive();
+        model.addAttribute("grades", grades);
+        model.addAttribute("packages", packagePage.getContent());
+        model.addAttribute("currentPage", packagePage.getNumber());
+        model.addAttribute("totalPages", packagePage.getTotalPages());
+        model.addAttribute("totalItems", packagePage.getTotalElements());
+
+        return "admin/package/show";
 
     }
 
@@ -121,4 +158,5 @@ public class PackageController {
                         contentType.equals("image/jpg") ||
                         contentType.equals("image/jpeg"));
     }
+
 }
