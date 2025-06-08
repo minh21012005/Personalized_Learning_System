@@ -49,7 +49,7 @@
                 }
 
                 .content {
-                    max-width: 1350px;
+                    max-width: 1280px;
                     margin: 0 auto;
                     padding: 0 20px;
                 }
@@ -157,7 +157,7 @@
                 /* Course List Section */
                 .course-list {
                     background-color: var(--greybackground);
-                    padding: 60px 0;
+                    padding: 40px 0;
                 }
 
                 .course-list-container {
@@ -209,6 +209,7 @@
                 }
 
                 .creator-info {
+                    margin-top: 5px;
                     display: flex;
                     align-items: center;
                     gap: 10px;
@@ -231,6 +232,7 @@
                 }
 
                 .course-image {
+                    margin-bottom: -6px;
                     width: 100%;
                     height: 200px;
                     object-fit: cover;
@@ -290,7 +292,7 @@
 
                 /* Main content styles */
                 .main-content {
-                    padding: 40px 0;
+                    padding: 10px 0 40px 0;
                 }
 
                 .breadcrumb {
@@ -345,8 +347,8 @@
                     margin-bottom: 15px;
                 }
 
-                .course-details p {
-                    margin-bottom: 20px;
+                .course-details>p {
+                    margin-bottom: 10px;
                 }
 
                 .curriculum {
@@ -422,29 +424,34 @@
                     margin-right: 10px;
                 }
 
-                .course-info {
-                    margin-top: -60px;
-                    /* Đẩy lên trên */
-                }
-
                 /* Nút back */
                 .back-button {
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
-                    margin-top: 20px;
+                    margin-top: 30px;
                 }
 
                 .back-button a {
                     padding: 10px 20px;
-                    background-color: rgba(51, 65, 85, 1);
+                    background-color: #2c2e3d;
                     /* Giống màu nền */
                     color: #e2e8f0;
                     border: 1px solid #cbd5e1;
                     border-radius: 10px;
                     text-decoration: none;
-                    font-weight: bold;
+                    font-weight: 500;
                     transition: all 0.3s ease;
+                }
+
+                .subject-description {
+                    margin-top: 10px;
+                }
+
+                .curriculum-item-description {
+                    padding: 10px;
+                    background-color: #fafafa;
+                    border-top: 1px solid #ddd;
                 }
             </style>
         </head>
@@ -508,67 +515,40 @@
                     <section class="course-list">
                         <div class="content course-list-container">
                             <div class="course-info">
-                                <nav class="breadcrumb">
-                                    <ol>
-                                        <li><a href="#">Home</a></li>
-                                        <li><a href="#">Courses</a></li>
-                                        <li>Web Development</li>
-                                    </ol>
-                                </nav>
-                                <h1>Learn Web Development</h1>
+                                <h1>${subject.subjectName}</h1>
+                                <h2>Nội dung môn học</h2>
+                                <p class="subject-description">${subject.subjectDescription}</p>
                                 <div class="creator-info">
-                                    <img src="creator.jpg" alt="Creator" class="creator-avatar" />
-                                    <span>John Doe</span>
+                                    <span></span>
                                 </div>
                             </div>
 
                             <!-- Course card chuyển sang bên phải -->
                             <div class="course-card">
-                                <img src="/img/403.jpg" alt="Course Image" class="course-image" />
+                                <img src="/img/subjectImg/${subject.subjectImage}" alt="Image not found"
+                                    class="course-image" />
                             </div>
                         </div> <!-- Đóng course-list-container -->
                     </section>
 
 
                     <section class="course-details">
-                        <h2>Nội dung môn học</h2>
-                        <p>This interactive e-learning course will introduce you to User Experience (UX) design, the art
-                            of
-                            creating products and services that are intuitive, enjoyable, and user-friendly. Gain a
-                            solid
-                            foundation in UX principles and learn to apply them in real-world scenarios through engaging
-                            modules
-                            and interactive exercises.</p>
-
                         <h2>Thời lượng môn học</h2>
-                        <p>19 chương - 190 bài giảng</p>
+                        <p>${totalChapter} chương</p>
 
                         <h2>Giáo trình</h2>
                         <div class="curriculum">
-                            <div class="curriculum-item">
-                                <div class="curriculum-item-header">
-                                    <span class="curriculum-item-title">Introduction to UX Design</span>
-                                    <span class="curriculum-item-meta">5 Lessons • 1 hour</span>
+                            <c:forEach var="chapter" items="${chapters}">
+                                <div class="curriculum-item">
+                                    <div class="curriculum-item-header" onclick="toggleDescription(this)">
+                                        <span class="curriculum-item-title">${chapter.chapterName}</span>
+                                        <span class="curriculum-item-meta"></span>
+                                    </div>
+                                    <div class="curriculum-item-description" style="display: none;">
+                                        <p>${chapter.chapterDescription}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="curriculum-item">
-                                <div class="curriculum-item-header">
-                                    <span class="curriculum-item-title">Basics of User-Centered Design</span>
-                                    <span class="curriculum-item-meta">5 Lessons • 1 hour</span>
-                                </div>
-                            </div>
-                            <div class="curriculum-item">
-                                <div class="curriculum-item-header">
-                                    <span class="curriculum-item-title">Elements of User Experience</span>
-                                    <span class="curriculum-item-meta">5 Lessons • 1 hour</span>
-                                </div>
-                            </div>
-                            <div class="curriculum-item">
-                                <div class="curriculum-item-header">
-                                    <span class="curriculum-item-title">Visual Design Principles</span>
-                                    <span class="curriculum-item-meta">5 Lessons • 1 hour</span>
-                                </div>
-                            </div>
+                            </c:forEach>
                         </div>
                     </section>
                     <div class="back-button">
@@ -623,6 +603,16 @@
         <script>
             // Initialize Lucide icons
             lucide.createIcons();
+        </script>
+        <script>
+            function toggleDescription(header) {
+                const description = header.nextElementSibling;
+                if (description.style.display === "none") {
+                    description.style.display = "block";
+                } else {
+                    description.style.display = "none";
+                }
+            }
         </script>
 
         </html>

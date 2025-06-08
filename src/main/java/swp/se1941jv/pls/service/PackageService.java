@@ -1,6 +1,7 @@
 package swp.se1941jv.pls.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,11 @@ public class PackageService {
         return this.packageRepository.findAll(
                 PackageSpecification.findPackageWithFilters(courseFilter, selectedGrades, selectedSubjects),
                 pageable);
+    }
+
+
+    public Optional<Package> findById(long id) {
+        return this.packageRepository.findById(id);
     }
 
     public Package savePackage(Package pkg) {
@@ -95,5 +101,6 @@ public class PackageService {
             return packageRepository.findAll(pageable);
         }
     }
+
 
 }

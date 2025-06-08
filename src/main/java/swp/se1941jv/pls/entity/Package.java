@@ -59,6 +59,9 @@ public class Package extends BaseEntity {
     @OneToMany(mappedBy = "pkg")
     List<PackageSubject> packageSubjects;
 
+    @OneToMany(mappedBy = "pkg")
+    List<CartPackage> cartPackages;
+
     @ManyToOne()
     @JoinColumn(name = "grade_id")
     Grade grade;

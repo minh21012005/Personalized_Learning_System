@@ -81,4 +81,8 @@ public class SubjectService {
 
     }
 
+    public Optional<Subject> findById(long id) {
+        return this.subjectRepository.findById(id);
+    }
+
 }

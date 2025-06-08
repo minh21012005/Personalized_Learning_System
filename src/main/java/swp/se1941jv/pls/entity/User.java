@@ -79,6 +79,9 @@ public class User extends BaseEntity {
     @JoinColumn(name = "role_name")
     Role role;
 
+    @OneToOne(mappedBy = "user")
+    Cart cart;
+
     @OneToMany(mappedBy = "user")
     List<UserNotification> userNotifications;
 
@@ -90,7 +93,6 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "userCreated")
     List<Transaction> transactions;
-
 
     @Column(name = "reset_password_token")
     String resetPasswordToken;

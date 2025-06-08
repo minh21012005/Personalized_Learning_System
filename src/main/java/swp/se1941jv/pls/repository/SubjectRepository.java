@@ -1,6 +1,7 @@
 package swp.se1941jv.pls.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,5 +39,4 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
        List<Subject> findAll();
 
        List<Subject> findByIsActiveTrue();
-
 }
