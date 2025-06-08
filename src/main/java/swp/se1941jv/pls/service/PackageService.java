@@ -44,7 +44,6 @@ public class PackageService {
                 pageable);
     }
 
-
     public Optional<Package> findById(long id) {
         return this.packageRepository.findById(id);
     }
@@ -101,6 +100,5 @@ public class PackageService {
             return packageRepository.findAll(pageable);
         }
     }
-
 
 }

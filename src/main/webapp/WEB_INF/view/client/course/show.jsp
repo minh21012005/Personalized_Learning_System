@@ -16,12 +16,18 @@
                         <link rel="stylesheet" href="/css/listpackage.css">
                         <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
                         <script src="https://unpkg.com/lucide@latest"></script>
+                        <link rel="stylesheet"
+                            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
                         <!-- Choices.js CSS -->
                         <link rel="stylesheet"
                             href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
                         <!-- Choices.js JS -->
                         <script
                             src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+                        <!-- Toastify CSS -->
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+                        <!-- Toastify JS -->
+                        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
                         <!-- Custom JS -->
                         <script src="/js/script.js"></script>
                     </head>
@@ -148,18 +154,24 @@
                                                     <h3 class="course-title">${pkg.name}</h3>
                                                 </a>
                                                 <p class="course-author">Tác giả: </p>
-                                                <!-- <p class="course-info">Khối: ${pkg.grade.gradeName} </p> -->
+
                                                 <div class="mt-auto course-bottom">
                                                     <span class="course-price">
                                                         <fmt:formatNumber value="${pkg.price}" type="number"
                                                             groupingUsed="true" /> ₫
                                                     </span>
-                                                    <button class="add-to-cart-btn mt-2">
-                                                        Thêm vào giỏ hàng
-                                                        <img width="18" height="18"
-                                                            src="https://img.icons8.com/material-outlined/24/FFFFFF/fast-cart.png"
-                                                            alt="fast-cart" />
-                                                    </button>
+                                                    <form action="/parent/cart" method="post">
+                                                        <input type="hidden" name="${_csrf.parameterName}"
+                                                            value="${_csrf.token}" />
+                                                        <input type="hidden" name="packageId"
+                                                            value="${pkg.packageId}" />
+                                                        <button type="submit" class="add-to-cart-btn mt-2">
+                                                            Thêm vào giỏ hàng
+                                                            <img width="18" height="18"
+                                                                src="https://img.icons8.com/material-outlined/24/FFFFFF/fast-cart.png"
+                                                                alt="fast-cart" />
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </c:forEach>
@@ -253,6 +265,59 @@
                         </footer>
                         <script
                             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                        <c:if test="${not empty success}">
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    Toastify({
+                                        text: "<i class='fas fa-check-circle'></i> ${fn:escapeXml(success)}",
+                                        duration: 4000,
+                                        close: true,
+                                        gravity: "top",
+                                        position: "right",
+                                        style: {
+                                            background: "linear-gradient(to right, #28a745, #34c759)", // Gradient xanh
+                                            borderRadius: "8px",
+                                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                            fontFamily: "'Roboto', sans-serif",
+                                            fontSize: "16px",
+                                            padding: "12px 20px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "10px"
+                                        },
+                                        className: "toastify-success",
+                                        escapeMarkup: false // Cho phép HTML trong text
+                                    }).showToast();
+                                });
+                            </script>
+                        </c:if>
+                        <%-- Hiển thị thông báo fail --%>
+                            <c:if test="${not empty fail}">
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        Toastify({
+                                            text: "<i class='fas fa-exclamation-triangle'></i> ${fn:escapeXml(fail)}",
+                                            duration: 4000,
+                                            close: true,
+                                            gravity: "top",
+                                            position: "right",
+                                            style: {
+                                                background: "linear-gradient(to right, #ffc107, #ffca2c)", // Gradient vàng
+                                                borderRadius: "8px",
+                                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                                fontFamily: "'Roboto', sans-serif",
+                                                fontSize: "16px",
+                                                padding: "12px 20px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "10px"
+                                            },
+                                            className: "toastify-fail",
+                                            escapeMarkup: false // Cho phép HTML trong text
+                                        }).showToast();
+                                    });
+                                </script>
+                            </c:if>
                     </body>
                     <script>
                         lucide.createIcons();

@@ -93,7 +93,11 @@
                                         <!-- <span class="original-price">$99</span>
                                     <span class="discount-badge">50% Off</span> -->
                                     </div>
-                                    <button class="add-to-cart-btn">Thêm vào giỏ hàng</button>
+                                    <form action="/parent/cart" method="post">
+                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                        <input type="hidden" name="packageId" value="${pkg.packageId}" />
+                                        <button class="add-to-cart-btn">Thêm vào giỏ hàng</button>
+                                    </form>
                                 </div>
                             </div>
                         </section>

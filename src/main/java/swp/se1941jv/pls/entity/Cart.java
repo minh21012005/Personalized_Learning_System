@@ -1,11 +1,14 @@
 package swp.se1941jv.pls.entity;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
@@ -35,4 +38,7 @@ public class Cart {
     @OneToOne()
     @JoinColumn(name = "user_id")
     User user;
+
+    @OneToMany(mappedBy = "cart")
+    List<CartPackage> cartPackages;
 }
