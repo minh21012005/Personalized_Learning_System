@@ -23,13 +23,13 @@ import swp.se1941jv.pls.service.PackageService;
 import swp.se1941jv.pls.service.SubjectService;
 
 @Controller
-public class PackageController {
+public class CourseController {
 
     private final PackageService packageService;
     private final GradeService gradeService;
     private final SubjectService subjectService;
 
-    public PackageController(PackageService packageService, GradeService gradeService, SubjectService subjectService) {
+    public CourseController(PackageService packageService, GradeService gradeService, SubjectService subjectService) {
         this.packageService = packageService;
         this.gradeService = gradeService;
         this.subjectService = subjectService;

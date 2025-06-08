@@ -71,8 +71,14 @@ public class SubjectService {
         subjectRepository.deleteById(id);
     }
 
+    public List<Subject> findAllSubjects() {
+
+        return subjectRepository.findAll();
+    }
+
     public List<Subject> fetchAllSubjects() {
         return this.subjectRepository.findByIsActiveTrue();
+
     }
 
 }
