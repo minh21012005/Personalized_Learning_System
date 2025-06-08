@@ -28,5 +28,5 @@ public class UserNotification {
 
 
     @Column(name = "is_read")
-    Boolean read;
+    Boolean isRead;
 }

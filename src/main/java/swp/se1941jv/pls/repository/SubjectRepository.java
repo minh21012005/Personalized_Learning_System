@@ -39,4 +39,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
        List<Subject> findByIsActiveTrue();
 
+         @Query("SELECT s FROM Subject s WHERE s.subjectId IN :ids AND s.isActive = true")
+    List<Subject> findAllActiveByIds(@Param("ids") List<Long> ids);
 }
