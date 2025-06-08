@@ -226,7 +226,7 @@
                                         <td class="col-2">${lesson.lessonName}</td>
                                         <td class="text-center col-1">${lesson.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
                                         <td class="text-center col-3">
-                                            <a href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/save?lessonId=${lesson.lessonId}"
+                                            <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save?lessonId=${lesson.lessonId}"
                                                class="btn btn-warning btn-sm mt-2 ">
                                                 Cập nhật
                                             </a>
@@ -259,7 +259,7 @@
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/lesson?page=${currentPage - 1}${queryString}"
+                                               href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lesson?page=${currentPage - 1}${queryString}"
                                                aria-label="Previous">
                                                 <span aria-hidden="true">«</span>
                                             </a>
@@ -268,12 +268,12 @@
                                             <li
                                                     class="page-item ${loop.index eq currentPage ? 'active' : ''}">
                                                 <a class="page-link"
-                                                   href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/lesson?page=${loop.index}${queryString}">${loop.index}</a>
+                                                   href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lesson?page=${loop.index}${queryString}">${loop.index}</a>
                                             </li>
                                         </c:forEach>
                                         <li class="page-item ${currentPage eq totalPages ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/lesson?page=${currentPage + 1}${queryString}"
+                                               href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lesson?page=${currentPage + 1}${queryString}"
                                                aria-label="Next">
                                                 <span aria-hidden="true">»</span>
                                             </a>

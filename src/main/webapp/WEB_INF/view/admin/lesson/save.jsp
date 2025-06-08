@@ -196,7 +196,7 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
-                                <a href="/admin/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                                <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons" class="btn btn-secondary">Hủy</a>
                             </div>
                         </form:form>
                     </div>
@@ -212,21 +212,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Xác thực URL nhúng YouTube
-    document.getElementById('lessonForm').addEventListener('submit', function (e) {
-        const videoSrcInput = document.getElementById('videoSrcInput');
-        const videoSrcError = document.getElementById('videoSrcError');
-        const youtubeRegex = /^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]+$/;
-
-        if (videoSrcInput.value && !youtubeRegex.test(videoSrcInput.value)) {
-            e.preventDefault();
-            videoSrcInput.classList.add('is-invalid');
-            videoSrcError.style.display = 'block';
-        } else {
-            videoSrcInput.classList.remove('is-invalid');
-            videoSrcError.style.display = 'none';
-        }
-    });
+    // // Xác thực URL nhúng YouTube
+    // document.getElementById('lessonForm').addEventListener('submit', function (e) {
+    //     const videoSrcInput = document.getElementById('videoSrcInput');
+    //     const videoSrcError = document.getElementById('videoSrcError');
+    //     const youtubeRegex = /^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]+$/;
+    //
+    //     if (videoSrcInput.value && !youtubeRegex.test(videoSrcInput.value)) {
+    //         e.preventDefault();
+    //         videoSrcInput.classList.add('is-invalid');
+    //         videoSrcError.style.display = 'block';
+    //     } else {
+    //         videoSrcInput.classList.remove('is-invalid');
+    //         videoSrcError.style.display = 'none';
+    //     }
+    // });
 
     // Cập nhật danh sách tên file được chọn
     document.getElementById('materialsInput').addEventListener('change', function () {

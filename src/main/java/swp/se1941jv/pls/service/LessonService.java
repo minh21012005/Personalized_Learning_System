@@ -29,4 +29,8 @@ public class LessonService {
     public Optional<Lesson> findLesson(Long lessonId) {
         return lessonRepository.findById(lessonId);
     }
+
+    public void saveLesson(Lesson lesson) {
+        lessonRepository.save(lesson);
+    }
 }

@@ -3,9 +3,10 @@ package swp.se1941jv.pls.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.ArrayList;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "lessons")
@@ -33,8 +34,11 @@ public class Lesson extends BaseEntity {
     @Column(name = "video_src")
     String videoSrc;
 
-    @Column(name = "materials")
-    String materials;
+    @Column(name = "materials_json", columnDefinition = "TEXT")
+    String materialsJson;
+
+    @Transient
+    List<String> materials;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")
@@ -49,4 +53,31 @@ public class Lesson extends BaseEntity {
 
     @OneToMany(mappedBy = "lesson")
     List<SubjectTest> subjectTests;
+
+    // Chuyển đổi materialsJson thành List<String> sau khi load từ DB
+    @PostLoad
+    private void deserializeMaterials() {
+        try {
+            if (materialsJson != null && !materialsJson.isEmpty()) {
+                ObjectMapper mapper = new ObjectMapper();
+                materials = mapper.readValue(materialsJson, new TypeReference<List<String>>() {});
+            } else {
+                materials = new ArrayList<>();
+            }
+        } catch (Exception e) {
+            materials = new ArrayList<>();
+        }
+    }
+
+    // Chuyển đổi List<String> thành materialsJson trước khi lưu vào DB
+    @PrePersist
+    @PreUpdate
+    private void serializeMaterials() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            materialsJson = mapper.writeValueAsString(materials != null ? materials : new ArrayList<>());
+        } catch (Exception e) {
+            materialsJson = "[]";
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.entity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -42,13 +43,25 @@ public abstract class BaseEntity {
     Long userUpdated;
 
     @PrePersist
-    public void prePersist() {
-        this.userCreated = SecurityUtils.getCurrentUserId();
-        this.userUpdated = this.userCreated;
-    }
-
     @PreUpdate
-    public void preUpdate() {
-        this.userUpdated = SecurityUtils.getCurrentUserId();
+    protected void onPrePersistOrUpdate() {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId != null) {
+            if (this.createdAt == null) { // Chỉ thiết lập userCreated khi là lần lưu mới
+                this.userCreated = currentUserId;
+            }
+            this.userUpdated = currentUserId;
+        }
+
+        // Kiểm tra và serialize materials nếu entity có trường materialsJson (dùng instanceof Lesson)
+        if (this instanceof Lesson) {
+            Lesson lesson = (Lesson) this;
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                lesson.setMaterialsJson(mapper.writeValueAsString(lesson.getMaterials() != null ? lesson.getMaterials() : new ArrayList<>()));
+            } catch (Exception e) {
+                lesson.setMaterialsJson("[]");
+            }
+        }
     }
 }

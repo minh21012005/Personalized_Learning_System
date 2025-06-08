@@ -8,13 +8,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.service.ChapterService;
+import swp.se1941jv.pls.service.FileUploadService;
 import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -23,11 +27,12 @@ public class LessonController {
     private final SubjectService subjectService;
     private final ChapterService chapterService;
     private final LessonService lessonService;
-
-    public LessonController(SubjectService subjectService, ChapterService chapterService, LessonService lessonService) {
+    private final FileUploadService fileUploadService;
+    public LessonController(SubjectService subjectService, ChapterService chapterService, LessonService lessonService, FileUploadService fileUploadService) {
         this.subjectService = subjectService;
         this.chapterService = chapterService;
         this.lessonService = lessonService;
+        this.fileUploadService = fileUploadService;
     }
 
     @GetMapping("admin/subject/{subjectId}/chapters/{chapterId}/lessons")
@@ -110,24 +115,32 @@ public class LessonController {
         return "admin/lesson/save";
     }
 
-    @PostMapping("admin/subject/{subjectId}/chapters/{chapterId}/lessons/save")
-    public String saveLessonToChapter(
+    @PostMapping("/admin/subject/{subjectId}/chapters/{chapterId}/lessons/save")
+    public String saveLesson(
             @PathVariable("subjectId") Long subjectId,
             @PathVariable("chapterId") Long chapterId,
             @ModelAttribute("lesson")  Lesson lesson,
             @RequestParam("materialFiles") MultipartFile[] materialFiles,
-            @RequestParam(value = "lessonId", required = false) Long lessonId) {
+            RedirectAttributes redirectAttributes) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        if (subject.isEmpty()) {
-            return "error/404";
-        }
-
         Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
-        if (chapter.isEmpty()) {
-            return "error/404";
+
+        if (subject.isEmpty() || chapter.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ.");
+            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons/save";
         }
 
+        lesson.setChapter(chapter.get());
+        List<String> materials = lesson.getMaterials() != null ? new ArrayList<>(lesson.getMaterials()) : new ArrayList<>();
 
-        return "admin/lesson/save";
+        // Xử lý file tải lên bằng FileUploadService
+        List<String> savedFileNames = fileUploadService.handleSaveUploadFiles(materialFiles, "taiLieu");
+        materials.addAll(savedFileNames);
+
+        lesson.setMaterials(materials);
+        lessonService.saveLesson(lesson);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Lưu bài học thành công!");
+        return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
     }
 }
