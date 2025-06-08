@@ -51,7 +51,7 @@ public class Package extends BaseEntity {
     Integer durationDays;
 
     @Column(name = "is_active")
-    boolean active;
+    boolean isActive;
 
     @OneToMany(mappedBy = "pkg")
     List<UserPackage> userPackages;
