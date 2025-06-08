@@ -1,6 +1,7 @@
 package swp.se1941jv.pls.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,4 +42,5 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
          @Query("SELECT s FROM Subject s WHERE s.subjectId IN :ids AND s.isActive = true")
     List<Subject> findAllActiveByIds(@Param("ids") List<Long> ids);
+
 }

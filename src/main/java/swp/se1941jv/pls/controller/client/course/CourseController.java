@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,19 +25,19 @@ import swp.se1941jv.pls.service.PackageService;
 import swp.se1941jv.pls.service.SubjectService;
 
 @Controller
-public class PackageController {
+public class CourseController {
 
     private final PackageService packageService;
     private final GradeService gradeService;
     private final SubjectService subjectService;
 
-    public PackageController(PackageService packageService, GradeService gradeService, SubjectService subjectService) {
+    public CourseController(PackageService packageService, GradeService gradeService, SubjectService subjectService) {
         this.packageService = packageService;
         this.gradeService = gradeService;
         this.subjectService = subjectService;
     }
 
-    @GetMapping("/course")
+    @GetMapping("/parent/course")
     public String getListCoursesPage(
             Model model,
             @RequestParam Optional<String> page,
@@ -100,18 +102,17 @@ public class PackageController {
         return "client/course/show";
     }
 
-    @GetMapping("/course/detail/{id}")
-    public String getDetailCoursePage(@PathVariable("id") long id) {
+    @GetMapping("/parent/course/detail/{id}")
+    public String getDetailCoursePage(Model model, @PathVariable("id") long id) {
+        Optional<Package> pkg = this.packageService.findById(id);
+        if (pkg.isEmpty()) {
+            return "error/404";
+        }
+
+        List<Subject> subjects = pkg.get().getPackageSubjects().stream().map(x -> x.getSubject())
+                .collect(Collectors.toList());
+        model.addAttribute("subjects", subjects);
+        model.addAttribute("pkg", pkg.get());
         return "client/course/detail";
-    }
-
-    @GetMapping("/subject/detail/{id}")
-    public String getDetailSubjectPage(@PathVariable("id") long id) {
-        return "client/subject/detail";
-    }
-
-    @GetMapping("cart")
-    public String getCartPage() {
-        return "client/cart/show";
     }
 }
