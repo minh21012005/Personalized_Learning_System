@@ -19,6 +19,11 @@
                     </a>
                 </li>
                 <li class="nav-item mb-2">
+                    <a class="nav-link text-white" href="/admin/notification" style="padding: 8px 15px;">
+                        <i class="bi bi-bell me-2"></i> Thông báo
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
                     <a class="nav-link text-white" href="/admin/grade" style="padding: 8px 15px;">
                         <i class="bi bi-book me-2"></i> Khối lớp
                     </a>
