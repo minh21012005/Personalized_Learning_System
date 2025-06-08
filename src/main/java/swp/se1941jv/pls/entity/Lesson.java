@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,8 +27,14 @@ public class Lesson extends BaseEntity {
     @Column(name = "lesson_description", columnDefinition = "NVARCHAR(255)")
     String lessonDescription;
 
+    @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    Boolean status;
+
     @Column(name = "video_src")
     String videoSrc;
+
+    @Column(name = "materials")
+    String materials;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")

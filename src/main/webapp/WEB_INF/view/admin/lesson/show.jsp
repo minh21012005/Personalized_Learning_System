@@ -142,34 +142,34 @@
                 <div class="mt-4">
                     <div class="row col-12 mx-auto">
                         <div class="mb-3">
-                            <h3>Danh sách chương học trong ${subject.subjectName}</h3>
+                            <h3>Danh sách bài học trong ${chapter.chapterName}</h3>
                         </div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                            <!-- Bộ lọc -->
-                            <form action="/admin/subject/${subject.subjectId}/chapters" method="get"
-                                  class="d-flex flex-column flex-md-row align-items-md-center  mb-2 mb-md-0">
-                                <label for="chapterName" class="mb-0 fw-bold me-md-2">Tìm chương:</label>
-                                <div class="d-flex gap-2 me-md-2 ">
-                                    <input type="text" id="chapterName" name="chapterName"
-                                           class="form-control form-control-sm"
-                                           value="${param.chapterName}"
-                                           placeholder="Tìm theo tên chương...">
-                                </div>
-                                <label for="status" class="mb-0 fw-bold me-md-2">Trạng thái:</label>
-                                <div class="d-flex gap-2 me-md-2">
-                                    <select id="status" name="status" class="form-control form-control-sm">
-                                        <option value="" ${param.status == null ? 'selected' : ''}>Tất cả</option>
-                                        <option value="true" ${param.status == 'true' ? 'selected' : ''}>Đang hoạt động</option>
-                                        <option value="false" ${param.status == 'false' ? 'selected' : ''}>Không hoạt động</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
-                            </form>
-                            <!-- Bộ lọc -->
+<%--                            <!-- Bộ lọc -->--%>
+<%--                            <form action="/admin/subject/${subject.subjectId}/chapters" method="get"--%>
+<%--                                  class="d-flex flex-column flex-md-row align-items-md-center  mb-2 mb-md-0">--%>
+<%--                                <label for="chapterName" class="mb-0 fw-bold me-md-2">Tìm chương:</label>--%>
+<%--                                <div class="d-flex gap-2 me-md-2 ">--%>
+<%--                                    <input type="text" id="chapterName" name="chapterName"--%>
+<%--                                           class="form-control form-control-sm"--%>
+<%--                                           value="${param.chapterName}"--%>
+<%--                                           placeholder="Tìm theo tên chương...">--%>
+<%--                                </div>--%>
+<%--                                <label for="status" class="mb-0 fw-bold me-md-2">Trạng thái:</label>--%>
+<%--                                <div class="d-flex gap-2 me-md-2">--%>
+<%--                                    <select id="status" name="status" class="form-control form-control-sm">--%>
+<%--                                        <option value="" ${param.status == null ? 'selected' : ''}>Tất cả</option>--%>
+<%--                                        <option value="true" ${param.status == 'true' ? 'selected' : ''}>Đang hoạt động</option>--%>
+<%--                                        <option value="false" ${param.status == 'false' ? 'selected' : ''}>Không hoạt động</option>--%>
+<%--                                    </select>--%>
+<%--                                </div>--%>
+<%--                                <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>--%>
+<%--                            </form>--%>
+<%--                            <!-- Bộ lọc -->--%>
 
-                            <!-- Nút tạo chương học mới -->
-                            <a href="/admin/subject/${subject.subjectId}/chapters/save" class="btn btn-primary">Tạo
-                                chương học mới</a>
+                            <!-- Nút tạo bài học mới -->
+                            <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save" class="btn btn-primary">Tạo
+                                bài học mới</a>
                         </div>
 
                         <%--SUCESS MESSAGE--%>
@@ -192,14 +192,14 @@
                         </c:if>
                         <%--ERROR MESSAGE--%>
 
-                        <%-- THÊM MỚI: Nút Kích hoạt và form gửi chapterIds --%>
-                        <div class="mb-3">
-                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post">
-                                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                                <button type="submit" class="btn btn-success btn-sm" onclick="toggleChapters()">Kích hoạt/Ẩn</button>
-                            </form>
-                        </div>
-                        <%-- /THÊM MỚI --%>
+<%--                        &lt;%&ndash; THÊM MỚI: Nút Kích hoạt và form gửi lessonIds &ndash;%&gt;--%>
+<%--                        <div class="mb-3">--%>
+<%--                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post">--%>
+<%--                                <input type="hidden" name="_csrf" value="${_csrf.token}"/>--%>
+<%--                                <button type="submit" class="btn btn-success btn-sm" onclick="toggleChapters()">Kích hoạt/Ẩn</button>--%>
+<%--                            </form>--%>
+<%--                        </div>--%>
+<%--                        &lt;%&ndash; /THÊM MỚI &ndash;%&gt;--%>
 
                         <%--TABLE--%>
                         <table class="table table-bordered table-hover table-fixed">
@@ -208,31 +208,25 @@
                                 <th scope="col" class="text-center col-1">
                                     <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)">
                                 </th>
-                                <th scope="col" class="text-center  col-2">Tên chương học</th>
-                                <th scope="col" class="text-center  col-6">Mô tả về chương học</th>
+                                <th scope="col" class="text-center  col-2">Tên bài học</th>
                                 <th scope="col" class="text-center  col-2">Trạng thái</th>
                                 <th scope="col" class="text-center  col-1">Thao tác</th>
 
                             </tr>
                             </thead>
                             <tbody>
-                            <c:if test="${not empty chapters}">
-                                <c:forEach var="chapter" items="${chapters}">
+                            <c:if test="${not empty lessons}">
+                                <c:forEach var="lesson" items="${lessons}">
                                     <tr>
                                         <td class="text-center checkbox-header">
-                                            <input type="checkbox" name="chapterIds" form="toggleStatusForm"
-                                                   value="${chapter.chapterId}" data-status="${chapter.status}"
+                                            <input type="checkbox" name="lessonIds" form="toggleStatusForm"
+                                                   value="${lesson.lessonId}" data-status="${lesson.status}"
                                                    onchange="handleCheckboxChange(this)">
                                         </td>
-                                        <td class="col-2">${chapter.chapterName}</td>
-                                        <td class="col-5">${chapter.chapterDescription}</td>
-                                        <td class="text-center col-1">${chapter.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
+                                        <td class="col-2">${lesson.lessonName}</td>
+                                        <td class="text-center col-1">${lesson.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
                                         <td class="text-center col-3">
-                                            <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons"
-                                               class="btn btn-primary btn-sm ">
-                                                Xem chi tiết
-                                            </a>
-                                            <a href="/admin/subject/${subject.subjectId}/chapters/save?chapterId=${chapter.chapterId}"
+                                            <a href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/save?lessonId=${lesson.lessonId}"
                                                class="btn btn-warning btn-sm mt-2 ">
                                                 Cập nhật
                                             </a>
@@ -240,9 +234,9 @@
                                     </tr>
                                 </c:forEach>
                             </c:if>
-                            <c:if test="${empty chapters}">
+                            <c:if test="${empty lessons}">
                                 <tr>
-                                    <td colspan="4" class="text-center">Chưa có chương học nào.</td>
+                                    <td colspan="4" class="text-center">Chưa có học học nào.</td>
                                 </tr>
                             </c:if>
                             </tbody>
@@ -253,19 +247,19 @@
                         <div class="pagination-container">
                             <c:set var="queryString" value=""/>
 
-                            <c:if test="${not empty chapterName}">
-                                <c:set var="queryString" value="${queryString}&role=${chapterName}"/>
-                            </c:if>
+<%--                            <c:if test="${not empty chapterName}">--%>
+<%--                                <c:set var="queryString" value="${queryString}&role=${chapterName}"/>--%>
+<%--                            </c:if>--%>
 
-                            <c:if test="${not empty status}">
-                                <c:set var="queryString" value="${queryString}&name=${status}"/>
-                            </c:if>
+<%--                            <c:if test="${not empty status}">--%>
+<%--                                <c:set var="queryString" value="${queryString}&name=${status}"/>--%>
+<%--                            </c:if>--%>
                             <c:if test="${totalPages >1}">
                                 <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/admin/subject/${subject.subjectId}/chapters?page=${currentPage - 1}${queryString}"
+                                               href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/lesson?page=${currentPage - 1}${queryString}"
                                                aria-label="Previous">
                                                 <span aria-hidden="true">«</span>
                                             </a>
@@ -274,12 +268,12 @@
                                             <li
                                                     class="page-item ${loop.index eq currentPage ? 'active' : ''}">
                                                 <a class="page-link"
-                                                   href="/admin/subject/${subject.subjectId}/chapters?page=${loop.index}${queryString}">${loop.index}</a>
+                                                   href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/lesson?page=${loop.index}${queryString}">${loop.index}</a>
                                             </li>
                                         </c:forEach>
                                         <li class="page-item ${currentPage eq totalPages ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/admin/subject/${subject.subjectId}/chapters?page=${currentPage + 1}${queryString}"
+                                               href="/admin/subject/${subject.subjectId}/chapters/{chapter.chapterId}/lesson?page=${currentPage + 1}${queryString}"
                                                aria-label="Next">
                                                 <span aria-hidden="true">»</span>
                                             </a>
@@ -314,7 +308,7 @@
     let currentStatus = null; // Lưu trạng thái hiện tại của checkbox được chọn
 
     function toggleChapters() {
-        const checkboxes = document.querySelectorAll('input[name="chapterIds"]:checked');
+        const checkboxes = document.querySelectorAll('input[name="lessonIds"]:checked');
         if (checkboxes.length === 0) {
             alert('Vui lòng chọn ít nhất một chương để thay đổi trạng thái!');
             return false;
@@ -323,7 +317,7 @@
     }
 
     function toggleSelectAll(source) {
-        const checkboxes = document.querySelectorAll('input[name="chapterIds"]');
+        const checkboxes = document.querySelectorAll('input[name="lessonIds"]');
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
         if (source.checked) {
@@ -348,7 +342,7 @@
     }
 
     function handleCheckboxChange(checkbox) {
-        const checkboxes = document.querySelectorAll('input[name="chapterIds"]');
+        const checkboxes = document.querySelectorAll('input[name="lessonIds"]');
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
         if (checkbox.checked && currentStatus === null) {
