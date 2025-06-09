@@ -91,7 +91,7 @@
                             </div>
                         </c:if>
 
-                        <form:form method="post" action="/admin/subject/${subject.subjectId}/save"
+                        <form:form method="post" action="/admin/subject/${subject.subjectId}/chapters/save"
                                    modelAttribute="chapter" class="mt-4">
                             <form:hidden path="chapterId"/>
                             <div class="mb-3">
@@ -111,13 +111,13 @@
                                 <label for="chapterDescriptionInput" class="form-label">Mô tả về chương học</label>
                                 <form:textarea id="chapterDescriptionInput" path="chapterDescription"
                                                class="form-control ${not empty errorChapterDescription?'is-invalid':''}"
-                                               rows="5" maxlength="255"
-                                               placeholder="Nhập nội dung không quá 255 kí tự"/>
+                                               rows="5" maxlength="1000"
+                                               placeholder="Nhập nội dung không quá 1000 kí tự"/>
                                     ${errorChapterDescription}
                             </div>
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
-                                <a href="/admin/subject/${subject.subjectId}" class="btn btn-secondary">Hủy</a>
+                                <a href="/admin/subject/${subject.subjectId}/chapters" class="btn btn-secondary">Hủy</a>
                             </div>
                         </form:form>
                     </div>

@@ -7,4 +7,5 @@ import swp.se1941jv.pls.entity.Lesson;
 
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecificationExecutor<Lesson> {
+    boolean existsByLessonNameAndChapterChapterId(String lessonName, Long chapterId);
 }

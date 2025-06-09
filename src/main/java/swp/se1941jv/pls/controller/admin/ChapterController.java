@@ -113,7 +113,7 @@ public class ChapterController {
     public String saveChapterToSubject(
             Model model,
             @PathVariable("id") Long subjectId,
-            @Valid @ModelAttribute("chapter") Chapter chapter,
+            @Valid @ModelAttribute("chapter")  Chapter chapter,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
         Optional<Subject> subjectOpt = subjectService.getSubjectById(subjectId);
@@ -128,7 +128,7 @@ public class ChapterController {
             Optional<Chapter> chapterOpt = chapterService.getChapterByChapterId(chapter.getChapterId());
             if (chapterOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Chương học không tồn tại!");
-                return "redirect:/admin/subject/" + subjectId;
+                return "redirect:/admin/subject/" + subjectId + "/chapters";
             }
             existingChapter = chapterOpt.get();
             if (!existingChapter.getChapterName().equals(chapter.getChapterName()) &&
@@ -155,6 +155,7 @@ public class ChapterController {
                 redirectAttributes.addFlashAttribute("successMessage", "Chỉnh sửa chương học thành công");
             } else {
                 chapter.setSubject(subject);
+                chapter.setStatus(true);
                 chapterService.saveChapter(chapter);
                 redirectAttributes.addFlashAttribute("successMessage", "Thêm chương học thành công");
             }
@@ -165,7 +166,7 @@ public class ChapterController {
             return "admin/chapter/save";
         }
 
-        return "redirect:/admin/subject/" + subjectId;
+        return "redirect:/admin/subject/" + subjectId + "/chapters";
     }
 
 

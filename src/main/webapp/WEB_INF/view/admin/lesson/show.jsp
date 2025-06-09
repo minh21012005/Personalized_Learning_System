@@ -142,7 +142,13 @@
                 <div class="mt-4">
                     <div class="row col-12 mx-auto">
                         <div class="mb-3">
-                            <h3>Danh sách bài học trong ${chapter.chapterName}</h3>
+                            <div class="d-flex flex-column  align-items-start">
+                                <a href="/admin/subject/${subject.subjectId}/chapters" class="btn btn-outline-secondary btn-sm mb-3">
+                                    <i class="bi bi-arrow-left"></i> Quay lại
+                                </a>
+                                <h3>Danh sách bài học trong ${chapter.chapterName}</h3>
+
+                            </div>
                         </div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
                             <!-- Nút tạo bài học mới -->

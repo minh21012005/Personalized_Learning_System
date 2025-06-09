@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -134,15 +135,25 @@ public class LessonController {
             @PathVariable("subjectId") Long subjectId,
             @PathVariable("chapterId") Long chapterId,
             @ModelAttribute("lesson") @Valid Lesson lesson,
+            BindingResult result,
             @RequestParam("materialFiles") MultipartFile[] materialFiles,
             @RequestParam(value = "materialsTemp", required = false) List<String> materialsTemp,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        // Kiểm tra subject và chapter
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
         Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
 
         if (subject.isEmpty() || chapter.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ.");
-            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons/save";
+            return "error/404";
+        }
+
+        // Nếu có lỗi validation, trả về form
+        if (result.hasErrors()) {
+            model.addAttribute("subject", subject.get());
+            model.addAttribute("chapter", chapter.get());
+            model.addAttribute("lesson", lesson);
+            return "admin/lesson/save";
         }
 
         lesson.setChapter(chapter.get());
@@ -164,6 +175,7 @@ public class LessonController {
             lesson.setMaterialsJson("[]");
         }
 
+        // Lưu bài học
         lessonService.saveLesson(lesson);
 
         redirectAttributes.addFlashAttribute("successMessage", "Lưu bài học thành công!");

@@ -67,13 +67,13 @@
             display: inline-block;
             background-color: #007bff;
             color: white;
-            padding: 0.375rem 0.75rem; /* Giảm padding để giống nút .btn */
+            padding: 0.375rem 0.75rem;
             border-radius: 0.25rem;
             cursor: pointer;
             transition: background-color 0.3s;
             text-align: center;
-            font-size: 1rem; /* Kích thước chữ giống .btn */
-            line-height: 1.5; /* Căn chỉnh chiều cao giống .btn */
+            font-size: 1rem;
+            line-height: 1.5;
         }
         .custom-file-input-label:hover {
             background-color: #0056b3;
@@ -171,6 +171,22 @@
                                     Vui lòng nhập link nhúng YouTube hợp lệ (e.g., https://www.youtube.com/embed/VIDEO_ID).
                                 </div>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">Trạng thái</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <form:radiobutton path="status" value="true" id="statusActive"
+                                                          cssClass="form-check-input" checked="${isEdit && lesson.status ? 'checked' : !isEdit ? 'checked' : ''}"/>
+                                        <label class="form-check-label" for="statusActive">Hoạt động</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <form:radiobutton path="status" value="false" id="statusInactive"
+                                                          cssClass="form-check-input" checked="${isEdit && !lesson.status ? 'checked' : ''}"/>
+                                        <label class="form-check-label" for="statusInactive">Không hoạt động</label>
+                                    </div>
+                                </div>
+                                <form:errors path="status" cssClass="invalid-feedback d-block"/>
+                            </div>
                             <div class="mb-3 row">
                                 <label for="materialsInput" class="form-label">Tài liệu tham khảo (PDF, Word)</label>
                                 <div class="custom-file-input">
@@ -230,17 +246,12 @@
     function updateFileList() {
         // Cập nhật giao diện danh sách tệp
         selectedFilesList.innerHTML = '';
-
-        // Log chẩn đoán
-
         if (selectedFiles.length > 0) {
             const displayText = selectedFiles.length + ' tệp đã chọn';
             fileNames.textContent = displayText;
-
             selectedFiles.forEach((file, index) => {
-
                 const fileItem = document.createElement('div');
-                fileItem.className = 'selected-file-item z-50';
+                fileItem.className = 'selected-file-item';
                 fileItem.innerHTML =
                     '<span>' + (file.name || 'Tên tệp không xác định') + '</span>' +
                     '<button type="button" class="text-danger btn btn-link p-0" onclick="removeSelectedFile(' + index + ')">Xóa</button>';
@@ -248,9 +259,7 @@
             });
         } else {
             fileNames.textContent = 'Chưa chọn tệp nào';
-            console.log('fileNames.textContent khi không có tệp:', fileNames.textContent);
         }
-
         // Cập nhật input file để giữ các tệp còn lại
         const dataTransfer = new DataTransfer();
         selectedFiles.forEach(file => dataTransfer.items.add(file));

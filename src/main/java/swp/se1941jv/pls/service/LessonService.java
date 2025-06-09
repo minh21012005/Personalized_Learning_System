@@ -45,4 +45,8 @@ public class LessonService {
             }
         }
     }
+
+    public boolean existsByLessonNameAndChapterId(String lessonName, Long chapterId) {
+        return lessonRepository.existsByLessonNameAndChapterChapterId(lessonName, chapterId);
+    }
 }

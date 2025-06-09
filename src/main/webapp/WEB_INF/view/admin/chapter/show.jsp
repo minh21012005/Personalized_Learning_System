@@ -141,8 +141,14 @@
             <div class="container-fluid px-4">
                 <div class="mt-4">
                     <div class="row col-12 mx-auto">
+
                         <div class="mb-3">
-                            <h3>Danh sách chương học trong ${subject.subjectName}</h3>
+                            <div class="d-flex flex-column  align-items-start">
+                                <a href="/admin/subject" class="btn btn-outline-secondary btn-sm mb-3">
+                                    <i class="bi bi-arrow-left"></i> Quay lại
+                                </a>
+                                <h3 class="mb-0">Danh sách chương học trong ${subject.subjectName}</h3>
+                            </div>
                         </div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
                             <!-- Bộ lọc -->
@@ -194,9 +200,9 @@
 
                         <%-- THÊM MỚI: Nút Kích hoạt và form gửi chapterIds --%>
                         <div class="mb-3">
-                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post">
+                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post" onsubmit="return toggleChapters(event)">
                                 <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                                <button type="submit" class="btn btn-success btn-sm" onclick="toggleChapters()">Kích hoạt/Ẩn</button>
+                                <button type="submit" class="btn btn-success btn-sm">Kích hoạt/Ẩn</button>
                             </form>
                         </div>
                         <%-- /THÊM MỚI --%>
@@ -209,9 +215,9 @@
                                     <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)">
                                 </th>
                                 <th scope="col" class="text-center  col-2">Tên chương học</th>
-                                <th scope="col" class="text-center  col-6">Mô tả về chương học</th>
+                                <th scope="col" class="text-center  col-4">Mô tả về chương học</th>
                                 <th scope="col" class="text-center  col-2">Trạng thái</th>
-                                <th scope="col" class="text-center  col-1">Thao tác</th>
+                                <th scope="col" class="text-center  col-3">Thao tác</th>
 
                             </tr>
                             </thead>
@@ -219,21 +225,21 @@
                             <c:if test="${not empty chapters}">
                                 <c:forEach var="chapter" items="${chapters}">
                                     <tr>
-                                        <td class="text-center checkbox-header">
+                                        <td class="col-1 text-center checkbox-header">
                                             <input type="checkbox" name="chapterIds" form="toggleStatusForm"
                                                    value="${chapter.chapterId}" data-status="${chapter.status}"
                                                    onchange="handleCheckboxChange(this)">
                                         </td>
                                         <td class="col-2">${chapter.chapterName}</td>
-                                        <td class="col-5">${chapter.chapterDescription}</td>
-                                        <td class="text-center col-1">${chapter.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
-                                        <td class="text-center col-3">
+                                        <td class="col-4">${chapter.chapterDescription}</td>
+                                        <td class="text-center col-2">${chapter.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
+                                        <td class="text-center col-3 ">
                                             <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons"
-                                               class="btn btn-primary btn-sm ">
+                                               class="btn btn-primary btn-sm mb-1 mb-lg-0 ">
                                                 Xem chi tiết
                                             </a>
                                             <a href="/admin/subject/${subject.subjectId}/chapters/save?chapterId=${chapter.chapterId}"
-                                               class="btn btn-warning btn-sm mt-2 ">
+                                               class="btn btn-warning btn-sm">
                                                 Cập nhật
                                             </a>
                                         </td>
@@ -317,9 +323,10 @@
         const checkboxes = document.querySelectorAll('input[name="chapterIds"]:checked');
         if (checkboxes.length === 0) {
             alert('Vui lòng chọn ít nhất một chương để thay đổi trạng thái!');
+            event.preventDefault(); // Ngăn gửi form
             return false;
         }
-        return true;
+        return true; // Cho phép gửi for
     }
 
     function toggleSelectAll(source) {
