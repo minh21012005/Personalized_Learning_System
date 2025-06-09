@@ -292,33 +292,32 @@
                                 });
                             </script>
                         </c:if>
-                        <%-- Hiển thị thông báo fail --%>
-                            <c:if test="${not empty fail}">
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function () {
-                                        Toastify({
-                                            text: "<i class='fas fa-exclamation-triangle'></i> ${fn:escapeXml(fail)}",
-                                            duration: 4000,
-                                            close: true,
-                                            gravity: "top",
-                                            position: "right",
-                                            style: {
-                                                background: "linear-gradient(to right, #ffc107, #ffca2c)", // Gradient vàng
-                                                borderRadius: "8px",
-                                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                                                fontFamily: "'Roboto', sans-serif",
-                                                fontSize: "16px",
-                                                padding: "12px 20px",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "10px"
-                                            },
-                                            className: "toastify-fail",
-                                            escapeMarkup: false // Cho phép HTML trong text
-                                        }).showToast();
-                                    });
-                                </script>
-                            </c:if>
+                        <c:if test="${not empty fail}">
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    Toastify({
+                                        text: "<i class='fas fa-exclamation-triangle'></i> ${fn:escapeXml(fail)}",
+                                        duration: 4000,
+                                        close: true,
+                                        gravity: "top",
+                                        position: "right",
+                                        style: {
+                                            background: "linear-gradient(to right, #ffc107, #ffca2c)", // Gradient vàng
+                                            borderRadius: "8px",
+                                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                            fontFamily: "'Roboto', sans-serif",
+                                            fontSize: "16px",
+                                            padding: "12px 20px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "10px"
+                                        },
+                                        className: "toastify-fail",
+                                        escapeMarkup: false // Cho phép HTML trong text
+                                    }).showToast();
+                                });
+                            </script>
+                        </c:if>
                     </body>
                     <script>
                         lucide.createIcons();

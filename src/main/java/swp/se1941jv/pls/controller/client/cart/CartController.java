@@ -61,10 +61,11 @@ public class CartController {
     }
 
     @PostMapping("/parent/cart/delete/{id}")
-    public String deletePackageInCart(Model model, HttpServletRequest request,
+    public String deletePackageInCart(RedirectAttributes redirectAttributes, HttpServletRequest request,
             @PathVariable("id") long id) {
         HttpSession session = request.getSession();
         this.cartService.handleDeletePackageInCart(id, session);
+        redirectAttributes.addFlashAttribute("success", "Khóa học đã được xóa khỏi giỏ hàng!");
         return "redirect:/parent/cart";
     }
 }
