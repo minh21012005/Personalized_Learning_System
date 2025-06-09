@@ -67,7 +67,7 @@ public class FileUploadService {
                 return "";
             }
 
-            finalName = UUID.randomUUID().toString() + fileExtension;
+            finalName = System.currentTimeMillis()+ '-' +file.getOriginalFilename();
             File serverFile = new File(targetDir.getAbsolutePath() + File.separator + finalName);
 
             try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile))) {

@@ -61,19 +61,19 @@
             top: 0;
             opacity: 0;
             width: 100%;
-            height: 100%;
             cursor: pointer;
         }
         .custom-file-input-label {
             display: inline-block;
             background-color: #007bff;
             color: white;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 0.375rem 0.75rem; /* Giảm padding để giống nút .btn */
+            border-radius: 0.25rem;
             cursor: pointer;
             transition: background-color 0.3s;
-            width: 100%;
             text-align: center;
+            font-size: 1rem; /* Kích thước chữ giống .btn */
+            line-height: 1.5; /* Căn chỉnh chiều cao giống .btn */
         }
         .custom-file-input-label:hover {
             background-color: #0056b3;
@@ -83,10 +83,10 @@
             color: #6c757d;
             font-size: 0.9em;
         }
-        .material-list {
+        .material-list, .selected-files-list {
             margin-top: 10px;
         }
-        .material-item {
+        .material-item, .selected-file-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -171,24 +171,26 @@
                                     Vui lòng nhập link nhúng YouTube hợp lệ (e.g., https://www.youtube.com/embed/VIDEO_ID).
                                 </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 row">
                                 <label for="materialsInput" class="form-label">Tài liệu tham khảo (PDF, Word)</label>
                                 <div class="custom-file-input">
                                     <input type="file" id="materialsInput" name="materialFiles" multiple
                                            accept=".pdf,.doc,.docx" class="form-control"/>
-                                    <label for="materialsInput" class="custom-file-input-label">
+                                    <label for="materialsInput" class="custom-file-input-label col-md-4">
                                         Chọn tệp tài liệu
                                     </label>
                                     <div class="file-name" id="fileNames">Chưa chọn tệp nào</div>
+                                    <div class="selected-files-list" id="selectedFilesList"></div>
                                 </div>
-                                <c:if test="${not empty lesson.materials}">
+                                <c:if test="${not empty materialsTemp}">
                                     <div class="material-list mt-2">
                                         <h6>Tài liệu hiện có:</h6>
-                                        <c:forEach var="material" items="${lesson.materials}" varStatus="status">
-                                            <div class="material-item">
-                                                <a href="${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
+                                        <c:forEach var="material" items="${materialsTemp}" varStatus="status">
+                                            <div class="material-item" data-index="${status.index}">
+                                                <a href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
                                                 <button type="button" class="text-danger btn btn-link p-0"
-                                                        onclick="removeMaterial(${status.index}, ${lesson.lessonId})">Xóa</button>
+                                                        onclick="removeMaterial(this, ${status.index})">Xóa</button>
+                                                <input type="hidden" name="materialsTemp" value="${material}"/>
                                             </div>
                                         </c:forEach>
                                     </div>
@@ -196,7 +198,7 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
-                                <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                                <a href="/admin/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
                             </div>
                         </form:form>
                     </div>
@@ -212,41 +214,61 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // // Xác thực URL nhúng YouTube
-    // document.getElementById('lessonForm').addEventListener('submit', function (e) {
-    //     const videoSrcInput = document.getElementById('videoSrcInput');
-    //     const videoSrcError = document.getElementById('videoSrcError');
-    //     const youtubeRegex = /^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]+$/;
-    //
-    //     if (videoSrcInput.value && !youtubeRegex.test(videoSrcInput.value)) {
-    //         e.preventDefault();
-    //         videoSrcInput.classList.add('is-invalid');
-    //         videoSrcError.style.display = 'block';
-    //     } else {
-    //         videoSrcInput.classList.remove('is-invalid');
-    //         videoSrcError.style.display = 'none';
-    //     }
-    // });
+    // Quản lý danh sách tệp đã chọn
+    const materialsInput = document.getElementById('materialsInput');
+    const selectedFilesList = document.getElementById('selectedFilesList');
+    const fileNames = document.getElementById('fileNames');
+    let selectedFiles = [];
 
-    // Cập nhật danh sách tên file được chọn
-    document.getElementById('materialsInput').addEventListener('change', function () {
-        const files = this.files;
-        const fileNames = files.length > 0 ? Array.from(files).map(file => file.name).join(', ') : 'Chưa chọn tệp nào';
-        document.getElementById('fileNames').textContent = fileNames;
+    materialsInput.addEventListener('change', function () {
+        // Cập nhật danh sách tệp đã chọn
+        const newFiles = Array.from(this.files);
+        selectedFiles = [...selectedFiles, ...newFiles];
+        updateFileList();
     });
 
-    // Xóa tài liệu (gửi yêu cầu đến server)
-    function removeMaterial(index, lessonId) {
-        if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
-            fetch(`/admin/subject/${subjectId}/chapters/${chapterId}/lessons/removeMaterial/${lessonId}/${index}`, {
-                method: 'POST'
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Lỗi khi xóa tài liệu.');
-                }
+    function updateFileList() {
+        // Cập nhật giao diện danh sách tệp
+        selectedFilesList.innerHTML = '';
+
+        // Log chẩn đoán
+
+        if (selectedFiles.length > 0) {
+            const displayText = selectedFiles.length + ' tệp đã chọn';
+            fileNames.textContent = displayText;
+
+            selectedFiles.forEach((file, index) => {
+
+                const fileItem = document.createElement('div');
+                fileItem.className = 'selected-file-item z-50';
+                fileItem.innerHTML =
+                    '<span>' + (file.name || 'Tên tệp không xác định') + '</span>' +
+                    '<button type="button" class="text-danger btn btn-link p-0" onclick="removeSelectedFile(' + index + ')">Xóa</button>';
+                selectedFilesList.appendChild(fileItem);
             });
+        } else {
+            fileNames.textContent = 'Chưa chọn tệp nào';
+            console.log('fileNames.textContent khi không có tệp:', fileNames.textContent);
+        }
+
+        // Cập nhật input file để giữ các tệp còn lại
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        materialsInput.files = dataTransfer.files;
+    }
+
+    window.removeSelectedFile = function (index) {
+        if (confirm('Bạn có chắc muốn xóa tệp này khỏi danh sách chọn?')) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+        }
+    };
+
+    // Xóa tài liệu hiện có
+    function removeMaterial(button, index) {
+        if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
+            const materialItem = button.closest('.material-item');
+            materialItem.remove();
         }
     }
 </script>

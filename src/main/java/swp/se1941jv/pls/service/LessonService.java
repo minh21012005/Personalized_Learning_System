@@ -9,6 +9,7 @@ import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.repository.LessonRepository;
 import swp.se1941jv.pls.service.specification.LessonSpecifications;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,16 @@ public class LessonService {
 
     public void saveLesson(Lesson lesson) {
         lessonRepository.save(lesson);
+    }
+
+    public void updateLessonsStatus(List<Long> lessonIds) {
+        for (Long id : lessonIds) {
+            Optional<Lesson> lessonOpt = lessonRepository.findById(id);
+            if (lessonOpt.isPresent()) {
+                Lesson lesson = lessonOpt.get();
+                lesson.setStatus(!lesson.getStatus()); // Đảo ngược trạng thái
+                lessonRepository.save(lesson);
+            }
+        }
     }
 }

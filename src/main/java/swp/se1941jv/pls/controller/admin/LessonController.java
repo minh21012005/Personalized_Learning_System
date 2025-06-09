@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.controller.admin;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,9 @@ import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.FileUploadService;
 import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +31,7 @@ public class LessonController {
     private final ChapterService chapterService;
     private final LessonService lessonService;
     private final FileUploadService fileUploadService;
+
     public LessonController(SubjectService subjectService, ChapterService chapterService, LessonService lessonService, FileUploadService fileUploadService) {
         this.subjectService = subjectService;
         this.chapterService = chapterService;
@@ -42,7 +46,7 @@ public class LessonController {
             @PathVariable("chapterId") Long chapterId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Optional<String> page,
             @RequestParam(value = "size", required = false, defaultValue = "10") Optional<String> size
-    ){
+    ) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
         if (subject.isEmpty()) {
             return "error/404";
@@ -68,8 +72,7 @@ public class LessonController {
         }
 
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "lessonId"));
-        Page<Lesson> lessons = lessonService.findLessons(chapterId,pageable);
-        // Truyền dữ liệu vào model để hiển thị trên JSP
+        Page<Lesson> lessons = lessonService.findLessons(chapterId, pageable);
         model.addAttribute("chapter", chapter.get());
         model.addAttribute("lessons", lessons.getContent());
         model.addAttribute("subject", subject.get());
@@ -98,12 +101,22 @@ public class LessonController {
 
         Lesson lesson;
         boolean isEdit = lessonId != null;
+        List<String> materialsTemp = new ArrayList<>(); // Danh sách tạm thời
         if (isEdit) {
             Optional<Lesson> lessonOpt = lessonService.findLesson(lessonId);
             if (lessonOpt.isEmpty()) {
                 return "error/404";
             }
             lesson = lessonOpt.get();
+            // Deserialize materialsJson to a temporary list in controller
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                if (lesson.getMaterialsJson() != null && !lesson.getMaterialsJson().isEmpty()) {
+                    materialsTemp = mapper.readValue(lesson.getMaterialsJson(), new TypeReference<List<String>>() {});
+                }
+            } catch (Exception e) {
+                materialsTemp = new ArrayList<>();
+            }
         } else {
             lesson = new Lesson();
         }
@@ -111,6 +124,7 @@ public class LessonController {
         model.addAttribute("subject", subject.get());
         model.addAttribute("chapter", chapter.get());
         model.addAttribute("lesson", lesson);
+        model.addAttribute("materialsTemp", materialsTemp); // Truyền danh sách tạm thời
         model.addAttribute("isEdit", isEdit);
         return "admin/lesson/save";
     }
@@ -119,8 +133,9 @@ public class LessonController {
     public String saveLesson(
             @PathVariable("subjectId") Long subjectId,
             @PathVariable("chapterId") Long chapterId,
-            @ModelAttribute("lesson")  Lesson lesson,
+            @ModelAttribute("lesson") @Valid Lesson lesson,
             @RequestParam("materialFiles") MultipartFile[] materialFiles,
+            @RequestParam(value = "materialsTemp", required = false) List<String> materialsTemp,
             RedirectAttributes redirectAttributes) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
         Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
@@ -131,16 +146,49 @@ public class LessonController {
         }
 
         lesson.setChapter(chapter.get());
-        List<String> materials = lesson.getMaterials() != null ? new ArrayList<>(lesson.getMaterials()) : new ArrayList<>();
+
+        // Khởi tạo danh sách materialsTemp nếu null
+        if (materialsTemp == null) {
+            materialsTemp = new ArrayList<>();
+        }
 
         // Xử lý file tải lên bằng FileUploadService
         List<String> savedFileNames = fileUploadService.handleSaveUploadFiles(materialFiles, "taiLieu");
-        materials.addAll(savedFileNames);
+        materialsTemp.addAll(savedFileNames);
 
-        lesson.setMaterials(materials);
+        // Serialize materialsTemp to materialsJson
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            lesson.setMaterialsJson(mapper.writeValueAsString(materialsTemp));
+        } catch (Exception e) {
+            lesson.setMaterialsJson("[]");
+        }
+
         lessonService.saveLesson(lesson);
 
         redirectAttributes.addFlashAttribute("successMessage", "Lưu bài học thành công!");
+        return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+    }
+
+    @PostMapping("admin/subject/{subjectId}/chapters/{chapterId}/lessons/update-status")
+    public String updateLessonStatus(
+            @PathVariable("subjectId") Long subjectId,
+            @PathVariable("chapterId") Long chapterId,
+            @RequestParam("lessonIds") List<Long> lessonIds,
+            RedirectAttributes redirectAttributes
+    ) {
+        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
+        Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
+        if (subject.isEmpty() || chapter.isEmpty()) {
+            return "error/404";
+        }
+        try {
+            lessonService.updateLessonsStatus(lessonIds);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái bài học thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+        }
+
         return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
     }
 }

@@ -1,12 +1,12 @@
 package swp.se1941jv.pls.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.List;
-import java.util.ArrayList;
 
 @Entity
 @Table(name = "lessons")
@@ -22,6 +22,8 @@ public class Lesson extends BaseEntity {
     @Column(name = "lesson_id")
     Long lessonId;
 
+    @NotBlank(message = "Lesson name cannot be blank")
+    @Size(max = 255, message = "Lesson name must not exceed 255 characters")
     @Column(name = "lesson_name", columnDefinition = "NVARCHAR(255)")
     String lessonName;
 
@@ -35,10 +37,8 @@ public class Lesson extends BaseEntity {
     String videoSrc;
 
     @Column(name = "materials_json", columnDefinition = "TEXT")
-    String materialsJson;
+    private String materialsJson;
 
-    @Transient
-    List<String> materials;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")
@@ -53,31 +53,4 @@ public class Lesson extends BaseEntity {
 
     @OneToMany(mappedBy = "lesson")
     List<SubjectTest> subjectTests;
-
-    // Chuyển đổi materialsJson thành List<String> sau khi load từ DB
-    @PostLoad
-    private void deserializeMaterials() {
-        try {
-            if (materialsJson != null && !materialsJson.isEmpty()) {
-                ObjectMapper mapper = new ObjectMapper();
-                materials = mapper.readValue(materialsJson, new TypeReference<List<String>>() {});
-            } else {
-                materials = new ArrayList<>();
-            }
-        } catch (Exception e) {
-            materials = new ArrayList<>();
-        }
-    }
-
-    // Chuyển đổi List<String> thành materialsJson trước khi lưu vào DB
-    @PrePersist
-    @PreUpdate
-    private void serializeMaterials() {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            materialsJson = mapper.writeValueAsString(materials != null ? materials : new ArrayList<>());
-        } catch (Exception e) {
-            materialsJson = "[]";
-        }
-    }
 }

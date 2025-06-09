@@ -53,7 +53,7 @@ public class ChapterController {
 
         int pageSize;
         try {
-            pageSize = size.map(Integer::parseInt).orElse(1);
+            pageSize = size.map(Integer::parseInt).orElse(10);
         } catch (Exception e) {
             pageSize = 1;
         }

@@ -55,7 +55,7 @@
             width: 100%;
         }
 
-        * Style for pagination container */
+        /* Style for pagination container */
         .pagination-container {
             position: fixed;
             bottom: 50px;
@@ -145,28 +145,6 @@
                             <h3>Danh sách bài học trong ${chapter.chapterName}</h3>
                         </div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-<%--                            <!-- Bộ lọc -->--%>
-<%--                            <form action="/admin/subject/${subject.subjectId}/chapters" method="get"--%>
-<%--                                  class="d-flex flex-column flex-md-row align-items-md-center  mb-2 mb-md-0">--%>
-<%--                                <label for="chapterName" class="mb-0 fw-bold me-md-2">Tìm chương:</label>--%>
-<%--                                <div class="d-flex gap-2 me-md-2 ">--%>
-<%--                                    <input type="text" id="chapterName" name="chapterName"--%>
-<%--                                           class="form-control form-control-sm"--%>
-<%--                                           value="${param.chapterName}"--%>
-<%--                                           placeholder="Tìm theo tên chương...">--%>
-<%--                                </div>--%>
-<%--                                <label for="status" class="mb-0 fw-bold me-md-2">Trạng thái:</label>--%>
-<%--                                <div class="d-flex gap-2 me-md-2">--%>
-<%--                                    <select id="status" name="status" class="form-control form-control-sm">--%>
-<%--                                        <option value="" ${param.status == null ? 'selected' : ''}>Tất cả</option>--%>
-<%--                                        <option value="true" ${param.status == 'true' ? 'selected' : ''}>Đang hoạt động</option>--%>
-<%--                                        <option value="false" ${param.status == 'false' ? 'selected' : ''}>Không hoạt động</option>--%>
-<%--                                    </select>--%>
-<%--                                </div>--%>
-<%--                                <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>--%>
-<%--                            </form>--%>
-<%--                            <!-- Bộ lọc -->--%>
-
                             <!-- Nút tạo bài học mới -->
                             <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save" class="btn btn-primary">Tạo
                                 bài học mới</a>
@@ -192,14 +170,13 @@
                         </c:if>
                         <%--ERROR MESSAGE--%>
 
-<%--                        &lt;%&ndash; THÊM MỚI: Nút Kích hoạt và form gửi lessonIds &ndash;%&gt;--%>
-<%--                        <div class="mb-3">--%>
-<%--                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post">--%>
-<%--                                <input type="hidden" name="_csrf" value="${_csrf.token}"/>--%>
-<%--                                <button type="submit" class="btn btn-success btn-sm" onclick="toggleChapters()">Kích hoạt/Ẩn</button>--%>
-<%--                            </form>--%>
-<%--                        </div>--%>
-<%--                        &lt;%&ndash; /THÊM MỚI &ndash;%&gt;--%>
+                        <%-- Nút Kích hoạt và form gửi lessonIds --%>
+                        <div class="mb-3">
+                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/update-status" method="post">
+                                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-success btn-sm">Kích hoạt/Ẩn</button>
+                            </form>
+                        </div>
 
                         <%--TABLE--%>
                         <table class="table table-bordered table-hover table-fixed">
@@ -208,10 +185,9 @@
                                 <th scope="col" class="text-center col-1">
                                     <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)">
                                 </th>
-                                <th scope="col" class="text-center  col-2">Tên bài học</th>
-                                <th scope="col" class="text-center  col-2">Trạng thái</th>
-                                <th scope="col" class="text-center  col-1">Thao tác</th>
-
+                                <th scope="col" class="text-center col-2">Tên bài học</th>
+                                <th scope="col" class="text-center col-2">Trạng thái</th>
+                                <th scope="col" class="text-center col-1">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -227,7 +203,7 @@
                                         <td class="text-center col-1">${lesson.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
                                         <td class="text-center col-3">
                                             <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save?lessonId=${lesson.lessonId}"
-                                               class="btn btn-warning btn-sm mt-2 ">
+                                               class="btn btn-warning btn-sm mt-2">
                                                 Cập nhật
                                             </a>
                                         </td>
@@ -236,7 +212,7 @@
                             </c:if>
                             <c:if test="${empty lessons}">
                                 <tr>
-                                    <td colspan="4" class="text-center">Chưa có học học nào.</td>
+                                    <td colspan="4" class="text-center">Chưa có bài học nào.</td>
                                 </tr>
                             </c:if>
                             </tbody>
@@ -246,34 +222,25 @@
                         <%--PHÂN TRANG--%>
                         <div class="pagination-container">
                             <c:set var="queryString" value=""/>
-
-<%--                            <c:if test="${not empty chapterName}">--%>
-<%--                                <c:set var="queryString" value="${queryString}&role=${chapterName}"/>--%>
-<%--                            </c:if>--%>
-
-<%--                            <c:if test="${not empty status}">--%>
-<%--                                <c:set var="queryString" value="${queryString}&name=${status}"/>--%>
-<%--                            </c:if>--%>
                             <c:if test="${totalPages >1}">
                                 <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lesson?page=${currentPage - 1}${queryString}"
+                                               href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons?page=${currentPage - 1}${queryString}"
                                                aria-label="Previous">
                                                 <span aria-hidden="true">«</span>
                                             </a>
                                         </li>
                                         <c:forEach begin="1" end="${totalPages}" varStatus="loop">
-                                            <li
-                                                    class="page-item ${loop.index eq currentPage ? 'active' : ''}">
+                                            <li class="page-item ${loop.index eq currentPage ? 'active' : ''}">
                                                 <a class="page-link"
-                                                   href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lesson?page=${loop.index}${queryString}">${loop.index}</a>
+                                                   href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons?page=${loop.index}${queryString}">${loop.index}</a>
                                             </li>
                                         </c:forEach>
                                         <li class="page-item ${currentPage eq totalPages ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lesson?page=${currentPage + 1}${queryString}"
+                                               href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons?page=${currentPage + 1}${queryString}"
                                                aria-label="Next">
                                                 <span aria-hidden="true">»</span>
                                             </a>
@@ -283,17 +250,14 @@
                             </c:if>
                         </div>
                         <%--PHÂN TRANG--%>
-
                     </div>
                 </div>
             </div>
         </main>
     </div>
     <!-- Main Content Area -->
-
 </div>
 <%--    MAIN CONTAINER--%>
-
 
 <!-- Footer -->
 <footer>
@@ -303,17 +267,18 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<%-- THÊM MỚI: JavaScript để kiểm tra checkbox và trạng thái --%>
+<%-- JavaScript để kiểm tra checkbox và trạng thái --%>
 <script>
     let currentStatus = null; // Lưu trạng thái hiện tại của checkbox được chọn
 
-    function toggleChapters() {
+    function toggleLessons(event) {
+        event.preventDefault(); // Ngăn hành vi mặc định của form
         const checkboxes = document.querySelectorAll('input[name="lessonIds"]:checked');
         if (checkboxes.length === 0) {
-            alert('Vui lòng chọn ít nhất một chương để thay đổi trạng thái!');
-            return false;
+            alert('Vui lòng chọn ít nhất một bài học để thay đổi trạng thái!');
+            return;
         }
-        return true;
+        document.getElementById('toggleStatusForm').submit(); // Gửi form nếu hợp lệ
     }
 
     function toggleSelectAll(source) {
@@ -322,7 +287,7 @@
 
         if (source.checked) {
             if (currentStatus === null) {
-                alert('Vui lòng chọn ít nhất một chương trước khi chọn tất cả!');
+                alert('Vui lòng chọn ít nhất một bài học trước khi chọn tất cả!');
                 source.checked = false;
                 return;
             }
@@ -368,7 +333,9 @@
             selectAllCheckbox.checked = allChecked;
         }
     }
+
+    // Gắn sự kiện submit cho form
+    document.getElementById('toggleStatusForm').addEventListener('submit', toggleLessons);
 </script>
-<%-- /THÊM MỚI --%>
 </body>
 </html>
