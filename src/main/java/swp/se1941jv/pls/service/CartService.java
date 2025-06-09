@@ -3,6 +3,7 @@ package swp.se1941jv.pls.service;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpSession;
 import swp.se1941jv.pls.entity.Cart;
@@ -61,5 +62,24 @@ public class CartService {
 
         }
         return true;
+    }
+
+    @Transactional
+    public void handleDeletePackageInCart(long id, HttpSession session) {
+        Optional<CartPackage> cartPackageOptional = this.cartPackageRepository.findById(id);
+        CartPackage cartPackage = cartPackageOptional.get();
+        Cart cart = cartPackage.getCart();
+        this.cartPackageRepository.delete(cartPackage);
+        int quantity = cart.getQuantity();
+        if (quantity > 1) {
+            quantity--;
+            cart.setQuantity(quantity);
+            this.cartRepository.save(cart);
+            session.setAttribute("sum", quantity);
+        } else {
+            cart.getUser().setCart(null);
+            this.cartRepository.delete(cart);
+            session.setAttribute("sum", 0);
+        }
     }
 }

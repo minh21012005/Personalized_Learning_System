@@ -84,7 +84,7 @@
 
                                 <!-- Course card chuyển sang bên phải -->
                                 <div class="course-card">
-                                    <img src="course.jpg" alt="Course Image" class="course-image" />
+                                    <img src="/img/package/${pkg.image}" alt="Course Image" class="course-image" />
                                     <div class="price-section">
                                         <span class="current-price">
                                             <fmt:formatNumber value="${pkg.price}" type="number" groupingUsed="true" />
@@ -112,7 +112,7 @@
                                     <div class="course-grid">
                                         <c:forEach var="subject" items="${subjects}">
                                             <div class="course-card">
-                                                <img src="/img/subjectImg/subject.subjectImage" alt="Image not found"
+                                                <img src="/img/subjectImg/${subject.subjectImage}" alt="Image not found"
                                                     class="course-image">
                                                 <a href="/subject/detail/${subject.subjectId}">
                                                     <h3>${subject.subjectName}</h3>

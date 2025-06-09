@@ -149,7 +149,8 @@
                                     <div class="course-grid">
                                         <c:forEach var="pkg" items="${packages}">
                                             <div class="course-card">
-                                                <img src="hinh-khoa-hoc.jpg" alt="Course Image" class="course-img">
+                                                <img src="/img/package/${pkg.image}" alt="Course Image"
+                                                    class="course-img">
                                                 <a href="/parent/course/detail/${pkg.packageId}">
                                                     <h3 class="course-title">${pkg.name}</h3>
                                                 </a>

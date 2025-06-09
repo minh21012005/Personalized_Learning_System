@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -36,6 +37,11 @@ public class CartController {
         User user = this.userService.getUserById(userId);
         Cart cart = this.cartService.getCartByUser(user);
         List<CartPackage> cartPackages = cart == null ? new ArrayList<>() : cart.getCartPackages();
+        double totalPrice = 0;
+        for (CartPackage cartPackage : cartPackages) {
+            totalPrice += cartPackage.getPkg().getPrice();
+        }
+        model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("cartPackages", cartPackages);
         return "client/cart/show";
     }
@@ -52,5 +58,13 @@ public class CartController {
             redirectAttributes.addFlashAttribute("success", "Khóa học đã được thêm vào giỏ hàng!");
         }
         return "redirect:/parent/course";
+    }
+
+    @PostMapping("/parent/cart/delete/{id}")
+    public String deletePackageInCart(Model model, HttpServletRequest request,
+            @PathVariable("id") long id) {
+        HttpSession session = request.getSession();
+        this.cartService.handleDeletePackageInCart(id, session);
+        return "redirect:/parent/cart";
     }
 }
