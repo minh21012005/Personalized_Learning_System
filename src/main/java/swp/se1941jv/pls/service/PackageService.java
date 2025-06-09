@@ -14,6 +14,7 @@ import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
 import swp.se1941jv.pls.repository.PackageRepository;
 import swp.se1941jv.pls.repository.PackageSubjectRepository;
 import swp.se1941jv.pls.repository.SubjectRepository;
+import swp.se1941jv.pls.repository.UserPackageRepository;
 import swp.se1941jv.pls.service.specification.PackageSpecification;
 
 @Service
@@ -22,13 +23,15 @@ public class PackageService {
     private final PackageRepository packageRepository;
     private final PackageSubjectRepository packageSubjectRepository;
     private final SubjectRepository subjectRepository;
+    private final UserPackageRepository userPackageRepository;
 
     public PackageService(PackageRepository packageRepository,
             PackageSubjectRepository packageSubjectRepository,
-            SubjectRepository subjectRepository) {
+            SubjectRepository subjectRepository, UserPackageRepository userPackageRepository) {
         this.packageRepository = packageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
         this.subjectRepository = subjectRepository;
+        this.userPackageRepository = userPackageRepository;
     }
 
     public List<Package> getListPackages() {
@@ -43,7 +46,6 @@ public class PackageService {
                 PackageSpecification.findPackageWithFilters(courseFilter, selectedGrades, selectedSubjects),
                 pageable);
     }
-
 
     public Optional<Package> findById(long id) {
         return this.packageRepository.findById(id);
@@ -81,26 +83,38 @@ public class PackageService {
 
     public Page<Package> getFilteredPackage(String keyword, String isActive, Long gradeId, Pageable pageable) {
         if (gradeId != null && keyword != null && isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByGradeGradeIdAndActiveAndNameContainingIgnoreCase(gradeId,
+            return packageRepository.findByGradeGradeIdAndIsActiveAndNameContainingIgnoreCase(gradeId,
                     Boolean.parseBoolean(isActive), keyword,
                     pageable);
         } else if (gradeId != null && keyword != null) {
             return packageRepository.findByGradeGradeIdAndNameContainingIgnoreCase(gradeId, keyword, pageable);
         } else if (gradeId != null && isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByGradeGradeIdAndActive(gradeId, Boolean.parseBoolean(isActive), pageable);
+            return packageRepository.findByGradeGradeIdAndIsActive(gradeId, Boolean.parseBoolean(isActive), pageable);
         } else if (gradeId != null) {
             return packageRepository.findByGradeGradeId(gradeId, pageable);
         } else if (keyword != null && isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByNameContainingIgnoreCaseAndActive(keyword, Boolean.parseBoolean(isActive),
+            return packageRepository.findByNameContainingIgnoreCaseAndIsActive(keyword, Boolean.parseBoolean(isActive),
                     pageable);
         } else if (keyword != null) {
             return packageRepository.findByNameContainingIgnoreCase(keyword, pageable);
         } else if (isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByActive(Boolean.parseBoolean(isActive), pageable);
+            return packageRepository.findByIsActive(Boolean.parseBoolean(isActive), pageable);
         } else {
             return packageRepository.findAll(pageable);
         }
     }
 
+    public List<Subject> findSubjectsByPackageIdAndKeyword(Long packageId, String keyword) {
+        return this.packageSubjectRepository.findSubjectsByPackageIdAndKeyword(packageId, keyword);
+    }
 
+    public List<Subject> findSubjectsByPackageId(Long packageId) {
+        return this.packageSubjectRepository.findSubjectsByPackageId(packageId);
+    }
+
+    public Long getAmountOfUsersRegistor(Long packageId) {
+        long count = userPackageRepository.countByPkgPackageId(packageId);
+        return count;
+
+    }
 }

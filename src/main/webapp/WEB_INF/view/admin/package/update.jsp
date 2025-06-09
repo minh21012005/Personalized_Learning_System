@@ -115,14 +115,14 @@
                     <div class="container mt-5">
                         <div class="row">
                             <div class="col-md-6 col-12 mx-auto">
-                                <h3>Tạo mới gói </h3>
+                                <h3>Chỉnh sửa gói học </h3>
                             </div>
                             <c:if test="${not empty error}">
                                 <div class="alert alert-danger" role="alert">
                                     ${error}
                                 </div>
                             </c:if>
-                            <form:form method="post" action="/admin/package/create" modelAttribute="newPackage"
+                            <form:form method="post" action="/admin/package/update" modelAttribute="pkg"
                                 enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <c:set var="errorName">

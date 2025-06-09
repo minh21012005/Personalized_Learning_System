@@ -17,36 +17,35 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
     boolean existsByName(String name);
 
     // Lọc theo keyword và isActive
-    Page<Package> findByNameContainingIgnoreCaseAndActive(String name, boolean active, Pageable pageable);
+    Page<Package> findByNameContainingIgnoreCaseAndIsActive(String name, boolean active, Pageable pageable);
 
     // Lọc theo keyword (không có isActive)
     Page<Package> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     // Lọc theo isActive (không có keyword)
-    Page<Package> findByActive(boolean active, Pageable pageable);
+    Page<Package> findByIsActive(boolean active, Pageable pageable);
 
     // Trả về tất cả (không lọc theo keyword hoặc isActive)
     Page<Package> findAll(Pageable pageable);
 
-    Page<Package> findByGradeGradeIdAndActive(Long gradeId, boolean active, Pageable pageable);
+    Page<Package> findByGradeGradeIdAndIsActive(Long gradeId, boolean active, Pageable pageable);
 
     Page<Package> findByGradeGradeIdAndNameContainingIgnoreCase(Long gradeId, String name, Pageable pageable);
 
     Page<Package> findByGradeGradeId(Long gradeId, Pageable pageable);
 
-    Page<Package> findByGradeGradeIdAndActiveAndNameContainingIgnoreCase(Long gradeId, boolean active, String name,
+    Page<Package> findByGradeGradeIdAndIsActiveAndNameContainingIgnoreCase(Long gradeId, boolean active, String name,
             Pageable pageable);
 
     // Truy vấn nâng cao với Specification
     Page<Package> findAll(Specification<Package> spec, Pageable pageable);
-
-
 
     List<Package> findAllByIsActiveTrue();
 
     /**
      * Tìm tất cả Package theo danh sách ID VÀ đang active (isActive = true).
      * Dùng cho createNotification (targetType="PACKAGE").
+     * 
      * @param ids danh sách Package ID
      * @return danh sách Package phù hợp
      */

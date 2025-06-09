@@ -19,7 +19,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -159,4 +161,37 @@ public class PackageController {
                         contentType.equals("image/jpeg"));
     }
 
+    @GetMapping(value = "/admin/package/view/{packageId}")
+    public String viewDetailPackage(Model model,
+
+            @PathVariable Long packageId,
+            @RequestParam(required = false) String keyword) {
+
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.isEmpty()) {
+                keyword = null;
+            }
+        }
+        try {
+            Package pkg = this.packageService.findById(packageId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói lớp"));
+
+            List<Subject> subjects = this.packageService.findSubjectsByPackageIdAndKeyword(packageId, keyword);
+            Long count = this.packageService.getAmountOfUsersRegistor(packageId);
+            if (!pkg.isActive()) {
+                model.addAttribute("warning", "⚠ Gói này đã ngừng hoạt động. Dữ liệu chỉ để tham khảo.");
+            }
+            model.addAttribute("count", count);
+            model.addAttribute("subjects", subjects);
+            model.addAttribute("pkg", pkg);
+
+            model.addAttribute("keyword", keyword);
+        } catch (IllegalArgumentException ex) {
+
+            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("subjects", java.util.Collections.emptyList());
+        }
+        return "admin/package/view";
+    }
 }
