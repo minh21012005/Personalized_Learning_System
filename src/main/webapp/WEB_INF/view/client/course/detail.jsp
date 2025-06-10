@@ -68,7 +68,8 @@
                                         <!-- User Actions -->
                                         <div class="user-actions">
                                             <i data-lucide="heart" class="action-icon"></i>
-                                            <i data-lucide="shopping-cart" class="action-icon"></i>
+                                            <a href="/parent/cart"><i data-lucide="shopping-cart"
+                                                    class="action-icon"></i></a>
                                             <i data-lucide="bell" class="action-icon"></i>
                                             <div class="avatar">
                                                 <span class="avatar-text">J</span>
