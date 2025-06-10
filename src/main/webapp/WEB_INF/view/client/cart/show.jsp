@@ -79,52 +79,43 @@
                                     </div>
                                 </header>
 
-                                <div class="container">
-                                    <!-- Cart Header Section -->
-                                    <section class="cart-header">
-                                        <h1 class="cart-title">Shopping Cart</h1>
-
-                                        <div class="breadcrumb">
-                                            <ul class="breadcrumb-list">
-                                                <li class="breadcrumb-item">
-                                                    <a href="#" class="breadcrumb-link">Categories</a>
-                                                </li>
-                                                <li class="breadcrumb-separator">
-                                                    <i data-lucide="chevron-right"></i>
-                                                </li>
-                                                <li class="breadcrumb-item">
-                                                    <a href="#" class="breadcrumb-link">Details</a>
-                                                </li>
-                                                <li class="breadcrumb-separator">
-                                                    <i data-lucide="chevron-right"></i>
-                                                </li>
-                                                <li class="breadcrumb-item">
-                                                    <a href="#" class="breadcrumb-link current">Shopping Cart</a>
-                                                </li>
-                                            </ul>
+                                <c:choose>
+                                    <c:when test="${empty cartPackages}">
+                                        <div class="empty-cart-wrapper">
+                                            <div class="empty-cart-content">
+                                                <h2>Giỏ hàng của bạn đang trống</h2>
+                                                <p>Hãy khám phá các khóa học tuyệt vời của chúng tôi!</p>
+                                                <a href="/parent/course" class="continue-button">Khám phá khóa học</a>
+                                            </div>
                                         </div>
-                                    </section>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="container">
+                                            <!-- Cart Header Section -->
+                                            <section class="cart-header">
+                                                <h1 class="cart-title">Giỏ hàng</h1>
+                                            </section>
 
-                                    <div class="two-column-layout">
-                                        <!-- Left column - Course items -->
-                                        <div class="left-column">
-                                            <!-- Course Item 1 -->
-                                            <c:forEach var="cartPackage" items="${cartPackages}">
-                                                <div class="course-card">
-                                                    <div class="course-content">
-                                                        <div class="course-info">
-                                                            <img class="course-img" alt="Course thumbnail"
-                                                                src="/img/package/${cartPackage.pkg.image}" />
+                                            <div class="two-column-layout">
+                                                <!-- Left column - Course items -->
+                                                <div class="left-column">
+                                                    <!-- Course Item 1 -->
+                                                    <c:forEach var="cartPackage" items="${cartPackages}">
+                                                        <div class="course-card">
+                                                            <div class="course-content">
+                                                                <div class="course-info">
+                                                                    <img class="course-img" alt="Course thumbnail"
+                                                                        src="/img/package/${cartPackage.pkg.image}" />
 
-                                                            <div class="course-details">
-                                                                <div class="course-title-container">
-                                                                    <a href="/parent/course/detail/${cartPackage.pkg.packageId}"
-                                                                        class="course-title">${cartPackage.pkg.name}
-                                                                    </a>
-                                                                    <!-- <p class="course-instructor">By John Doe</p> -->
-                                                                </div>
+                                                                    <div class="course-details">
+                                                                        <div class="course-title-container">
+                                                                            <a href="/parent/course/detail/${cartPackage.pkg.packageId}"
+                                                                                class="course-title">${cartPackage.pkg.name}
+                                                                            </a>
+                                                                            <!-- <p class="course-instructor">By John Doe</p> -->
+                                                                        </div>
 
-                                                                <!-- <div class="course-rating-container">
+                                                                        <!-- <div class="course-rating-container">
                                                                 <div class="rating-group">
                                                                     <span class="rating-value">4.6</span>
                                                                     <div class="star-container">
@@ -150,71 +141,78 @@
                                                                     levels</span>
                                                             </div> -->
 
-                                                                <div class="course-actions">
-                                                                    <div class="separator-vertical"></div>
-                                                                    <form action="/parent/cart/delete/${cartPackage.id}"
-                                                                        method="post">
-                                                                        <input type="hidden"
-                                                                            name="${_csrf.parameterName}"
-                                                                            value="${_csrf.token}" />
-                                                                        <button class="remove-button">Remove</button>
-                                                                    </form>
+                                                                        <div class="course-actions">
+                                                                            <div class="separator-vertical"></div>
+                                                                            <form
+                                                                                action="/parent/cart/delete/${cartPackage.id}"
+                                                                                method="post">
+                                                                                <input type="hidden"
+                                                                                    name="${_csrf.parameterName}"
+                                                                                    value="${_csrf.token}" />
+                                                                                <button
+                                                                                    class="remove-button">Xóa</button>
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="course-price">
+                                                                    <fmt:formatNumber value="${cartPackage.pkg.price}"
+                                                                        type="number" groupingUsed="true" />
+                                                                    <span class="vnd-symbol">₫</span>
                                                                 </div>
                                                             </div>
                                                         </div>
-
-                                                        <div class="course-price">
-                                                            <fmt:formatNumber value="${cartPackage.pkg.price}"
-                                                                type="number" groupingUsed="true" />
-                                                            <span class="vnd-symbol">₫</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </c:forEach>
-                                        </div>
-
-                                        <!-- Right column - Checkout details -->
-                                        <div class="right-column">
-                                            <div class="checkout-card">
-                                                <div class="checkout-content">
-                                                    <h3 class="checkout-title">Order Details</h3>
-
-                                                    <div class="order-item">
-                                                        <span class="order-label">Price</span>
-                                                        <span class="order-value">
-                                                            <fmt:formatNumber value="${totalPrice}" type="number"
-                                                                groupingUsed="true" /> ₫
-                                                        </span>
-                                                    </div>
-
-                                                    <!-- <div class="order-item">
-                                                    <span class="order-label">Discount</span>
-                                                    <span class="order-value">-$10.00</span>
+                                                    </c:forEach>
                                                 </div>
 
-                                                <div class="order-item">
-                                                    <span class="order-label">Tax</span>
-                                                    <span class="order-value">$10.00</span>
-                                                </div> -->
+                                                <!-- Right column - Checkout details -->
+                                                <div class="right-column">
+                                                    <c:choose>
+                                                        <c:when test="${not empty cartPackages}">
+                                                            <div class="checkout-card">
+                                                                <div class="checkout-content">
+                                                                    <h3 class="checkout-title">Chi tiết thanh toán</h3>
 
-                                                    <div class="separator-horizontal"></div>
+                                                                    <div class="order-item">
+                                                                        <span class="order-label">Giá</span>
+                                                                        <span class="order-value">
+                                                                            <fmt:formatNumber value="${totalPrice}"
+                                                                                type="number" groupingUsed="true" /> ₫
+                                                                        </span>
+                                                                    </div>
 
-                                                    <div class="order-total">
-                                                        <span class="total-label">Total</span>
-                                                        <span class="total-value">
-                                                            <fmt:formatNumber value="${totalPrice}" type="number"
-                                                                groupingUsed="true" /> ₫
-                                                        </span>
-                                                    </div>
+                                                                    <div class="separator-horizontal"></div>
 
-                                                    <button class="checkout-button">Checkout</button>
+                                                                    <div class="order-total">
+                                                                        <span class="total-label">Tổng tiền</span>
+                                                                        <span class="total-value">
+                                                                            <fmt:formatNumber value="${totalPrice}"
+                                                                                type="number" groupingUsed="true" /> ₫
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <button class="checkout-button">Thanh toán</button>
+                                                                </div>
+                                                            </div>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="checkout-card">
+                                                                <div class="checkout-content empty-cart">
+                                                                    <h3 class="checkout-title">Giỏ hàng trống</h3>
+                                                                    <p>Bạn chưa có khóa học nào trong giỏ hàng.</p>
+                                                                    <a href="/parent/course" class="checkout-button">Bắt
+                                                                        đầu mua
+                                                                        sắm</a>
+                                                                </div>
+                                                            </div>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-
-
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                     </div>

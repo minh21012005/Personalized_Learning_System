@@ -55,7 +55,7 @@ public class CourseController {
             pageNumber = 1;
         }
 
-        int pageSize = 9;
+        int pageSize = 6;
         String courseFilter = course.orElse(null);
         String gradesFilter = grades.orElse(null);
         String subjectsFilter = subjects.orElse(null);
