@@ -49,4 +49,8 @@ public class LessonService {
     public boolean existsByLessonNameAndChapterId(String lessonName, Long chapterId) {
         return lessonRepository.existsByLessonNameAndChapterChapterId(lessonName, chapterId);
     }
+
+    public Optional<Lesson> getLessonByIdAndStatusTrue(Long lessonId) {
+        return lessonRepository.findByLessonIdAndStatusTrue(lessonId);
+    }
 }

@@ -20,4 +20,8 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long>, JpaSpec
     List<Chapter> findBySubject(Subject subject);
 
     Optional<Chapter> getChapterByChapterId(Long chapterId);
+
+    Optional<Chapter> findByChapterIdAndStatusTrue(Long chapterId);
+
+    List<Chapter> findBySubjectSubjectIdAndStatusTrue(Long subjectId);
 }

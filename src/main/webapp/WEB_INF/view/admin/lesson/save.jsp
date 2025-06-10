@@ -154,8 +154,8 @@
                                 <label for="lessonDescriptionInput" class="form-label">Mô tả về bài học</label>
                                 <form:textarea id="lessonDescriptionInput" path="lessonDescription"
                                                class="form-control ${not empty errorLessonDescription?'is-invalid':''}"
-                                               rows="5" maxlength="255"
-                                               placeholder="Nhập nội dung không quá 255 kí tự"/>
+                                               rows="10" maxlength="1000"
+                                               placeholder="Nhập nội dung không quá 1000 kí tự"/>
                                     ${errorLessonDescription}
                             </div>
                             <div class="mb-3">

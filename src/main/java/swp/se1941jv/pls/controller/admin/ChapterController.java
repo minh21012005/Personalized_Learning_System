@@ -33,49 +33,23 @@ public class ChapterController {
     public String getDetailSubjectPage(
             Model model,
             @PathVariable("id") Long id,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Optional<String> page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") Optional<String> size,
-            @RequestParam(value = "chapterName") Optional<String> chapterName,
-            @RequestParam(value = "status") Optional<Boolean> status
-
+            @RequestParam(value = "chapterName", required = false) String chapterName,
+            @RequestParam(value = "status", required = false) Boolean status
     ) {
         Optional<Subject> subject = subjectService.getSubjectById(id);
         if (subject.isEmpty()) {
             return "error/404";
         }
 
-        int pageNumber;
-        try {
-            pageNumber = page.map(Integer::parseInt).orElse(1);
-        } catch (Exception e) {
-            pageNumber = 1;
-        }
+        // SỬA MỚI: Lấy toàn bộ danh sách chương thay vì phân trang
+        String searchName = chapterName != null ? chapterName : "";
+        List<Chapter> chapters = chapterService.findChapters(id, searchName, status);
 
-        int pageSize;
-        try {
-            pageSize = size.map(Integer::parseInt).orElse(10);
-        } catch (Exception e) {
-            pageSize = 1;
-        }
-
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "chapterId"));
-
-        // Lấy giá trị status
-        Boolean chapterStatus = status.orElse(null); // null nghĩa là không lọc theo status
-        String searchName = chapterName.orElse(""); // Chuỗi rỗng nghĩa là không lọc theo tên
-
-
-        Page<Chapter> chapters = chapterService.findChapters(id,searchName, chapterStatus,pageable);
-
-
-            // Truyền dữ liệu vào model để hiển thị trên JSP
+        // Truyền dữ liệu vào model để hiển thị trên JSP
         model.addAttribute("subject", subject.get());
-        model.addAttribute("chapters", chapters.getContent());
-        model.addAttribute("currentPage", pageNumber);
-        model.addAttribute("totalPages", chapters.getTotalPages());
-        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("chapters", chapters);
         model.addAttribute("chapterName", searchName);
-        model.addAttribute("status", chapterStatus);
+        model.addAttribute("status", status);
 
         return "admin/chapter/show";
     }

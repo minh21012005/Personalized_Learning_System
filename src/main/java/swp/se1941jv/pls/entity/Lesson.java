@@ -29,7 +29,7 @@ public class Lesson extends BaseEntity {
 
     @NotBlank(message = "Mô tả bài học không được để trống")
     @Size(min = 10, max = 1000, message = "Mô tả bài học phải có độ dài từ 10 đến 1000 ký tự")
-    @Column(name = "lesson_description", columnDefinition = "NVARCHAR(1000)")
+    @Column(name = "lesson_description", columnDefinition = "TEXT")
     String lessonDescription;
 
     @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT TRUE")

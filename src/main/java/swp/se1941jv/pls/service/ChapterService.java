@@ -35,22 +35,23 @@ public class ChapterService {
         return chapterRepository.getChapterByChapterId(chapterId);
     }
 
-    public Page<Chapter> findChapters(Long subjectId, String chapterName, Boolean status, Pageable pageable) {
+    // SỬA MỚI: Thay Page<Chapter> bằng List<Chapter> và nạp lessons
+    public List<Chapter> findChapters(Long subjectId, String chapterName, Boolean status) {
         Specification<Chapter> spec = Specification.where(null);
-        if(subjectId != null){
+        if (subjectId != null) {
             spec = spec.and(ChapterSpecifications.hasSubjectId(subjectId));
         }
 
         if (chapterName != null && !chapterName.isEmpty()) {
             spec = spec.and(ChapterSpecifications.hasName(chapterName));
-
         }
 
         if (status != null) {
             spec = spec.and(ChapterSpecifications.hasStatus(status));
         }
-        return chapterRepository.findAll(spec, pageable);
+        return chapterRepository.findAll(spec);
     }
+    // /SỬA MỚI
 
     public void updateChaptersStatus(List<Long> chapterIds) {
         List<Chapter> chapters = chapterRepository.findAllById(chapterIds);
@@ -58,5 +59,13 @@ public class ChapterService {
             chapter.setStatus(!chapter.getStatus()); // Đảo trạng thái
         }
         chapterRepository.saveAll(chapters);
+    }
+
+    public Optional<Chapter> getChapterByChapterIdAndStatusTrue(Long chapterId) {
+        return chapterRepository.findByChapterIdAndStatusTrue(chapterId);
+    }
+
+    public List<Chapter> getChaptersBySubjectIdAndStatusTrue(Long subjectId) {
+        return chapterRepository.findBySubjectSubjectIdAndStatusTrue(subjectId);
     }
 }
