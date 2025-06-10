@@ -65,4 +65,9 @@ public class Package extends BaseEntity {
     @ManyToOne()
     @JoinColumn(name = "grade_id")
     Grade grade;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Trạng thái không được để trống")
+    private PackageStatus status;
 }

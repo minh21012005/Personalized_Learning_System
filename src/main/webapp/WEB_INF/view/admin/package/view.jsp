@@ -186,6 +186,13 @@
 
                         <div class="description-box">
                             <div><strong>Mô tả:</strong> ${pkg.description}</div>
+                            <div><strong>Trạng thái:</strong>
+                                <c:choose>
+                                    <c:when test="${pkg.status == 'APPROVED'}">Đã duyệt</c:when>
+                                    <c:when test="${pkg.status == 'PENDING'}">Chờ duyệt</c:when>
+                                    <c:otherwise>Bị từ chối</c:otherwise>
+                                </c:choose>
+                            </div>
                             <div><strong>Số lượng người đăng kí:</strong> ${count}</div>
                         </div>
                         <!-- Filter -->

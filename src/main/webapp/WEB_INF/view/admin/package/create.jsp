@@ -236,19 +236,8 @@
                             <img style="max-height: 250px; display: none;" alt="Image not found" id="image" />
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label d-block">Trạng thái</label>
-                            <div class="form-check form-check-inline">
-                                <form:radiobutton path="active" value="true" cssClass="form-check-input"
-                                    id="activeTrue" />
-                                <label class="form-check-label" for="activeTrue">Active</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <form:radiobutton path="active" value="false" cssClass="form-check-input"
-                                    id="activeFalse" />
-                                <label class="form-check-label" for="activeFalse">Inactive</label>
-                            </div>
-                        </div>
+                        <form:hidden path="status" value="PENDING" />
+                        <form:errors path="status" cssClass="invalid-feedback" />
 
 
 
@@ -256,7 +245,7 @@
 
 
                         <button type="submit" class="btn btn-primary">Lưu</button>
-                        <a href="/admin/grade" class="btn btn-secondary">Hủy</a>
+                        <a href="/admin/package" class="btn btn-secondary">Hủy</a>
                         </form:form>
                     </div>
                 </div>

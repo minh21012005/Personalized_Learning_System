@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import swp.se1941jv.pls.entity.Package;
+import swp.se1941jv.pls.entity.PackageStatus;
 import swp.se1941jv.pls.entity.PackageSubject;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
@@ -53,6 +54,9 @@ public class PackageService {
     }
 
     public Package savePackage(Package pkg) {
+        if (pkg.getStatus() == null) {
+            pkg.setStatus(PackageStatus.PENDING);
+        }
         return this.packageRepository.save(pkg);
     }
 
@@ -62,19 +66,19 @@ public class PackageService {
 
     @Transactional
     public Package savePackageWithSubjects(Package newPackage, List<Long> subjectIds) {
-
+        if (newPackage.getStatus() == null) {
+            newPackage.setStatus(PackageStatus.PENDING); // Mặc định PENDING
+        }
         Package savedPackage = packageRepository.save(newPackage);
         packageSubjectRepository.deleteByPkg_PackageId(savedPackage.getPackageId());
         for (Long subjectId : subjectIds) {
-            Subject subject = subjectRepository.findById(subjectId).orElseThrow();
+            Subject subject = subjectRepository.findById(subjectId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid subject ID: " + subjectId));
 
             // tạo khóa chính tổng hợp
             KeyPackageSubject key = new KeyPackageSubject(savedPackage.getPackageId(), subjectId);
 
-            PackageSubject packageSubject = new PackageSubject();
-            packageSubject.setId(key); // Gán khóa tổng hợp
-            packageSubject.setPkg(savedPackage); // Gán package
-            packageSubject.setSubject(subject); // Gán subject
+            PackageSubject packageSubject = new PackageSubject(key, savedPackage, subject);
 
             packageSubjectRepository.save(packageSubject);
         }
@@ -82,24 +86,25 @@ public class PackageService {
         return savedPackage;
     }
 
-    public Page<Package> getFilteredPackage(String keyword, String isActive, Long gradeId, Pageable pageable) {
-        if (gradeId != null && keyword != null && isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByGradeGradeIdAndIsActiveAndNameContainingIgnoreCase(gradeId,
-                    Boolean.parseBoolean(isActive), keyword,
+    public Page<Package> getFilteredPackage(String keyword, String status, Long gradeId, Pageable pageable) {
+        PackageStatus packageStatus = status != null && !status.isEmpty() ? PackageStatus.valueOf(status) : null;
+        if (gradeId != null && keyword != null && packageStatus != null) {
+            return packageRepository.findByGradeGradeIdAndStatusAndNameContainingIgnoreCase(gradeId,
+                    packageStatus, keyword,
                     pageable);
         } else if (gradeId != null && keyword != null) {
             return packageRepository.findByGradeGradeIdAndNameContainingIgnoreCase(gradeId, keyword, pageable);
-        } else if (gradeId != null && isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByGradeGradeIdAndIsActive(gradeId, Boolean.parseBoolean(isActive), pageable);
+        } else if (gradeId != null && packageStatus != null) {
+            return packageRepository.findByGradeGradeIdAndStatus(gradeId, packageStatus, pageable);
         } else if (gradeId != null) {
             return packageRepository.findByGradeGradeId(gradeId, pageable);
-        } else if (keyword != null && isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByNameContainingIgnoreCaseAndIsActive(keyword, Boolean.parseBoolean(isActive),
+        } else if (keyword != null && packageStatus != null) {
+            return packageRepository.findByNameContainingIgnoreCaseAndStatus(keyword, packageStatus,
                     pageable);
         } else if (keyword != null) {
             return packageRepository.findByNameContainingIgnoreCase(keyword, pageable);
-        } else if (isActive != null && !isActive.isEmpty()) {
-            return packageRepository.findByIsActive(Boolean.parseBoolean(isActive), pageable);
+        } else if (packageStatus != null) {
+            return packageRepository.findByStatus(packageStatus, pageable);
         } else {
             return packageRepository.findAll(pageable);
         }
@@ -118,4 +123,5 @@ public class PackageService {
         return count;
 
     }
+
 }

@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Package;
+import swp.se1941jv.pls.entity.PackageStatus;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.service.SubjectService;
 import swp.se1941jv.pls.service.UploadService;
@@ -55,7 +56,7 @@ public class PackageController {
     public String getPackagePage(Model model,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String isActive,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) Long gradeId) {
 
         Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "packageId"));
@@ -66,7 +67,7 @@ public class PackageController {
             }
         }
 
-        Page<Package> packagePage = this.packageService.getFilteredPackage(keyword, isActive, gradeId, pageable);
+        Page<Package> packagePage = this.packageService.getFilteredPackage(keyword, status, gradeId, pageable);
         List<Grade> grades = this.gradeService.getAllGradesIsActive();
         model.addAttribute("grades", grades);
         model.addAttribute("packages", packagePage.getContent());
@@ -85,6 +86,7 @@ public class PackageController {
         model.addAttribute("grades", grades);
         model.addAttribute("subjects", subjects);
         model.addAttribute("newPackage", new Package());
+
         return "admin/package/create";
     }
 
@@ -148,6 +150,8 @@ public class PackageController {
         String packageImage = this.uploadService.handleSaveUploadFile(file, "package");
         // Lưu Package và mối quan hệ Package-Subject
         newPackage.setImage(packageImage);
+        newPackage.setStatus(PackageStatus.PENDING);
+        newPackage.setActive(false);
         this.packageService.savePackageWithSubjects(newPackage, subjectIds);
 
         return "redirect:/admin/package";
@@ -179,9 +183,13 @@ public class PackageController {
 
             List<Subject> subjects = this.packageService.findSubjectsByPackageIdAndKeyword(packageId, keyword);
             Long count = this.packageService.getAmountOfUsersRegistor(packageId);
-            if (!pkg.isActive()) {
-                model.addAttribute("warning", "⚠ Gói này đã ngừng hoạt động. Dữ liệu chỉ để tham khảo.");
+            if (pkg.getStatus() == PackageStatus.PENDING) {
+                model.addAttribute("warning", "⚠ Gói này đang được xét duyệt. Dữ liệu chỉ để tham khảo.");
             }
+            if (pkg.getStatus() == PackageStatus.REJECTED) {
+                model.addAttribute("warning", "⚠ Gói này đã bị từ chối. Dữ liệu chỉ để tham khảo.");
+            }
+
             model.addAttribute("count", count);
             model.addAttribute("subjects", subjects);
             model.addAttribute("pkg", pkg);
@@ -201,7 +209,10 @@ public class PackageController {
 
             Package pkg = this.packageService.findById(packageId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
-
+            if (pkg.getStatus() != PackageStatus.PENDING) {
+                model.addAttribute("errorMessage", "Chỉ có thể chỉnh sửa gói ở trạng thái PENDING");
+                return "admin/package/view";
+            }
             Long gradeId = pkg.getGrade() != null ? pkg.getGrade().getGradeId() : null;
             List<Subject> subjects = gradeId != null ? this.subjectService.getSubjectsByGradeId(gradeId, true)
                     : Collections.emptyList();
@@ -242,6 +253,11 @@ public class PackageController {
         }
 
         Package existingPackage = this.packageService.findById(pkg.getPackageId()).orElse(null);
+        if (existingPackage.getStatus() != PackageStatus.PENDING) {
+            bindingResult.reject("statusError", "Chỉ có thể chỉnh sửa gói ở trạng thái PENDING");
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
         if (existingPackage == null) {
             model.addAttribute("error", "Gói học không tồn tại!");
             model.addAttribute("selectedSubjectIds", subjectIds);
@@ -289,7 +305,7 @@ public class PackageController {
             packageImage = this.uploadService.handleSaveUploadFile(file, "package");
         }
         pkg.setImage(packageImage);
-
+        pkg.setStatus(existingPackage.getStatus());
         this.packageService.savePackageWithSubjects(pkg, subjectIds);
 
         return "redirect:/admin/package";

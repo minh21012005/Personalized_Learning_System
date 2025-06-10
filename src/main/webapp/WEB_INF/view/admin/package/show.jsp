@@ -102,17 +102,14 @@
                                 placeholder="Tìm theo tên" value="${param.keyword}">
                         </div>
                         <div class="col-md-3">
-                            <select id="isActive" name="isActive" class="form-select">
-                                <option value="" <c:if test="${empty param.isActive}">selected</c:if>>Tất cả
-                                </option>
-                                <option value="true" <c:if test="${param.isActive eq 'true'}">selected</c:if>>Hoạt
-                                    động
-                                </option>
-                                <option value="false" <c:if test="${param.isActive eq 'false'}">selected</c:if>
-                                    >Không
-                                    hoạt
-                                    động
-                                </option>
+                            <select id="status" name="status" class="form-select">
+                                <option value="" <c:if test="${empty param.status}">selected</c:if>>Tất cả</option>
+                                <option value="PENDING" <c:if test="${param.status eq 'PENDING'}">selected</c:if>>Chờ
+                                    duyệt</option>
+                                <option value="APPROVED" <c:if test="${param.status eq 'APPROVED'}">selected</c:if>>Đã
+                                    duyệt</option>
+                                <option value="REJECTED" <c:if test="${param.status eq 'REJECTED'}">selected</c:if>>Bị
+                                    từ chối</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -158,9 +155,11 @@
                                                 <td>${pkg.name}</td>
                                                 <td class="text-center">
                                                     <c:choose>
-                                                        <c:when test="${pkg.active}"><span
-                                                                class="badge bg-success">Active</span></c:when>
-                                                        <c:otherwise><span class="badge bg-danger">Inactive</span>
+                                                        <c:when test="${pkg.status == 'APPROVED'}"><span
+                                                                class="badge bg-success">Đã duyệt</span></c:when>
+                                                        <c:when test="${pkg.status == 'PENDING'}"><span
+                                                                class="badge bg-warning">Chờ duyệt</span></c:when>
+                                                        <c:otherwise><span class="badge bg-danger">Bị từ chối</span>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
@@ -221,13 +220,13 @@
                                 <c:forEach begin="0" end="${totalPages - 1}" var="i">
                                     <li class="page-item ${currentPage == i ? 'active' : ''}">
                                         <a class="page-link"
-                                            href="/admin/package?page=${i}&keyword=${param.keyword}&isActive=${param.isActive}&gradeId=${param.gradeId}">${i
+                                            href="/admin/package?page=${i}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">${i
                                             + 1}</a>
                                     </li>
                                 </c:forEach>
                                 <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                        href="/admin/package?page=${currentPage + 1}&keyword=${param.keyword}&isActive=${param.isActive}&gradeId=${param.gradeId}">»</a>
+                                        href="/admin/package?page=${currentPage + 1}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">»</a>
                                 </li>
                             </ul>
                         </nav>
