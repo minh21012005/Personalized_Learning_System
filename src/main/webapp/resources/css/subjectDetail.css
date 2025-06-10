@@ -442,3 +442,7 @@ footer {
     background-color: #fafafa;
     border-top: 1px solid #ddd;
 }
+
+.curriculum-item-description p {
+    margin-bottom: 5px;
+}

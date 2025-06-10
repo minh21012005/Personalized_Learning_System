@@ -88,10 +88,10 @@
 
 
                     <section class="course-details">
-                        <h2>Thời lượng môn học</h2>
+                        <h2>Số chương học</h2>
                         <p>${totalChapter} chương</p>
 
-                        <h2>Giáo trình</h2>
+                        <h2>Lộ trình học</h2>
                         <div class="curriculum">
                             <c:forEach var="chapter" items="${chapters}">
                                 <div class="curriculum-item">
@@ -101,6 +101,15 @@
                                     </div>
                                     <div class="curriculum-item-description" style="display: none;">
                                         <p>${chapter.chapterDescription}</p>
+
+                                        <!-- Danh sách bài học -->
+                                        <ul class="lesson-list">
+                                            <c:forEach var="lesson" items="${chapter.lessons}">
+                                                <div class="lesson-item">
+                                                    📘 ${lesson.lessonName}
+                                                </div>
+                                            </c:forEach>
+                                        </ul>
                                     </div>
                                 </div>
                             </c:forEach>
