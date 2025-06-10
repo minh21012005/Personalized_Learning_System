@@ -18,4 +18,5 @@ public interface PackageSubjectRepository extends JpaRepository<PackageSubject, 
         @Query("SELECT ps.subject FROM PackageSubject ps WHERE ps.pkg.packageId = :packageId AND ps.subject.isActive = true")
         List<Subject> findSubjectsByPackageId(@Param("packageId") Long packageId);
 
+        void deleteByPkg_PackageId(Long packageId);
 }

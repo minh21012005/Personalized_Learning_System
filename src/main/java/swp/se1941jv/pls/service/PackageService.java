@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.PackageSubject;
@@ -59,17 +60,17 @@ public class PackageService {
         return this.packageRepository.existsByName(name);
     }
 
+    @Transactional
     public Package savePackageWithSubjects(Package newPackage, List<Long> subjectIds) {
-        // Lưu Package trước để có packageId
-        Package savedPackage = packageRepository.save(newPackage);
 
+        Package savedPackage = packageRepository.save(newPackage);
+        packageSubjectRepository.deleteByPkg_PackageId(savedPackage.getPackageId());
         for (Long subjectId : subjectIds) {
             Subject subject = subjectRepository.findById(subjectId).orElseThrow();
 
-            // Tạo khóa chính tổng hợp
+            // tạo khóa chính tổng hợp
             KeyPackageSubject key = new KeyPackageSubject(savedPackage.getPackageId(), subjectId);
 
-            // Tạo PackageSubject
             PackageSubject packageSubject = new PackageSubject();
             packageSubject.setId(key); // Gán khóa tổng hợp
             packageSubject.setPkg(savedPackage); // Gán package

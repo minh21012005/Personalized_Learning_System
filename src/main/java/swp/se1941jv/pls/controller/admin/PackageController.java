@@ -150,7 +150,7 @@ public class PackageController {
         newPackage.setImage(packageImage);
         this.packageService.savePackageWithSubjects(newPackage, subjectIds);
 
-        return "redirect:/admin/grade";
+        return "redirect:/admin/package";
     }
 
     // Hàm kiểm tra content type của file có phải là ảnh hợp lệ
@@ -194,4 +194,105 @@ public class PackageController {
         }
         return "admin/package/view";
     }
+
+    @GetMapping("/admin/package/update/{packageId}")
+    public String getUpdatePackagePage(Model model, @PathVariable Long packageId) {
+        try {
+
+            Package pkg = this.packageService.findById(packageId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
+
+            Long gradeId = pkg.getGrade() != null ? pkg.getGrade().getGradeId() : null;
+            List<Subject> subjects = gradeId != null ? this.subjectService.getSubjectsByGradeId(gradeId, true)
+                    : Collections.emptyList();
+            List<Grade> grades = this.gradeService.getAllGradesIsActive();
+            if (!pkg.isActive()) {
+                model.addAttribute("warning",
+                        "⚠ Gói học này đã ngừng hoạt động. Không thể chỉnh sửa danh sách gói học.");
+            }
+            model.addAttribute("grades", grades);
+            model.addAttribute("subjects", subjects);
+            model.addAttribute("pkg", pkg);
+
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("subjects", java.util.Collections.emptyList());
+
+        }
+        return "admin/package/update";
+    }
+
+    @PostMapping("/admin/package/update")
+    public String updatePackage(
+            @ModelAttribute("pkg") @Valid Package pkg,
+            BindingResult bindingResult,
+            @RequestParam(value = "subjects", required = false) List<Long> subjectIds,
+            @RequestParam("file") MultipartFile file,
+            Model model) {
+        List<Grade> grades = this.gradeService.getAllGradesIsActive();
+        Long gradeId = pkg.getGrade() != null ? pkg.getGrade().getGradeId() : null;
+        List<Subject> subjects = gradeId != null ? this.subjectService.getSubjectsByGradeId(gradeId, true)
+                : Collections.emptyList();
+        model.addAttribute("grades", grades);
+        model.addAttribute("subjects", subjects);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
+
+        Package existingPackage = this.packageService.findById(pkg.getPackageId()).orElse(null);
+        if (existingPackage == null) {
+            model.addAttribute("error", "Gói học không tồn tại!");
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
+
+        if (!existingPackage.getName().equals(pkg.getName()) && this.packageService.existsByName(pkg.getName())) {
+            bindingResult.rejectValue("name", "error.pkg", "Tên gói đã được sử dụng!");
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
+
+        if (subjectIds == null || subjectIds.isEmpty()) {
+            bindingResult.reject("subjectsError", "Phải chọn ít nhất một môn học!");
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
+        List<Long> validSubjectIds = subjects.stream().map(Subject::getSubjectId).collect(Collectors.toList());
+        if (subjectIds.stream().anyMatch(id -> !validSubjectIds.contains(id))) {
+            bindingResult.reject("subjectsError", "Một hoặc nhiều môn học không hợp lệ!");
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
+
+        if (gradeId == null) {
+            bindingResult.rejectValue("grade.gradeId", "error.pkg", "Phải chọn một khối lớp!");
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
+        Optional<Grade> grade = this.gradeService.getGradeById(gradeId);
+        if (!grade.isPresent()) {
+            bindingResult.rejectValue("grade.gradeId", "error.pkg", "Khối lớp không hợp lệ!");
+            model.addAttribute("selectedSubjectIds", subjectIds);
+            return "admin/package/update";
+        }
+
+        String packageImage = existingPackage.getImage();
+        if (!file.isEmpty()) {
+            String contentType = file.getContentType();
+            if (!isImageFile(contentType)) {
+                bindingResult.rejectValue("image", "error.pkg", "Chỉ được chọn ảnh định dạng PNG, JPG, JPEG!");
+                model.addAttribute("selectedSubjectIds", subjectIds);
+                return "admin/package/update";
+            }
+            packageImage = this.uploadService.handleSaveUploadFile(file, "package");
+        }
+        pkg.setImage(packageImage);
+
+        this.packageService.savePackageWithSubjects(pkg, subjectIds);
+
+        return "redirect:/admin/package";
+    }
+
 }

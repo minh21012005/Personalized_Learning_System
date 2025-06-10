@@ -115,7 +115,7 @@
                     <div class="container mt-5">
                         <div class="row">
                             <div class="col-md-6 col-12 mx-auto">
-                                <h3>Chỉnh sửa gói học </h3>
+                                <h3>Tạo mới gói </h3>
                             </div>
                             <c:if test="${not empty error}">
                                 <div class="alert alert-danger" role="alert">
@@ -124,6 +124,7 @@
                             </c:if>
                             <form:form method="post" action="/admin/package/update" modelAttribute="pkg"
                                 enctype="multipart/form-data">
+                                <form:hidden path="packageId" value="${pkg.packageId}" />
                                 <div class="mb-3">
                                     <c:set var="errorName">
                                         <form:errors path="name" cssClass="invalid-feedback" />
@@ -193,30 +194,27 @@
 
                         </div>
                         <div class="mb-3">
-                            <c:set var="errorGrade">
-                                <form:errors path="grade.gradeId" cssClass="invalid-feedback" />
-                            </c:set>
                             <label for="subjects" class="form-label">Môn học</label>
                             <select name="subjects" id="subjects" multiple class="form-select">
-                                <c:choose>
-                                    <c:when test="${not empty subjects}">
-                                        <c:forEach var="subject" items="${subjects}">
-                                            <option value="${subject.subjectId}">
-                                                ${subject.subjectName}</option>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-
-                                    </c:otherwise>
-                                </c:choose>
+                                <c:forEach var="subject" items="${subjects}">
+                                    <c:set var="isSelected" value="false" />
+                                    <c:forEach var="pkgSubject" items="${pkg.packageSubjects}">
+                                        <c:if test="${pkgSubject.subject.subjectId == subject.subjectId}">
+                                            <c:set var="isSelected" value="true" />
+                                        </c:if>
+                                    </c:forEach>
+                                    <option value="${subject.subjectId}" ${isSelected ? 'selected' : '' }>
+                                        ${subject.subjectName}
+                                    </option>
+                                </c:forEach>
                             </select>
                             <c:if test="${empty subjects}">
                                 <div class="text-muted text-center placeholder-message">
-                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách mon học đang trống
+                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách môn học đang trống
                                 </div>
                             </c:if>
                             <c:if test="${not empty subjectsError}">
-                                <div class="invalid-feedback">${subjectsError}</div>
+                                <div class="invalid-feedback d-block">${subjectsError}</div>
                             </c:if>
                         </div>
                         <div class="mb-3">
@@ -256,7 +254,7 @@
 
 
                         <button type="submit" class="btn btn-primary">Lưu</button>
-                        <a href="/admin/grade" class="btn btn-secondary">Hủy</a>
+                        <a href="/admin/package" class="btn btn-secondary">Hủy</a>
                         </form:form>
                     </div>
                 </div>
