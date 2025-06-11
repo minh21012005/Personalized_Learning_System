@@ -136,6 +136,20 @@
                     margin-top: 20px;
                     color: #dc3545;
                 }
+
+                .login-link {
+                    text-align: center;
+                    margin-top: 20px;
+                }
+
+                .login-link a {
+                    color: #045bd8;
+                    text-decoration: none;
+                }
+
+                .login-link a:hover {
+                    text-decoration: underline;
+                }
             </style>
         </head>
 
@@ -171,12 +185,15 @@
                             <div class="error">${error}</div>
                         </c:if>
 
+                        <div class="login-link">
+                            <a href="/">Quay lại trang chủ</a>
+                        </div>
                     </div>
 
                     <!-- Right: Promotional Section -->
                     <div class="forgot-password-right col-md-6">
                         <h3>Hỗ trợ bạn mọi lúc.</h3>
-                        <p>Chúng tôi ở đây để giúp bạn khôi phục tài khoản một cách nhanh chóng và an toàn.</p>
+                        <p>Chúng tôi ở đây để giúp bạn liên kết tài khoản một cách nhanh chóng và an toàn.</p>
                         <div class="dots">
                             <div class="dot active"></div>
                             <div class="dot"></div>
