@@ -19,12 +19,14 @@ public class LessonService {
         this.lessonRepository = lessonRepository;
     }
 
-    public Page<Lesson> findLessons(Long chapterId ,Pageable pageable) {
-        Specification<Lesson> spec = Specification.where(null);
-        if(chapterId != null){
-            spec = spec.and(LessonSpecifications.hasChapterId(chapterId));
-        }
-        return lessonRepository.findAll(spec, pageable);
+    /**
+     * Lấy danh sách bài học theo chapterId.
+     *
+     * @param chapterId ID của chương
+     * @return Danh sách bài học
+     */
+    public List<Lesson> findLessons(Long chapterId) {
+        return lessonRepository.findAll(LessonSpecifications.hasChapterId(chapterId));
     }
 
     public Optional<Lesson> findLesson(Long lessonId) {

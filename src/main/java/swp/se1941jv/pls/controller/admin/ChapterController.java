@@ -131,24 +131,29 @@ public class ChapterController {
     }
 
 
-    @PostMapping("admin/subject/{id}/chapters/update-status")
+    /**
+     * Cập nhật trạng thái của các chương.
+     *
+     * @param subjectId ID của môn học
+     * @param chapterIds Danh sách ID của các chương
+     * @param redirectAttributes Để truyền thông báo
+     * @return Redirect
+     */
+    @PostMapping("/update-status")
     public String updateChapterStatus(
             @PathVariable("id") Long subjectId,
             @RequestParam("chapterIds") List<Long> chapterIds,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
         if (subject.isEmpty()) {
             return "error/404";
         }
-
         try {
-            chapterService.updateChaptersStatus(chapterIds);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái chương học thành công!");
+            chapterService.toggleChaptersStatus(chapterIds);
+            redirectAttributes.addFlashAttribute("message", "Cập nhật trạng thái thành công");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
         }
-
         return "redirect:/admin/subject/" + subjectId + "/chapters";
     }
 }

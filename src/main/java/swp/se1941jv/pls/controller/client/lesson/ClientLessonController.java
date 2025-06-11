@@ -31,50 +31,50 @@ public class ClientLessonController {
         this.lessonService = lessonService;
     }
 
-    @GetMapping("/subject/{subjectId}/chapters/{chapterId}/lessons/{lessonId}")
-    public String viewLesson(
-            @PathVariable("subjectId") Long subjectId,
-            @PathVariable("chapterId") Long chapterId,
-            @PathVariable("lessonId") Long lessonId,
-            Model model) {
-        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        if (subject.isEmpty()) {
-            return "error/404";
-        }
-
-        // Lấy chapter có status = true
-        Optional<Chapter> chapter = chapterService.getChapterByChapterIdAndStatusTrue(chapterId);
-        if (chapter.isEmpty() || !chapter.get().getSubject().getSubjectId().equals(subjectId)) {
-            return "error/404";
-        }
-
-        // Lấy lesson có status = true
-        Optional<Lesson> lesson = lessonService.getLessonByIdAndStatusTrue(lessonId);
-        if (lesson.isEmpty() || !lesson.get().getChapter().getChapterId().equals(chapterId)) {
-            return "error/404";
-        }
-
-        // Lấy danh sách chapters có status = true
-        List<Chapter> chapters = chapterService.getChaptersBySubjectIdAndStatusTrue(subjectId);
-
-        // Parse materialsJson thành danh sách
-        List<String> materials = new ArrayList<>();
-        try {
-            if (lesson.get().getMaterialsJson() != null && !lesson.get().getMaterialsJson().isEmpty()) {
-                ObjectMapper mapper = new ObjectMapper();
-                materials = mapper.readValue(lesson.get().getMaterialsJson(), new TypeReference<List<String>>() {});
-            }
-        } catch (JsonProcessingException e) {
-            materials = new ArrayList<>();
-        }
-
-        // Thêm các đối tượng vào model
-        model.addAttribute("subject", subject.get());
-        model.addAttribute("chapter", chapter.get());
-        model.addAttribute("lesson", lesson.get());
-        model.addAttribute("chapters", chapters);
-        model.addAttribute("materials", materials);
-
-        return "client/lesson/show";
-    }
+//    @GetMapping("/subject/{subjectId}/chapters/{chapterId}/lessons/{lessonId}")
+//    public String viewLesson(
+//            @PathVariable("subjectId") Long subjectId,
+//            @PathVariable("chapterId") Long chapterId,
+//            @PathVariable("lessonId") Long lessonId,
+//            Model model) {
+//        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
+//        if (subject.isEmpty()) {
+//            return "error/404";
+//        }
+//
+//        // Lấy chapter có status = true
+//        Optional<Chapter> chapter = chapterService.getChapterByChapterIdAndStatusTrue(chapterId);
+//        if (chapter.isEmpty() || !chapter.get().getSubject().getSubjectId().equals(subjectId)) {
+//            return "error/404";
+//        }
+//
+//        // Lấy lesson có status = true
+//        Optional<Lesson> lesson = lessonService.getLessonByIdAndStatusTrue(lessonId);
+//        if (lesson.isEmpty() || !lesson.get().getChapter().getChapterId().equals(chapterId)) {
+//            return "error/404";
+//        }
+//
+//        // Lấy danh sách chapters có status = true
+//        List<Chapter> chapters = chapterService.getChaptersBySubjectIdAndStatusTrue(subjectId);
+//
+//        // Parse materialsJson thành danh sách
+//        List<String> materials = new ArrayList<>();
+//        try {
+//            if (lesson.get().getMaterialsJson() != null && !lesson.get().getMaterialsJson().isEmpty()) {
+//                ObjectMapper mapper = new ObjectMapper();
+//                materials = mapper.readValue(lesson.get().getMaterialsJson(), new TypeReference<List<String>>() {});
+//            }
+//        } catch (JsonProcessingException e) {
+//            materials = new ArrayList<>();
+//        }
+//
+//        // Thêm các đối tượng vào model
+//        model.addAttribute("subject", subject.get());
+//        model.addAttribute("chapter", chapter.get());
+//        model.addAttribute("lesson", lesson.get());
+//        model.addAttribute("chapters", chapters);
+//        model.addAttribute("materials", materials);
+//
+//        return "client/lesson/show";
+//    }
 }

@@ -63,46 +63,55 @@ public class ChapterService {
         chapterRepository.save(chapter);
     }
 
+    /**
+     * Đổi trạng thái (true/false) của nhiều chương.
+     *
+     * @param chapterIds Danh sách ID của các chương
+     */
+    @Transactional
+    public void toggleChaptersStatus(List<Long> chapterIds) {
+        List<Chapter> chapters = chapterRepository.findAllById(chapterIds);
+        for (Chapter chapter : chapters) {
+            chapter.setStatus(!chapter.getStatus());
+        }
+        chapterRepository.saveAll(chapters);
+    }
 
+    /**
+     * Kiểm tra xem tên chương đã tồn tại cho một môn học chưa.
+     *
+     * @param chapterName Tên chương
+     * @param subject Môn học
+     * @return true nếu tên chương đã tồn tại, false nếu không
+     */
     public boolean existsByChapterNameAndSubject(String chapterName, Subject subject) {
         return chapterRepository.existsByChapterNameAndSubject(chapterName, subject);
     }
 
-    public void saveChapter(Chapter chapter){
-        this.chapterRepository.save(chapter);
-    }
-
-
-
-    // SỬA MỚI: Thay Page<Chapter> bằng List<Chapter> và nạp lessons
+    /**
+     * Lọc danh sách chương theo subjectId, chapterName, và status.
+     *
+     * @param subjectId ID của môn học
+     * @param chapterName Tên chương
+     * @param status Trạng thái (true/false)
+     * @return Danh sách chương phù hợp
+     */
     public List<Chapter> findChapters(Long subjectId, String chapterName, Boolean status) {
         Specification<Chapter> spec = Specification.where(null);
         if (subjectId != null) {
             spec = spec.and(ChapterSpecifications.hasSubjectId(subjectId));
         }
-
         if (chapterName != null && !chapterName.isEmpty()) {
             spec = spec.and(ChapterSpecifications.hasName(chapterName));
         }
-
         if (status != null) {
             spec = spec.and(ChapterSpecifications.hasStatus(status));
         }
         return chapterRepository.findAll(spec);
     }
-    // /SỬA MỚI
 
-    public void updateChaptersStatus(List<Long> chapterIds) {
-        List<Chapter> chapters = chapterRepository.findAllById(chapterIds);
-        for (Chapter chapter : chapters) {
-            chapter.setStatus(!chapter.getStatus()); // Đảo trạng thái
-        }
-        chapterRepository.saveAll(chapters);
-    }
 
-    public Optional<Chapter> getChapterByChapterIdAndStatusTrue(Long chapterId) {
-        return chapterRepository.findByChapterIdAndStatusTrue(chapterId);
-    }
+
 
     public List<Chapter> getChaptersBySubjectIdAndStatusTrue(Long subjectId) {
         return chapterRepository.findBySubjectSubjectIdAndStatusTrue(subjectId);

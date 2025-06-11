@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/admin/subject/{subjectId}/chapters/{chapterId}/lessons")
 public class LessonController {
 
     private final SubjectService subjectService;
@@ -40,47 +41,28 @@ public class LessonController {
         this.fileUploadService = fileUploadService;
     }
 
-    @GetMapping("admin/subject/{subjectId}/chapters/{chapterId}/lessons")
-    public String getDetailChapterPage(
-            Model model,
+    /**
+     * Hiển thị trang danh sách bài học của một chương.
+     *
+     * @param subjectId ID của môn học
+     * @param chapterId ID của chương
+     * @param model     Model để truyền dữ liệu đến JSP
+     * @return Tên view JSP hoặc redirect
+     */
+    @GetMapping
+    public String showLessons(
             @PathVariable("subjectId") Long subjectId,
             @PathVariable("chapterId") Long chapterId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Optional<String> page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") Optional<String> size
-    ) {
+            Model model) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        if (subject.isEmpty()) {
+        Chapter chapter = chapterService.findChapterById(chapterId).orElse(null);
+        if (subject.isEmpty() || chapter == null) {
             return "error/404";
         }
-
-        Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
-        if (chapter.isEmpty()) {
-            return "error/404";
-        }
-
-        int pageNumber;
-        try {
-            pageNumber = page.map(Integer::parseInt).orElse(1);
-        } catch (Exception e) {
-            pageNumber = 1;
-        }
-
-        int pageSize;
-        try {
-            pageSize = size.map(Integer::parseInt).orElse(1);
-        } catch (Exception e) {
-            pageSize = 1;
-        }
-
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "lessonId"));
-        Page<Lesson> lessons = lessonService.findLessons(chapterId, pageable);
-        model.addAttribute("chapter", chapter.get());
-        model.addAttribute("lessons", lessons.getContent());
-        model.addAttribute("subject", subject.get());
-        model.addAttribute("currentPage", pageNumber);
-        model.addAttribute("totalPages", lessons.getTotalPages());
-        model.addAttribute("pageSize", pageSize);
-
+        List<Lesson> lessons = lessonService.findLessons(chapterId);
+        model.addAttribute("subject", subject);
+        model.addAttribute("chapter", chapter);
+        model.addAttribute("lessons", lessons);
         return "admin/lesson/show";
     }
 
@@ -95,7 +77,7 @@ public class LessonController {
             return "error/404";
         }
 
-        Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
+        Optional<Chapter> chapter = chapterService.findChapterById(chapterId);
         if (chapter.isEmpty()) {
             return "error/404";
         }
@@ -142,7 +124,7 @@ public class LessonController {
             Model model) {
         // Kiểm tra subject và chapter
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
+        Optional<Chapter> chapter = chapterService.findChapterById(chapterId);
 
         if (subject.isEmpty() || chapter.isEmpty()) {
             return "error/404";
@@ -190,7 +172,7 @@ public class LessonController {
             RedirectAttributes redirectAttributes
     ) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        Optional<Chapter> chapter = chapterService.getChapterByChapterId(chapterId);
+        Optional<Chapter> chapter = chapterService.findChapterById(chapterId);
         if (subject.isEmpty() || chapter.isEmpty()) {
             return "error/404";
         }
