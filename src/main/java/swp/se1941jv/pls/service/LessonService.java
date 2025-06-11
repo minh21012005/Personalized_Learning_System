@@ -29,7 +29,13 @@ public class LessonService {
         return lessonRepository.findAll(LessonSpecifications.hasChapterId(chapterId));
     }
 
-    public Optional<Lesson> findLesson(Long lessonId) {
+    /**
+     * Tìm một bài học theo ID.
+     *
+     * @param lessonId ID của bài học
+     * @return Optional chứa bài học nếu tìm thấy
+     */
+    public Optional<Lesson> findLessonById(Long lessonId) {
         return lessonRepository.findById(lessonId);
     }
 

@@ -66,49 +66,61 @@ public class LessonController {
         return "admin/lesson/show";
     }
 
-    @GetMapping("admin/subject/{subjectId}/chapters/{chapterId}/lessons/save")
-    public String saveLessonToChapterPage(
-            Model model,
+    /**
+     * Hiển thị form tạo hoặc cập nhật bài học.
+     *
+     * @param subjectId ID của môn học
+     * @param chapterId ID của chương
+     * @param lessonId  ID của bài học (tùy chọn, để chỉnh sửa)
+     * @param model     Model để truyền dữ liệu đến JSP
+     * @param redirectAttributes Để truyền thông báo lỗi
+     * @return Tên view JSP hoặc redirect
+     */
+    @GetMapping("/save")
+    public String showSaveLessonForm(
             @PathVariable("subjectId") Long subjectId,
             @PathVariable("chapterId") Long chapterId,
-            @RequestParam(value = "lessonId", required = false) Long lessonId) {
+            @RequestParam(value = "lessonId", required = false) Long lessonId,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        if (subject.isEmpty()) {
+        Chapter chapter = chapterService.findChapterById(chapterId).orElse(null);
+        if (subject.isEmpty() || chapter == null) {
             return "error/404";
         }
 
-        Optional<Chapter> chapter = chapterService.findChapterById(chapterId);
-        if (chapter.isEmpty()) {
+        // Kiểm tra nếu chapter không thuộc về subject
+        if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
             return "error/404";
         }
 
-        Lesson lesson;
-        boolean isEdit = lessonId != null;
-        List<String> materialsTemp = new ArrayList<>(); // Danh sách tạm thời
-        if (isEdit) {
-            Optional<Lesson> lessonOpt = lessonService.findLesson(lessonId);
-            if (lessonOpt.isEmpty()) {
-                return "error/404";
-            }
-            lesson = lessonOpt.get();
-            // Deserialize materialsJson to a temporary list in controller
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                if (lesson.getMaterialsJson() != null && !lesson.getMaterialsJson().isEmpty()) {
-                    materialsTemp = mapper.readValue(lesson.getMaterialsJson(), new TypeReference<List<String>>() {});
-                }
-            } catch (Exception e) {
-                materialsTemp = new ArrayList<>();
-            }
-        } else {
-            lesson = new Lesson();
+        Lesson lesson = (lessonId != null) ? lessonService.findLessonById(lessonId)
+                .orElse(null) : new Lesson();
+        if (lessonId != null && lesson == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bài học không tồn tại");
+            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
 
-        model.addAttribute("subject", subject.get());
-        model.addAttribute("chapter", chapter.get());
+        // Kiểm tra nếu chapter có tồn tại và không thuộc về chapter
+        if (!lesson.getChapter().getChapterId().equals(chapterId)) {
+            return "error/404";
+        }
+
+
+        List<String> materialsTemp = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            if (lesson.getMaterialsJson() != null && !lesson.getMaterialsJson().isEmpty()) {
+                materialsTemp = mapper.readValue(lesson.getMaterialsJson(), new TypeReference<List<String>>() {});
+            }
+        } catch (Exception e) {
+            materialsTemp = new ArrayList<>();
+        }
+        model.addAttribute("subject", subject);
+        model.addAttribute("chapter", chapter);
         model.addAttribute("lesson", lesson);
-        model.addAttribute("materialsTemp", materialsTemp); // Truyền danh sách tạm thời
-        model.addAttribute("isEdit", isEdit);
+        model.addAttribute("materialsTemp", materialsTemp);
+        model.addAttribute("isEdit", lessonId != null);
         return "admin/lesson/save";
     }
 
