@@ -1,26 +1,33 @@
 package swp.se1941jv.pls.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.entity.Lesson;
-import swp.se1941jv.pls.exception.Lesson.DuplicateLessonNameException;
-import swp.se1941jv.pls.exception.Lesson.LessonNotFoundException;
+import swp.se1941jv.pls.exception.lesson.DuplicateLessonNameException;
+import swp.se1941jv.pls.exception.lesson.LessonNotFoundException;
 import swp.se1941jv.pls.repository.LessonRepository;
 import swp.se1941jv.pls.service.specification.LessonSpecifications;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LessonService {
 
     private final LessonRepository lessonRepository;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    public LessonService(LessonRepository lessonRepository) {
+    public LessonService(LessonRepository lessonRepository, @Qualifier("jacksonObjectMapper") ObjectMapper objectMapper) {
         this.lessonRepository = lessonRepository;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -102,6 +109,58 @@ public class LessonService {
      */
     public Optional<Lesson> getActiveLessonById(Long lessonId) {
         return lessonRepository.findByLessonIdAndStatusTrue(lessonId);
+    }
+
+    /**
+     * Lấy danh sách các LessonResponseDTO active của một chapter.
+     *
+     * @param chapterId ID của chương
+     * @return Danh sách LessonResponseDTO chứa thông tin lesson và danh sách materials
+     */
+    public List<LessonResponseDTO> getActiveLessonsResponseByChapterId(Long chapterId) {
+        List<Lesson> lessons = getActiveLessonsByChapterId(chapterId);
+        return lessons.stream()
+                .map(lesson -> LessonResponseDTO.builder()
+                        .lessonId(lesson.getLessonId())
+                        .lessonName(lesson.getLessonName())
+                        .lessonDescription(lesson.getLessonDescription())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // Phương thức hỗ trợ (giả định từ phản hồi trước)
+    private List<Lesson> getActiveLessonsByChapterId(Long chapterId) {
+        return lessonRepository.findByChapterIdAndIsActive(chapterId, true);
+    }
+
+    /**
+     * Lấy thông tin chi tiết của một bài học active dưới dạng DTO.
+     *
+     * @param lessonId ID của bài học
+     * @return LessonResponseDTO chứa thông tin lesson và danh sách materials
+     * @throws LessonNotFoundException nếu bài học không tồn tại hoặc không active
+     */
+    public LessonResponseDTO getActiveLessonResponseById(Long lessonId) {
+        Lesson lesson = getActiveLessonById(lessonId).orElse(null);
+        if (lesson == null) {
+            throw new LessonNotFoundException("Bài học không tồn tại hoặc không active");
+        }
+        List<String> materials = new ArrayList<>();
+        try {
+            if (lesson.getMaterialsJson() != null && !lesson.getMaterialsJson().isEmpty()) {
+                materials = objectMapper.readValue(lesson.getMaterialsJson(), new TypeReference<List<String>>() {});
+            }
+        } catch (Exception e) {
+            materials = new ArrayList<>();
+        }
+        return LessonResponseDTO.builder()
+                .lessonId(lesson.getLessonId())
+                .lessonName(lesson.getLessonName())
+                .lessonDescription(lesson.getLessonDescription())
+                .videoSrc(lesson.getVideoSrc())
+                .status(lesson.getStatus())
+                .materials(materials)
+                .build();
     }
 }
 

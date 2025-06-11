@@ -12,7 +12,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "chapter")
-@Data
+//@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor

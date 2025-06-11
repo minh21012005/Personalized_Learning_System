@@ -1,10 +1,6 @@
 package swp.se1941jv.pls.controller.admin;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,8 +10,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.entity.Subject;
-import swp.se1941jv.pls.exception.Lesson.DuplicateLessonNameException;
-import swp.se1941jv.pls.exception.Lesson.LessonNotFoundException;
+import swp.se1941jv.pls.exception.lesson.DuplicateLessonNameException;
+import swp.se1941jv.pls.exception.lesson.LessonNotFoundException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.FileUploadService;
 import swp.se1941jv.pls.service.LessonService;

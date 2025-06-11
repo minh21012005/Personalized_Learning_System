@@ -7,16 +7,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
+import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
 import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.exception.subject.SubjectNotFoundException;
 import swp.se1941jv.pls.repository.SubjectRepository;
 
 @Service
 public class SubjectService {
     private final SubjectRepository subjectRepository;
-
-    public SubjectService(SubjectRepository subjectRepository) {
+    private final ChapterService chapterService;
+    public SubjectService(SubjectRepository subjectRepository, ChapterService chapterService) {
         this.subjectRepository = subjectRepository;
+        this.chapterService = chapterService;
     }
 
     public List<Subject> getSubjectsByGradeId(Long gradeId, boolean isActive) {
@@ -85,4 +89,20 @@ public class SubjectService {
         return this.subjectRepository.findById(id);
     }
 
+    // Phương thức mới
+    public SubjectResponseDTO getSubjectResponseById(Long subjectId) {
+        Subject subject = getSubjectById(subjectId).orElse(null);
+        if (subject == null) {
+            throw new SubjectNotFoundException("Môn học không tồn tại");
+        }
+        List<ChapterResponseDTO> chapters = chapterService.getChaptersResponseBySubjectId(subjectId);
+        return SubjectResponseDTO.builder()
+                .subjectId(subject.getSubjectId())
+                .subjectName(subject.getSubjectName())
+                .subjectDescription(subject.getSubjectDescription())
+                .subjectImage(subject.getSubjectImage())
+                .isActive(subject.getIsActive())
+                .listChapter(chapters)
+                .build();
+    }
 }

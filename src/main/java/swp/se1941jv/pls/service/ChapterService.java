@@ -3,21 +3,27 @@ package swp.se1941jv.pls.service;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
+import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
-import swp.se1941jv.pls.exception.Chapter.ChapterNotFoundException;
-import swp.se1941jv.pls.exception.Chapter.DuplicateChapterNameException;
+import swp.se1941jv.pls.exception.chapter.ChapterNotFoundException;
+import swp.se1941jv.pls.exception.chapter.DuplicateChapterNameException;
+import swp.se1941jv.pls.exception.chapter.InvalidChapterException;
 import swp.se1941jv.pls.repository.ChapterRepository;
 import swp.se1941jv.pls.service.specification.ChapterSpecifications;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ChapterService {
     private final ChapterRepository chapterRepository;
-    public ChapterService(ChapterRepository chapterRepository) {
+    private final LessonService lessonService;
+    public ChapterService(ChapterRepository chapterRepository, LessonService lessonService) {
         this.chapterRepository = chapterRepository;
+        this.lessonService = lessonService;
     }
 
     /**
@@ -96,7 +102,7 @@ public class ChapterService {
      * @param status Trạng thái (true/false)
      * @return Danh sách chương phù hợp
      */
-    public List<Chapter> findChapters(Long subjectId, String chapterName, Boolean status) {
+    public List<Chapter> findChaptersBySsubjectId(Long subjectId, String chapterName, Boolean status) {
         Specification<Chapter> spec = Specification.where(null);
         if (subjectId != null) {
             spec = spec.and(ChapterSpecifications.hasSubjectId(subjectId));
@@ -112,8 +118,34 @@ public class ChapterService {
 
 
 
-
-    public List<Chapter> getChaptersBySubjectIdAndStatusTrue(Long subjectId) {
-        return chapterRepository.findBySubjectSubjectIdAndStatusTrue(subjectId);
+    public ChapterResponseDTO getChapterResponseById(Long chapterId, Long subjectId) {
+        Chapter chapter = chapterRepository.findByChapterIdAndStatusTrue(chapterId).orElse(null);
+        if (chapter == null) {
+            throw new ChapterNotFoundException("Chương không tồn tại");
+        }
+        if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
+            throw new InvalidChapterException("Chương không thuộc môn học này");
+        }
+        List<LessonResponseDTO> lessons = lessonService.getActiveLessonsResponseByChapterId(chapterId);
+        return ChapterResponseDTO.builder()
+                .chapterId(chapter.getChapterId())
+                .chapterName(chapter.getChapterName())
+                .chapterDescription(chapter.getChapterDescription())
+                .status(chapter.getStatus())
+                .listLesson(lessons)
+                .build();
     }
+
+    public List<ChapterResponseDTO> getChaptersResponseBySubjectId(Long subjectId) {
+        List<Chapter> chapters =chapterRepository.findBySubjectSubjectIdAndStatusTrue(subjectId);
+        return chapters.stream()
+                .map(chapter -> ChapterResponseDTO.builder()
+                        .chapterId(chapter.getChapterId())
+                        .chapterName(chapter.getChapterName())
+                        .chapterDescription(chapter.getChapterDescription())
+                    .build())
+                .toList();
+
+    }
+
 }
