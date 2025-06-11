@@ -39,41 +39,42 @@
             padding: 20px;
             background-color: #f8f9fa;
         }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-        }
         footer {
             background-color: #1a252f;
             color: white;
             height: 40px;
             width: 100%;
         }
+        .card-footer {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
+        }
         .custom-file-input {
             position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
+            display: block;
+            margin-bottom: 10px;
         }
         .custom-file-input input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
             opacity: 0;
+            position: absolute;
             width: 100%;
+            height: 100%;
             cursor: pointer;
+            z-index: 2;
         }
         .custom-file-input-label {
-            display: inline-block;
+            display: block;
             background-color: #007bff;
             color: white;
-            padding: 0.375rem 0.75rem;
-            border-radius: 0.25rem;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-align: center;
             cursor: pointer;
             transition: background-color 0.3s;
-            text-align: center;
-            font-size: 1rem;
-            line-height: 1.5;
+            z-index: 1;
         }
         .custom-file-input-label:hover {
             background-color: #0056b3;
@@ -85,12 +86,22 @@
         }
         .material-list, .selected-files-list {
             margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
         }
         .material-item, .selected-file-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .material-item:last-child, .selected-file-item:last-child {
+            border-bottom: none;
+        }
+        .material-item a, .selected-file-item button {
+            z-index: 3;
         }
         @media (max-width: 767.98px) {
             .sidebar {
@@ -123,10 +134,13 @@
     <div class="content">
         <main>
             <div class="container px-4">
-                <div class="mt-4">
-                    <div class="row col-8 mx-auto">
-                        <h3>${isEdit ? 'Chỉnh sửa bài học' : 'Thêm bài học'} trong ${chapter.chapterName}</h3>
-
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">${isEdit ? 'Chỉnh sửa bài học' : 'Thêm bài học'} trong ${chapter.chapterName}</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
                         <c:if test="${not empty errorMessage}">
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     ${errorMessage}
@@ -137,84 +151,89 @@
                         <form:form method="post" action="/admin/subject/${subjectId}/chapters/${chapterId}/lessons/save"
                                    modelAttribute="lesson" enctype="multipart/form-data" class="mt-4" id="lessonForm">
                             <form:hidden path="lessonId"/>
-                            <div class="mb-3">
-                                <c:set var="errorLessonName">
-                                    <form:errors path="lessonName" cssClass="invalid-feedback"/>
-                                </c:set>
-                                <label for="lessonNameInput" class="form-label">Tên bài học</label>
-                                <form:input type="text" id="lessonNameInput" path="lessonName"
-                                            class="form-control ${not empty errorLessonName?'is-invalid':''}"
-                                            placeholder="Nhập tên bài học"/>
-                                    ${errorLessonName}
-                            </div>
-                            <div class="mb-3">
-                                <c:set var="errorLessonDescription">
-                                    <form:errors path="lessonDescription" cssClass="invalid-feedback"/>
-                                </c:set>
-                                <label for="lessonDescriptionInput" class="form-label">Mô tả về bài học</label>
-                                <form:textarea id="lessonDescriptionInput" path="lessonDescription"
-                                               class="form-control ${not empty errorLessonDescription?'is-invalid':''}"
-                                               rows="10" maxlength="1000"
-                                               placeholder="Nhập nội dung không quá 1000 kí tự"/>
-                                    ${errorLessonDescription}
-                            </div>
-                            <div class="mb-3">
-                                <c:set var="errorVideoSrc">
-                                    <form:errors path="videoSrc" cssClass="invalid-feedback"/>
-                                </c:set>
-                                <label for="videoSrcInput" class="form-label">Link nhúng YouTube</label>
-                                <form:input type="text" id="videoSrcInput" path="videoSrc"
-                                            class="form-control ${not empty errorVideoSrc?'is-invalid':''}"
-                                            placeholder="Nhập link nhúng YouTube (e.g., https://www.youtube.com/embed/VIDEO_ID)"/>
-                                    ${errorVideoSrc}
-                                <div id="videoSrcError" class="invalid-feedback" style="display: none;">
-                                    Vui lòng nhập link nhúng YouTube hợp lệ (e.g., https://www.youtube.com/embed/VIDEO_ID).
+                            <div class="row mb-3">
+                                <label for="lessonNameInput" class="col-sm-3 col-form-label">Tên bài học</label>
+                                <div class="col-sm-9">
+                                    <c:set var="errorLessonName"><form:errors path="lessonName" cssClass="invalid-feedback"/></c:set>
+                                    <form:input type="text" id="lessonNameInput" path="lessonName"
+                                                class="form-control ${not empty errorLessonName ? 'is-invalid' : ''}"
+                                                placeholder="Nhập tên bài học"/>
+                                        ${errorLessonName}
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Trạng thái</label>
-                                <div class="d-flex gap-3">
-                                    <div class="form-check">
-                                        <form:radiobutton path="status" value="true" id="statusActive"
-                                                          cssClass="form-check-input" checked="${isEdit && lesson.status ? 'checked' : !isEdit ? 'checked' : ''}"/>
-                                        <label class="form-check-label" for="statusActive">Hoạt động</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <form:radiobutton path="status" value="false" id="statusInactive"
-                                                          cssClass="form-check-input" checked="${isEdit && !lesson.status ? 'checked' : ''}"/>
-                                        <label class="form-check-label" for="statusInactive">Không hoạt động</label>
+                            <div class="row mb-3">
+                                <label for="lessonDescriptionInput" class="col-sm-3 col-form-label">Mô tả bài học</label>
+                                <div class="col-sm-9">
+                                    <c:set var="errorLessonDescription"><form:errors path="lessonDescription" cssClass="invalid-feedback"/></c:set>
+                                    <form:textarea id="lessonDescriptionInput" path="lessonDescription"
+                                                   class="form-control ${not empty errorLessonDescription ? 'is-invalid' : ''}"
+                                                   rows="6" maxlength="1000" placeholder="Nhập mô tả (tối đa 1000 ký tự)"/>
+                                        ${errorLessonDescription}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="videoSrcInput" class="col-sm-3 col-form-label">Link nhúng YouTube
+                                    <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Nhập link nhúng YouTube (e.g., https://www.youtube.com/embed/VIDEO_ID)"></i>
+                                </label>
+                                <div class="col-sm-9">
+                                    <c:set var="errorVideoSrc"><form:errors path="videoSrc" cssClass="invalid-feedback"/></c:set>
+                                    <form:input type="text" id="videoSrcInput" path="videoSrc"
+                                                class="form-control ${not empty errorVideoSrc ? 'is-invalid' : ''}"
+                                                placeholder="https://www.youtube.com/embed/VIDEO_ID"/>
+                                        ${errorVideoSrc}
+                                    <div id="videoSrcError" class="invalid-feedback" style="display: none;">
+                                        Vui lòng nhập link nhúng YouTube hợp lệ.
                                     </div>
                                 </div>
-                                <form:errors path="status" cssClass="invalid-feedback d-block"/>
                             </div>
-                            <div class="mb-3 row">
-                                <label for="materialsInput" class="form-label">Tài liệu tham khảo (PDF, Word)</label>
-                                <div class="custom-file-input">
-                                    <input type="file" id="materialsInput" name="materialFiles" multiple
-                                           accept=".pdf,.doc,.docx" class="form-control"/>
-                                    <label for="materialsInput" class="custom-file-input-label col-md-4">
-                                        Chọn tệp tài liệu
-                                    </label>
-                                    <div class="file-name" id="fileNames">Chưa chọn tệp nào</div>
-                                    <div class="selected-files-list" id="selectedFilesList"></div>
-                                </div>
-                                <c:if test="${not empty materialsTemp}">
-                                    <div class="material-list mt-2">
-                                        <h6>Tài liệu hiện có:</h6>
-                                        <c:forEach var="material" items="${materialsTemp}" varStatus="status">
-                                            <div class="material-item" data-index="${status.index}">
-                                                <a href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
-                                                <button type="button" class="text-danger btn btn-link p-0"
-                                                        onclick="removeMaterial(this, ${status.index})">Xóa</button>
-                                                <input type="hidden" name="materialsTemp" value="${material}"/>
-                                            </div>
-                                        </c:forEach>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Trạng thái</label>
+                                <div class="col-sm-9">
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
+                                            <form:radiobutton path="status" value="true" id="statusActive"
+                                                              cssClass="form-check-input" checked="${isEdit && lesson.status ? 'checked' : !isEdit ? 'checked' : ''}"/>
+                                            <label class="form-check-label" for="statusActive">Hoạt động</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <form:radiobutton path="status" value="false" id="statusInactive"
+                                                              cssClass="form-check-input" checked="${isEdit && !lesson.status ? 'checked' : ''}"/>
+                                            <label class="form-check-label" for="statusInactive">Không hoạt động</label>
+                                        </div>
                                     </div>
-                                </c:if>
+                                    <form:errors path="status" cssClass="invalid-feedback d-block"/>
+                                </div>
                             </div>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
-                                <a href="/admin/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                            <div class="row mb-3">
+                                <label for="materialsInput" class="col-sm-3 col-form-label">Tài liệu tham khảo (PDF, Word)</label>
+                                <div class="col-sm-9">
+                                    <div class="custom-file-input">
+                                        <input type="file" id="materialsInput" name="materialFiles" multiple
+                                               accept=".pdf,.doc,.docx" class="form-control"/>
+                                        <label for="materialsInput" class="custom-file-input-label">Chọn tệp tài liệu</label>
+                                        <div class="file-name" id="fileNames">Chưa chọn tệp nào</div>
+                                        <div class="selected-files-list" id="selectedFilesList"></div>
+                                    </div>
+                                    <c:if test="${not empty materialsTemp}">
+                                        <div class="material-list mt-3">
+                                            <h6>Tài liệu hiện có:</h6>
+                                            <c:forEach var="material" items="${materialsTemp}" varStatus="status">
+                                                <div class="material-item" data-index="${status.index}">
+                                                    <a href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
+                                                    <button type="button" class="btn btn-link text-danger p-0"
+                                                            onclick="removeMaterial(this, ${status.index})">Xóa</button>
+                                                    <input type="hidden" name="materialsTemp" value="${material}"/>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
+                                    <a href="/admin/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                                </div>
                             </div>
                         </form:form>
                     </div>
@@ -230,6 +249,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
     // Quản lý danh sách tệp đã chọn
     const materialsInput = document.getElementById('materialsInput');
     const selectedFilesList = document.getElementById('selectedFilesList');
@@ -280,6 +303,20 @@
             materialItem.remove();
         }
     }
+
+    // // Validate YouTube embed link
+    // document.getElementById('videoSrcInput').addEventListener('input', function () {
+    //     const value = this.value;
+    //     const regex = /^https:\/\/www\.youtube\.com\/embed\/[a-zA-Z0-9_-]+$/;
+    //     const errorDiv = document.getElementById('videoSrcError');
+    //     if (value && !regex.test(value)) {
+    //         this.classList.add('is-invalid');
+    //         errorDiv.style.display = 'block';
+    //     } else {
+    //         this.classList.remove('is-invalid');
+    //         errorDiv.style.display = 'none';
+    //     }
+    // });
 </script>
 </body>
 </html>

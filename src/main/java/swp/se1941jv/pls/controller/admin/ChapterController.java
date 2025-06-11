@@ -87,7 +87,7 @@ public class ChapterController {
         } else {
             chapter = new Chapter();
         }
-        model.addAttribute("subject", subject);
+        model.addAttribute("subject", subject.get());
         model.addAttribute("chapter", chapter);
         model.addAttribute("isEdit", chapterId != null);
         return "admin/chapter/save";
@@ -119,7 +119,7 @@ public class ChapterController {
             redirectAttributes.addFlashAttribute("message", "Lưu chương thành công");
         } catch (DuplicateChapterNameException e) {
             model.addAttribute("chapter", chapter);
-            model.addAttribute("subject", subject);
+            model.addAttribute("subject", subject.get());
             model.addAttribute("isEdit", chapter.getChapterId() != null);
             bindingResult.rejectValue("chapterName", "error.chapter", e.getMessage());
             return "admin/chapter/save";

@@ -1,5 +1,7 @@
 package swp.se1941jv.pls.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString(exclude = {"subjectTests", "test", "lessons"})
 public class Chapter extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -103,10 +103,7 @@ public class LessonController {
             return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
 
-        // Kiểm tra nếu lesson có tồn tại và không thuộc về chapter
-        if (!lesson.getChapter().getChapterId().equals(chapterId)) {
-            return "error/404";
-        }
+
 
 
         List<String> materialsTemp = new ArrayList<>();
@@ -158,13 +155,6 @@ public class LessonController {
         // Kiểm tra nếu chapter không thuộc về subject
         if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
             return "error/404";
-        }
-        // If lesson đã tồn tại kiểm tra xem lesson đó cos thuộc chapter không
-        if (lesson.getLessonId() != null) {
-            if (!lesson.getChapter().getChapterId().equals(chapterId)) {
-                return "error/404";
-        }
-
         }
 
         // Khởi tạo danh sách materialsTemp nếu null
