@@ -209,8 +209,8 @@ public class PackageController {
 
             Package pkg = this.packageService.findById(packageId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
-            if (pkg.getStatus() != PackageStatus.PENDING) {
-                model.addAttribute("errorMessage", "Chỉ có thể chỉnh sửa gói ở trạng thái PENDING");
+            if (pkg.getStatus() == PackageStatus.APPROVED) {
+                model.addAttribute("errorMessage", "Không được chỉnh sửa gói đã duyệt");
                 return "admin/package/view";
             }
             Long gradeId = pkg.getGrade() != null ? pkg.getGrade().getGradeId() : null;
@@ -253,8 +253,8 @@ public class PackageController {
         }
 
         Package existingPackage = this.packageService.findById(pkg.getPackageId()).orElse(null);
-        if (existingPackage.getStatus() != PackageStatus.PENDING) {
-            bindingResult.reject("statusError", "Chỉ có thể chỉnh sửa gói ở trạng thái PENDING");
+        if (existingPackage.getStatus() == PackageStatus.APPROVED) {
+            bindingResult.reject("statusError", "Không được chỉnh sửa gói đã duyệt");
             model.addAttribute("selectedSubjectIds", subjectIds);
             return "admin/package/update";
         }
@@ -304,8 +304,11 @@ public class PackageController {
             }
             packageImage = this.uploadService.handleSaveUploadFile(file, "package");
         }
+
+        pkg.setStatus(PackageStatus.PENDING);
+        pkg.setActive(false);
         pkg.setImage(packageImage);
-        pkg.setStatus(existingPackage.getStatus());
+
         this.packageService.savePackageWithSubjects(pkg, subjectIds);
 
         return "redirect:/admin/package";
