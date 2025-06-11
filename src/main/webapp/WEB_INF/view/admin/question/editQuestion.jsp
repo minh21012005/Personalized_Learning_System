@@ -99,7 +99,7 @@
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>
     <script>
-        var optionCount = <c:out value="${fn:length(options)}"/>;
+        var optionCount = <c:out value="${fn:length(submittedOptions != null ? submittedOptions : options)}"/>;
 
         $(document).ready(function () {
             // Populate dependent dropdowns on page load
@@ -421,7 +421,8 @@
                                 <label class="form-label mandatory">Nội dung câu hỏi</label>
                                 <form:textarea path="content"
                                                placeholder="Nhập nội dung câu hỏi (dùng \$...\$ cho công thức toán, ví dụ: \$x^2 + y^2 = z^2\$)"
-                                               class="form-control" rows="5"/>
+                                               class="form-control" rows="5"
+                                               value="${submittedContent != null ? submittedContent : question.content}"/>
                                 <div class="preview" id="contentPreview"></div>
                                 <div class="invalid-feedback">Vui lòng nhập nội dung câu hỏi.</div>
                             </div>
@@ -442,27 +443,54 @@
                             </div>
 
                             <div id="optionsContainer">
-                                <c:forEach items="${options}" var="option" varStatus="status">
-                                    <div class="option-group mb-3" id="optionGroup${status.count}">
-                                        <label class="form-label fw-semibold">Đáp án ${status.count}</label>
-                                        <textarea name="options" class="option-content form-control"
-                                                  data-index="${status.index}"
-                                                  placeholder="Nhập đáp án ${status.count}"><c:out
-                                                value="${option.text}"/></textarea>
-                                        <div class="d-flex align-items-center gap-2 mt-2">
-                                            <div class="form-check">
-                                                <input type="checkbox" name="isCorrect" value="${status.index}"
-                                                       class="form-check-input" ${option.correct ? 'checked' : ''}/>
-                                                <label class="form-check-label">Đúng</label>
+                                <c:choose>
+                                    <c:when test="${not empty submittedOptions}">
+                                        <c:forEach items="${submittedOptions}" var="option" varStatus="status">
+                                            <div class="option-group mb-3" id="optionGroup${status.count}">
+                                                <label class="form-label fw-semibold">Đáp án ${status.count}</label>
+                                                <textarea name="options" class="option-content form-control"
+                                                          data-index="${status.index}"
+                                                          placeholder="Nhập đáp án ${status.count}"><c:out
+                                                        value="${option}"/></textarea>
+                                                <div class="d-flex align-items-center gap-2 mt-2">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" name="isCorrect" value="${status.index}"
+                                                               class="form-check-input" ${submittedIsCorrect[status.index] ? 'checked' : ''}/>
+                                                        <label class="form-check-label">Đúng</label>
+                                                    </div>
+                                                    <button type="button" onclick="removeOption(${status.count})"
+                                                            class="btn btn-danger btn-sm">Xóa
+                                                    </button>
+                                                </div>
+                                                <div class="preview" id="preview${status.count}"><c:out
+                                                        value="${option}" escapeXml="false"/></div>
                                             </div>
-                                            <button type="button" onclick="removeOption(${status.count})"
-                                                    class="btn btn-danger btn-sm">Xóa
-                                            </button>
-                                        </div>
-                                        <div class="preview" id="preview${status.count}"><c:out value="${option.text}"
-                                                                                                escapeXml="false"/></div>
-                                    </div>
-                                </c:forEach>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach items="${options}" var="option" varStatus="status">
+                                            <div class="option-group mb-3" id="optionGroup${status.count}">
+                                                <label class="form-label fw-semibold">Đáp án ${status.count}</label>
+                                                <textarea name="options" class="option-content form-control"
+                                                          data-index="${status.index}"
+                                                          placeholder="Nhập đáp án ${status.count}"><c:out
+                                                        value="${option.text}"/></textarea>
+                                                <div class="d-flex align-items-center gap-2 mt-2">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" name="isCorrect" value="${status.index}"
+                                                               class="form-check-input" ${option.correct ? 'checked' : ''}/>
+                                                        <label class="form-check-label">Đúng</label>
+                                                    </div>
+                                                    <button type="button" onclick="removeOption(${status.count})"
+                                                            class="btn btn-danger btn-sm">Xóa
+                                                    </button>
+                                                </div>
+                                                <div class="preview" id="preview${status.count}"><c:out
+                                                        value="${option.text}" escapeXml="false"/></div>
+                                            </div>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                             <div class="form-group mb-3">
                                 <button type="button" class="btn btn-success" onclick="addOption()">Thêm đáp án</button>

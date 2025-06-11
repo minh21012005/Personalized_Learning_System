@@ -19,56 +19,103 @@
             overflow-x: hidden;
             font-family: Arial, sans-serif;
         }
+
         header {
             background-color: #1a252f;
             color: white;
             width: 100%;
         }
+
         .main-container {
             display: flex;
             flex: 1;
         }
+
         .sidebar {
             width: 250px;
             background-color: #1a252f;
             color: white;
             overflow-y: auto;
         }
+
         .content {
             flex: 1;
             padding: 20px;
             background-color: #f8f9fa;
-            padding-bottom: 100px; /* Prevent overlap with pagination */
+            padding-bottom: 100px;
         }
+
         footer {
             background-color: #1a252f;
             color: white;
             height: 40px;
             width: 100%;
         }
+
         .table-fixed {
             table-layout: fixed;
             width: 100%;
         }
+
         .table-fixed th,
         .table-fixed td {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .col-id { width: 5%; }
-        .col-content { width: 25%; }
-        .col-grade { width: 10%; }
-        .col-subject { width: 15%; }
-        .col-chapter { width: 15%; }
-        .col-lesson { width: 15%; }
-        .col-level { width: 10%; }
-        .col-status { width: 10%; }
-        .col-action { width: 15%; }
-        
+
+        .col-id {
+            width: 5%;
+        }
+
+        .col-content {
+            width: 25%;
+        }
+
+        .col-grade {
+            width: 10%;
+        }
+
+        .col-subject {
+            width: 15%;
+        }
+
+        .col-chapter {
+            width: 15%;
+        }
+
+        .col-lesson {
+            width: 15%;
+        }
+
+        .col-level {
+            width: 10%;
+        }
+
+        .col-status {
+            width: 10%;
+        }
+
+        .col-action {
+            width: 15%;
+        }
+
+        /*.pagination-container {*/
+        /*    position: fixed;*/
+        /*    bottom: 60px;*/
+        /*    left: 270px;*/
+        /*    right: 20px;*/
+        /*    background-color: #f8f9fa;*/
+        /*    padding: 10px 20px;*/
+        /*    z-index: 1000;*/
+        /*    display: flex;*/
+        /*    justify-content: center;*/
+        /*    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);*/
+        /*}*/
         .pagination .page-item {
             margin: 0 2px;
         }
+
         .pagination .page-link {
             color: #212529;
             border: 1px solid #dee2e6;
@@ -76,16 +123,19 @@
             font-size: 0.875rem;
             border-radius: 0.25rem;
         }
+
         .pagination .page-link:hover {
             background-color: #e9ecef;
             color: #212529;
             border-color: #dee2e6;
         }
+
         .pagination .page-item.active .page-link {
             background-color: #6c757d;
             border-color: #6c757d;
             color: white;
         }
+
         .pagination .page-item.disabled .page-link {
             color: #6c757d;
             background-color: #fff;
@@ -97,11 +147,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>
-    <!-- MathJax for rendering LaTeX formulas -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>
         $(document).ready(function () {
-            // AJAX for filter dropdowns
             $("#gradeId").change(function () {
                 var gradeId = $(this).val();
                 var subjectSelect = $("#subjectId");
@@ -159,8 +207,14 @@
                 }
             });
 
-            // Trigger MathJax rendering after page load
             MathJax.typeset();
+
+            // Confirm delete action
+            $('.delete-btn').click(function (e) {
+                if (!confirm('Bạn có chắc muốn xóa câu hỏi này?')) {
+                    e.preventDefault();
+                }
+            });
         });
     </script>
 </head>
@@ -183,7 +237,6 @@
             <div class="container-fluid">
                 <div class="mt-4">
                     <div>
-                        <!-- Create Question Button -->
                         <a href="/staff/questions/create-question" class="btn btn-primary">Tạo câu hỏi</a>
                     </div>
                     <div class="row col-12 mx-auto mt-4">
@@ -284,10 +337,21 @@
                                         </c:choose>
                                     </td>
                                     <td class="text-center col-action">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a href="/staff/questions/${question.questionId}" class="btn btn-success btn-sm">Chi tiết</a>
+                                        <div class="gap-2">
+                                            <div class="mt-2"><a href="/staff/questions/${question.questionId}"
+                                                                 class="btn btn-success btn-sm">Chi tiết</a></div>
                                             <c:if test="${question.status.statusName != 'Accepted'}">
-                                                <a href="/staff/questions/update/${question.questionId}" class="btn btn-warning btn-sm">Cập nhật</a>
+                                                <div class="mt-2"><a
+                                                        href="/staff/questions/update/${question.questionId}"
+                                                        class="btn btn-warning btn-sm">Cập nhật</a></div>
+
+                                            </c:if>
+                                            <c:if test="${question.status.statusName == 'Pending'}">
+                                                <div class="mt-2">
+                                                    <a href="/staff/questions/delete/${question.questionId}"
+                                                       class="btn btn-danger btn-sm delete-btn">Xóa</a>
+                                                </div>
+
                                             </c:if>
                                         </div>
                                     </td>
@@ -296,41 +360,74 @@
                             </tbody>
                         </table>
                         <div class="pagination-container">
-                            <c:set var="queryString" value="" />
+                            <c:set var="queryString" value=""/>
                             <c:if test="${not empty param.gradeId}">
-                                <c:set var="queryString" value="${queryString}&gradeId=${param.gradeId}" />
+                                <c:set var="queryString" value="${queryString}&gradeId=${param.gradeId}"/>
                             </c:if>
                             <c:if test="${not empty param.subjectId}">
-                                <c:set var="queryString" value="${queryString}&subjectId=${param.subjectId}" />
+                                <c:set var="queryString" value="${queryString}&subjectId=${param.subjectId}"/>
                             </c:if>
                             <c:if test="${not empty param.chapterId}">
-                                <c:set var="queryString" value="${queryString}&chapterId=${param.chapterId}" />
+                                <c:set var="queryString" value="${queryString}&chapterId=${param.chapterId}"/>
                             </c:if>
                             <c:if test="${not empty param.lessonId}">
-                                <c:set var="queryString" value="${queryString}&lessonId=${param.lessonId}" />
+                                <c:set var="queryString" value="${queryString}&lessonId=${param.lessonId}"/>
                             </c:if>
                             <c:if test="${not empty param.levelId}">
-                                <c:set var="queryString" value="${queryString}&levelId=${param.levelId}" />
+                                <c:set var="queryString" value="${queryString}&levelId=${param.levelId}"/>
                             </c:if>
                             <c:if test="${not empty param.statusId}">
-                                <c:set var="queryString" value="${queryString}&statusId=${param.statusId}" />
+                                <c:set var="queryString" value="${queryString}&statusId=${param.statusId}"/>
                             </c:if>
                             <c:if test="${totalPages > 1}">
                                 <nav aria-label="Page navigation">
                                     <ul class="pagination justify-content-center mb-0">
+                                        <!-- First Page -->
                                         <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                            <a class="page-link" href="/staff/questions?page=${currentPage - 1}${queryString}" aria-label="Previous">
+                                            <a class="page-link" href="/staff/questions?page=1${queryString}"
+                                               aria-label="First">
+                                                <span aria-hidden="true">««</span>
+                                            </a>
+                                        </li>
+                                        <!-- Previous Page -->
+                                        <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                            <a class="page-link"
+                                               href="/staff/questions?page=${currentPage - 1}${queryString}"
+                                               aria-label="Previous">
                                                 <span aria-hidden="true">«</span>
                                             </a>
                                         </li>
-                                        <c:forEach begin="1" end="${totalPages}" varStatus="loop">
+                                        <!-- Page Numbers (current page ± 2) -->
+                                        <c:set var="startPage" value="${currentPage - 2}"/>
+                                        <c:set var="endPage" value="${currentPage + 2}"/>
+                                        <c:if test="${startPage < 1}">
+                                            <c:set var="startPage" value="1"/>
+                                            <c:set var="endPage" value="${startPage + 4}"/>
+                                        </c:if>
+                                        <c:if test="${endPage > totalPages}">
+                                            <c:set var="endPage" value="${totalPages}"/>
+                                            <c:set var="startPage" value="${endPage - 4 > 0 ? endPage - 4 : 1}"/>
+                                        </c:if>
+                                        <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
                                             <li class="page-item ${loop.index == currentPage ? 'active' : ''}">
-                                                <a class="page-link" href="/staff/questions?page=${loop.index}${queryString}">${loop.index}</a>
+                                                <a class="page-link"
+                                                   href="/staff/questions?page=${loop.index}${queryString}">${loop.index}</a>
                                             </li>
                                         </c:forEach>
+                                        <!-- Next Page -->
                                         <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                            <a class="page-link" href="/staff/questions?page=${currentPage + 1}${queryString}" aria-label="Next">
+                                            <a class="page-link"
+                                               href="/staff/questions?page=${currentPage + 1}${queryString}"
+                                               aria-label="Next">
                                                 <span aria-hidden="true">»</span>
+                                            </a>
+                                        </li>
+                                        <!-- Last Page -->
+                                        <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                            <a class="page-link"
+                                               href="/staff/questions?page=${totalPages}${queryString}"
+                                               aria-label="Last">
+                                                <span aria-hidden="true">»»</span>
                                             </a>
                                         </li>
                                     </ul>

@@ -164,7 +164,7 @@ public class QuestionService {
                 predicates.add(cb.equal(root.get("status").get("statusId"), statusId));
             }
 
-            query.orderBy(cb.desc(root.get("createdAt")));
+            query.orderBy(cb.desc(root.get("questionId")));
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
@@ -261,4 +261,18 @@ public class QuestionService {
         // Save the updated question
         return questionBankRepository.save(question);
     }
+
+    public void deleteQuestion(Long id) throws Exception {
+        QuestionBank question = questionBankRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy."));
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null || !currentUserId.equals(question.getUserCreated())) {
+            throw new IllegalArgumentException("Bạn không có quyền xóa câu hỏi này.");
+        }
+        if (!"Pending".equals(question.getStatus().getStatusName())) {
+            throw new IllegalStateException("Chỉ có thể xóa câu hỏi ở trạng thái Đang xử lý.");
+        }
+        questionBankRepository.delete(question);
+    }
+
 }

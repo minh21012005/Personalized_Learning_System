@@ -22,7 +22,7 @@ public class QuestionBank extends BaseEntity {
     Long questionId;
 
     @ManyToOne
-    @JoinColumn(name = "lession_id")
+    @JoinColumn(name = "lesson_id")
     Lesson lesson;
 
     @ManyToOne

@@ -533,6 +533,18 @@ public class QuestionController {
     }
 
     @PreAuthorize("hasAnyRole('STAFF')")
+    @GetMapping("/staff/questions/delete/{id}")
+    public String deleteQuestion(@PathVariable Long id, Model model) {
+        try {
+            questionService.deleteQuestion(id);
+            return "redirect:/staff/questions?success=true";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/staff/questions";
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('STAFF')")
     @GetMapping("/api/subjects-by-grade/{gradeId}")
     @ResponseBody
     public List<SubjectResponseDTO> getSubjectsByGrade(@PathVariable Long gradeId) {
