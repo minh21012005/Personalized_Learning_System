@@ -1,9 +1,9 @@
 package swp.se1941jv.pls.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank; 
-import jakarta.validation.constraints.NotEmpty; 
-import jakarta.validation.constraints.NotNull; 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,7 +27,7 @@ public class Subject extends BaseEntity {
     @Column(name = "subject_id")
     Long subjectId;
 
-    @NotBlank(message = "Tên môn học không được để trống!") 
+    @NotBlank(message = "Tên môn học không được để trống!")
     @Size(min = 2, max = 255, message = "Tên môn học phải từ 2 đến 255 ký tự.")
     @Column(name = "subject_name", columnDefinition = "NVARCHAR(255)")
     String subjectName;

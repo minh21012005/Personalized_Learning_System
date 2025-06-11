@@ -29,6 +29,9 @@ public class Lesson extends BaseEntity {
     @Column(name = "video_src")
     String videoSrc;
 
+    @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    Boolean status;
+
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     Chapter chapter;
