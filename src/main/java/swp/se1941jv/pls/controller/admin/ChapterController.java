@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.exception.Chapter.ChapterNotFoundException;
+import swp.se1941jv.pls.exception.Chapter.DuplicateChapterNameException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.SubjectService;
 
@@ -91,63 +93,40 @@ public class ChapterController {
         return "admin/chapter/save";
     }
 
-    @PostMapping("admin/subject/{id}/chapters/save")
+    /**
+     * Xử lý lưu hoặc cập nhật chương.
+     *
+     * @param subjectId ID của môn học
+     * @param chapter Chương cần lưu
+     * @param bindingResult Kết quả validation
+     * @param redirectAttributes Để truyền thông báo
+     * @param model Model để truyền dữ liệu đến JSP
+     * @return Redirect hoặc tên view JSP
+     */
+    @PostMapping("/save")
     public String saveChapterToSubject(
-            Model model,
             @PathVariable("id") Long subjectId,
-            @Valid @ModelAttribute("chapter")  Chapter chapter,
+            @Valid @ModelAttribute("chapter") Chapter chapter,
             BindingResult bindingResult,
-            RedirectAttributes redirectAttributes) {
-        Optional<Subject> subjectOpt = subjectService.getSubjectById(subjectId);
-        if (subjectOpt.isEmpty()) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
+        if (subject.isEmpty()) {
             return "error/404";
         }
-        Subject subject = subjectOpt.get();
-
-        boolean isEdit = chapter.getChapterId() != null;
-        Chapter existingChapter = null;
-        if (isEdit) {
-            Optional<Chapter> chapterOpt = chapterService.getChapterByChapterId(chapter.getChapterId());
-            if (chapterOpt.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Chương học không tồn tại!");
-                return "redirect:/admin/subject/" + subjectId + "/chapters";
-            }
-            existingChapter = chapterOpt.get();
-            if (!existingChapter.getChapterName().equals(chapter.getChapterName()) &&
-                    chapterService.existsByChapterNameAndSubject(chapter.getChapterName(), subject)) {
-                bindingResult.rejectValue("chapterName", "error.chapter", "Tên chương đã tồn tại trong môn học này");
-            }
-        } else {
-            if (chapterService.existsByChapterNameAndSubject(chapter.getChapterName(), subject)) {
-                bindingResult.rejectValue("chapterName", "error.chapter", "Tên chương đã tồn tại trong môn học này");
-            }
-        }
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("subject", subject);
-            model.addAttribute("isEdit", isEdit);
-            return "admin/chapter/save";
-        }
-
         try {
-            if (isEdit) {
-                existingChapter.setChapterName(chapter.getChapterName());
-                existingChapter.setChapterDescription(chapter.getChapterDescription());
-                chapterService.saveChapter(existingChapter);
-                redirectAttributes.addFlashAttribute("successMessage", "Chỉnh sửa chương học thành công");
-            } else {
-                chapter.setSubject(subject);
-                chapter.setStatus(true);
-                chapterService.saveChapter(chapter);
-                redirectAttributes.addFlashAttribute("successMessage", "Thêm chương học thành công");
-            }
-        } catch (Exception e) {
+            chapterService.saveChapter(chapter, subject.get());
+            redirectAttributes.addFlashAttribute("message", "Lưu chương thành công");
+        } catch (DuplicateChapterNameException e) {
+            model.addAttribute("chapter", chapter);
             model.addAttribute("subject", subject);
-            model.addAttribute("isEdit", isEdit);
-            model.addAttribute("errorMessage", "Lỗi khi lưu chương học: " + e.getMessage());
+            model.addAttribute("isEdit", chapter.getChapterId() != null);
+            bindingResult.rejectValue("chapterName", "error.chapter", e.getMessage());
             return "admin/chapter/save";
+        } catch (ChapterNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/subject/" + subjectId + "/chapters";
         }
-
         return "redirect:/admin/subject/" + subjectId + "/chapters";
     }
 
