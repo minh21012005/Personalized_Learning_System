@@ -32,16 +32,16 @@ public class InviteService {
     public void createInvite(Long parentId, String studentEmail, HttpServletRequest request) throws MessagingException {
         // Tìm Parent
         User parent = this.userRepository.findById(parentId)
-                .orElseThrow(() -> new RuntimeException("Parent not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng là phụ huynh!"));
 
         // Kiểm tra vai trò Parent
         if (!parent.getRole().getRoleName().equals("PARENT")) {
-            throw new RuntimeException("User is not a Parent");
+            throw new RuntimeException("Bạn không có vai trò là phụ huynh!");
         }
 
         // Kiểm tra email hợp lệ
         if (!studentEmail.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new RuntimeException("Invalid student email");
+            throw new RuntimeException("Email không hợp lệ!");
         }
 
         // Tạo mã mời ngẫu nhiên
@@ -73,26 +73,26 @@ public class InviteService {
     public void confirmInvite(String inviteCode, Long studentId) {
         // Tìm lời mời
         Optional<Invite> inviteOpt = this.inviteRepository.findByInviteCode(inviteCode);
-        Invite invite = inviteOpt.orElseThrow(() -> new RuntimeException("Invalid invite code"));
+        Invite invite = inviteOpt.orElseThrow(() -> new RuntimeException("Mã liên kết không hợp lệ!"));
 
         // Kiểm tra trạng thái
         if (invite.getIsUsed()) {
-            throw new RuntimeException("Invite code already used");
+            throw new RuntimeException("Mã liên kết đã được sử dụng!");
         }
         if (invite.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Invite code expired");
+            throw new RuntimeException("Mã liên kết đã hết hạn!");
         }
 
         // Tìm Student
         User student = this.userRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng là học sinh!"));
 
         // Kiểm tra vai trò và email
         if (!student.getRole().getRoleName().equals("STUDENT")) {
-            throw new RuntimeException("User is not a Student");
+            throw new RuntimeException("Bạn không có vai trò là học sinh!");
         }
         if (!student.getEmail().equals(invite.getStudentEmail())) {
-            throw new RuntimeException("Email does not match invite");
+            throw new RuntimeException("Bạn không có quyền sử dụng mã liên kết này!");
         }
 
         // Liên kết Parent và Student

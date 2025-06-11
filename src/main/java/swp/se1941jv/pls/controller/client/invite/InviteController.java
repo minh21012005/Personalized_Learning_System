@@ -36,25 +36,20 @@ public class InviteController {
             User parent = this.userService.getUserByEmail(email);
 
             if (!parent.getRole().getRoleName().equals("PARENT")) {
-                model.addAttribute("error", "Only parents can send invites");
+                model.addAttribute("error", "Chỉ phụ huynh mới có thể gửi liên kết tài khoản tới con của họ!");
                 return "client/invite/invite_form";
             }
 
             inviteService.createInvite(parent.getUserId(), studentEmail, request);
-            return "redirect:/invite/success";
+            model.addAttribute("message", "Nếu email tồn tại, chúng tôi đã gửi một liên kết tới hộp thư của con bạn!");
+            return "client/invite/invite_form";
         } catch (MessagingException e) {
-            model.addAttribute("error", "Failed to send invite email");
+            model.addAttribute("error", "Email gửi không thành công!");
             return "client/invite/invite_form";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "client/invite/invite_form";
         }
-    }
-
-    // Hiển thị trang thành công sau khi gửi lời mời
-    @GetMapping("/invite/success")
-    public String showInviteSuccess(Model model) {
-        return "client/invite/invite_success";
     }
 
     // Hiển thị trang xác nhận lời mời
@@ -70,19 +65,13 @@ public class InviteController {
         try {
             String email = authentication.getName();
             User student = this.userService.getUserByEmail(email);
-
             inviteService.confirmInvite(inviteCode, student.getUserId());
-            return "redirect:/invite/confirm-success";
+            model.addAttribute("message", "Xác nhận liên kết tài khoản với phụ huynh thành công!");
+            return "client/invite/confirm_invite";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("inviteCode", inviteCode);
             return "client/invite/confirm_invite";
         }
-    }
-
-    // Hiển thị trang thành công sau khi xác nhận lời mời
-    @GetMapping("/invite/confirm-success")
-    public String showConfirmSuccess(Model model) {
-        return "client/invite/confirm_success";
     }
 }
