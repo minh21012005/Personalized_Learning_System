@@ -1,12 +1,18 @@
+
 package swp.se1941jv.pls.controller.admin;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.response.*;
 import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.repository.*;
@@ -25,6 +31,8 @@ public class QuestionController {
     private final ChapterRepository chapterRepository;
     private final LessonRepository lessonRepository;
     private final LevelQuestionRepository levelQuestionRepository;
+    private final QuestionBankRepository questionBankRepository;
+    private final QuestionStatusRepository questionStatusRepository;
     private final QuestionService questionService;
 
     @PreAuthorize("hasAnyRole('STAFF')")
@@ -77,7 +85,7 @@ public class QuestionController {
 
         try {
             Grade grade = gradeRepository.findById(gradeId)
-                    .orElseThrow(() -> new IllegalArgumentException("Khối lượng không tìm thấy."));
+                    .orElseThrow(() -> new IllegalArgumentException("Khối không tìm thấy."));
             Subject subject = subjectRepository.findById(subjectId)
                     .orElseThrow(() -> new IllegalArgumentException("Môn học không tìm thấy."));
             Chapter chapter = chapterRepository.findById(chapterId)
@@ -204,6 +212,90 @@ public class QuestionController {
 
             return "admin/question/createQuestion";
         }
+    }
+
+    @PreAuthorize("hasAnyRole('STAFF')")
+    @GetMapping("/staff/questions")
+    public String listQuestions(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "gradeId", required = false) Long gradeId,
+            @RequestParam(value = "subjectId", required = false) Long subjectId,
+            @RequestParam(value = "chapterId", required = false) Long chapterId,
+            @RequestParam(value = "lessonId", required = false) Long lessonId,
+            @RequestParam(value = "levelId", required = false) Long levelId,
+            @RequestParam(value = "statusId", required = false) Long statusId,
+            Authentication authentication,
+            Model model) {
+
+        int pageSize = 10; // Number of questions per page
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Long creatorUserId = SecurityUtils.getCurrentUserId(); // Get current user's ID
+
+        if (creatorUserId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "admin/question/questionList";
+        }
+
+        Page<QuestionBank> questionPage = questionService.findQuestionsByCreatorAndFilters(
+                creatorUserId, gradeId, subjectId, chapterId, lessonId, levelId, statusId, pageable);
+
+        List<QuestionBank> questions = questionPage.getContent();
+        int totalPages = questionPage.getTotalPages();
+        int currentPage = page;
+
+        // Populate filter dropdowns
+        List<GradeResponseDTO> grades = gradeRepository.findByIsActiveTrue()
+                .stream()
+                .map(grade -> GradeResponseDTO.builder()
+                        .gradeId(grade.getGradeId())
+                        .gradeName(grade.getGradeName())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<SubjectResponseDTO> subjects = gradeId != null ? subjectRepository.findByGradeIdAndIsActive(gradeId, true)
+                .stream()
+                .map(subject -> SubjectResponseDTO.builder()
+                        .subjectId(subject.getSubjectId())
+                        .subjectName(subject.getSubjectName())
+                        .build())
+                .collect(Collectors.toList()) : new ArrayList<>();
+
+        List<ChapterResponseDTO> chapters = subjectId != null ? chapterRepository.findBySubjectIdAndIsActive(subjectId, true)
+                .stream()
+                .map(chapter -> ChapterResponseDTO.builder()
+                        .chapterId(chapter.getChapterId())
+                        .chapterName(chapter.getChapterName())
+                        .build())
+                .collect(Collectors.toList()) : new ArrayList<>();
+
+        List<LessonResponseDTO> lessons = chapterId != null ? lessonRepository.findByChapterIdAndIsActive(chapterId, true)
+                .stream()
+                .map(lesson -> LessonResponseDTO.builder()
+                        .lessonId(lesson.getLessonId())
+                        .lessonName(lesson.getLessonName())
+                        .build())
+                .collect(Collectors.toList()) : new ArrayList<>();
+
+        List<LevelQuestionResponseDTO> levels = levelQuestionRepository.findAll().stream()
+                .map(levelQuestion -> LevelQuestionResponseDTO.builder()
+                        .levelQuestionId(levelQuestion.getLevelQuestionId())
+                        .levelQuestionName(levelQuestion.getLevelQuestionName())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<QuestionStatus> statuses = questionStatusRepository.findAll();
+
+        model.addAttribute("questions", questions);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("grades", grades);
+        model.addAttribute("subjects", subjects);
+        model.addAttribute("chapters", chapters);
+        model.addAttribute("lessons", lessons);
+        model.addAttribute("levels", levels);
+        model.addAttribute("statuses", statuses);
+
+        return "admin/question/questionList";
     }
 
     @PreAuthorize("hasAnyRole('STAFF')")

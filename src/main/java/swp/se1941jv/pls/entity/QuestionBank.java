@@ -66,5 +66,9 @@ public class QuestionBank extends BaseEntity {
     @JoinColumn(name = "question_type_id")
     QuestionType questionType;
 
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    QuestionStatus status;
+
 
 }

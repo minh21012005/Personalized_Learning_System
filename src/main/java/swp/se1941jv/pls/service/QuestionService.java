@@ -1,13 +1,20 @@
+
 package swp.se1941jv.pls.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.request.AnswerOptionDto;
 import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.repository.*;
+
+import jakarta.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +30,17 @@ public class QuestionService {
     private final LessonRepository lessonRepository;
     private final LevelQuestionRepository levelQuestionRepository;
     private final QuestionTypeRepository questionTypeRepository;
+    private final QuestionStatusRepository questionStatusRepository;
     private final UploadService uploadService;
     private final ObjectMapper objectMapper;
 
     private static final String UPLOAD_DIR = "question_bank";
+    private static final Long PENDING_STATUS_ID = 1L; // Assuming status_id=1 is "Pending"
 
     public QuestionBank saveQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList, MultipartFile imageFile) throws Exception {
         // Validate mandatory fields
         if (question.getGrade() == null || question.getGrade().getGradeId() == null) {
-            throw new IllegalArgumentException("Khối lượng là bắt buộc.");
+            throw new IllegalArgumentException("Khối là bắt buộc.");
         }
         if (question.getSubject() == null || question.getSubject().getSubjectId() == null) {
             throw new IllegalArgumentException("Môn học là bắt buộc.");
@@ -81,6 +90,12 @@ public class QuestionService {
                 .orElseThrow(() -> new RuntimeException("Loại câu hỏi không tìm thấy."));
         question.setQuestionType(questionType);
 
+        // Set initial status to Pending
+        QuestionStatus pendingStatus = questionStatusRepository.findById(PENDING_STATUS_ID)
+                .orElseThrow(() -> new RuntimeException("Trạng thái Pending không tìm thấy."));
+        question.setStatus(pendingStatus);
+
+
         // Handle image upload using UploadService
         if (imageFile != null && !imageFile.isEmpty()) {
             String fileName = uploadService.handleSaveUploadFile(imageFile, UPLOAD_DIR);
@@ -88,7 +103,7 @@ public class QuestionService {
                 throw new RuntimeException("Không thể tải lên hình ảnh.");
             }
             question.setImage(fileName);
-        } // Retain existing image if no new file is uploaded
+        }
 
         // Prepare options as JSON
         List<AnswerOptionDto> options = new ArrayList<>();
@@ -114,5 +129,46 @@ public class QuestionService {
             return uploadService.handleSaveUploadFile(imageFile, UPLOAD_DIR);
         }
         return null;
+    }
+
+    public Page<QuestionBank> findQuestionsByCreatorAndFilters(
+            Long creatorUserId,
+            Long gradeId,
+            Long subjectId,
+            Long chapterId,
+            Long lessonId,
+            Long levelId,
+            Long statusId,
+            Pageable pageable) {
+
+        Specification<QuestionBank> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("userCreated"), creatorUserId));
+
+            if (gradeId != null) {
+                predicates.add(cb.equal(root.get("grade").get("gradeId"), gradeId));
+            }
+            if (subjectId != null) {
+                predicates.add(cb.equal(root.get("subject").get("subjectId"), subjectId));
+            }
+            if (chapterId != null) {
+                predicates.add(cb.equal(root.get("chapter").get("chapterId"), chapterId));
+            }
+            if (lessonId != null) {
+                predicates.add(cb.equal(root.get("lesson").get("lessonId"), lessonId));
+            }
+            if (levelId != null) {
+                predicates.add(cb.equal(root.get("levelQuestion").get("levelQuestionId"), levelId));
+            }
+            if (statusId != null) {
+                predicates.add(cb.equal(root.get("status").get("statusId"), statusId));
+            }
+
+            query.orderBy(cb.desc(root.get("createdAt")));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return questionBankRepository.findAll(spec, pageable);
     }
 }
