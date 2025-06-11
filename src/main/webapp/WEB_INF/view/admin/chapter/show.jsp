@@ -73,34 +73,18 @@
             }
         }
 
-        /* Style cho danh sách bài học */
-        .lesson-list {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
+        .lesson-list .list-group-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border: none;
         }
 
-        .lesson-list ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .lesson-list li {
-            margin-bottom: 5px;
-        }
-
-        .lesson-list a {
+        .lesson-list .list-group-item i {
+            margin-right: 10px;
             color: #007bff;
-            text-decoration: none;
         }
 
-        .lesson-list a:hover {
-            text-decoration: underline;
-        }
-
-        /* Style cho nút icon mũi tên */
         .toggle-lesson-btn {
             background: none;
             border: none;
@@ -113,7 +97,6 @@
             color: #0056b3;
         }
 
-        /* Style để quản lý hiển thị mũi tên */
         .toggle-lesson-btn .bi-chevron-down {
             display: inline;
         }
@@ -132,37 +115,27 @@
     </style>
 </head>
 <body>
-<%-- Header --%>
 <header>
     <jsp:include page="../layout/header.jsp"/>
 </header>
-<%-- Header --%>
 
-<%-- MAIN CONTAINER --%>
 <div class="main-container">
-    <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
         <jsp:include page="../layout/sidebar.jsp"/>
     </div>
-    <!-- Sidebar -->
 
-    <!-- Main Content Area -->
     <div class="content">
         <main>
             <div class="container-fluid px-4">
-                <div class="mt-4">
-                    <div class="row col-12 mx-auto">
-
-                        <div class="mb-3">
-                            <div class="d-flex flex-column align-items-start">
-                                <a href="/admin/subject" class="btn btn-outline-secondary btn-sm mb-3">
-                                    <i class="bi bi-arrow-left"></i> Quay lại
-                                </a>
-                                <h3 class="mb-0">Danh sách chương học trong ${subject.subjectName}</h3>
-                            </div>
-                        </div>
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <a href="/admin/subject" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Quay lại
+                        </a>
+                        <h5 class="mb-0">Danh sách chương học trong ${subject.subjectName}</h5>
+                    </div>
+                    <div class="card-body">
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                            <!-- Bộ lọc -->
                             <form action="/admin/subject/${subject.subjectId}/chapters" method="get"
                                   class="d-flex flex-column flex-md-row align-items-md-center mb-2 mb-md-0">
                                 <label for="chapterName" class="mb-0 fw-bold me-md-2">Tìm chương:</label>
@@ -182,34 +155,24 @@
                                 </div>
                                 <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
                             </form>
-                            <!-- Bộ lọc -->
-
-                            <!-- Nút tạo chương học mới -->
-                            <a href="/admin/subject/${subject.subjectId}/chapters/save" class="btn btn-primary">Tạo
-                                chương học mới</a>
+                            <a href="/admin/subject/${subject.subjectId}/chapters/save" class="btn btn-primary mt-2 mt-md-0">
+                                Tạo chương học mới
+                            </a>
                         </div>
 
-                        <%-- SUCESS MESSAGE --%>
                         <c:if test="${not empty successMessage}">
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     ${successMessage}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         </c:if>
-                        <%-- SUCESS MESSAGE --%>
-
-                        <%-- ERROR MESSAGE --%>
                         <c:if test="${not empty errorMessage}">
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     ${errorMessage}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         </c:if>
-                        <%-- ERROR MESSAGE --%>
 
-                        <%-- Nút Kích hoạt và form gửi chapterIds --%>
                         <div class="mb-3">
                             <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post" onsubmit="return toggleChapters(event)">
                                 <input type="hidden" name="_csrf" value="${_csrf.token}"/>
@@ -217,107 +180,109 @@
                             </form>
                         </div>
 
-                        <%-- TABLE --%>
-                        <table class="table table-bordered table-hover table-fixed">
-                            <thead>
-                            <tr>
-                                <th scope="col" class="text-center col-1">
-                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)">
-                                </th>
-                                <th scope="col" class="text-center col-2">Tên chương học</th>
-                                <th scope="col" class="text-center col-4">Mô tả về chương học</th>
-                                <th scope="col" class="text-center col-2">Trạng thái</th>
-                                <th scope="col" class="text-center col-3">Thao tác</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <c:if test="${not empty chapters}">
-                                <c:forEach var="chapter" items="${chapters}">
-                                    <tr>
-                                        <td class="col-1 text-center checkbox-header">
-                                            <input type="checkbox" name="chapterIds" form="toggleStatusForm"
-                                                   value="${chapter.chapterId}" data-status="${chapter.status}"
-                                                   onchange="handleCheckboxChange(this)">
-                                        </td>
-                                        <td class="col-2">${chapter.chapterName}</td>
-                                        <td class="col-4">${chapter.chapterDescription}</td>
-                                        <td class="text-center col-2">${chapter.status ? 'Đang hoạt động' : 'Không hoạt động'}</td>
-                                        <td class="text-center col-3">
-                                            <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons"
-                                               class="btn btn-primary btn-sm mb-1 mb-lg-0">
-                                                Xem chi tiết
-                                            </a>
-                                            <a href="/admin/subject/${subject.subjectId}/chapters/save?chapterId=${chapter.chapterId}"
-                                               class="btn btn-warning btn-sm mb-1 mb-lg-0">
-                                                Cập nhật
-                                            </a>
-                                            <!-- Nút icon với Bootstrap Collapse -->
-                                            <button class="toggle-lesson-btn collapsed"
-                                                    type="button"
-                                                    data-bs-toggle="collapse"
-                                                    data-bs-target="#collapse-lesson-${chapter.chapterId}"
-                                                    aria-expanded="false"
-                                                    aria-controls="collapse-lesson-${chapter.chapterId}">
-                                                <i class="bi bi-chevron-down"></i>
-                                                <i class="bi bi-chevron-up"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="5">
-                                            <!-- Sử dụng Bootstrap Collapse -->
-                                            <div id="collapse-lesson-${chapter.chapterId}" class="collapse lesson-list">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-striped">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="text-center col-1">
+                                        <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)">
+                                    </th>
+                                    <th scope="col" class="text-center col-2">Tên chương học</th>
+                                    <th scope="col" class="text-center col-4">Mô tả</th>
+                                    <th scope="col" class="text-center col-2">Trạng thái</th>
+                                    <th scope="col" class="text-center col-3">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <c:if test="${not empty chapters}">
+                                    <c:forEach var="chapter" items="${chapters}">
+                                        <tr>
+                                            <td class="col-1 text-center">
+                                                <input type="checkbox" name="chapterIds" form="toggleStatusForm"
+                                                       value="${chapter.chapterId}" data-status="${chapter.status}"
+                                                       onchange="handleCheckboxChange(this)">
+                                            </td>
+                                            <td class="col-2">${chapter.chapterName}</td>
+                                            <td class="col-4">${chapter.chapterDescription}</td>
+                                            <td class="text-center col-2">
                                                 <c:choose>
-                                                    <c:when test="${not empty chapter.lessons}">
-                                                        <ul>
-                                                            <c:forEach var="lesson" items="${chapter.lessons}">
-                                                                <li>
-                                                                    <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save?lessonId=${lesson.lessonId}">
-                                                                            ${lesson.lessonName}
-                                                                    </a>
-                                                                </li>
-                                                            </c:forEach>
-                                                        </ul>
+                                                    <c:when test="${chapter.status}">
+                                                        <span class="badge bg-success">Đang hoạt động</span>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <p>Chưa có bài học nào.</p>
+                                                        <span class="badge bg-danger">Không hoạt động</span>
                                                     </c:otherwise>
                                                 </c:choose>
-                                            </div>
-                                        </td>
+                                            </td>
+                                            <td class="text-center col-3">
+                                                <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons"
+                                                   class="btn btn-primary btn-sm mb-1 mb-lg-0" title="Quản lý bài học">
+                                                    Xem chi tiết
+                                                </a>
+                                                <a href="/admin/subject/${subject.subjectId}/chapters/save?chapterId=${chapter.chapterId}"
+                                                   class="btn btn-warning btn-sm mb-1 mb-lg-0" title="Cập nhật">
+                                                    Cập nhật
+                                                </a>
+                                                <button class="toggle-lesson-btn collapsed"
+                                                        type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#collapse-lesson-${chapter.chapterId}"
+                                                        aria-expanded="false"
+                                                        aria-controls="collapse-lesson-${chapter.chapterId}">
+                                                    <i class="bi bi-chevron-down"></i>
+                                                    <i class="bi bi-chevron-up"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="5">
+                                                <div id="collapse-lesson-${chapter.chapterId}" class="collapse lesson-list">
+                                                    <c:choose>
+                                                        <c:when test="${not empty chapter.lessons}">
+                                                            <ul class="list-group">
+                                                                <c:forEach var="lesson" items="${chapter.lessons}">
+                                                                    <li class="list-group-item">
+                                                                        <i class="bi bi-book"></i>
+                                                                        <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save?lessonId=${lesson.lessonId}">
+                                                                                ${lesson.lessonName}
+                                                                        </a>
+                                                                    </li>
+                                                                </c:forEach>
+                                                            </ul>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <p class="text-muted">Chưa có bài học nào.</p>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:if>
+                                <c:if test="${empty chapters}">
+                                    <tr>
+                                        <td colspan="5" class="text-center">Chưa có chương học nào.</td>
                                     </tr>
-                                </c:forEach>
-                            </c:if>
-                            <c:if test="${empty chapters}">
-                                <tr>
-                                    <td colspan="5" class="text-center">Chưa có chương học nào.</td>
-                                </tr>
-                            </c:if>
-                            </tbody>
-                        </table>
-                        <%-- TABLE --%>
+                                </c:if>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-    <!-- Main Content Area -->
 </div>
-<%-- MAIN CONTAINER --%>
 
-<!-- Footer -->
 <footer>
     <jsp:include page="../layout/footer.jsp"/>
 </footer>
-<!-- Footer -->
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<%-- JavaScript để kiểm tra checkbox và trạng thái --%>
 <script>
     let currentStatus = null;
 
-    function toggleChapters() {
+    function toggleChapters(event) {
         const checkboxes = document.querySelectorAll('input[name="chapterIds"]:checked');
         if (checkboxes.length === 0) {
             alert('Vui lòng chọn ít nhất một chương để thay đổi trạng thái!');

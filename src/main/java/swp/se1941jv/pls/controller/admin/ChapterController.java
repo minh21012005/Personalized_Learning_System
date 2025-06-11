@@ -1,10 +1,7 @@
 package swp.se1941jv.pls.controller.admin;
 
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/admin/subject/{id}/chapters")
 public class ChapterController {
 
     private final SubjectService subjectService;
@@ -29,28 +27,31 @@ public class ChapterController {
         this.chapterService = chapterService;
     }
 
-    @GetMapping("admin/subject/{id}/chapters")
+
+    /**
+     * Hiển thị trang danh sách chương của một môn học.
+     *
+     * @param id ID của môn học
+     * @param chapterName Tên chương để lọc (tùy chọn)
+     * @param status Trạng thái để lọc (tùy chọn)
+     * @param model Model để truyền dữ liệu đến JSP
+     * @return Tên view JSP
+     */
+    @GetMapping
     public String getDetailSubjectPage(
-            Model model,
             @PathVariable("id") Long id,
             @RequestParam(value = "chapterName", required = false) String chapterName,
-            @RequestParam(value = "status", required = false) Boolean status
-    ) {
+            @RequestParam(value = "status", required = false) Boolean status,
+            Model model) {
         Optional<Subject> subject = subjectService.getSubjectById(id);
         if (subject.isEmpty()) {
             return "error/404";
         }
-
-        // SỬA MỚI: Lấy toàn bộ danh sách chương thay vì phân trang
-        String searchName = chapterName != null ? chapterName : "";
-        List<Chapter> chapters = chapterService.findChapters(id, searchName, status);
-
-        // Truyền dữ liệu vào model để hiển thị trên JSP
+        List<Chapter> chapters = chapterService.findChapters(id, chapterName, status);
         model.addAttribute("subject", subject.get());
         model.addAttribute("chapters", chapters);
-        model.addAttribute("chapterName", searchName);
+        model.addAttribute("chapterName", chapterName);
         model.addAttribute("status", status);
-
         return "admin/chapter/show";
     }
 
