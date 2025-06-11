@@ -1,10 +1,7 @@
 package swp.se1941jv.pls.controller.admin;
 
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.exception.Chapter.ChapterNotFoundException;
+import swp.se1941jv.pls.exception.Chapter.DuplicateChapterNameException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.SubjectService;
 
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/admin/subject/{id}/chapters")
 public class ChapterController {
 
     private final SubjectService subjectService;
@@ -29,164 +29,131 @@ public class ChapterController {
         this.chapterService = chapterService;
     }
 
-    @GetMapping("admin/subject/{id}/chapters")
-    public String getDetailSubjectPage(
-            Model model,
-            @PathVariable("id") Long id,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Optional<String> page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") Optional<String> size,
-            @RequestParam(value = "chapterName") Optional<String> chapterName,
-            @RequestParam(value = "status") Optional<Boolean> status
 
-    ) {
+    /**
+     * Hiển thị trang danh sách chương của một môn học.
+     *
+     * @param id ID của môn học
+     * @param chapterName Tên chương để lọc (tùy chọn)
+     * @param status Trạng thái để lọc (tùy chọn)
+     * @param model Model để truyền dữ liệu đến JSP
+     * @return Tên view JSP
+     */
+    @GetMapping
+    public String showChapters(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "chapterName", required = false) String chapterName,
+            @RequestParam(value = "status", required = false) Boolean status,
+            Model model) {
         Optional<Subject> subject = subjectService.getSubjectById(id);
         if (subject.isEmpty()) {
             return "error/404";
         }
-
-        int pageNumber;
-        try {
-            pageNumber = page.map(Integer::parseInt).orElse(1);
-        } catch (Exception e) {
-            pageNumber = 1;
-        }
-
-        int pageSize;
-        try {
-            pageSize = size.map(Integer::parseInt).orElse(1);
-        } catch (Exception e) {
-            pageSize = 1;
-        }
-
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "chapterId"));
-
-        // Lấy giá trị status
-        Boolean chapterStatus = status.orElse(null); // null nghĩa là không lọc theo status
-        String searchName = chapterName.orElse(""); // Chuỗi rỗng nghĩa là không lọc theo tên
-
-
-        Page<Chapter> chapters = chapterService.findChapters(id,searchName, chapterStatus,pageable);
-
-
-            // Truyền dữ liệu vào model để hiển thị trên JSP
+        List<Chapter> chapters = chapterService.findChapters(id, chapterName, status);
         model.addAttribute("subject", subject.get());
-        model.addAttribute("chapters", chapters.getContent());
-        model.addAttribute("currentPage", pageNumber);
-        model.addAttribute("totalPages", chapters.getTotalPages());
-        model.addAttribute("pageSize", pageSize);
-        model.addAttribute("chapterName", searchName);
-        model.addAttribute("status", chapterStatus);
-
+        model.addAttribute("chapters", chapters);
+        model.addAttribute("chapterName", chapterName);
+        model.addAttribute("status", status);
         return "admin/chapter/show";
     }
 
-    @GetMapping("admin/subject/{id}/chapters/save")
+    /**
+     * Hiển thị form tạo hoặc cập nhật chương.
+     *
+     * @param subjectId ID của môn học
+     * @param chapterId ID của chương (tùy chọn, để chỉnh sửa)
+     * @param model Model để truyền dữ liệu đến JSP
+     * @param redirectAttributes Để truyền thông báo lỗi
+     * @return Tên view JSP hoặc redirect
+     */
+    @GetMapping("/save")
     public String saveChapterToSubjectPage(
-            Model model,
             @PathVariable("id") Long subjectId,
-            @RequestParam(value = "chapterId", required = false) Long chapterId) {
-        Optional<Subject> subjectOpt = subjectService.getSubjectById(subjectId);
-        if (subjectOpt.isEmpty()) {
-            return "error/404";
-        }
-        Subject subject = subjectOpt.get();
-
-        Chapter chapter;
-        boolean isEdit = chapterId != null;
-        if (isEdit) {
-            Optional<Chapter> chapterOpt = chapterService.getChapterByChapterId(chapterId);
-            if (chapterOpt.isEmpty()) {
-                return "error/404";
-            }
-            chapter = chapterOpt.get();
-        } else {
-            chapter = new Chapter();
-        }
-
-        model.addAttribute("subject", subject);
-        model.addAttribute("chapter", chapter);
-        model.addAttribute("isEdit", isEdit);
-        return "admin/chapter/save";
-    }
-
-    @PostMapping("admin/subject/{id}/chapters/save")
-    public String saveChapterToSubject(
+            @RequestParam(value = "chapterId", required = false) Long chapterId,
             Model model,
-            @PathVariable("id") Long subjectId,
-            @Valid @ModelAttribute("chapter") Chapter chapter,
-            BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
-        Optional<Subject> subjectOpt = subjectService.getSubjectById(subjectId);
-        if (subjectOpt.isEmpty()) {
-            return "error/404";
-        }
-        Subject subject = subjectOpt.get();
-
-        boolean isEdit = chapter.getChapterId() != null;
-        Chapter existingChapter = null;
-        if (isEdit) {
-            Optional<Chapter> chapterOpt = chapterService.getChapterByChapterId(chapter.getChapterId());
-            if (chapterOpt.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Chương học không tồn tại!");
-                return "redirect:/admin/subject/" + subjectId;
-            }
-            existingChapter = chapterOpt.get();
-            if (!existingChapter.getChapterName().equals(chapter.getChapterName()) &&
-                    chapterService.existsByChapterNameAndSubject(chapter.getChapterName(), subject)) {
-                bindingResult.rejectValue("chapterName", "error.chapter", "Tên chương đã tồn tại trong môn học này");
-            }
-        } else {
-            if (chapterService.existsByChapterNameAndSubject(chapter.getChapterName(), subject)) {
-                bindingResult.rejectValue("chapterName", "error.chapter", "Tên chương đã tồn tại trong môn học này");
-            }
-        }
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("subject", subject);
-            model.addAttribute("isEdit", isEdit);
-            return "admin/chapter/save";
-        }
-
-        try {
-            if (isEdit) {
-                existingChapter.setChapterName(chapter.getChapterName());
-                existingChapter.setChapterDescription(chapter.getChapterDescription());
-                chapterService.saveChapter(existingChapter);
-                redirectAttributes.addFlashAttribute("successMessage", "Chỉnh sửa chương học thành công");
-            } else {
-                chapter.setSubject(subject);
-                chapterService.saveChapter(chapter);
-                redirectAttributes.addFlashAttribute("successMessage", "Thêm chương học thành công");
-            }
-        } catch (Exception e) {
-            model.addAttribute("subject", subject);
-            model.addAttribute("isEdit", isEdit);
-            model.addAttribute("errorMessage", "Lỗi khi lưu chương học: " + e.getMessage());
-            return "admin/chapter/save";
-        }
-
-        return "redirect:/admin/subject/" + subjectId;
-    }
-
-
-    @PostMapping("admin/subject/{id}/chapters/update-status")
-    public String updateChapterStatus(
-            @PathVariable("id") Long subjectId,
-            @RequestParam("chapterIds") List<Long> chapterIds,
-            RedirectAttributes redirectAttributes
-    ) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
         if (subject.isEmpty()) {
             return "error/404";
         }
-
-        try {
-            chapterService.updateChaptersStatus(chapterIds);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái chương học thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+        Chapter chapter;
+        if (chapterId != null) {
+            chapter = chapterService.findChapterById(chapterId)
+                    .orElse(null);
+            if (chapter == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Chương không tồn tại");
+                return "redirect:/admin/subject/" + subjectId + "/chapters";
+            }
+        } else {
+            chapter = new Chapter();
         }
+        model.addAttribute("subject", subject.get());
+        model.addAttribute("chapter", chapter);
+        model.addAttribute("isEdit", chapterId != null);
+        return "admin/chapter/save";
+    }
 
+    /**
+     * Xử lý lưu hoặc cập nhật chương.
+     *
+     * @param subjectId ID của môn học
+     * @param chapter Chương cần lưu
+     * @param bindingResult Kết quả validation
+     * @param redirectAttributes Để truyền thông báo
+     * @param model Model để truyền dữ liệu đến JSP
+     * @return Redirect hoặc tên view JSP
+     */
+    @PostMapping("/save")
+    public String saveChapterToSubject(
+            @PathVariable("id") Long subjectId,
+            @Valid @ModelAttribute("chapter") Chapter chapter,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
+        if (subject.isEmpty()) {
+            return "error/404";
+        }
+        try {
+            chapterService.saveChapter(chapter, subject.get());
+            redirectAttributes.addFlashAttribute("message", "Lưu chương thành công");
+        } catch (DuplicateChapterNameException e) {
+            model.addAttribute("chapter", chapter);
+            model.addAttribute("subject", subject.get());
+            model.addAttribute("isEdit", chapter.getChapterId() != null);
+            bindingResult.rejectValue("chapterName", "error.chapter", e.getMessage());
+            return "admin/chapter/save";
+        } catch (ChapterNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/subject/" + subjectId + "/chapters";
+        }
+        return "redirect:/admin/subject/" + subjectId + "/chapters";
+    }
+
+
+    /**
+     * Cập nhật trạng thái của các chương.
+     *
+     * @param subjectId ID của môn học
+     * @param chapterIds Danh sách ID của các chương
+     * @param redirectAttributes Để truyền thông báo
+     * @return Redirect
+     */
+    @PostMapping("/update-status")
+    public String updateChapterStatus(
+            @PathVariable("id") Long subjectId,
+            @RequestParam("chapterIds") List<Long> chapterIds,
+            RedirectAttributes redirectAttributes) {
+        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
+        if (subject.isEmpty()) {
+            return "error/404";
+        }
+        try {
+            chapterService.toggleChaptersStatus(chapterIds);
+            redirectAttributes.addFlashAttribute("message", "Cập nhật trạng thái thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
+        }
         return "redirect:/admin/subject/" + subjectId + "/chapters";
     }
 }
