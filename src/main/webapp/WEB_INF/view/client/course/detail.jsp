@@ -25,59 +25,7 @@
                     <body>
                         <div class="detail-package">
                             <!-- Header Section -->
-                            <header class="header">
-                                <div class="header-container">
-                                    <div class="header-content">
-                                        <!-- Logo -->
-                                        <div class="logo">
-                                            <img class="logo-img" alt="Logo"
-                                                src="https://c.animaapp.com/mbgux5dcnDKIHL/img/logo.svg" />
-                                        </div>
-
-                                        <!-- Navigation Menu -->
-                                        <nav class="nav-menu">
-                                            <ul class="nav-list">
-                                                <li class="nav-item">
-                                                    <a href="#" class="nav-link">
-                                                        <span class="nav-text">Trang chủ</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="#" class="nav-link">
-                                                        <span class="nav-text">Khóa học</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="#" class="nav-link">
-                                                        <span class="nav-text">Dịch vụ</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="#" class="nav-link">
-                                                        <span class="nav-text">Tin tức</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a href="#" class="nav-link">
-                                                        <span class="nav-text">Liên hệ</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </nav>
-
-                                        <!-- User Actions -->
-                                        <div class="user-actions">
-                                            <i data-lucide="heart" class="action-icon"></i>
-                                            <a href="/parent/cart"><i data-lucide="shopping-cart"
-                                                    class="action-icon"></i></a>
-                                            <i data-lucide="bell" class="action-icon"></i>
-                                            <div class="avatar">
-                                                <span class="avatar-text">J</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </header>
+                            <jsp:include page="../layout/head.jsp" />
 
                             <!-- Course List Section -->
                             <section class="course-list">
