@@ -9,6 +9,8 @@ import java.util.List;
 @Entity
 @Table(name = "question_bank")
 @Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -23,14 +25,35 @@ public class QuestionBank extends BaseEntity {
     @JoinColumn(name = "lession_id")
     Lesson lesson;
 
-    @Column(name = "content", columnDefinition = "NVARCHAR(255)")
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    Subject subject;
+
+    @ManyToOne
+    @JoinColumn(name = "chapter_id")
+    Chapter chapter;
+
+    @ManyToOne
+    @JoinColumn(name = "grade_id")
+    Grade grade;
+
+    @Column(name = "content", columnDefinition = "TEXT")
     String content;
+
+    @Column(name = "image", columnDefinition = "TEXT")
+    String image;
+
+    @Column(name = "options", columnDefinition = "TEXT")
+    String options;
 
     @Column(name = "answer", columnDefinition = "NVARCHAR(255)")
     String answer;
 
-    @Column(name = "is_active")
-    boolean isActive;
+    @Column(name = "active")
+    boolean active;
+
+    @Column(name = "display_at_end_of_lesson")
+    boolean displayAtEndOfLesson;
 
     @ManyToOne
     @JoinColumn(name = "level_question_id")
@@ -42,4 +65,10 @@ public class QuestionBank extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "question_type_id")
     QuestionType questionType;
+
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    QuestionStatus status;
+
+
 }
