@@ -55,32 +55,39 @@ public class ChapterController {
         return "admin/chapter/show";
     }
 
-    @GetMapping("admin/subject/{id}/chapters/save")
+    /**
+     * Hiển thị form tạo hoặc cập nhật chương.
+     *
+     * @param subjectId ID của môn học
+     * @param chapterId ID của chương (tùy chọn, để chỉnh sửa)
+     * @param model Model để truyền dữ liệu đến JSP
+     * @param redirectAttributes Để truyền thông báo lỗi
+     * @return Tên view JSP hoặc redirect
+     */
+    @GetMapping("/save")
     public String saveChapterToSubjectPage(
-            Model model,
             @PathVariable("id") Long subjectId,
-            @RequestParam(value = "chapterId", required = false) Long chapterId) {
-        Optional<Subject> subjectOpt = subjectService.getSubjectById(subjectId);
-        if (subjectOpt.isEmpty()) {
+            @RequestParam(value = "chapterId", required = false) Long chapterId,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        Optional<Subject> subject = subjectService.getSubjectById(subjectId);
+        if (subject.isEmpty()) {
             return "error/404";
         }
-        Subject subject = subjectOpt.get();
-
         Chapter chapter;
-        boolean isEdit = chapterId != null;
-        if (isEdit) {
-            Optional<Chapter> chapterOpt = chapterService.getChapterByChapterId(chapterId);
-            if (chapterOpt.isEmpty()) {
-                return "error/404";
+        if (chapterId != null) {
+            chapter = chapterService.findChapterById(chapterId)
+                    .orElse(null);
+            if (chapter == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Chương không tồn tại");
+                return "redirect:/admin/subject/" + subjectId + "/chapters";
             }
-            chapter = chapterOpt.get();
         } else {
             chapter = new Chapter();
         }
-
         model.addAttribute("subject", subject);
         model.addAttribute("chapter", chapter);
-        model.addAttribute("isEdit", isEdit);
+        model.addAttribute("isEdit", chapterId != null);
         return "admin/chapter/save";
     }
 

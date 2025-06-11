@@ -19,6 +19,16 @@ public class ChapterService {
         this.chapterRepository = chapterRepository;
     }
 
+    /**
+     * Tìm một chương theo ID.
+     *
+     * @param chapterId ID của chương
+     * @return Optional chứa chương nếu tìm thấy
+     */
+    public Optional<Chapter> findChapterById(Long chapterId) {
+        return chapterRepository.findById(chapterId);
+    }
+
     public boolean existsByChapterNameAndSubject(String chapterName, Subject subject) {
         return chapterRepository.existsByChapterNameAndSubject(chapterName, subject);
     }
@@ -27,13 +37,7 @@ public class ChapterService {
         this.chapterRepository.save(chapter);
     }
 
-    public List<Chapter> getChaptersBySubject(Subject subject) {
-        return chapterRepository.findBySubject(subject);
-    }
 
-    public Optional<Chapter> getChapterByChapterId(Long chapterId) {
-        return chapterRepository.getChapterByChapterId(chapterId);
-    }
 
     // SỬA MỚI: Thay Page<Chapter> bằng List<Chapter> và nạp lessons
     public List<Chapter> findChapters(Long subjectId, String chapterName, Boolean status) {
