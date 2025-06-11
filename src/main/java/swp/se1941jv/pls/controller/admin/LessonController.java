@@ -14,6 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.exception.Lesson.DuplicateLessonNameException;
+import swp.se1941jv.pls.exception.Lesson.LessonNotFoundException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.FileUploadService;
 import swp.se1941jv.pls.service.LessonService;
@@ -59,8 +61,8 @@ public class LessonController {
         if (subject.isEmpty() || chapter == null) {
             return "error/404";
         }
-        List<Lesson> lessons = lessonService.findLessons(chapterId);
-        model.addAttribute("subject", subject);
+        List<Lesson> lessons = lessonService.findLessonsByChapterId(chapterId);
+        model.addAttribute("subject", subject.get());
         model.addAttribute("chapter", chapter);
         model.addAttribute("lessons", lessons);
         return "admin/lesson/show";
@@ -101,7 +103,7 @@ public class LessonController {
             return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
 
-        // Kiểm tra nếu chapter có tồn tại và không thuộc về chapter
+        // Kiểm tra nếu lesson có tồn tại và không thuộc về chapter
         if (!lesson.getChapter().getChapterId().equals(chapterId)) {
             return "error/404";
         }
@@ -124,33 +126,46 @@ public class LessonController {
         return "admin/lesson/save";
     }
 
-    @PostMapping("/admin/subject/{subjectId}/chapters/{chapterId}/lessons/save")
-    public String saveLesson(
+    /**
+     * Xử lý lưu hoặc cập nhật bài học.
+     *
+     * @param subjectId         ID của môn học
+     * @param chapterId         ID của chương
+     * @param lesson            Bài học cần lưu
+     * @param bindingResult     Kết quả validation
+     * @param materialFiles     Các file tài liệu được tải lên
+     * @param materialsTemp     Danh sách tên file tài liệu hiện có
+     * @param redirectAttributes Để truyền thông báo
+     * @param model             Model để truyền dữ liệu đến JSP
+     * @return Redirect hoặc tên view JSP
+     */
+    @PostMapping("/save")
+    public String handleSaveLesson(
             @PathVariable("subjectId") Long subjectId,
             @PathVariable("chapterId") Long chapterId,
-            @ModelAttribute("lesson") @Valid Lesson lesson,
-            BindingResult result,
+            @Valid @ModelAttribute("lesson") Lesson lesson,
+            BindingResult bindingResult,
             @RequestParam("materialFiles") MultipartFile[] materialFiles,
             @RequestParam(value = "materialsTemp", required = false) List<String> materialsTemp,
             RedirectAttributes redirectAttributes,
             Model model) {
-        // Kiểm tra subject và chapter
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        Optional<Chapter> chapter = chapterService.findChapterById(chapterId);
-
-        if (subject.isEmpty() || chapter.isEmpty()) {
+        Chapter chapter = chapterService.findChapterById(chapterId).orElse(null);
+        if (subject.isEmpty() || chapter == null) {
             return "error/404";
         }
 
-        // Nếu có lỗi validation, trả về form
-        if (result.hasErrors()) {
-            model.addAttribute("subject", subject.get());
-            model.addAttribute("chapter", chapter.get());
-            model.addAttribute("lesson", lesson);
-            return "admin/lesson/save";
+        // Kiểm tra nếu chapter không thuộc về subject
+        if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
+            return "error/404";
+        }
+        // If lesson đã tồn tại kiểm tra xem lesson đó cos thuộc chapter không
+        if (lesson.getLessonId() != null) {
+            if (!lesson.getChapter().getChapterId().equals(chapterId)) {
+                return "error/404";
         }
 
-        lesson.setChapter(chapter.get());
+        }
 
         // Khởi tạo danh sách materialsTemp nếu null
         if (materialsTemp == null) {
@@ -168,33 +183,55 @@ public class LessonController {
         } catch (Exception e) {
             lesson.setMaterialsJson("[]");
         }
+        lesson.setChapter(chapter);
 
-        // Lưu bài học
-        lessonService.saveLesson(lesson);
-
-        redirectAttributes.addFlashAttribute("successMessage", "Lưu bài học thành công!");
+        try {
+            lessonService.saveLesson(lesson);
+            redirectAttributes.addFlashAttribute("message", "Lưu bài học thành công");
+        } catch (DuplicateLessonNameException e) {
+            model.addAttribute("lesson", lesson);
+            model.addAttribute("chapter", chapter);
+            model.addAttribute("subject", subject);
+            model.addAttribute("isEdit", lesson.getLessonId() != null);
+            model.addAttribute("materialsTemp", materialsTemp);
+            bindingResult.rejectValue("lessonName", "error.lesson", e.getMessage());
+            return "admin/lesson/save";
+        } catch (LessonNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu bài học");
+        }
         return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
     }
 
-    @PostMapping("admin/subject/{subjectId}/chapters/{chapterId}/lessons/update-status")
-    public String updateLessonStatus(
+
+    /**
+     * Cập nhật trạng thái của các bài học.
+     *
+     * @param subjectId         ID của môn học
+     * @param chapterId         ID của chương
+     * @param lessonIds         Danh sách ID của các bài học
+     * @param redirectAttributes Để truyền thông báo
+     * @return Redirect
+     */
+    @PostMapping("/update-status")
+    public String updateLessonsStatus(
             @PathVariable("subjectId") Long subjectId,
             @PathVariable("chapterId") Long chapterId,
             @RequestParam("lessonIds") List<Long> lessonIds,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         Optional<Subject> subject = subjectService.getSubjectById(subjectId);
-        Optional<Chapter> chapter = chapterService.findChapterById(chapterId);
-        if (subject.isEmpty() || chapter.isEmpty()) {
+        Chapter chapter = chapterService.findChapterById(chapterId).orElse(null);
+        if (subject.isEmpty() || chapter == null) {
             return "error/404";
         }
-        try {
-            lessonService.updateLessonsStatus(lessonIds);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái bài học thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
-        }
 
+        try {
+            lessonService.toggleLessonsStatus(lessonIds);
+            redirectAttributes.addFlashAttribute("message", "Cập nhật trạng thái thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
+        }
         return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
     }
 }

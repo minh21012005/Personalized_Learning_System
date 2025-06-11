@@ -40,7 +40,7 @@ public class ChapterController {
      * @return Tên view JSP
      */
     @GetMapping
-    public String getDetailSubjectPage(
+    public String showChapters(
             @PathVariable("id") Long id,
             @RequestParam(value = "chapterName", required = false) String chapterName,
             @RequestParam(value = "status", required = false) Boolean status,
