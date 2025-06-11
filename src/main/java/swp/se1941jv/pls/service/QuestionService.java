@@ -1,7 +1,7 @@
-
 package swp.se1941jv.pls.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -170,5 +170,95 @@ public class QuestionService {
         };
 
         return questionBankRepository.findAll(spec, pageable);
+    }
+
+    public List<AnswerOptionDto> getQuestionOptions(QuestionBank question) throws Exception {
+        if (question.getOptions() == null || question.getOptions().isEmpty()) {
+            return new ArrayList<>();
+        }
+        try {
+            return objectMapper.readValue(question.getOptions(), new TypeReference<List<AnswerOptionDto>>() {
+            });
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Lỗi khi chuyển đổi đáp án sang JSON.", e);
+        }
+    }
+
+    public QuestionBank updateQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList, MultipartFile imageFile, String existingImage) throws Exception {
+        // Validate mandatory fields
+        if (question.getGrade() == null || question.getGrade().getGradeId() == null) {
+            throw new IllegalArgumentException("Khối là bắt buộc.");
+        }
+        if (question.getSubject() == null || question.getSubject().getSubjectId() == null) {
+            throw new IllegalArgumentException("Môn học là bắt buộc.");
+        }
+        if (question.getChapter() == null || question.getChapter().getChapterId() == null) {
+            throw new IllegalArgumentException("Chương là bắt buộc.");
+        }
+        if (question.getLesson() == null || question.getLesson().getLessonId() == null) {
+            throw new IllegalArgumentException("Bài học là bắt buộc.");
+        }
+        if (question.getLevelQuestion() == null || question.getLevelQuestion().getLevelQuestionId() == null) {
+            throw new IllegalArgumentException("Mức độ là bắt buộc.");
+        }
+
+        // Validate question content
+        if (question.getContent() == null || question.getContent().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nội dung câu hỏi không được để trống.");
+        }
+
+        // Validate options: at least 2 options, at least 1 correct, at most n-1 correct, no empty options
+        if (optionTexts == null || optionTexts.size() < 2) {
+            throw new IllegalArgumentException("Phải có ít nhất 2 đáp án.");
+        }
+        for (String option : optionTexts) {
+            if (option == null || option.trim().isEmpty()) {
+                throw new IllegalArgumentException("Đáp án không được để trống.");
+            }
+        }
+        if (isCorrectList == null || isCorrectList.isEmpty()) {
+            throw new IllegalArgumentException("Phải có ít nhất một đáp án đúng.");
+        }
+        long correctCount = isCorrectList.stream().filter(Boolean::booleanValue).count();
+        if (correctCount < 1) {
+            throw new IllegalArgumentException("Phải có ít nhất một đáp án đúng.");
+        }
+        if (correctCount >= optionTexts.size()) {
+            throw new IllegalArgumentException("Chỉ được phép có tối đa " + (optionTexts.size() - 1) + " đáp án đúng.");
+        }
+
+        // Set default values if not provided
+        if (question.getAnswer() == null) {
+            question.setAnswer("");
+        }
+
+        // Handle image upload or retain existing
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String fileName = uploadService.handleSaveUploadFile(imageFile, UPLOAD_DIR);
+            if (fileName.isEmpty()) {
+                throw new RuntimeException("Không thể tải lên hình ảnh.");
+            }
+            question.setImage(fileName);
+        } else {
+            question.setImage(existingImage);
+        }
+
+        // Prepare options as JSON
+        List<AnswerOptionDto> options = new ArrayList<>();
+        for (int i = 0; i < optionTexts.size(); i++) {
+            AnswerOptionDto option = new AnswerOptionDto();
+            option.setText(optionTexts.get(i));
+            option.setCorrect(isCorrectList.get(i));
+            options.add(option);
+        }
+        try {
+            String optionsJson = objectMapper.writeValueAsString(options);
+            question.setOptions(optionsJson);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Lỗi khi chuyển đổi đáp án sang JSON.", e);
+        }
+
+        // Save the updated question
+        return questionBankRepository.save(question);
     }
 }
