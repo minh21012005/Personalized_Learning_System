@@ -161,34 +161,69 @@
                                 <c:if test="${not empty paramName}">
                                     <c:set var="queryString" value="${queryString}&course=${paramName}" />
                                 </c:if>
+
                                 <c:if test="${totalPage > 1}">
                                     <nav aria-label="Page navigation example">
                                         <ul class="pagination justify-content-center">
-                                            <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
+
+                                            <!-- First Page -->
+                                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                                <a class="page-link" href="/parent/course?page=1${queryString}"
+                                                    aria-label="First">
+                                                    <span aria-hidden="true">««</span>
+                                                </a>
+                                            </li>
+
+                                            <!-- Previous Page -->
+                                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                                 <a class="page-link"
                                                     href="/parent/course?page=${currentPage - 1}${queryString}"
                                                     aria-label="Previous">
-                                                    <span aria-hidden="true">
-                                                        < </span>
+                                                    <span aria-hidden="true">«</span>
                                                 </a>
                                             </li>
-                                            <c:forEach begin="1" end="${totalPage}" varStatus="loop">
-                                                <li class="page-item ${loop.index eq currentPage ? 'active' : ''}">
+
+                                            <!-- Page Numbers (current page ± 2) -->
+                                            <c:set var="startPage" value="${currentPage - 2}" />
+                                            <c:set var="endPage" value="${currentPage + 2}" />
+                                            <c:if test="${startPage < 1}">
+                                                <c:set var="startPage" value="1" />
+                                                <c:set var="endPage" value="${startPage + 4}" />
+                                            </c:if>
+                                            <c:if test="${endPage > totalPage}">
+                                                <c:set var="endPage" value="${totalPage}" />
+                                                <c:set var="startPage" value="${endPage - 4 > 0 ? endPage - 4 : 1}" />
+                                            </c:if>
+
+                                            <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
+                                                <li class="page-item ${loop.index == currentPage ? 'active' : ''}">
                                                     <a class="page-link"
                                                         href="/parent/course?page=${loop.index}${queryString}">${loop.index}</a>
                                                 </li>
                                             </c:forEach>
-                                            <li class="page-item ${currentPage eq totalPage ? 'disabled' : ''}">
+
+                                            <!-- Next Page -->
+                                            <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
                                                 <a class="page-link"
                                                     href="/parent/course?page=${currentPage + 1}${queryString}"
                                                     aria-label="Next">
-                                                    <span aria-hidden="true">></span>
+                                                    <span aria-hidden="true">»</span>
+                                                </a>
+                                            </li>
+
+                                            <!-- Last Page -->
+                                            <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    href="/parent/course?page=${totalPage}${queryString}"
+                                                    aria-label="Last">
+                                                    <span aria-hidden="true">»»</span>
                                                 </a>
                                             </li>
                                         </ul>
                                     </nav>
                                 </c:if>
                             </div>
+
                         </main>
                         <!-- Footer Section -->
                         <footer class="footer">
