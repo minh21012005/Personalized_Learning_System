@@ -38,16 +38,23 @@
             flex: 1;
             padding: 20px;
             background-color: #f8f9fa;
-            .container {
-                width: 80%;
-                margin: 0 auto;
-            }
+        }
+        .container {
+            max-width: 800px; /* Limit width for better readability */
+            margin: 0 auto;
         }
         footer {
             background-color: #1a252f;
             color: white;
             height: 40px;
             width: 100%;
+        }
+        .card-footer {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
         }
         @media (max-width: 767.98px) {
             .sidebar {
@@ -65,6 +72,10 @@
             .content {
                 padding: 15px;
             }
+            .container {
+                max-width: 100%;
+                padding: 0 10px;
+            }
         }
     </style>
 </head>
@@ -80,10 +91,14 @@
     <div class="content">
         <main>
             <div class="container px-4">
-                <div class="mt-4">
-                    <div class="row col-8 mx-auto">
-                        <h3>${isEdit ? 'Chỉnh sửa chương học' : 'Thêm chương học'} trong ${subject.subjectName}</h3>
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">${isEdit ? 'Chỉnh sửa chương học' : 'Thêm chương học'} trong ${subject.subjectName}</h5>
 
+                        </div>
+                    </div>
+                    <div class="card-body">
                         <c:if test="${not empty errorMessage}">
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     ${errorMessage}
@@ -91,33 +106,35 @@
                             </div>
                         </c:if>
 
-                        <form:form method="post" action="/admin/subject/${subject.subjectId}/save"
+                        <form:form method="post" action="/admin/subject/${subject.subjectId}/chapters/save"
                                    modelAttribute="chapter" class="mt-4">
                             <form:hidden path="chapterId"/>
-                            <div class="mb-3">
-                                <c:set var="errorChapterName">
-                                    <form:errors path="chapterName" cssClass="invalid-feedback"/>
-                                </c:set>
-                                <label for="chapterNameInput" class="form-label">Tên chương học</label>
-                                <form:input type="text" id="chapterNameInput" path="chapterName"
-                                            class="form-control ${not empty errorChapterName?'is-invalid':''}"
-                                            placeholder="Nhập tên chương học"/>
-                                    ${errorChapterName}
+                            <div class="row mb-3">
+                                <label for="chapterNameInput" class="col-sm-3 col-form-label">Tên chương học</label>
+                                <div class="col-sm-9">
+                                    <c:set var="errorChapterName"><form:errors path="chapterName" cssClass="invalid-feedback"/></c:set>
+                                    <form:input type="text" id="chapterNameInput" path="chapterName"
+                                                class="form-control ${not empty errorChapterName ? 'is-invalid' : ''}"
+                                                placeholder="Nhập tên chương học"/>
+                                        ${errorChapterName}
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <c:set var="errorChapterDescription">
-                                    <form:errors path="chapterDescription" cssClass="invalid-feedback"/>
-                                </c:set>
-                                <label for="chapterDescriptionInput" class="form-label">Mô tả về chương học</label>
-                                <form:textarea id="chapterDescriptionInput" path="chapterDescription"
-                                               class="form-control ${not empty errorChapterDescription?'is-invalid':''}"
-                                               rows="5" maxlength="255"
-                                               placeholder="Nhập nội dung không quá 255 kí tự"/>
-                                    ${errorChapterDescription}
+                            <div class="row mb-3">
+                                <label for="chapterDescriptionInput" class="col-sm-3 col-form-label">Mô tả chương học</label>
+                                <div class="col-sm-9">
+                                    <c:set var="errorChapterDescription"><form:errors path="chapterDescription" cssClass="invalid-feedback"/></c:set>
+                                    <form:textarea id="chapterDescriptionInput" path="chapterDescription"
+                                                   class="form-control ${not empty errorChapterDescription ? 'is-invalid' : ''}"
+                                                   rows="10" maxlength="1000"
+                                                   placeholder="Nhập mô tả (tối đa 1000 ký tự)"/>
+                                        ${errorChapterDescription}
+                                </div>
                             </div>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
-                                <a href="/admin/subject/${subject.subjectId}" class="btn btn-secondary">Hủy</a>
+                            <div class="card-footer">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
+                                    <a href="/admin/subject/${subject.subjectId}/chapters" class="btn btn-secondary">Hủy</a>
+                                </div>
                             </div>
                         </form:form>
                     </div>
@@ -132,5 +149,14 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Basic client-side validation for textarea maxlength
+    document.getElementById('chapterDescriptionInput').addEventListener('input', function () {
+        const maxLength = 1000;
+        if (this.value.length > maxLength) {
+            this.value = this.value.slice(0, maxLength);
+        }
+    });
+</script>
 </body>
 </html>

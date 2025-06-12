@@ -3,12 +3,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<%-- 
-    PHẦN 1: Tiêu đề trang, nút "Tạo mới" và Form Filter
---%>
-<div class="d-flex justify-content-between align-items-center mb-4 page-header"> <%-- SỬA: Tăng mb-3 thành mb-4 để tạo khoảng cách với form filter --%>
+
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-header"> 
     <h3 class="mb-0"><c:out value="${pageTitle}" default="Danh sách Thông báo"/></h3> 
-    <a href="${pageContext.request.contextPath}/admin/notification/create" class="btn btn-primary"> <%-- SỬA: Bỏ btn-lg để nút nhỏ hơn (kích thước mặc định) --%>
+    <a href="${pageContext.request.contextPath}/admin/notification/create" class="btn btn-primary"> 
         <i class="bi bi-plus-lg me-2"></i>Tạo thông báo mới 
     </a>
 </div>
@@ -36,7 +35,6 @@
     </div>
 </form>
 
-<%-- ... (Phần còn lại của file: hiển thị thông báo lỗi/info, danh sách Card, phân trang, modal, script giữ nguyên) ... --%>
 <c:if test="${not empty errorMessage && empty notificationList}">
     <div class="alert alert-danger" role="alert">
         <i class="fas fa-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
@@ -142,7 +140,6 @@
     </c:if>
 </c:if>
 
-<%-- Modal xác nhận xóa --%>
 <div class="modal fade" id="deleteNotificationConfirmModal" tabindex="-1" aria-labelledby="deleteNotificationConfirmModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -157,6 +154,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
         <form id="deleteActualNotificationForm" method="POST" style="display: inline;">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt me-1"></i>Xác nhận xóa</button>
         </form>
       </div>

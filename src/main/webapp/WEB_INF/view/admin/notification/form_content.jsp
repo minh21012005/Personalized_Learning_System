@@ -8,11 +8,6 @@
 <c:set var="submitButtonText" value="${currentIsEditMode ? 'Cập nhật thông báo' : 'Gửi thông báo'}"/>
 <c:set var="submitButtonIcon" value="${currentIsEditMode ? 'fas fa-save' : 'fas fa-paper-plane'}"/>
 
-<%-- Tiêu đề của phần content này (sẽ được bao bởi show.jsp) --%>
-<%-- Tiêu đề chính của trang (pageTitle) đã được đặt ở show.jsp --%>
-<%-- Nếu bạn muốn có một tiêu đề phụ riêng cho form ở đây, có thể thêm:
-    <h4 class="mb-3">${currentIsEditMode ? 'Chỉnh sửa thông báo' : 'Tạo thông báo mới'}</h4>
---%>
 
 <div class="card shadow-sm">
     <div class="card-header">
@@ -70,12 +65,7 @@
                 </div>
             </div>
 
-            <%-- 
-                Khi Edit, không cho sửa Target Type và Target Value để đơn giản hóa.
-                Select box sẽ bị disabled.
-                Nếu bạn muốn cho phép sửa người nhận, cần logic phức tạp hơn ở cả backend và frontend
-                để load và pre-select người nhận cũ, cũng như xử lý việc thay đổi người nhận.
-            --%>
+            
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group mb-3">
@@ -90,12 +80,7 @@
                             <option value="ROLE" <c:if test="${selectedTargetType == 'ROLE'}">selected</c:if>>Các user theo Role (Student/Parent)</option>
                         </select>
                         <c:if test="${currentIsEditMode}">
-                            <%-- Khi select bị disabled, giá trị của nó không được gửi đi.
-                                 Nếu backend cần targetType khi edit (dù không cho sửa),
-                                 chúng ta cần gửi nó qua một input hidden.
-                                 Tuy nhiên, phiên bản controller hiện tại cho processUpdateNotification
-                                 không nhận targetType, nên dòng này có thể không cần thiết.
-                            --%>
+                         
                              <input type="hidden" name="targetType" value="${selectedTargetType}" />
                         </c:if>
                     </div>
@@ -106,7 +91,7 @@
                         <label for="targetValue" id="targetValueLabel" class="form-label">Chọn giá trị <c:if test="${not currentIsEditMode}"><span class="text-danger">*</span></c:if>:</label>
                         <select class="form-select" name="targetValue" id="targetValue" multiple 
                                 <c:if test="${not currentIsEditMode && not empty selectedTargetType}">required</c:if>>
-                            <%-- Options sẽ được JS thêm vào --%>
+                           
                         </select>
                         <small id="targetValueHelp" class="form-text text-muted"></small>
                     </div>
