@@ -41,6 +41,9 @@ public class Lesson extends BaseEntity {
     @Column(name = "video_src")
     String videoSrc;
 
+    @Column(name = "video_time")
+    String videoTime;
+
     @Column(name = "materials_json", columnDefinition = "TEXT")
     private String materialsJson;
 

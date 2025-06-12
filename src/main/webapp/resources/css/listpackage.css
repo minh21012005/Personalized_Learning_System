@@ -504,6 +504,29 @@ body {
     background-color: #1a1c30;
 }
 
+.toastify-success,
+.toastify-fail {
+    transition: all 0.3s ease-in-out;
+    /* Hiệu ứng mượt mà khi xuất hiện/biến mất */
+}
+
+.toastify-success:hover,
+.toastify-fail:hover {
+    transform: translateY(-2px);
+    /* Hiệu ứng nâng nhẹ khi hover */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    /* Bóng lớn hơn khi hover */
+}
+
+.toastify-success .toast-close,
+.toastify-fail .toast-close {
+    color: #fff;
+    /* Màu nút đóng */
+    font-size: 14px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .content-wrapper {
@@ -539,5 +562,11 @@ body {
 
     .search-button {
         margin-left: 0;
+    }
+
+    .toastify-success,
+    .toastify-fail {
+        font-size: 14px;
+        padding: 10px 15px;
     }
 }

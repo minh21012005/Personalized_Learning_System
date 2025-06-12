@@ -33,7 +33,7 @@ public class Package extends BaseEntity {
     String name;
 
     @Column(name = "description", columnDefinition = "NVARCHAR(255)")
-    @Size(max = 2000, message = "Mô tả không được vượt quá 1000 ký tự")
+    @Size(max = 255, message = "Mô tả không được vượt quá 255 ký tự")
     @NotBlank(message = "Mô tả không được để trống")
     String description;
     @Column(name = "image")
@@ -65,4 +65,9 @@ public class Package extends BaseEntity {
     @ManyToOne()
     @JoinColumn(name = "grade_id")
     Grade grade;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Trạng thái không được để trống")
+    private PackageStatus status;
 }

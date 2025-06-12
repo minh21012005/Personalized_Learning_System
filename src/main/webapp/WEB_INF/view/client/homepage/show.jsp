@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +14,12 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Custom CSS -->
+    
+    <c:if test="${_csrf != null}">
+        <meta name="_csrf" content="${_csrf.token}"/>
+        <meta name="_csrf_header" content="${_csrf.parameterName}"/>
+    </c:if>
+    
     <style>
         /* Import Inter font */
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
@@ -579,5 +587,15 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    window.APP_CONTEXT_PATH = "${pageContext.request.contextPath}";
+    <c:if test="${_csrf != null}">
+        window.CSRF_HEADER_NAME = "${_csrf.parameterName}"; 
+        window.CSRF_TOKEN = "${_csrf.token}"; 
+    </c:if>
+</script>
+<script src="${pageContext.request.contextPath}/js/client_notification.js"></script>
+
 </body>
 </html>

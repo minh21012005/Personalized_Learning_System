@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
-import swp.se1941jv.pls.exception.Chapter.ChapterNotFoundException;
-import swp.se1941jv.pls.exception.Chapter.DuplicateChapterNameException;
+import swp.se1941jv.pls.exception.chapter.ChapterNotFoundException;
+import swp.se1941jv.pls.exception.chapter.DuplicateChapterNameException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.SubjectService;
 
@@ -49,7 +49,7 @@ public class ChapterController {
         if (subject.isEmpty()) {
             return "error/404";
         }
-        List<Chapter> chapters = chapterService.findChapters(id, chapterName, status);
+        List<Chapter> chapters = chapterService.findChaptersBySsubjectId(id, chapterName, status);
         model.addAttribute("subject", subject.get());
         model.addAttribute("chapters", chapters);
         model.addAttribute("chapterName", chapterName);

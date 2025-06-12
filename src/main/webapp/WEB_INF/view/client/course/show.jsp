@@ -16,50 +16,24 @@
                         <link rel="stylesheet" href="/css/listpackage.css">
                         <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
                         <script src="https://unpkg.com/lucide@latest"></script>
+                        <link rel="stylesheet"
+                            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
                         <!-- Choices.js CSS -->
                         <link rel="stylesheet"
                             href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
                         <!-- Choices.js JS -->
                         <script
                             src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+                        <!-- Toastify CSS -->
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+                        <!-- Toastify JS -->
+                        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
                         <!-- Custom JS -->
                         <script src="/js/script.js"></script>
                     </head>
 
                     <body>
-                        <header class="header">
-                            <div class="header-container">
-                                <div class="header-content">
-                                    <!-- Logo -->
-                                    <div class="logo">
-                                        <img class="logo-img" alt="Logo"
-                                            src="https://c.animaapp.com/mbgux5dcnDKIHL/img/logo.svg" />
-                                    </div>
-                                    <!-- Navigation Menu -->
-                                    <nav class="nav-menu">
-                                        <ul class="nav-list">
-                                            <li class="nav-item"><a href="#" class="nav-link"><span
-                                                        class="nav-text">Trang chủ</span></a></li>
-                                            <li class="nav-item"><a href="#" class="nav-link"><span
-                                                        class="nav-text">Khóa học</span></a></li>
-                                            <li class="nav-item"><a href="#" class="nav-link"><span
-                                                        class="nav-text">Dịch vụ</span></a></li>
-                                            <li class="nav-item"><a href="#" class="nav-link"><span class="nav-text">Tin
-                                                        tức</span></a></li>
-                                            <li class="nav-item"><a href="#" class="nav-link"><span
-                                                        class="nav-text">Liên hệ</span></a></li>
-                                        </ul>
-                                    </nav>
-                                    <!-- User Actions -->
-                                    <div class="user-actions">
-                                        <i data-lucide="heart" class="action-icon"></i>
-                                        <i data-lucide="shopping-cart" class="action-icon"></i>
-                                        <i data-lucide="bell" class="action-icon"></i>
-                                        <div class="avatar"><span class="avatar-text">J</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </header>
+                        <jsp:include page="../layout/head.jsp" />
 
                         <main class="main-content">
                             <div class="container">
@@ -143,23 +117,30 @@
                                     <div class="course-grid">
                                         <c:forEach var="pkg" items="${packages}">
                                             <div class="course-card">
-                                                <img src="hinh-khoa-hoc.jpg" alt="Course Image" class="course-img">
+                                                <img src="/img/package/${pkg.image}" alt="Course Image"
+                                                    class="course-img">
                                                 <a href="/parent/course/detail/${pkg.packageId}">
                                                     <h3 class="course-title">${pkg.name}</h3>
                                                 </a>
                                                 <p class="course-author">Tác giả: </p>
-                                                <!-- <p class="course-info">Khối: ${pkg.grade.gradeName} </p> -->
+
                                                 <div class="mt-auto course-bottom">
                                                     <span class="course-price">
                                                         <fmt:formatNumber value="${pkg.price}" type="number"
                                                             groupingUsed="true" /> ₫
                                                     </span>
-                                                    <button class="add-to-cart-btn mt-2">
-                                                        Thêm vào giỏ hàng
-                                                        <img width="18" height="18"
-                                                            src="https://img.icons8.com/material-outlined/24/FFFFFF/fast-cart.png"
-                                                            alt="fast-cart" />
-                                                    </button>
+                                                    <form action="/parent/cart" method="post">
+                                                        <input type="hidden" name="${_csrf.parameterName}"
+                                                            value="${_csrf.token}" />
+                                                        <input type="hidden" name="packageId"
+                                                            value="${pkg.packageId}" />
+                                                        <button type="submit" class="add-to-cart-btn mt-2">
+                                                            Thêm vào giỏ hàng
+                                                            <img width="18" height="18"
+                                                                src="https://img.icons8.com/material-outlined/24/FFFFFF/fast-cart.png"
+                                                                alt="fast-cart" />
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </c:forEach>
@@ -180,34 +161,69 @@
                                 <c:if test="${not empty paramName}">
                                     <c:set var="queryString" value="${queryString}&course=${paramName}" />
                                 </c:if>
+
                                 <c:if test="${totalPage > 1}">
                                     <nav aria-label="Page navigation example">
                                         <ul class="pagination justify-content-center">
-                                            <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
+
+                                            <!-- First Page -->
+                                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                                <a class="page-link" href="/parent/course?page=1${queryString}"
+                                                    aria-label="First">
+                                                    <span aria-hidden="true">««</span>
+                                                </a>
+                                            </li>
+
+                                            <!-- Previous Page -->
+                                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                                 <a class="page-link"
                                                     href="/parent/course?page=${currentPage - 1}${queryString}"
                                                     aria-label="Previous">
-                                                    <span aria-hidden="true">
-                                                        < </span>
+                                                    <span aria-hidden="true">«</span>
                                                 </a>
                                             </li>
-                                            <c:forEach begin="1" end="${totalPage}" varStatus="loop">
-                                                <li class="page-item ${loop.index eq currentPage ? 'active' : ''}">
+
+                                            <!-- Page Numbers (current page ± 2) -->
+                                            <c:set var="startPage" value="${currentPage - 2}" />
+                                            <c:set var="endPage" value="${currentPage + 2}" />
+                                            <c:if test="${startPage < 1}">
+                                                <c:set var="startPage" value="1" />
+                                                <c:set var="endPage" value="${startPage + 4}" />
+                                            </c:if>
+                                            <c:if test="${endPage > totalPage}">
+                                                <c:set var="endPage" value="${totalPage}" />
+                                                <c:set var="startPage" value="${endPage - 4 > 0 ? endPage - 4 : 1}" />
+                                            </c:if>
+
+                                            <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
+                                                <li class="page-item ${loop.index == currentPage ? 'active' : ''}">
                                                     <a class="page-link"
                                                         href="/parent/course?page=${loop.index}${queryString}">${loop.index}</a>
                                                 </li>
                                             </c:forEach>
-                                            <li class="page-item ${currentPage eq totalPage ? 'disabled' : ''}">
+
+                                            <!-- Next Page -->
+                                            <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
                                                 <a class="page-link"
                                                     href="/parent/course?page=${currentPage + 1}${queryString}"
                                                     aria-label="Next">
-                                                    <span aria-hidden="true">></span>
+                                                    <span aria-hidden="true">»</span>
+                                                </a>
+                                            </li>
+
+                                            <!-- Last Page -->
+                                            <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    href="/parent/course?page=${totalPage}${queryString}"
+                                                    aria-label="Last">
+                                                    <span aria-hidden="true">»»</span>
                                                 </a>
                                             </li>
                                         </ul>
                                     </nav>
                                 </c:if>
                             </div>
+
                         </main>
                         <!-- Footer Section -->
                         <footer class="footer">
@@ -253,6 +269,58 @@
                         </footer>
                         <script
                             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                        <c:if test="${not empty success}">
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    Toastify({
+                                        text: "<i class='fas fa-check-circle'></i> ${fn:escapeXml(success)}",
+                                        duration: 4000,
+                                        close: true,
+                                        gravity: "top",
+                                        position: "right",
+                                        style: {
+                                            background: "linear-gradient(to right, #28a745, #34c759)", // Gradient xanh
+                                            borderRadius: "8px",
+                                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                            fontFamily: "'Roboto', sans-serif",
+                                            fontSize: "16px",
+                                            padding: "12px 20px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "10px"
+                                        },
+                                        className: "toastify-success",
+                                        escapeMarkup: false // Cho phép HTML trong text
+                                    }).showToast();
+                                });
+                            </script>
+                        </c:if>
+                        <c:if test="${not empty fail}">
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    Toastify({
+                                        text: "<i class='fas fa-exclamation-triangle'></i> ${fn:escapeXml(fail)}",
+                                        duration: 4000,
+                                        close: true,
+                                        gravity: "top",
+                                        position: "right",
+                                        style: {
+                                            background: "linear-gradient(to right, #ffc107, #ffca2c)", // Gradient vàng
+                                            borderRadius: "8px",
+                                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                            fontFamily: "'Roboto', sans-serif",
+                                            fontSize: "16px",
+                                            padding: "12px 20px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "10px"
+                                        },
+                                        className: "toastify-fail",
+                                        escapeMarkup: false // Cho phép HTML trong text
+                                    }).showToast();
+                                });
+                            </script>
+                        </c:if>
                     </body>
                     <script>
                         lucide.createIcons();
