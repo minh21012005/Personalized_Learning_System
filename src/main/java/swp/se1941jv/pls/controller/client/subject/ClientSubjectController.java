@@ -2,6 +2,7 @@ package swp.se1941jv.pls.controller.client.subject;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,7 +28,9 @@ public class ClientSubjectController {
         if (subject.isEmpty()) {
             return "error/404";
         }
-        List<Chapter> chapters = subject.get().getChapters();
+        List<Chapter> chapters = subject.get().getChapters().stream()
+                .filter(chapter -> Boolean.TRUE.equals(chapter.getStatus()))
+                .collect(Collectors.toList());
         model.addAttribute("totalChapter", chapters.size());
         model.addAttribute("chapters", chapters);
         model.addAttribute("subject", subject.get());

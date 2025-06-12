@@ -532,6 +532,29 @@ h2 {
     /* Điều chỉnh kích thước icon mạng xã hội */
 }
 
+.toastify-success,
+.toastify-fail {
+    transition: all 0.3s ease-in-out;
+    /* Hiệu ứng mượt mà khi xuất hiện/biến mất */
+}
+
+.toastify-success:hover,
+.toastify-fail:hover {
+    transform: translateY(-2px);
+    /* Hiệu ứng nâng nhẹ khi hover */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    /* Bóng lớn hơn khi hover */
+}
+
+.toastify-success .toast-close,
+.toastify-fail .toast-close {
+    color: #fff;
+    /* Màu nút đóng */
+    font-size: 14px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .header .container {
@@ -585,5 +608,11 @@ h2 {
         flex-direction: column;
         gap: 20px;
         /* Giảm gap trong responsive */
+    }
+
+    .toastify-success,
+    .toastify-fail {
+        font-size: 14px;
+        padding: 10px 15px;
     }
 }

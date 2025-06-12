@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Package;
+import swp.se1941jv.pls.entity.PackageSubject;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.service.GradeService;
 import swp.se1941jv.pls.service.PackageService;
@@ -55,7 +56,7 @@ public class CourseController {
             pageNumber = 1;
         }
 
-        int pageSize = 9;
+        int pageSize = 6;
         String courseFilter = course.orElse(null);
         String gradesFilter = grades.orElse(null);
         String subjectsFilter = subjects.orElse(null);
@@ -109,7 +110,9 @@ public class CourseController {
             return "error/404";
         }
 
-        List<Subject> subjects = pkg.get().getPackageSubjects().stream().map(x -> x.getSubject())
+        List<Subject> subjects = pkg.get().getPackageSubjects().stream()
+                .map(PackageSubject::getSubject)
+                .filter(subject -> Boolean.TRUE.equals(subject.getIsActive()))
                 .collect(Collectors.toList());
         model.addAttribute("subjects", subjects);
         model.addAttribute("pkg", pkg.get());
