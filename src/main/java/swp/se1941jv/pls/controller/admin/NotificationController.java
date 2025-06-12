@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import swp.se1941jv.pls.entity.Notification;
-import swp.se1941jv.pls.entity.User; // Cần cho populateFormModelAttributes
-import swp.se1941jv.pls.entity.Package; // Cần cho populateFormModelAttributes
-import swp.se1941jv.pls.entity.Subject; // Cần cho populateFormModelAttributes
+import swp.se1941jv.pls.entity.User; 
+import swp.se1941jv.pls.entity.Package; 
+import swp.se1941jv.pls.entity.Subject; 
 import swp.se1941jv.pls.service.NotificationService;
 
 import java.util.Collections;
@@ -42,8 +42,8 @@ public class NotificationController {
         model.addAttribute("pageTitle", "Tạo thông báo mới");
         populateFormModelAttributes(model);
 
-        // Dùng các thuộc tính riêng lẻ cho form tạo mới
-        model.addAttribute("isEditMode", false); // Đánh dấu đây không phải là form edit
+       
+        model.addAttribute("isEditMode", false); 
         model.addAttribute("title", "");
         model.addAttribute("content", "");
         model.addAttribute("link", "");
@@ -51,7 +51,7 @@ public class NotificationController {
         model.addAttribute("selectedTargetType", "");
         model.addAttribute("selectedTargetValues", Collections.emptyList());
         
-        model.addAttribute("formAction", "/admin/notification/create"); // Action cho form tạo
+        model.addAttribute("formAction", "/admin/notification/create"); 
         model.addAttribute("contentPage", "form_content.jsp");
         return "admin/notification/show";
     }
@@ -106,7 +106,7 @@ public class NotificationController {
         model.addAttribute("pageTitle", "Danh sách thông báo");
 
         try {
-            Sort sort = Sort.by(Sort.Direction.DESC, "notificationId"); // Hoặc "createdAt"
+            Sort sort = Sort.by(Sort.Direction.DESC, "notificationId"); 
             Pageable pageable = PageRequest.of(page, size, sort);
             Page<Notification> notificationPage = notificationService.getAllNotificationsPageable(keyword, filterTargetType, pageable);
 
@@ -136,17 +136,17 @@ public class NotificationController {
                 model.addAttribute("pageTitle", "Sửa thông báo");
                 populateFormModelAttributes(model);
                 Notification notification = notificationOpt.get();
-                model.addAttribute("isEditMode", true); // Đánh dấu đây là form edit
+                model.addAttribute("isEditMode", true); 
                 model.addAttribute("notificationId", notification.getNotificationId());
                 model.addAttribute("title", notification.getTitle());
                 model.addAttribute("content", notification.getContent());
                 model.addAttribute("link", notification.getLink());
                 model.addAttribute("thumbnail", notification.getThumbnail());
-                model.addAttribute("selectedTargetType", notification.getTargetType()); // Hiển thị target type hiện tại
-                model.addAttribute("selectedTargetValues", Collections.emptyList()); // Không load lại target values cũ để chọn lại
+                model.addAttribute("selectedTargetType", notification.getTargetType()); 
+                model.addAttribute("selectedTargetValues", Collections.emptyList()); 
                 
-                model.addAttribute("formAction", "/admin/notification/edit/" + id); // Action cho form sửa
-                model.addAttribute("contentPage", "form_content.jsp"); // Dùng chung form
+                model.addAttribute("formAction", "/admin/notification/edit/" + id); 
+                model.addAttribute("contentPage", "form_content.jsp");
                 return "admin/notification/show";
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông báo với ID: " + id);
@@ -163,11 +163,11 @@ public class NotificationController {
     public String processUpdateNotification(@PathVariable("id") Long id,
                                          @RequestParam String title, @RequestParam String content,
                                          @RequestParam String link, @RequestParam(required = false) String thumbnail,
-                                         // Không nhận targetType, targetValue vì không cho sửa người nhận ở bản này
+                                         
                                          RedirectAttributes redirectAttributes, Model model) {
         logger.info("Processing update for notification ID: {}", id);
 
-        // --- Validation (chỉ cho các trường được phép sửa) ---
+        
         if (title == null || title.trim().isEmpty()) model.addAttribute("errorMessage", "Tiêu đề không được để trống!");
         else if (content == null || content.trim().isEmpty()) model.addAttribute("errorMessage", "Nội dung không được để trống!");
         else if (link == null || link.trim().isEmpty()) model.addAttribute("errorMessage", "Link không được để trống!");
@@ -207,7 +207,7 @@ public class NotificationController {
         try {
             notificationService.deleteNotificationById(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa thông báo thành công!");
-        } catch (IllegalArgumentException ex) { // Ví dụ: ID không tìm thấy từ service
+        } catch (IllegalArgumentException ex) { 
              logger.warn("Error deleting notification ID {}: {}", id, ex.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         } 
@@ -218,9 +218,9 @@ public class NotificationController {
         return "redirect:/admin/notification/show";
     }
 
-    // --- Helper Methods ---
+   
     private void populateFormModelAttributes(Model model) {
-        String formErrorAccumulator = ""; // Để gom các thông báo lỗi nếu có
+        String formErrorAccumulator = ""; 
 
         try {
             List<User> users = notificationService.getTargetableUsersForForm();
@@ -228,7 +228,7 @@ public class NotificationController {
             logger.debug("Populated 'allUsers' with {} entries for notification form.", users.size());
         } catch (Exception e) {
             logger.error("Error populating users for notification form", e);
-            model.addAttribute("allUsers", Collections.emptyList()); // Truyền danh sách rỗng nếu lỗi
+            model.addAttribute("allUsers", Collections.emptyList()); 
             formErrorAccumulator += "Lỗi khi tải danh sách Người dùng. ";
         }
 

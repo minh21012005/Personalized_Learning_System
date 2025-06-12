@@ -51,4 +51,10 @@ public abstract class BaseEntity {
     public void preUpdate() {
         this.userUpdated = SecurityUtils.getCurrentUserId();
     }
+
+    public java.util.Date getCreatedAtAsUtilDate() {
+        if (this.createdAt == null)
+            return null;
+        return java.sql.Timestamp.valueOf(this.createdAt);
+    }
 }
