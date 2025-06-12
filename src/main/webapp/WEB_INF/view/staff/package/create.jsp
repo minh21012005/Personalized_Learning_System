@@ -212,7 +212,7 @@
                             </select>
                             <c:if test="${empty subjects}">
                                 <div class="text-muted text-center placeholder-message">
-                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách mon học đang trống
+                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách môn học đang trống
                                 </div>
                             </c:if>
                             <c:if test="${not empty subjectsError}">

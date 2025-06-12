@@ -61,7 +61,8 @@ public class PackageService {
     }
 
     public boolean existsByName(String name) {
-        return this.packageRepository.existsByName(name);
+        name = name.trim();
+        return this.packageRepository.existsByNameIgnoreCase(name);
     }
 
     @Transactional

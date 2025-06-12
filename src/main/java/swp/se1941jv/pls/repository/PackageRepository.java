@@ -18,15 +18,14 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
 
     boolean existsByName(String name);
 
+    boolean existsByNameIgnoreCase(String name);
+
     Page<Package> findByNameContainingIgnoreCaseAndStatus(String name, PackageStatus status, Pageable pageable);
 
-    // Lọc theo keyword (không có isActive)
     Page<Package> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    // Lọc theo isActive (không có keyword)
     Page<Package> findByStatus(PackageStatus status, Pageable pageable);
 
-    // Trả về tất cả (không lọc theo keyword hoặc isActive)
     Page<Package> findAll(Pageable pageable);
 
     Page<Package> findByGradeGradeIdAndStatus(Long gradeId, PackageStatus status, Pageable pageable);
