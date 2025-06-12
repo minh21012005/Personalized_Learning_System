@@ -33,5 +33,10 @@
                         <i class="bi bi-journal-text me-2"></i> Môn học
                     </a>
                 </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white" href="/admin/questions" style="padding: 8px 15px;">
+                        <i class="bi bi-question-square me-2"></i>  Câu hỏi
+                    </a>
+                </li>
             </ul>
         </div>

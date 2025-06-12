@@ -22,7 +22,7 @@ public class QuestionBank extends BaseEntity {
     Long questionId;
 
     @ManyToOne
-    @JoinColumn(name = "lession_id")
+    @JoinColumn(name = "lesson_id")
     Lesson lesson;
 
     @ManyToOne
@@ -69,6 +69,9 @@ public class QuestionBank extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "status_id")
     QuestionStatus status;
+
+    @OneToMany(mappedBy = "question")
+    List<QuestionTest> questionTests;
 
 
 }

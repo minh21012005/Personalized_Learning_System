@@ -5,8 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PLS - Quản lý câu hỏi</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>PLS - Phê duyệt câu hỏi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -100,18 +99,6 @@
             width: 15%;
         }
 
-        /*.pagination-container {*/
-        /*    position: fixed;*/
-        /*    bottom: 60px;*/
-        /*    left: 270px;*/
-        /*    right: 20px;*/
-        /*    background-color: #f8f9fa;*/
-        /*    padding: 10px 20px;*/
-        /*    z-index: 1000;*/
-        /*    display: flex;*/
-        /*    justify-content: center;*/
-        /*    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);*/
-        /*}*/
         .pagination .page-item {
             margin: 0 2px;
         }
@@ -209,9 +196,10 @@
 
             MathJax.typeset();
 
-            // Confirm delete action
-            $('.delete-btn').click(function (e) {
-                if (!confirm('Bạn có chắc muốn xóa câu hỏi này?')) {
+            // Confirm approve/reject actions
+            $('.approve-btn, .reject-btn').click(function (e) {
+                var action = $(this).hasClass('approve-btn') ? 'phê duyệt' : 'từ chối';
+                if (!confirm('Bạn có chắc muốn ' + action + ' câu hỏi này?')) {
                     e.preventDefault();
                 }
             });
@@ -221,14 +209,14 @@
 <body>
 <!-- Header -->
 <header>
-    <jsp:include page="../layout_staff/header.jsp"/>
+    <jsp:include page="../layout/header.jsp"/>
 </header>
 
 <!-- Main Container for Sidebar and Content -->
 <div class="main-container">
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
-        <jsp:include page="../layout_staff/sidebar.jsp"/>
+        <jsp:include page="../layout/sidebar.jsp"/>
     </div>
 
     <!-- Main Content Area -->
@@ -236,13 +224,11 @@
         <main>
             <div class="container-fluid">
                 <div class="mt-4">
-                    <div>
-                        <a href="/staff/questions/create-question" class="btn btn-primary">Tạo câu hỏi</a>
-                    </div>
+                    <h2>Phê duyệt câu hỏi</h2>
                     <div class="row col-12 mx-auto mt-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <!-- Filters -->
-                            <form action="/staff/questions" method="get"
+                            <form action="/admin/questions" method="get"
                                   class="d-flex align-items-center gap-2 flex-wrap">
                                 <label for="gradeId" class="mb-0 fw-bold me-2">Khối:</label>
                                 <select name="gradeId" id="gradeId" class="form-select form-select-sm w-auto">
@@ -337,21 +323,19 @@
                                         </c:choose>
                                     </td>
                                     <td class="text-center col-action">
-                                        <div class="gap-2">
-                                            <div class="mt-2"><a href="/staff/questions/${question.questionId}"
-                                                                 class="btn btn-success btn-sm">Chi tiết</a></div>
-                                            <c:if test="${question.status.statusName != 'Accepted'}">
-                                                <div class="mt-2"><a
-                                                        href="/staff/questions/update/${question.questionId}"
-                                                        class="btn btn-warning btn-sm">Cập nhật</a></div>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <div><a href="/admin/questions/${question.questionId}"
+                                                    class="btn btn-success btn-sm">Chi tiết</a><div>
 
-                                            </c:if>
                                             <c:if test="${question.status.statusName == 'Pending'}">
-                                                <div class="mt-2">
-                                                    <a href="/staff/questions/delete/${question.questionId}"
-                                                       class="btn btn-danger btn-sm delete-btn">Xóa</a>
-                                                </div>
+                                                <form action="/admin/questions/approve/${question.questionId}" method="post" style="display:block;margin-top: 5px">
 
+                                                    <button type="submit" class="btn btn-primary btn-sm approve-btn">Phê duyệt</button>
+                                                </form>
+                                                <form action="/admin/questions/reject/${question.questionId}" method="post" style="display:block; margin-top: 5px">
+
+                                                    <button type="submit" class="btn btn-danger btn-sm reject-btn">Từ chối</button>
+                                                </form>
                                             </c:if>
                                         </div>
                                     </td>
@@ -382,22 +366,16 @@
                             <c:if test="${totalPages > 1}">
                                 <nav aria-label="Page navigation">
                                     <ul class="pagination justify-content-center mb-0">
-                                        <!-- First Page -->
                                         <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                            <a class="page-link" href="/staff/questions?page=1${queryString}"
-                                               aria-label="First">
+                                            <a class="page-link" href="/admin/questions?page=1${queryString}" aria-label="First">
                                                 <span aria-hidden="true">««</span>
                                             </a>
                                         </li>
-                                        <!-- Previous Page -->
                                         <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                            <a class="page-link"
-                                               href="/staff/questions?page=${currentPage - 1}${queryString}"
-                                               aria-label="Previous">
+                                            <a class="page-link" href="/admin/questions?page=${currentPage - 1}${queryString}" aria-label="Previous">
                                                 <span aria-hidden="true">«</span>
                                             </a>
                                         </li>
-                                        <!-- Page Numbers (current page ± 2) -->
                                         <c:set var="startPage" value="${currentPage - 2}"/>
                                         <c:set var="endPage" value="${currentPage + 2}"/>
                                         <c:if test="${startPage < 1}">
@@ -410,23 +388,16 @@
                                         </c:if>
                                         <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
                                             <li class="page-item ${loop.index == currentPage ? 'active' : ''}">
-                                                <a class="page-link"
-                                                   href="/staff/questions?page=${loop.index}${queryString}">${loop.index}</a>
+                                                <a class="page-link" href="/admin/questions?page=${loop.index}${queryString}">${loop.index}</a>
                                             </li>
                                         </c:forEach>
-                                        <!-- Next Page -->
                                         <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                            <a class="page-link"
-                                               href="/staff/questions?page=${currentPage + 1}${queryString}"
-                                               aria-label="Next">
+                                            <a class="page-link" href="/admin/questions?page=${currentPage + 1}${queryString}" aria-label="Next">
                                                 <span aria-hidden="true">»</span>
                                             </a>
                                         </li>
-                                        <!-- Last Page -->
                                         <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                            <a class="page-link"
-                                               href="/staff/questions?page=${totalPages}${queryString}"
-                                               aria-label="Last">
+                                            <a class="page-link" href="/admin/questions?page=${totalPages}${queryString}" aria-label="Last">
                                                 <span aria-hidden="true">»»</span>
                                             </a>
                                         </li>
@@ -443,7 +414,7 @@
 
 <!-- Footer -->
 <footer>
-    <jsp:include page="../layout_staff/footer.jsp"/>
+    <jsp:include page="../layout/footer.jsp"/>
 </footer>
 </body>
 </html>

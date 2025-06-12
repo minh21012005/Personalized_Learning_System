@@ -2,6 +2,7 @@ package swp.se1941jv.pls.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -56,6 +57,7 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                         .permitAll()
@@ -70,7 +72,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/invite/confirm").hasRole("STUDENT")
 
                         .requestMatchers("/admin/**")
-                        .hasRole("ADMIN")
+                        .hasAnyRole("ADMIN","CONTENT_MANAGER")
 
                         .requestMatchers("/student/**")
                         .hasAnyRole("STUDENT", "ADMIN")
@@ -101,7 +103,7 @@ public class SecurityConfiguration {
                         .successHandler(authenticationSuccessHandler())
                         .permitAll())
 
-                .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny"));
+                .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny")) ;
 
         return http.build();
     }
