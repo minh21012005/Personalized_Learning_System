@@ -532,7 +532,7 @@ public class QuestionController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('STAFF')")
+    @PreAuthorize("hasAnyRole('STAFF','CONTENT_MANAGER')")
     @GetMapping("/staff/questions/delete/{id}")
     public String deleteQuestion(@PathVariable Long id, Model model) {
         try {
@@ -544,7 +544,6 @@ public class QuestionController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('STAFF')")
     @GetMapping("/api/subjects-by-grade/{gradeId}")
     @ResponseBody
     public List<SubjectResponseDTO> getSubjectsByGrade(@PathVariable Long gradeId) {
@@ -557,7 +556,6 @@ public class QuestionController {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAnyRole('STAFF')")
     @GetMapping("/api/chapters-by-subject/{subjectId}")
     @ResponseBody
     public List<ChapterResponseDTO> getChaptersBySubject(@PathVariable Long subjectId) {
@@ -570,7 +568,6 @@ public class QuestionController {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAnyRole('STAFF')")
     @GetMapping("/api/lessons-by-chapter/{chapterId}")
     @ResponseBody
     public List<LessonResponseDTO> getLessonsByChapter(@PathVariable Long chapterId) {
@@ -583,7 +580,6 @@ public class QuestionController {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAnyRole('STAFF')")
     @GetMapping("/api/grades")
     @ResponseBody
     public List<GradeResponseDTO> getAllGrades() {

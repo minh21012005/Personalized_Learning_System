@@ -17,6 +17,7 @@ import swp.se1941jv.pls.repository.*;
 import jakarta.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -131,6 +132,7 @@ public class QuestionService {
         return null;
     }
 
+
     public Page<QuestionBank> findQuestionsByCreatorAndFilters(
             Long creatorUserId,
             Long gradeId,
@@ -143,8 +145,9 @@ public class QuestionService {
 
         Specification<QuestionBank> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("userCreated"), creatorUserId));
-
+            if (creatorUserId != null) {
+                predicates.add(cb.equal(root.get("userCreated"), creatorUserId));
+            }
             if (gradeId != null) {
                 predicates.add(cb.equal(root.get("grade").get("gradeId"), gradeId));
             }
@@ -258,6 +261,10 @@ public class QuestionService {
             throw new RuntimeException("Lỗi khi chuyển đổi đáp án sang JSON.", e);
         }
 
+        QuestionStatus pendingStatus = questionStatusRepository.findById(PENDING_STATUS_ID)
+                .orElseThrow(() -> new RuntimeException("Trạng thái Pending không tìm thấy."));
+        question.setStatus(pendingStatus);
+
         // Save the updated question
         return questionBankRepository.save(question);
     }
@@ -273,6 +280,27 @@ public class QuestionService {
             throw new IllegalStateException("Chỉ có thể xóa câu hỏi ở trạng thái Đang xử lý.");
         }
         questionBankRepository.delete(question);
+    }
+
+    public List<QuestionBank> getRandomQuestions(Long subjectId, List<Long> chapterIds, List<Long> lessonIds, List<Long> levelIds, int count) throws Exception {
+        Specification<QuestionBank> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(cb.equal(root.get("subject").get("subjectId"), subjectId));
+            if (!chapterIds.isEmpty()) {
+                predicates.add(root.get("chapter").get("chapterId").in(chapterIds));
+            }
+            if (!lessonIds.isEmpty()) {
+                predicates.add(root.get("lesson").get("lessonId").in(lessonIds));
+            }
+            if (!levelIds.isEmpty()) {
+                predicates.add(root.get("levelQuestion").get("levelQuestionId").in(levelIds));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        List<QuestionBank> questions = questionBankRepository.findAll(spec);
+        Collections.shuffle(questions);
+        return questions.subList(0, Math.min(count, questions.size()));
     }
 
 }

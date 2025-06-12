@@ -70,5 +70,8 @@ public class QuestionBank extends BaseEntity {
     @JoinColumn(name = "status_id")
     QuestionStatus status;
 
+    @OneToMany(mappedBy = "question")
+    List<QuestionTest> questionTests;
+
 
 }

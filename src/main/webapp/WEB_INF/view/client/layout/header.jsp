@@ -365,7 +365,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#">Dịch vụ</a>
+                    <a href="/practice/start">Luyện Tập</a>
                 </li>
 
                 <li>
