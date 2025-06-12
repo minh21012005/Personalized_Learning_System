@@ -67,10 +67,77 @@
                     .table th,
                     .table td {
                         vertical-align: middle;
+                        padding: 8px;
+                        /* Reduced padding for a tighter table */
+                        font-size: 14px;
+                        /* Adjusted font size for better readability */
+                    }
+
+                    .table th {
+                        background-color: #343a40;
+                        /* Darker header background */
+                        color: #fff;
+                        border-color: #454d55;
+                        /* Matching border color */
+                    }
+
+                    .table td {
+                        border-color: #dee2e6;
+                        /* Lighter border for cells */
+                    }
+
+                    .table-hover tbody tr:hover {
+                        background-color: #f8f9fa;
+                        /* Subtle hover effect */
                     }
 
                     .btn-lg {
-                        padding: 0.5rem 1.2rem;
+                        padding: 0.25rem 0.5rem;
+                        /* Reduced padding for smaller buttons */
+                        font-size: 1rem;
+                        /* Smaller font size */
+                    }
+
+                    .pagination .page-item .page-link {
+                        color: #000;
+                        /* Default text color */
+                        background-color: #e9ecef;
+                        /* Gray background like in the image */
+                        border: 1px solid #ddd;
+                        /* Subtle border */
+                        padding: 0.25rem 0.5rem;
+                        /* Match button size */
+                    }
+
+                    .pagination .page-item.active .page-link {
+                        background-color: #6c757d;
+                        /* Gray active button like in the image */
+                        border-color: #6c757d;
+                        color: #fff;
+                    }
+
+                    .pagination .page-item.disabled .page-link {
+                        background-color: #e9ecef;
+                        /* Gray for disabled state */
+                        color: #6c757d;
+                    }
+
+                    .description {
+                        max-width: 270px;
+                        /* Reduced width for description */
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .custom-btn {
+                        font-size: 12px;
+                        /* Nhỏ lại chữ */
+                        padding: 2px 8px;
+                        /* Giảm khoảng cách trên/dưới và trái/phải */
+                        line-height: 1.2;
+                        border-radius: 3px;
+                        /* Bo góc giống hình */
                     }
                 </style>
             </head>
@@ -90,13 +157,13 @@
                 <div class="content">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="mb-0">Danh sách gói học</h3>
-                        <a href="/admin/package/create" class="btn btn-primary btn-lg">
+                        <a href="/staff/package/create" class="btn btn-primary btn-lg">
                             <i class="bi bi-plus-lg"></i> Thêm mới
                         </a>
                     </div>
 
                     <!-- Search + Filter Form -->
-                    <form action="/admin/package" method="get" class="row g-2 align-items-center mb-4">
+                    <form action="/staff/package" method="get" class="row g-2 align-items-center mb-4">
                         <div class="col-md-4">
                             <input type="text" id="keyword" name="keyword" class="form-control"
                                 placeholder="Tìm theo tên" value="${param.keyword}">
@@ -128,7 +195,7 @@
 
                         <div class="col-auto">
                             <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Tìm</button>
-                            <a href="/admin/package" class="btn btn-secondary">Xóa lọc</a>
+                            <a href="/staff/package" class="btn btn-secondary">Xóa lọc</a>
                         </div>
                     </form>
 
@@ -163,7 +230,7 @@
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td>
+                                                <td class="description">
                                                     <c:choose>
                                                         <c:when test="${fn:length(pkg.description) > 100}">
                                                             ${fn:substring(pkg.description, 0, 100)}...
@@ -186,16 +253,18 @@
 
 
                                                 <td class="text-center">
-                                                    <a href="/admin/package/view/${pkg.packageId}"
-                                                        class="btn btn-success btn-sm"><i class="bi bi-eye"></i> Xem
-                                                        chi
-                                                        tiết</a>
-                                                    <a href="/admin/package/update/${pkg.packageId}"
-                                                        class="btn btn-warning btn-sm mx-1"><i
-                                                            class="bi bi-pencil-square"></i>
-                                                        Sửa</a>
-
+                                                    <div class="d-flex justify-content-center gap-2">
+                                                        <a href="/staff/package/view/${pkg.packageId}"
+                                                            class="btn btn-success btn-sm custom-btn">
+                                                            <i class="bi bi-eye"></i> Chi tiết
+                                                        </a>
+                                                        <a href="/staff/package/update/${pkg.packageId}"
+                                                            class="btn btn-warning btn-sm custom-btn">
+                                                            <i class="bi bi-pencil-square"></i> Sửa
+                                                        </a>
+                                                    </div>
                                                 </td>
+
                                             </tr>
                                         </c:forEach>
                                     </c:when>
@@ -215,18 +284,18 @@
                             <ul class="pagination justify-content-center">
                                 <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                        href="/admin/package?page=${currentPage - 1}&keyword=${param.keyword}&isActive=${param.isActive}&gradeId=${param.gradeId}">«</a>
+                                        href="/staff/package?page=${currentPage - 1}&keyword=${param.keyword}&isActive=${param.isActive}&gradeId=${param.gradeId}">«</a>
                                 </li>
                                 <c:forEach begin="0" end="${totalPages - 1}" var="i">
                                     <li class="page-item ${currentPage == i ? 'active' : ''}">
                                         <a class="page-link"
-                                            href="/admin/package?page=${i}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">${i
+                                            href="/staff/package?page=${i}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">${i
                                             + 1}</a>
                                     </li>
                                 </c:forEach>
                                 <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                        href="/admin/package?page=${currentPage + 1}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">»</a>
+                                        href="/staff/package?page=${currentPage + 1}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">»</a>
                                 </li>
                             </ul>
                         </nav>

@@ -22,6 +22,16 @@
                     right: 0;
                     height: 60px;
                     background-color: #212529;
+                    z-index: 1000;
+                    /* Thêm z-index để đảm bảo header nổi trên cùng */
+                }
+
+                .content {
+                    margin-left: 250px;
+                    padding: 20px;
+                    padding-top: 30px;
+                    /* Tăng để chừa không gian header (60px) + thêm chút khoảng cách */
+                    padding-bottom: 100px;
                 }
 
                 .sidebar {
@@ -34,10 +44,7 @@
                     color: #fff;
                 }
 
-                .content {
-                    margin-left: 250px;
-                    padding: 20px;
-                }
+
 
                 footer {
                     background-color: #212529;
@@ -49,6 +56,7 @@
                     bottom: 0;
                     left: 0;
                     right: 0;
+
                 }
 
                 .package-title {

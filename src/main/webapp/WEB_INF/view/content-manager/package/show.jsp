@@ -77,7 +77,7 @@
 
                     <!-- Filter Form -->
                     <form action="/manager/package" method="get" class="row g-2 mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên"
                                 value="${param.keyword}">
                         </div>
@@ -169,20 +169,7 @@
                                                 <td class="text-center">
                                                     <a href="/manager/package/view/${pkg.packageId}"
                                                         class="btn btn-success btn-sm"><i class="bi bi-eye"></i> Xem</a>
-                                                    <c:if test="${pkg.status == 'APPROVED'}">
-                                                        <form action="/manager/package/edit/${pkg.packageId}"
-                                                            method="post" style="display:inline;">
 
-                                                            <input type="hidden" name="${_csrf.parameterName}"
-                                                                value="${_csrf.token}" />
-
-                                                            <button type="submit" class="btn btn-warning btn-sm mx-1">
-                                                                <i
-                                                                    class="bi ${pkg.active ? 'bi-toggle-off' : 'bi-toggle-on'}"></i>
-                                                                ${pkg.active ? 'Ngừng bán' : 'Tiếp tục bán'}
-                                                            </button>
-                                                        </form>
-                                                    </c:if>
 
                                                 </td>
                                             </tr>

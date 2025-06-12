@@ -122,7 +122,7 @@
                                     ${error}
                                 </div>
                             </c:if>
-                            <form:form method="post" action="/admin/package/create" modelAttribute="newPackage"
+                            <form:form method="post" action="/staff/package/create" modelAttribute="newPackage"
                                 enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <c:set var="errorName">
@@ -245,7 +245,7 @@
 
 
                         <button type="submit" class="btn btn-primary">Lưu</button>
-                        <a href="/admin/package" class="btn btn-secondary">Hủy</a>
+                        <a href="/staff/package" class="btn btn-secondary">Hủy</a>
                         </form:form>
                     </div>
                 </div>

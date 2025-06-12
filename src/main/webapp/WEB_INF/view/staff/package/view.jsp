@@ -50,7 +50,7 @@
                     padding: 20px;
                     flex: 1;
                     min-height: calc(100vh - 100px);
-                    padding-bottom: 70px;
+                    padding-bottom: 120px;
                 }
 
                 .custom-container {
@@ -196,11 +196,11 @@
                             <div><strong>Số lượng người đăng kí:</strong> ${count}</div>
                         </div>
                         <!-- Filter -->
-                        <form action="/admin/package/view/${pkg.packageId}" method="get" class="d-flex mb-3">
+                        <form action="/staff/package/view/${pkg.packageId}" method="get" class="d-flex mb-3">
                             <input type="text" name="keyword" class="form-control me-2"
                                 placeholder="Tìm kiếm theo tên môn học" value="${keyword}">
                             <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                            <a href="/admin/package/view/${pkg.packageId}" class="btn btn-secondary ms-2">Xóa bộ lọc</a>
+                            <a href="/staff/package/view/${pkg.packageId}" class="btn btn-secondary ms-2">Xóa bộ lọc</a>
                         </form>
                         <!-- Table -->
                         <table class="table table-bordered table-hover align-middle text-center">
@@ -233,7 +233,7 @@
                         </table>
 
                         <!-- Back Button -->
-                        <a href="/admin/package" class="btn btn-back">Quay lại</a>
+                        <a href="/staff/package" class="btn btn-back">Quay lại</a>
                     </c:if>
                 </div>
             </div>

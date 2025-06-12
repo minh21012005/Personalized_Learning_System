@@ -11,6 +11,8 @@
                 <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
                     rel="stylesheet">
+                <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
                 <!-- head: below existing links -->
                 <link rel="stylesheet"
                     href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@4.0.1/dist/css/multi-select-tag.min.css">
@@ -92,6 +94,16 @@
                         /* Approximate footer height */
                     }
                 </style>
+                <script>
+                    $(document).ready(() => {
+                        const avatarFile = $("#image");
+                        avatarFile.change(function (e) {
+                            const imgURL = URL.createObjectURL(e.target.files[0]);
+                            $("#imagePreview").attr("src", imgURL);
+                            $("#imagePreview").css({ "display": "block" });
+                        });
+                    });
+                </script>
             </head>
 
 
@@ -115,14 +127,14 @@
                     <div class="container mt-5">
                         <div class="row">
                             <div class="col-md-6 col-12 mx-auto">
-                                <h3>Tạo mới gói </h3>
+                                <h3>Cập nhật gói </h3>
                             </div>
                             <c:if test="${not empty error}">
                                 <div class="alert alert-danger" role="alert">
                                     ${error}
                                 </div>
                             </c:if>
-                            <form:form method="post" action="/admin/package/update" modelAttribute="pkg"
+                            <form:form method="post" action="/staff/package/update" modelAttribute="pkg"
                                 enctype="multipart/form-data">
                                 <form:hidden path="packageId" value="${pkg.packageId}" />
                                 <div class="mb-3">
@@ -221,17 +233,22 @@
                             <c:set var="errorImage">
                                 <form:errors path="image" cssClass="invalid-feedback" />
                             </c:set>
-                            <label for="image" class="form-label">Avatar (bắt buộc):</label>
+                            <label for="image" class="form-label">Anh (bắt buộc):</label>
                             <input class="form-control ${not empty errorImage ? 'is-invalid' : ''}" type="file"
-                                id="image" name="file" accept=".png, .jpg, .jpeg" required />
+                                id="image" name="file" accept=".png, .jpg, .jpeg" />
                             ${errorImage}
                         </div>
-
-
-
-
                         <div class="col-12 mt-3">
-                            <img style="max-height: 250px; display: none;" alt="Image not found" id="image" />
+                            <c:choose>
+                                <c:when test="${not empty pkg.image}">
+                                    <img style="max-height: 250px; display: block" alt="Image not found"
+                                        id="imagePreview" src="/img/package/${pkg.image}" />
+                                </c:when>
+                                <c:otherwise>
+                                    <img style="max-height: 250px; display: none" alt="Image not found"
+                                        id="imagePreview" src="#" />
+                                </c:otherwise>
+                            </c:choose>
                         </div>
 
                         <form:hidden path="status" value="PENDING" />
@@ -242,7 +259,7 @@
 
 
                         <button type="submit" class="btn btn-primary">Lưu</button>
-                        <a href="/admin/package" class="btn btn-secondary">Hủy</a>
+                        <a href="/staff/package" class="btn btn-secondary">Hủy</a>
                         </form:form>
                     </div>
                 </div>
