@@ -19,6 +19,8 @@ public class LessonResponseDTO {
 
     String videoSrc;
 
+    String videoTime;
+
     Boolean status;
 
     List<String> materials;

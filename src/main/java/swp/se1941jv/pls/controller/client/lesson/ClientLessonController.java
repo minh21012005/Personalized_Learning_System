@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
@@ -99,7 +100,7 @@ public class ClientLessonController {
     @ResponseBody
     public ChapterResponseDTO getChapterDetails(
             @PathVariable("chapterId") Long chapterId,
-            @PathVariable("subjectId") Long subjectId) {
+            @RequestParam("subjectId") Long subjectId) {
         try {
             return chapterService.getChapterResponseById(chapterId, subjectId);
         } catch (ChapterNotFoundException | InvalidChapterException e) {

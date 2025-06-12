@@ -89,6 +89,21 @@ public class SubjectService {
         return this.subjectRepository.findById(id);
     }
 
+    public List<SubjectResponseDTO> getSubjectsResponse() {
+        List<Subject> subjects = subjectRepository.findByIsActiveTrue();
+        if (subjects.isEmpty()) {
+            throw new SubjectNotFoundException("Không có môn học nào tồn tại");
+        }
+        return subjects.stream()
+                .map(subject -> SubjectResponseDTO.builder()
+                        .subjectId(subject.getSubjectId())
+                        .subjectName(subject.getSubjectName())
+                        .subjectDescription(subject.getSubjectDescription())
+                        .subjectImage(subject.getSubjectImage())
+                        .build())
+                .toList();
+    }
+
     // Phương thức mới
     public SubjectResponseDTO getSubjectResponseById(Long subjectId) {
         Subject subject = getSubjectById(subjectId).orElse(null);

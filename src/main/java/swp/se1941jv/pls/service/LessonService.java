@@ -124,8 +124,10 @@ public class LessonService {
                         .lessonId(lesson.getLessonId())
                         .lessonName(lesson.getLessonName())
                         .lessonDescription(lesson.getLessonDescription())
+                        .videoSrc(lesson.getVideoSrc())
+                        .videoTime(lesson.getVideoTime())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Phương thức hỗ trợ (giả định từ phản hồi trước)
@@ -158,7 +160,7 @@ public class LessonService {
                 .lessonName(lesson.getLessonName())
                 .lessonDescription(lesson.getLessonDescription())
                 .videoSrc(lesson.getVideoSrc())
-                .status(lesson.getStatus())
+                .videoTime(lesson.getVideoTime())
                 .materials(materials)
                 .build();
     }

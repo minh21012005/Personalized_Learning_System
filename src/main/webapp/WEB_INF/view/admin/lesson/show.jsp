@@ -150,6 +150,7 @@
                                     </th>
                                     <th scope="col" class="text-center col-2">Tên bài học</th>
                                     <th scope="col" class="text-center col-2">Link video</th>
+                                    <th scope="col" class="text-center col-2">Thời lượng</th>
                                     <th scope="col" class="text-center col-2">Trạng thái</th>
                                     <th scope="col" class="text-center col-1">Thao tác</th>
                                 </tr>
@@ -170,6 +171,7 @@
                                                     Xem video
                                                 </a>
                                             </td>
+                                            <td class="col-2 text-center">${lesson.videoTime}</td>
 
                                             <td class="text-center col-2">
                                                 <c:choose>

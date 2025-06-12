@@ -1,10 +1,15 @@
 package swp.se1941jv.pls.controller.admin;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.entity.Chapter;
@@ -16,12 +21,13 @@ import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.FileUploadService;
 import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 @RequestMapping("/admin/subject/{subjectId}/chapters/{chapterId}/lessons")
@@ -31,6 +37,8 @@ public class LessonController {
     private final ChapterService chapterService;
     private final LessonService lessonService;
     private final FileUploadService fileUploadService;
+    private final String YOUTUBE_API_KEY = "AIzaSyAa9qz9xeYVePrsXLVIJJuA3qAhW4YXwqY"; // Thay bằng API Key của bạn
+    private final String YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={videoId}&key={apiKey}";
 
     public LessonController(SubjectService subjectService, ChapterService chapterService, LessonService lessonService, FileUploadService fileUploadService) {
         this.subjectService = subjectService;
@@ -39,14 +47,6 @@ public class LessonController {
         this.fileUploadService = fileUploadService;
     }
 
-    /**
-     * Hiển thị trang danh sách bài học của một chương.
-     *
-     * @param subjectId ID của môn học
-     * @param chapterId ID của chương
-     * @param model     Model để truyền dữ liệu đến JSP
-     * @return Tên view JSP hoặc redirect
-     */
     @GetMapping
     public String showLessons(
             @PathVariable("subjectId") Long subjectId,
@@ -64,16 +64,6 @@ public class LessonController {
         return "admin/lesson/show";
     }
 
-    /**
-     * Hiển thị form tạo hoặc cập nhật bài học.
-     *
-     * @param subjectId ID của môn học
-     * @param chapterId ID của chương
-     * @param lessonId  ID của bài học (tùy chọn, để chỉnh sửa)
-     * @param model     Model để truyền dữ liệu đến JSP
-     * @param redirectAttributes Để truyền thông báo lỗi
-     * @return Tên view JSP hoặc redirect
-     */
     @GetMapping("/save")
     public String showSaveLessonForm(
             @PathVariable("subjectId") Long subjectId,
@@ -87,7 +77,6 @@ public class LessonController {
             return "error/404";
         }
 
-        // Kiểm tra nếu chapter không thuộc về subject
         if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
             return "error/404";
         }
@@ -98,9 +87,6 @@ public class LessonController {
             redirectAttributes.addFlashAttribute("errorMessage", "Bài học không tồn tại");
             return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
-
-
-
 
         List<String> materialsTemp = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
@@ -119,19 +105,6 @@ public class LessonController {
         return "admin/lesson/save";
     }
 
-    /**
-     * Xử lý lưu hoặc cập nhật bài học.
-     *
-     * @param subjectId         ID của môn học
-     * @param chapterId         ID của chương
-     * @param lesson            Bài học cần lưu
-     * @param bindingResult     Kết quả validation
-     * @param materialFiles     Các file tài liệu được tải lên
-     * @param materialsTemp     Danh sách tên file tài liệu hiện có
-     * @param redirectAttributes Để truyền thông báo
-     * @param model             Model để truyền dữ liệu đến JSP
-     * @return Redirect hoặc tên view JSP
-     */
     @PostMapping("/save")
     public String handleSaveLesson(
             @PathVariable("subjectId") Long subjectId,
@@ -148,17 +121,42 @@ public class LessonController {
             return "error/404";
         }
 
-        // Kiểm tra nếu chapter không thuộc về subject
         if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
             return "error/404";
         }
 
-        // Khởi tạo danh sách materialsTemp nếu null
         if (materialsTemp == null) {
             materialsTemp = new ArrayList<>();
         }
 
-        // Xử lý file tải lên bằng FileUploadService
+        // Trích xuất VIDEO_ID từ videoSrc
+        String videoId = extractVideoId(lesson.getVideoSrc());
+        if (videoId == null) {
+            model.addAttribute("lesson", lesson);
+            model.addAttribute("chapter", chapter);
+            model.addAttribute("subject", subject);
+            model.addAttribute("isEdit", lesson.getLessonId() != null);
+            model.addAttribute("materialsTemp", materialsTemp);
+            bindingResult.rejectValue("videoSrc", "error.lesson", "Đường dẫn video không hợp lệ");
+            return "admin/lesson/save";
+        }
+
+        // Lấy thời lượng video từ YouTube API
+        String videoTime = getVideoDuration(videoId);
+        if (videoTime == null) {
+            model.addAttribute("lesson", lesson);
+            model.addAttribute("chapter", chapter);
+            model.addAttribute("subject", subject);
+            model.addAttribute("isEdit", lesson.getLessonId() != null);
+            model.addAttribute("materialsTemp", materialsTemp);
+            bindingResult.rejectValue("videoSrc", "error.lesson", "Không thể lấy thời lượng video. Video có thể là private hoặc không tồn tại.");
+            return "admin/lesson/save";
+        }
+
+        // Lưu thời lượng vào videoTime
+        lesson.setVideoTime(videoTime);
+
+        // Xử lý file tải lên
         List<String> savedFileNames = fileUploadService.handleSaveUploadFiles(materialFiles, "taiLieu");
         materialsTemp.addAll(savedFileNames);
 
@@ -190,16 +188,6 @@ public class LessonController {
         return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
     }
 
-
-    /**
-     * Cập nhật trạng thái của các bài học.
-     *
-     * @param subjectId         ID của môn học
-     * @param chapterId         ID của chương
-     * @param lessonIds         Danh sách ID của các bài học
-     * @param redirectAttributes Để truyền thông báo
-     * @return Redirect
-     */
     @PostMapping("/update-status")
     public String updateLessonsStatus(
             @PathVariable("subjectId") Long subjectId,
@@ -219,5 +207,56 @@ public class LessonController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
         }
         return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+    }
+
+    private String extractVideoId(String videoSrc) {
+        if (videoSrc == null || videoSrc.isEmpty()) {
+            return null;
+        }
+        // Regex để lấy VIDEO_ID từ youtube.com/embed/VIDEO_ID
+        Pattern pattern = Pattern.compile("youtube\\.com/embed/([a-zA-Z0-9_-]{11})");
+        Matcher matcher = pattern.matcher(videoSrc);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private String getVideoDuration(String videoId) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = YOUTUBE_API_URL.replace("{videoId}", videoId).replace("{apiKey}", YOUTUBE_API_KEY);
+            String response = restTemplate.getForObject(url, String.class);
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(response);
+            JsonNode items = jsonNode.get("items");
+
+            if (items == null || items.size() == 0) {
+                return null; // Video private, unlisted, hoặc không tồn tại
+            }
+
+            String duration = items.get(0).get("contentDetails").get("duration").asText();
+            // Chuyển PT#H#M#S thành định dạng như "1 tiếng 30 phút 45 giây"
+            Pattern pattern = Pattern.compile("PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?");
+            Matcher matcher = pattern.matcher(duration);
+            if (matcher.matches()) {
+                int hours = matcher.group(1) != null ? Integer.parseInt(matcher.group(1)) : 0;
+                int minutes = matcher.group(2) != null ? Integer.parseInt(matcher.group(2)) : 0;
+                int seconds = matcher.group(3) != null ? Integer.parseInt(matcher.group(3)) : 0;
+
+                StringBuilder formattedDuration = new StringBuilder();
+                if (hours > 0) {
+                    formattedDuration.append(hours).append(" tiếng ");
+                }
+                if (minutes > 0 || hours > 0) { // Hiển thị phút nếu có giờ hoặc phút
+                    formattedDuration.append(minutes).append(" phút ");
+                }
+                if (seconds > 0 || (hours == 0 && minutes == 0)) { // Hiển thị giây nếu có giây hoặc không có giờ/phút
+                    formattedDuration.append(seconds).append(" giây");
+                }
+                return formattedDuration.toString().trim();
+            }
+            return null;
+        } catch (Exception e) {
+            return null; // Lỗi API hoặc network
+        }
     }
 }
