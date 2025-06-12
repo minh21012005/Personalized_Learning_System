@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp.se1941jv.pls.entity.Package;
+import swp.se1941jv.pls.entity.PackageStatus;
+
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -16,26 +18,24 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
 
     boolean existsByName(String name);
 
-    // Lọc theo keyword và isActive
-    Page<Package> findByNameContainingIgnoreCaseAndActive(String name, boolean active, Pageable pageable);
+    boolean existsByNameIgnoreCase(String name);
 
-    // Lọc theo keyword (không có isActive)
+    Page<Package> findByNameContainingIgnoreCaseAndStatus(String name, PackageStatus status, Pageable pageable);
+
     Page<Package> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    // Lọc theo isActive (không có keyword)
-    Page<Package> findByActive(boolean active, Pageable pageable);
+    Page<Package> findByStatus(PackageStatus status, Pageable pageable);
 
-    // Trả về tất cả (không lọc theo keyword hoặc isActive)
     Page<Package> findAll(Pageable pageable);
 
-    Page<Package> findByGradeGradeIdAndActive(Long gradeId, boolean active, Pageable pageable);
+    Page<Package> findByGradeGradeIdAndStatus(Long gradeId, PackageStatus status, Pageable pageable);
 
     Page<Package> findByGradeGradeIdAndNameContainingIgnoreCase(Long gradeId, String name, Pageable pageable);
 
     Page<Package> findByGradeGradeId(Long gradeId, Pageable pageable);
 
-    Page<Package> findByGradeGradeIdAndActiveAndNameContainingIgnoreCase(Long gradeId, boolean active, String name,
-            Pageable pageable);
+    Page<Package> findByGradeGradeIdAndStatusAndNameContainingIgnoreCase(Long gradeId, PackageStatus status,
+            String name, Pageable pageable);
 
     // Truy vấn nâng cao với Specification
     Page<Package> findAll(Specification<Package> spec, Pageable pageable);

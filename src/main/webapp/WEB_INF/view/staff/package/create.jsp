@@ -63,11 +63,12 @@
 
                     .content {
                         margin-left: 15%;
-                        margin-top: 2%;
+                        margin-top: 3%;
                         padding: 20px;
                         flex: 1;
                         display: flex;
                         justify-content: center;
+                        padding-bottom: 100px;
                     }
 
                     .container {
@@ -121,7 +122,7 @@
                                     ${error}
                                 </div>
                             </c:if>
-                            <form:form method="post" action="/admin/package/create" modelAttribute="newPackage"
+                            <form:form method="post" action="/staff/package/create" modelAttribute="newPackage"
                                 enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <c:set var="errorName">
@@ -211,7 +212,7 @@
                             </select>
                             <c:if test="${empty subjects}">
                                 <div class="text-muted text-center placeholder-message">
-                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách mon học đang trống
+                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách môn học đang trống
                                 </div>
                             </c:if>
                             <c:if test="${not empty subjectsError}">
@@ -235,19 +236,8 @@
                             <img style="max-height: 250px; display: none;" alt="Image not found" id="image" />
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label d-block">Trạng thái</label>
-                            <div class="form-check form-check-inline">
-                                <form:radiobutton path="active" value="true" cssClass="form-check-input"
-                                    id="activeTrue" />
-                                <label class="form-check-label" for="activeTrue">Active</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <form:radiobutton path="active" value="false" cssClass="form-check-input"
-                                    id="activeFalse" />
-                                <label class="form-check-label" for="activeFalse">Inactive</label>
-                            </div>
-                        </div>
+                        <form:hidden path="status" value="PENDING" />
+                        <form:errors path="status" cssClass="invalid-feedback" />
 
 
 
@@ -255,7 +245,7 @@
 
 
                         <button type="submit" class="btn btn-primary">Lưu</button>
-                        <a href="/admin/grade" class="btn btn-secondary">Hủy</a>
+                        <a href="/staff/package" class="btn btn-secondary">Hủy</a>
                         </form:form>
                     </div>
                 </div>
