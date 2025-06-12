@@ -40,13 +40,12 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
     // Truy vấn nâng cao với Specification
     Page<Package> findAll(Specification<Package> spec, Pageable pageable);
 
-
-
     List<Package> findAllByIsActiveTrue();
 
     /**
      * Tìm tất cả Package theo danh sách ID VÀ đang active (isActive = true).
      * Dùng cho createNotification (targetType="PACKAGE").
+     * 
      * @param ids danh sách Package ID
      * @return danh sách Package phù hợp
      */
