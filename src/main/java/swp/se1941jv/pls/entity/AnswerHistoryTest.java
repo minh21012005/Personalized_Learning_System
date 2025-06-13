@@ -18,17 +18,13 @@ public class AnswerHistoryTest {
     Long answerHistoryId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    User user;
-
-    @ManyToOne
-    @JoinColumn(name = "test_id")
-    Test test;
+    @JoinColumn(name = "user_test_id")
+    UserTest userTest;
 
     @ManyToOne
     @JoinColumn(name = "question_id")
     QuestionBank question;
 
-    @Column(name = "answer", columnDefinition = "NVARCHAR(255)")
+    @Column(name = "answer", columnDefinition = "TEXT")
     String answer;
 }

@@ -49,9 +49,6 @@ public class Test extends BaseEntity {
     @OneToMany(mappedBy = "test")
     List<UserTest> userTests;
 
-    @OneToMany(mappedBy = "test")
-    List<AnswerHistoryTest> answerHistories;
-
     @Transient
     private List<QuestionBank> randomQuestions;
 
