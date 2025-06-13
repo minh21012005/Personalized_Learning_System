@@ -3,16 +3,37 @@ spring:
     name: SWP_SE1941JV_GR2_PLS
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://103.20.96.16:3308/SWP_DB
+    url: jdbc:mysql://10.8.0.1:3308/SWP_DB
     username: team_swp
     password: Swp1941@
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  session:
+    store-type: jdbc
+    timeout: 30m
+    jdbc:
+      initialize-schema: always
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: seswp5069@gmail.com
+    password: yblpwtdhqrucjtes
+    properties:
+      mail:
+        stmp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+app:
+  base-url: http://localhost:5555
 server:
   port: 5555
-
-
-
-
