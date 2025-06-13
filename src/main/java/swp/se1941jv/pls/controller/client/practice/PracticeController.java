@@ -18,7 +18,6 @@ import swp.se1941jv.pls.service.QuestionService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -141,7 +140,6 @@ public class PracticeController {
         userTest.setTest(test);
         userTest.setTimeStart(LocalDateTime.now());
         userTest.setTimeEnd(LocalDateTime.now().plusMinutes(duration));
-//        userTest.setCurrentQuestionIndex(0);
         userTest = userTestRepository.save(userTest);
 
         List<QuestionDisplayDto> displayQuestions = questions.stream()
@@ -167,69 +165,77 @@ public class PracticeController {
         return "client/practice/practiceTest";
     }
 
-//    @PostMapping("/submit-answer")
-//    @PreAuthorize("hasAnyRole('STUDENT')")
-//    public ResponseEntity<?> submitAnswer(
-//            @RequestParam Long questionId,
-//            @RequestParam String answer,
-//            @RequestParam Long userTestId) {
-//
-//        Long userId = SecurityUtils.getCurrentUserId();
-//        if (userId == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Không thể xác định người dùng.");
-//        }
-//
-//        UserTest userTest = userTestRepository.findById(userTestId)
-//                .orElseThrow(() -> new IllegalArgumentException("UserTest không tồn tại."));
-//
-//        if (!userTest.getUser().getUserId().equals(userId)) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Không có quyền truy cập.");
-//        }
-//
-//        QuestionBank question = questionBankRepository.findById(questionId)
-//                .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tồn tại."));
-//
-//        AnswerHistoryTest answerHistory = AnswerHistoryTest.builder()
-//                .userTest(userTest)
-//                .question(question)
-//                .answer(answer)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//        answerHistoryRepository.save(answerHistory);
-//
-//        int nextIndex = userTest.getCurrentQuestionIndex() + 1;
-//        List<QuestionTest> questionTests = questionTestRepository.findByTestId(userTest.getTest().getTestId());
-//        if (nextIndex < questionTests.size()) {
-//            userTest.setCurrentQuestionIndex(nextIndex);
-//            userTestRepository.save(userTest);
-//            return ResponseEntity.ok("Đáp án đã được lưu.");
-//        } else {
-//            return ResponseEntity.ok(Map.of("redirect", "/practice/finish?userTestId=" + userTestId));
-//        }
-//    }
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    @PostMapping("/submit-test")
+    public String submitTest(
+            @RequestParam("userTestId") Long userTestId,
+            @RequestParam("testId") Long testId,
+            @RequestParam(name = "jsonAnswers", required = false) List<String> jsonAnswers,
+            Model model) {
 
-//    @GetMapping("/finish")
-//    @PreAuthorize("hasAnyRole('STUDENT')")
-//    public String finishPractice(@RequestParam Long userTestId, Model model) {
-//        Long userId = SecurityUtils.getCurrentUserId();
-//        if (userId == null) {
-//            model.addAttribute("error", "Không thể xác định người dùng.");
-//            return "redirect:/login";
-//        }
-//
-//        UserTest userTest = userTestRepository.findById(userTestId)
-//                .orElseThrow(() -> new IllegalArgumentException("UserTest không tồn tại."));
-//
-//        if (!userTest.getUser().getUserId().equals(userId)) {
-//            model.addAttribute("error", "Không có quyền truy cập.");
-//            return "redirect:/";
-//        }
-//
-//        List<AnswerHistoryTest> answers = answerHistoryRepository.findByUserTestId(userTestId);
-//        model.addAttribute("userTest", userTest);
-//        model.addAttribute("answers", answers);
-//        return "client/practice/practiceResult";
-//    }
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng.");
+            return "redirect:/login";
+        }
+
+        UserTest userTest = userTestRepository.findById(userTestId)
+                .orElseThrow(() -> new IllegalArgumentException("UserTest không tồn tại."));
+
+        if (!userTest.getUser().getUserId().equals(userId)) {
+            model.addAttribute("error", "Không có quyền truy cập.");
+            return "redirect:/";
+        }
+
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new IllegalArgumentException("Test không tồn tại."));
+        List<QuestionTest> questionTests = questionTestRepository.findByTestId(testId);
+
+        if (jsonAnswers == null || jsonAnswers.isEmpty()) {
+            model.addAttribute("error", "Không có dữ liệu đáp án được gửi lên.");
+            return "client/practice/practiceTest";
+        }
+
+        for (int i = 0; i < questionTests.size() && i < jsonAnswers.size(); i++) {
+            QuestionBank question = questionTests.get(i).getQuestion();
+            String jsonAnswer = jsonAnswers.get(i);
+            AnswerHistoryTest answerHistory = AnswerHistoryTest.builder()
+                    .userTest(userTest)
+                    .question(question)
+                    .answer(jsonAnswer != null ? jsonAnswer : "[]") // Đảm bảo không null
+                    .build();
+            answerHistoryRepository.save(answerHistory);
+        }
+
+        userTest.setTimeEnd(LocalDateTime.now());
+        userTestRepository.save(userTest);
+
+        model.addAttribute("userTest", userTest);
+        return "redirect:/practice/finish?userTestId=" + userTestId;
+    }
+
+    @GetMapping("/finish")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String finishPractice(@RequestParam Long userTestId, Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng.");
+            return "redirect:/login";
+        }
+
+        UserTest userTest = userTestRepository.findById(userTestId)
+                .orElseThrow(() -> new IllegalArgumentException("UserTest không tồn tại."));
+
+        if (!userTest.getUser().getUserId().equals(userId)) {
+            model.addAttribute("error", "Không có quyền truy cập.");
+            return "redirect:/";
+        }
+
+        List<AnswerHistoryTest> answers = answerHistoryRepository.findByUserTestId(userTestId);
+        model.addAttribute("userTest", userTest);
+        model.addAttribute("answers", answers);
+        return "client/practice/practiceResult";
+    }
 
     @GetMapping("/api/lessons-by-subject/{subjectId}")
     @ResponseBody

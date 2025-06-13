@@ -88,9 +88,6 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     List<UserTest> userTests;
 
-    @OneToMany(mappedBy = "user")
-    List<AnswerHistoryTest> answerHistories;
-
     @OneToMany(mappedBy = "userCreated")
     List<Transaction> transactions;
 
