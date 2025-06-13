@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
@@ -20,7 +19,6 @@ import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Controller xử lý các yêu cầu từ phía client liên quan đến bài học.
@@ -40,7 +38,7 @@ public class ClientLessonController {
     }
 
     /**
-     * Hiển thị trang tổng quan của môn học với chapter và lesson đầu tiên.
+     * Hiển thị trang tổng quan của môn học với danh sách chapter và lesson.
      *
      * @param subjectId ID của môn học
      * @param model     Model để truyền dữ liệu đến JSP
@@ -55,57 +53,45 @@ public class ClientLessonController {
         SubjectResponseDTO subjectResponse;
         try {
             subjectResponse = subjectService.getSubjectResponseById(subjectId);
-            // Lọc chỉ lấy chapterId và chapterName từ listChapter
-            List<ChapterResponseDTO> simplifiedChapters = subjectResponse.getListChapter().stream()
-                    .map(chapter -> ChapterResponseDTO.builder()
-                            .chapterId(chapter.getChapterId())
-                            .chapterName(chapter.getChapterName())
-                            .build())
+            // Lấy danh sách chapter với chapterId, chapterName và danh sách lesson
+            List<ChapterResponseDTO> chapters = subjectResponse.getListChapter().stream()
+                    .map(chapter -> {
+                        List<LessonResponseDTO> simplifiedLessons = lessonService.getActiveLessonsResponseByChapterId(chapter.getChapterId());
+                        return ChapterResponseDTO.builder()
+                                .chapterId(chapter.getChapterId())
+                                .chapterName(chapter.getChapterName())
+                                .listLesson(simplifiedLessons)
+                                .build();
+                    })
                     .toList();
-            subjectResponse = SubjectResponseDTO.builder()
-                    .subjectId(subjectResponse.getSubjectId())
-                    .subjectName(subjectResponse.getSubjectName())
-                    .subjectDescription(subjectResponse.getSubjectDescription())
-                    .subjectImage(subjectResponse.getSubjectImage())
-                    .isActive(subjectResponse.getIsActive())
-                    .listChapter(simplifiedChapters)
-                    .build();
-            // Lấy chapter và lesson đầu tiên
-            ChapterResponseDTO firstChapter = simplifiedChapters.stream().findFirst().map(chapter ->
-                    chapterService.getChapterResponseById(chapter.getChapterId(), subjectId)).orElse(null);
-            LessonResponseDTO firstLesson = firstChapter != null ? firstChapter.getListLesson().stream().findFirst().orElse(null) : null;
+
+            // Lấy lesson đầu tiên của chapter đầu tiên (nếu có) để hiển thị mặc định
+            LessonResponseDTO defaultLesson = chapters.stream()
+                    .filter(chapter -> !chapter.getListLesson().isEmpty())
+                    .findFirst()
+                    .flatMap(chapter -> chapter.getListLesson().stream().findFirst())
+                    .map(lesson -> lessonService.getActiveLessonResponseById(lesson.getLessonId()))
+                    .orElse(null);
+
+            // Lấy chapter chứa lesson mặc định
+            ChapterResponseDTO defaultChapter = chapters.stream()
+                    .filter(chapter -> chapter.getListLesson().stream()
+                            .anyMatch(lesson -> defaultLesson != null && lesson.getLessonId().equals(defaultLesson.getLessonId())))
+                    .findFirst()
+                    .orElse(null);
 
             model.addAttribute("subject", subjectResponse);
-            model.addAttribute("chapter", firstChapter);
-            model.addAttribute("lesson", firstLesson);
-            model.addAttribute("chapters", simplifiedChapters);
+            model.addAttribute("chapters", chapters);
+            model.addAttribute("chapter", defaultChapter);
+            model.addAttribute("lesson", defaultLesson);
         } catch (SubjectNotFoundException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/";
-        } catch (ChapterNotFoundException | InvalidChapterException e) {
+        } catch (ChapterNotFoundException | InvalidChapterException | LessonNotFoundException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/subject/" + subjectId;
         }
         return "client/lesson/show";
-    }
-
-    /**
-     * Lấy chi tiết chapter qua API cho AJAX.
-     *
-     * @param chapterId ID của chương
-     * @param subjectId ID của môn học
-     * @return ChapterResponseDTO dưới dạng JSON
-     */
-    @GetMapping("/api/chapters/{chapterId}")
-    @ResponseBody
-    public ChapterResponseDTO getChapterDetails(
-            @PathVariable("chapterId") Long chapterId,
-            @RequestParam("subjectId") Long subjectId) {
-        try {
-            return chapterService.getChapterResponseById(chapterId, subjectId);
-        } catch (ChapterNotFoundException | InvalidChapterException e) {
-            throw new RuntimeException(e.getMessage()); // Xử lý ngoại lệ qua HTTP status
-        }
     }
 
     /**
