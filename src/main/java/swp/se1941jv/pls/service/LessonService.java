@@ -123,8 +123,6 @@ public class LessonService {
                 .map(lesson -> LessonResponseDTO.builder()
                         .lessonId(lesson.getLessonId())
                         .lessonName(lesson.getLessonName())
-                        .lessonDescription(lesson.getLessonDescription())
-                        .videoSrc(lesson.getVideoSrc())
                         .videoTime(lesson.getVideoTime())
                         .build())
                 .toList();
