@@ -155,9 +155,15 @@
                                 </div>
                                 <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
                             </form>
-                            <a href="/admin/subject/${subject.subjectId}/chapters/save" class="btn btn-primary mt-2 mt-md-0">
-                                Tạo chương học mới
-                            </a>
+                            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                                <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post" onsubmit="return toggleChapters(event)">
+                                    <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-success btn-sm">Kích hoạt/Ẩn</button>
+                                </form>
+                                <a href="/admin/subject/${subject.subjectId}/chapters/save" class="btn btn-sm btn-primary mt-2 mt-md-0">
+                                    Tạo chương học mới
+                                </a>
+                            </div>
                         </div>
 
                         <c:if test="${not empty successMessage}">
@@ -173,12 +179,7 @@
                             </div>
                         </c:if>
 
-                        <div class="mb-3">
-                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/update-status" method="post" onsubmit="return toggleChapters(event)">
-                                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                                <button type="submit" class="btn btn-success btn-sm">Kích hoạt/Ẩn</button>
-                            </form>
-                        </div>
+
 
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover table-striped">
@@ -238,9 +239,9 @@
                                             <td colspan="5">
                                                 <div id="collapse-lesson-${chapter.chapterId}" class="collapse lesson-list">
                                                     <c:choose>
-                                                        <c:when test="${not empty chapter.lessons}">
+                                                        <c:when test="${not empty chapter.listLesson}">
                                                             <ul class="list-group">
-                                                                <c:forEach var="lesson" items="${chapter.lessons}">
+                                                                <c:forEach var="lesson" items="${chapter.listLesson}">
                                                                     <li class="list-group-item">
                                                                         <i class="bi bi-book"></i>
                                                                         <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save?lessonId=${lesson.lessonId}">

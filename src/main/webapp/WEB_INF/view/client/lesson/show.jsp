@@ -49,7 +49,7 @@
             color: #0056b3;
         }
         /* Quy tắc active mạnh hơn để đảm bảo hiển thị */
-        .list-group-item:active {
+        .list-group-item-action.active {
             background-color: #e7f1ff !important; /* Sử dụng !important để đảm bảo ghi đè */
             color: #0056b3 !important;
             font-weight: bold;

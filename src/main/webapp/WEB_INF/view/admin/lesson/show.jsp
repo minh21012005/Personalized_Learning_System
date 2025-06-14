@@ -121,11 +121,34 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                            <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/update-status" method="post" class="me-md-2 mb-2 mb-md-0">
-                                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                                <button type="submit" class="btn btn-success btn-sm">Kích hoạt/Ẩn</button>
+                            <form action="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons" method="get"
+                                  class="d-flex flex-column flex-md-row align-items-md-center mb-2 mb-md-0">
+                                <label for="lessonName" class="mb-0 fw-bold me-md-2">Tìm bài học:</label>
+                                <div class="d-flex gap-2 me-md-2">
+                                    <input type="text" id="lessonName" name="lessonName"
+                                           class="form-control form-control-sm"
+                                           value="${param.lessonName}"
+                                           placeholder="Tìm theo tên bài học...">
+                                </div>
+                                <label for="status" class="mb-0 fw-bold me-md-2">Trạng thái:</label>
+                                <div class="d-flex gap-2 me-md-2">
+                                    <select id="status" name="status" class="form-control form-control-sm">
+                                        <option value="" ${param.status == null ? 'selected' : ''}>Tất cả</option>
+                                        <option value="true" ${param.status == 'true' ? 'selected' : ''}>Đang hoạt động</option>
+                                        <option value="false" ${param.status == 'false' ? 'selected' : ''}>Không hoạt động</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
+                                <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons"
+                                   class="btn btn-outline-secondary btn-sm ms-2">Xóa lọc</a>
                             </form>
-                            <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save" class="btn btn-primary btn-sm">Tạo bài học mới</a>
+                            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                                <form id="toggleStatusForm" action="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/update-status" method="post">
+                                    <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-success btn-sm">Kích hoạt/Ẩn</button>
+                                </form>
+                                <a href="/admin/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/save" class="btn btn-primary btn-sm">Tạo bài học mới</a>
+                            </div>
                         </div>
 
                         <c:if test="${not empty successMessage}">
@@ -166,13 +189,11 @@
                                             </td>
                                             <td class="col-2">${lesson.lessonName}</td>
                                             <td class="text-center col-2">
-                                                <a href="${lesson.videoSrc}"
-                                                   class="" title="Video">
+                                                <a href="${lesson.videoSrc}" class="" title="Video">
                                                     Xem video
                                                 </a>
                                             </td>
                                             <td class="col-2 text-center">${lesson.videoTime}</td>
-
                                             <td class="text-center col-2">
                                                 <c:choose>
                                                     <c:when test="${lesson.status}">
@@ -194,14 +215,13 @@
                                 </c:if>
                                 <c:if test="${empty lessons}">
                                     <tr>
-                                        <td colspan="4" class="text-center">Chưa có bài học nào.</td>
+                                        <td colspan="6" class="text-center">Chưa có bài học nào.</td>
                                     </tr>
                                 </c:if>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
                 </div>
             </div>
         </main>
@@ -215,16 +235,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let currentStatus = null;
-
-    function toggleLessons(event) {
-        event.preventDefault();
-        const checkboxes = document.querySelectorAll('input[name="lessonIds"]:checked');
-        if (checkboxes.length === 0) {
-            alert('Vui lòng chọn ít nhất một bài học để thay đổi trạng thái!');
-            return;
-        }
-        document.getElementById('toggleStatusForm').submit();
-    }
 
     function toggleSelectAll(source) {
         const checkboxes = document.querySelectorAll('input[name="lessonIds"]');
@@ -279,7 +289,15 @@
         }
     }
 
-    document.getElementById('toggleStatusForm').addEventListener('submit', toggleLessons);
+    document.getElementById('toggleStatusForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const checkboxes = document.querySelectorAll('input[name="lessonIds"]:checked');
+        if (checkboxes.length === 0) {
+            alert('Vui lòng chọn ít nhất một bài học để thay đổi trạng thái!');
+            return;
+        }
+        this.submit();
+    });
 </script>
 </body>
 </html>
