@@ -15,4 +15,21 @@ public class LessonSpecifications {
             return cb.equal(root.get("chapter").get("id"), chapterId);
         };
     }
+    public static Specification<Lesson> hasName(String lessonName) {
+        return (Root<Lesson> root ,CriteriaQuery<?> query, CriteriaBuilder cb) -> {
+            if (lessonName == null || lessonName.isEmpty()) {
+                return cb.conjunction();
+            }
+            return cb.like(cb.lower(root.get("lessonName")), "%" + lessonName.toLowerCase() + "%");
+        };
+    }
+
+    public static Specification<Lesson> hasStatus(Boolean status) {
+        return (Root<Lesson> root ,CriteriaQuery<?> query, CriteriaBuilder cb) -> {
+            if (status == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("status"), status);
+        };
+    }
 }

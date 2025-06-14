@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,9 @@ import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
 import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
 import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.exception.ApplicationException;
+import swp.se1941jv.pls.exception.NotFoundException;
+import swp.se1941jv.pls.exception.ValidationException;
 import swp.se1941jv.pls.exception.subject.SubjectNotFoundException;
 import swp.se1941jv.pls.repository.SubjectRepository;
 
@@ -104,20 +108,22 @@ public class SubjectService {
                 .toList();
     }
 
-    // Phương thức mới
     public SubjectResponseDTO getSubjectResponseById(Long subjectId) {
-        Subject subject = getSubjectById(subjectId).orElse(null);
-        if (subject == null) {
-            throw new SubjectNotFoundException("Môn học không tồn tại");
+        if (subjectId == null || subjectId <= 0) {
+            throw new ValidationException("ID môn học không hợp lệ");
         }
-        List<ChapterResponseDTO> chapters = chapterService.getChaptersResponseBySubjectId(subjectId);
-        return SubjectResponseDTO.builder()
-                .subjectId(subject.getSubjectId())
-                .subjectName(subject.getSubjectName())
-                .subjectDescription(subject.getSubjectDescription())
-                .subjectImage(subject.getSubjectImage())
-                .isActive(subject.getIsActive())
-                .listChapter(chapters)
-                .build();
+
+        try {
+            Subject subject =  subjectRepository.findById(subjectId)
+                    .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
+            return SubjectResponseDTO.builder()
+                    .subjectId(subject.getSubjectId())
+                    .subjectName(subject.getSubjectName())
+                    .listChapter(chapterService.findChaptersBySubjectId(subjectId,null,null))
+                    .build();
+        } catch (Exception e) {
+            throw new ApplicationException("FETCH_ERROR", "Lỗi khi lấy thông tin môn học", e);
+        }
     }
+
 }
