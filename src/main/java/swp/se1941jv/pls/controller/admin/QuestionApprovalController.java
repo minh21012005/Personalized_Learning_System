@@ -111,7 +111,7 @@ public class QuestionApprovalController {
         model.addAttribute("levels", levels);
         model.addAttribute("statuses", statuses);
 
-        return "admin/question_contentmanager/approvalList";
+        return "content-manager/question_contentmanager/approvalList";
     }
 
     @PreAuthorize("hasAnyRole('CONTENT_MANAGER','ADMIN')")
@@ -129,10 +129,10 @@ public class QuestionApprovalController {
             model.addAttribute("question", question);
             model.addAttribute("options", options);
 
-            return "admin/question_contentmanager/questionDetail";
+            return "content-manager/question_contentmanager/questionDetail";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "admin/question_contentmanager/questionDetail";
+            return "content-manager/question_contentmanager/questionDetail";
         }
     }
 
@@ -151,10 +151,10 @@ public class QuestionApprovalController {
             question.setStatus(acceptedStatus);
             questionBankRepository.save(question);
 
-            return "redirect:/admin/questions?success=true";
+            return "redirect:/content-manager/questions?success=true";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "redirect:/admin/questions";
+            return "redirect:/content-manager/questions";
         }
     }
 
@@ -173,10 +173,10 @@ public class QuestionApprovalController {
             question.setStatus(rejectedStatus);
             questionBankRepository.save(question);
 
-            return "redirect:/admin/questions?success=true";
+            return "redirect:/content-manager/questions?success=true";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "redirect:/admin/questions";
+            return "redirect:/content-manager/questions";
         }
     }
 
