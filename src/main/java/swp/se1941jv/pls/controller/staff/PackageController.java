@@ -134,11 +134,7 @@ public class PackageController {
             bindingResult.rejectValue("image", "error.newPackage", "Không được bỏ trống ảnh");
         }
         List<Long> validSubjectIds = subjects.stream().map(Subject::getSubjectId).collect(Collectors.toList());
-        if (subjectIds.stream().anyMatch(id -> !validSubjectIds.contains(id))) {
-            bindingResult.reject("subjectsError", "Một hoặc nhiều môn học không hợp lệ!");
 
-            return "staff/package/create";
-        }
         if (gradeId == null) {
             bindingResult.rejectValue("grade.gradeId", "error.newPackage", "Phải chọn một khối lớp!");
             return "staff/package/create";

@@ -225,7 +225,7 @@
                             </c:set>
                             <label for="image" class="form-label">Avatar (bắt buộc):</label>
                             <input class="form-control ${not empty errorImage ? 'is-invalid' : ''}" type="file"
-                                id="image" name="file" accept=".png, .jpg, .jpeg" required />
+                                id="image" name="file" eaccept=".png, .jpg, .jpg" required />
                             ${errorImage}
                         </div>
 
