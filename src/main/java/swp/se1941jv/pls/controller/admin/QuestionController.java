@@ -68,7 +68,7 @@ public class QuestionController {
             model.addAttribute("success", "Câu hỏi đã được tạo thành công!");
         }
 
-        return "admin/question/createQuestion";
+        return "staff/question/createQuestion";
     }
 
     @PreAuthorize("hasAnyRole('STAFF')")
@@ -145,7 +145,7 @@ public class QuestionController {
             model.addAttribute("lessons", lessons);
             model.addAttribute("levels", levels);
 
-            return "admin/question/createQuestion";
+            return "staff/question/createQuestion";
         } catch (Exception e) {
             // Repopulate model attributes for form retention
             List<GradeResponseDTO> grades = gradeRepository.findByIsActiveTrue()
@@ -211,7 +211,7 @@ public class QuestionController {
             model.addAttribute("submittedIsCorrect", isCorrectList);
             model.addAttribute("error", e.getMessage());
 
-            return "admin/question/createQuestion";
+            return "staff/question/createQuestion";
         }
     }
 
@@ -233,7 +233,7 @@ public class QuestionController {
 
         if (creatorUserId == null) {
             model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
-            return "admin/question/questionList";
+            return "staff/question/questionList";
         }
 
         Page<QuestionBank> questionPage = questionService.findQuestionsByCreatorAndFilters(
@@ -294,7 +294,7 @@ public class QuestionController {
         model.addAttribute("levels", levels);
         model.addAttribute("statuses", statuses);
 
-        return "admin/question/questionList";
+        return "staff/question/questionList";
     }
 
     @PreAuthorize("hasAnyRole('STAFF')")
@@ -313,10 +313,10 @@ public class QuestionController {
             model.addAttribute("question", question);
             model.addAttribute("options", options);
 
-            return "admin/question/questionDetail";
+            return "staff/question/questionDetail";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "admin/question/questionDetail";
+            return "staff/question/questionDetail";
         }
     }
 
@@ -383,10 +383,10 @@ public class QuestionController {
             model.addAttribute("lessons", lessons);
             model.addAttribute("levels", levels);
 
-            return "admin/question/editQuestion";
+            return "staff/question/editQuestion";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "admin/question/questionList";
+            return "staff/question/questionList";
         }
     }
 
@@ -528,7 +528,7 @@ public class QuestionController {
             }
             model.addAttribute("error", e.getMessage());
 
-            return "admin/question/editQuestion";
+            return "staff/question/editQuestion";
         }
     }
 

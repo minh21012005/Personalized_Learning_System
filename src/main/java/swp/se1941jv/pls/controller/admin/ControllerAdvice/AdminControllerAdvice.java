@@ -21,6 +21,10 @@ public class AdminControllerAdvice {
             model.addAttribute("activePage", "subject");
         } else if (uri.equals("/admin")) {
             model.addAttribute("activePage", "dashboard");
+        } else if (uri.startsWith("/admin/questions")) {
+            model.addAttribute("activePage", "questions");
+        } else if (uri.startsWith("/staff/questions")) {
+            model.addAttribute("activePage", "questions");
         } else {
             model.addAttribute("activePage", ""); // không chọn gì
         }
