@@ -26,4 +26,6 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
 
     List<Grade> findByIsActiveFalse();
 
+    Grade findByGradeNameIgnoreCase(String gradeName);
+
 }
