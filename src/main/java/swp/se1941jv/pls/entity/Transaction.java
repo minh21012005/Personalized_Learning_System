@@ -62,5 +62,8 @@ public class Transaction extends BaseEntity {
     User processedBy; // Người xử lý (SUCCESS hoặc REJECTED)
 
     @Column(columnDefinition = "TEXT")
-    String rejectionReason;
+    @Size(min = 5, max = 1000, message = "Lý do từ chối phải từ 5 đến 1000 ký tự")
+    @NotBlank(message = "Lý do từ chối không được để trống")
+    private String rejectionReason;
+
 }
