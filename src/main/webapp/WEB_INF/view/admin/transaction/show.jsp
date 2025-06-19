@@ -232,7 +232,7 @@
                                                                     học:</label>
                                                                 <select name="packages" id="packageSelect" multiple
                                                                     class="form-select">
-                                                                    <c:forEach var="p" items="${packages}">
+                                                                    <c:forEach var="p" items="${packageList}">
                                                                         <c:set var="isSelected" value="false" />
                                                                         <c:if test="${not empty paramValues.packages}">
                                                                             <c:forEach var="selectedPkg"
@@ -511,9 +511,84 @@
 
                                         </div>
                                     </div>
+                                    <div class="pagination-container">
+                                        <c:set var="queryString" value="" />
+
+                                        <c:if test="${not empty selectedRole}">
+                                            <c:set var="queryString" value="${queryString}&role=${selectedRole}" />
+                                        </c:if>
+
+                                        <c:if test="${not empty paramName}">
+                                            <c:set var="queryString" value="${queryString}&name=${paramName}" />
+                                        </c:if>
+
+                                        <c:if test="${totalPage > 1}">
+                                            <nav aria-label="Page navigation example">
+                                                <ul class="pagination justify-content-center">
+
+                                                    <!-- First Page -->
+                                                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                                        <a class="page-link" href="/admin/user?page=1${queryString}"
+                                                            aria-label="First">
+                                                            <span aria-hidden="true">««</span>
+                                                        </a>
+                                                    </li>
+
+                                                    <!-- Previous Page -->
+                                                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                                        <a class="page-link"
+                                                            href="/admin/user?page=${currentPage - 1}${queryString}"
+                                                            aria-label="Previous">
+                                                            <span aria-hidden="true">«</span>
+                                                        </a>
+                                                    </li>
+
+                                                    <!-- Dynamic Page Range (current ±2) -->
+                                                    <c:set var="startPage" value="${currentPage - 2}" />
+                                                    <c:set var="endPage" value="${currentPage + 2}" />
+                                                    <c:if test="${startPage < 1}">
+                                                        <c:set var="startPage" value="1" />
+                                                        <c:set var="endPage" value="${startPage + 4}" />
+                                                    </c:if>
+                                                    <c:if test="${endPage > totalPage}">
+                                                        <c:set var="endPage" value="${totalPage}" />
+                                                        <c:set var="startPage"
+                                                            value="${endPage - 4 > 0 ? endPage - 4 : 1}" />
+                                                    </c:if>
+
+                                                    <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
+                                                        <li
+                                                            class="page-item ${loop.index == currentPage ? 'active' : ''}">
+                                                            <a class="page-link"
+                                                                href="/admin/user?page=${loop.index}${queryString}">${loop.index}</a>
+                                                        </li>
+                                                    </c:forEach>
+
+                                                    <!-- Next Page -->
+                                                    <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
+                                                        <a class="page-link"
+                                                            href="/admin/user?page=${currentPage + 1}${queryString}"
+                                                            aria-label="Next">
+                                                            <span aria-hidden="true">»</span>
+                                                        </a>
+                                                    </li>
+
+                                                    <!-- Last Page -->
+                                                    <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
+                                                        <a class="page-link"
+                                                            href="/admin/user?page=${totalPage}${queryString}"
+                                                            aria-label="Last">
+                                                            <span aria-hidden="true">»»</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </c:if>
+                                    </div>
                             </main>
                         </div>
                     </div>
+
 
                     <!-- Footer -->
                     <footer>
