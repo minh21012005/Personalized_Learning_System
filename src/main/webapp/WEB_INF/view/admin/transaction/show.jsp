@@ -233,9 +233,19 @@
                                                                 <select name="packages" id="packageSelect" multiple
                                                                     class="form-select">
                                                                     <c:forEach var="p" items="${packages}">
-                                                                        <option value="${p.packageId}" <c:if
-                                                                            test="${fn:contains(param.packages, p.packageId)}">
-                                                                            selected</c:if>>
+                                                                        <c:set var="isSelected" value="false" />
+                                                                        <c:if test="${not empty paramValues.packages}">
+                                                                            <c:forEach var="selectedPkg"
+                                                                                items="${paramValues.packages}">
+                                                                                <c:if
+                                                                                    test="${selectedPkg eq p.packageId}">
+                                                                                    <c:set var="isSelected"
+                                                                                        value="true" />
+                                                                                </c:if>
+                                                                            </c:forEach>
+                                                                        </c:if>
+                                                                        <option value="${p.packageId}" ${isSelected
+                                                                            ? 'selected' : '' }>
                                                                             ${p.name}
                                                                         </option>
                                                                     </c:forEach>
