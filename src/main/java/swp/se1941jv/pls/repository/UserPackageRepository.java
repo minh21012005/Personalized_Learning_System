@@ -10,4 +10,6 @@ public interface UserPackageRepository extends JpaRepository<UserPackage, KeyUse
     long countByPkgPackageId(Long packageId);
 
     List<UserPackage> findByIdUserId(Long idUserId);
+
+
 }

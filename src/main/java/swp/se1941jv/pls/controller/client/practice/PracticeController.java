@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PracticeController {
 
-    private  final PracticesService practicesService;
+    private final PracticesService practicesService;
 
 
     @GetMapping
@@ -43,5 +43,22 @@ public class PracticeController {
         model.addAttribute("packagePractices", packagePractices);
 
         return "client/practice/Practices";
+    }
+
+    @GetMapping("/start")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String showPackageDetail(@RequestParam("packageId") Long packageId, Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        PackagePracticeDTO packagePractice = practicesService.getPackageDetail(packageId);
+
+        model.addAttribute("packagePractice", packagePractice);
+        model.addAttribute("subjects", packagePractice.getListSubject());
+
+        return "client/practice/PackageDetail";
     }
 }

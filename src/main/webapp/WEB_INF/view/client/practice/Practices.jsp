@@ -61,7 +61,7 @@
         }
 
         .package-card .card-title {
-            color: #007bff;
+            color:#212529;
             font-size: 18px;
             margin-bottom: 10px;
         }
@@ -102,7 +102,7 @@
 </header>
 <div class="main-container">
     <div class="content">
-        <h1>Các gói luyên tập của bạn</h1>
+        <h2>Các gói luyên tập của bạn</h2>
         <c:if test="${empty packagePractices}">
             <p>Không có gói luyện tập nào.</p>
         </c:if>
@@ -137,60 +137,5 @@
 </footer>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        // When subject changes, fetch lessons
-        $('#subjectId').change(function () {
-            var subjectId = $(this).val();
-            if (subjectId) {
-                loadLessons(subjectId);
-            } else {
-                $('#lessonGroup').empty();
-            }
-        });
-
-        // Load lessons via API
-        function loadLessons(subjectId) {
-            $.ajax({
-                url: '/practice/api/lessons-by-subject/' + subjectId,
-                method: 'GET',
-                success: function (data) {
-                    var lessonGroup = $('#lessonGroup').empty();
-                    if (data.length === 0) {
-                        lessonGroup.append('<p>Không có bài học nào.</p>');
-                        return;
-                    }
-                    $.each(data, function (index, lesson) {
-                        lessonGroup.append(
-                            '<label><input type="checkbox" name="lessonIds" value="' + lesson.lessonId + '"> ' + lesson.lessonName + '</label>'
-                        );
-                    });
-                    addCheckboxValidation('lessonIds');
-                },
-                error: function () {
-                    $('#lessonGroup').html('<p>Lỗi khi tải bài học.</p>');
-                }
-            });
-        }
-
-        // Validate lesson checkboxes (at least one must be checked)
-        function addCheckboxValidation(name) {
-            var checkboxes = $('input[name="' + name + '"]');
-            checkboxes.on('change', function () {
-                var checked = checkboxes.filter(':checked').length > 0;
-                checkboxes.prop('required', !checked);
-            });
-        }
-
-        // Form submission validation
-        $('#practiceForm').submit(function (event) {
-            var lessonChecked = $('input[name="lessonIds"]:checked').length > 0;
-            if (!lessonChecked) {
-                event.preventDefault();
-                alert('Vui lòng chọn ít nhất một bài học.');
-            }
-        });
-    });
-</script>
 </body>
 </html>
