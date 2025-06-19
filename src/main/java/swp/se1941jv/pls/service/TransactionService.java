@@ -1,12 +1,17 @@
 package swp.se1941jv.pls.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import swp.se1941jv.pls.entity.Transaction;
 import swp.se1941jv.pls.repository.TransactionRepository;
+import swp.se1941jv.pls.service.specification.TransactionSpecification;
 
 @Service
 public class TransactionService {
@@ -31,5 +36,12 @@ public class TransactionService {
 
     public Optional<Transaction> findById(Long id) {
         return this.transactionRepository.findById(id);
+    }
+
+    public Page<Transaction> getFilteredTransactions(String transferCode, String email, List<Long> packageIds,
+            String status, LocalDate createdAt, Pageable pageable) {
+        Specification<Transaction> spec = TransactionSpecification.filterTransactions(
+                transferCode, email, packageIds, status, createdAt);
+        return transactionRepository.findAll(spec, pageable);
     }
 }

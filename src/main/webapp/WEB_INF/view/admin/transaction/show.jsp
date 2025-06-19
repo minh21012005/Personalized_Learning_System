@@ -124,20 +124,17 @@
 
                         /* Style for pagination container */
                         .pagination-container {
-                            bottom: 50px;
-                            /* Position above the footer (footer height is 40px) */
-                            left: 250px;
-                            /* Offset by sidebar width */
-                            width: calc(100% - 250px);
-                            /* Span remaining width */
-                            max-width: 1140px;
-                            /* Match container-fluid max-width */
+                            margin-top: 20px;
+                            margin-bottom: -30px;
+                            width: 100%;
                             background-color: #f8f9fa;
-                            /* Match content background */
                             padding: 10px 20px;
                             z-index: 1000;
-                            /* Ensure it appears above other content */
+                            display: flex;
+                            justify-content: center;
+                            /* Căn giữa nội dung bên trong */
                         }
+
 
                         /* Tùy chỉnh phân trang */
                         .pagination .page-link {
@@ -257,7 +254,7 @@
                                                                 <label for="status" class="fw-bold">Trạng thái:</label>
                                                                 <select name="status" id="status" class="form-select">
                                                                     <option value="">Tất cả</option>
-                                                                    <option value="SUCCESS" ${param.status=='SUCCESS'
+                                                                    <option value="APPROVED" ${param.status=='APPROVED'
                                                                         ? 'selected' : '' }>Thành công</option>
                                                                     <option value="REJECTED" ${param.status=='REJECTED'
                                                                         ? 'selected' : '' }>Từ chối</option>
@@ -346,7 +343,7 @@
                                                             <td class="col-status text-center">
                                                                 <c:choose>
                                                                     <c:when
-                                                                        test="${transaction.status.name() == 'SUCCESS'}">
+                                                                        test="${transaction.status.name() == 'APPROVED'}">
                                                                         <span class="badge bg-success">Thành
                                                                             công</span>
                                                                     </c:when>
@@ -432,23 +429,41 @@
                                             <div class="pagination-container">
                                                 <c:set var="queryString" value="" />
 
-                                                <c:if test="${not empty selectedRole}">
+                                                <!-- Append các filter để giữ lại -->
+                                                <c:if test="${not empty param.transferCode}">
                                                     <c:set var="queryString"
-                                                        value="${queryString}&role=${selectedRole}" />
+                                                        value="${queryString}&transferCode=${param.transferCode}" />
                                                 </c:if>
 
-                                                <c:if test="${not empty paramName}">
-                                                    <c:set var="queryString" value="${queryString}&name=${paramName}" />
+                                                <c:if test="${not empty param.email}">
+                                                    <c:set var="queryString"
+                                                        value="${queryString}&email=${param.email}" />
+                                                </c:if>
+
+                                                <c:if test="${not empty param.packages}">
+                                                    <c:forEach var="pkg" items="${param.packages}">
+                                                        <c:set var="queryString"
+                                                            value="${queryString}&packages=${pkg}" />
+                                                    </c:forEach>
+                                                </c:if>
+
+                                                <c:if test="${not empty param.status}">
+                                                    <c:set var="queryString"
+                                                        value="${queryString}&status=${param.status}" />
+                                                </c:if>
+
+                                                <c:if test="${not empty param.createdAt}">
+                                                    <c:set var="queryString"
+                                                        value="${queryString}&createdAt=${param.createdAt}" />
                                                 </c:if>
 
                                                 <c:if test="${totalPage > 1}">
                                                     <nav aria-label="Page navigation example">
                                                         <ul class="pagination justify-content-center">
-
                                                             <!-- First Page -->
                                                             <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                                                 <a class="page-link"
-                                                                    href="/admin/user?page=1${queryString}"
+                                                                    href="/admin/transaction?page=1${queryString}"
                                                                     aria-label="First">
                                                                     <span aria-hidden="true">««</span>
                                                                 </a>
@@ -457,7 +472,7 @@
                                                             <!-- Previous Page -->
                                                             <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                                                 <a class="page-link"
-                                                                    href="/admin/user?page=${currentPage - 1}${queryString}"
+                                                                    href="/admin/transaction?page=${currentPage - 1}${queryString}"
                                                                     aria-label="Previous">
                                                                     <span aria-hidden="true">«</span>
                                                                 </a>
@@ -481,7 +496,7 @@
                                                                 <li
                                                                     class="page-item ${loop.index == currentPage ? 'active' : ''}">
                                                                     <a class="page-link"
-                                                                        href="/admin/user?page=${loop.index}${queryString}">${loop.index}</a>
+                                                                        href="/admin/transaction?page=${loop.index}${queryString}">${loop.index}</a>
                                                                 </li>
                                                             </c:forEach>
 
@@ -489,7 +504,7 @@
                                                             <li
                                                                 class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
                                                                 <a class="page-link"
-                                                                    href="/admin/user?page=${currentPage + 1}${queryString}"
+                                                                    href="/admin/transaction?page=${currentPage + 1}${queryString}"
                                                                     aria-label="Next">
                                                                     <span aria-hidden="true">»</span>
                                                                 </a>
@@ -499,7 +514,7 @@
                                                             <li
                                                                 class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
                                                                 <a class="page-link"
-                                                                    href="/admin/user?page=${totalPage}${queryString}"
+                                                                    href="/admin/transaction?page=${totalPage}${queryString}"
                                                                     aria-label="Last">
                                                                     <span aria-hidden="true">»»</span>
                                                                 </a>
@@ -508,84 +523,10 @@
                                                     </nav>
                                                 </c:if>
                                             </div>
-
                                         </div>
                                     </div>
-                                    <div class="pagination-container">
-                                        <c:set var="queryString" value="" />
-
-                                        <c:if test="${not empty selectedRole}">
-                                            <c:set var="queryString" value="${queryString}&role=${selectedRole}" />
-                                        </c:if>
-
-                                        <c:if test="${not empty paramName}">
-                                            <c:set var="queryString" value="${queryString}&name=${paramName}" />
-                                        </c:if>
-
-                                        <c:if test="${totalPage > 1}">
-                                            <nav aria-label="Page navigation example">
-                                                <ul class="pagination justify-content-center">
-
-                                                    <!-- First Page -->
-                                                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                                        <a class="page-link" href="/admin/user?page=1${queryString}"
-                                                            aria-label="First">
-                                                            <span aria-hidden="true">««</span>
-                                                        </a>
-                                                    </li>
-
-                                                    <!-- Previous Page -->
-                                                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                                        <a class="page-link"
-                                                            href="/admin/user?page=${currentPage - 1}${queryString}"
-                                                            aria-label="Previous">
-                                                            <span aria-hidden="true">«</span>
-                                                        </a>
-                                                    </li>
-
-                                                    <!-- Dynamic Page Range (current ±2) -->
-                                                    <c:set var="startPage" value="${currentPage - 2}" />
-                                                    <c:set var="endPage" value="${currentPage + 2}" />
-                                                    <c:if test="${startPage < 1}">
-                                                        <c:set var="startPage" value="1" />
-                                                        <c:set var="endPage" value="${startPage + 4}" />
-                                                    </c:if>
-                                                    <c:if test="${endPage > totalPage}">
-                                                        <c:set var="endPage" value="${totalPage}" />
-                                                        <c:set var="startPage"
-                                                            value="${endPage - 4 > 0 ? endPage - 4 : 1}" />
-                                                    </c:if>
-
-                                                    <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
-                                                        <li
-                                                            class="page-item ${loop.index == currentPage ? 'active' : ''}">
-                                                            <a class="page-link"
-                                                                href="/admin/user?page=${loop.index}${queryString}">${loop.index}</a>
-                                                        </li>
-                                                    </c:forEach>
-
-                                                    <!-- Next Page -->
-                                                    <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
-                                                        <a class="page-link"
-                                                            href="/admin/user?page=${currentPage + 1}${queryString}"
-                                                            aria-label="Next">
-                                                            <span aria-hidden="true">»</span>
-                                                        </a>
-                                                    </li>
-
-                                                    <!-- Last Page -->
-                                                    <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
-                                                        <a class="page-link"
-                                                            href="/admin/user?page=${totalPage}${queryString}"
-                                                            aria-label="Last">
-                                                            <span aria-hidden="true">»»</span>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </c:if>
-                                    </div>
                             </main>
+
                         </div>
                     </div>
 

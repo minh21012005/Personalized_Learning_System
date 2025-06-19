@@ -132,7 +132,7 @@
                                                     <th>Trạng thái</th>
                                                     <td>
                                                         <c:choose>
-                                                            <c:when test="${transaction.status.name() == 'SUCCESS'}">
+                                                            <c:when test="${transaction.status.name() == 'APPROVED'}">
                                                                 <span class="badge bg-success">Thành công</span>
                                                             </c:when>
                                                             <c:when test="${transaction.status.name() == 'REJECTED'}">
