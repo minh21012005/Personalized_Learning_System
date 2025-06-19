@@ -1,7 +1,10 @@
 package swp.se1941jv.pls.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -32,9 +35,11 @@ public class Transaction extends BaseEntity {
     @NotNull
     BigDecimal amount;
 
-    @NotNull
+    @NotBlank(message = "Mã giao dịch không được để trống!")
+    @Size(min = 8, max = 20, message = "Mã giao dịch phải từ 8 đến 20 ký tự!")
+    @Pattern(regexp = "^[A-Za-z0-9]+$", message = "Mã giao dịch chỉ được chứa chữ in hoa, chữ thường và số!")
     @Column(unique = true)
-    String transferCode;
+    private String transferCode;
 
     @Column(name = "add_info", nullable = false)
     String addInfo;
@@ -44,6 +49,7 @@ public class Transaction extends BaseEntity {
     @Enumerated(EnumType.STRING)
     TransactionStatus status;
 
+    @Size(max = 1000, message = "Ghi chú không được vượt quá 1000 ký tự!")
     @Column(columnDefinition = "TEXT")
     String note;
 

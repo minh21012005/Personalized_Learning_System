@@ -23,7 +23,7 @@
                         <nav class="nav-menu">
                             <ul class="nav-list">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
+                                    <a href="/" class="nav-link">
                                         <span class="nav-text">Trang chủ</span>
                                     </a>
                                 </li>

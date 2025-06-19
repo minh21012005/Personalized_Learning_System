@@ -88,31 +88,6 @@ a {
     margin: 0 auto;
 }
 
-.main-header {
-    background-color: var(--white);
-    border-bottom: 1px solid var(--greyborder);
-}
-
-.main-nav {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-}
-
-.logo-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.logo {
-    width: 31px;
-    height: 40px;
-    background-image: url(https://c.animaapp.com/mc0hohc0Q9222b/img/logo.png);
-    background-size: cover;
-    background-position: 50% 50%;
-}
-
 .brand-name {
     font-family: var(--button-text-font-family);
     font-weight: 500;
@@ -226,10 +201,10 @@ a {
 }
 
 .section-title {
+    font-weight: 600;
     font-family: var(--heading-4-subheading-font-family);
-    font-weight: var(--heading-4-subheading-font-weight);
     color: var(--grey-900);
-    font-size: var(--heading-4-subheading-font-size);
+    font-size: 22px;
     margin-bottom: 0.5rem;
 }
 
@@ -250,7 +225,7 @@ a {
 .amount-label,
 .amount-value {
     font-family: var(--heading-4-subheading-font-family);
-    font-weight: var(--heading-4-subheading-font-weight);
+    font-weight: 600;
     color: var(--grey-900);
     font-size: var(--heading-4-subheading-font-size);
 }
@@ -275,7 +250,7 @@ a {
 .form-group label {
     display: block;
     font-family: var(--heading-5-subheading-font-family);
-    font-weight: var(--heading-5-subheading-font-weight);
+    font-weight: 550;
     color: var(--grey-900);
     font-size: var(--heading-5-subheading-font-size);
     margin-bottom: 0.5rem;

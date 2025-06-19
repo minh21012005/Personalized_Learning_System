@@ -11,12 +11,15 @@ import java.util.UUID;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.Transaction;
 import swp.se1941jv.pls.entity.TransactionStatus;
@@ -71,38 +74,45 @@ public class TransactionController {
         model.addAttribute("amount", amountFormatted);
         model.addAttribute("addInfo", addInfo);
         model.addAttribute("packageIds", packageIds);
+        model.addAttribute("transaction", new Transaction());
         return "client/checkout/payment"; // sẽ trỏ đến: /WEB-INF/views/payment.jsp
     }
 
     @Transactional
     @PostMapping("/parent/checkout")
-    public String handleCheckout(Model model, @RequestParam("transferCode") String transferCode,
-            @RequestParam(value = "note", required = false) String note,
-            @RequestParam("evidenceImage") MultipartFile evidenceImage,
-            @RequestParam("amount") BigDecimal amount,
+    public String handleCheckout(Model model,
+            @RequestParam("image") MultipartFile evidenceImage,
             @RequestParam("packageIds") List<Long> packageIds,
-            @RequestParam("addInfo") String addInfo,
+            @ModelAttribute("transaction") @Valid Transaction transaction,
+            BindingResult bindingResult,
+            @RequestParam("qrUrl") String qrUrl,
             HttpSession session) {
 
-        // Validation
-        if (transferCode == null || transferCode.trim().isEmpty()) {
-            model.addAttribute("error", "Mã chuyển khoản không được để trống!");
-            return "client/checkout/payment";
+        if (this.transactionService.isExistsByTransferCode(transaction.getTransferCode())) {
+            bindingResult.rejectValue("transferCode", "error.transferCode", "Mã giao dịch đã tồn tại!");
         }
-        if (transactionService.isExistsByTransferCode(transferCode)) {
-            model.addAttribute("error", "Mã chuyển khoản đã tồn tại!");
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("qrUrl", qrUrl);
+            model.addAttribute("amount", transaction.getAmount());
+            model.addAttribute("addInfo", transaction.getAddInfo());
+            model.addAttribute("packageIds", packageIds);
             return "client/checkout/payment";
+
         }
 
         String contentType = evidenceImage.getContentType();
         if (!evidenceImage.isEmpty() && !isImageFile(contentType)) {
             model.addAttribute("fileError", "Chỉ được chọn ảnh định dạng PNG, JPG, JPEG!");
+            model.addAttribute("qrUrl", qrUrl);
+            model.addAttribute("amount", transaction.getAmount());
+            model.addAttribute("addInfo", transaction.getAddInfo());
+            model.addAttribute("packageIds", packageIds);
             return "client/checkout/payment";
         }
 
         long userId = (long) session.getAttribute("id");
         User user = this.userService.getUserById(userId);
-        Transaction transaction = new Transaction();
 
         if (transaction.getPackages() == null) {
             transaction.setPackages(new ArrayList<>());
@@ -118,6 +128,10 @@ public class TransactionController {
         }
         if (packages.isEmpty()) {
             model.addAttribute("error", "Không tìm thấy khóa hợp lệ!");
+            model.addAttribute("qrUrl", qrUrl);
+            model.addAttribute("amount", transaction.getAmount());
+            model.addAttribute("addInfo", transaction.getAddInfo());
+            model.addAttribute("packageIds", packageIds);
             return "client/checkout/payment";
         }
         transaction.setPackages(packages);
@@ -127,17 +141,14 @@ public class TransactionController {
             transaction.setEvidenceImage(image);
         }
 
-        if (note != null && !note.isEmpty()) {
-            transaction.setNote(note);
+        if (transaction.getNote() != null && transaction.getNote().trim().isEmpty()) {
+            transaction.setNote(null);
         }
 
-        transaction.setTransferCode(transferCode);
         transaction.setUser(user);
-        transaction.setAmount(amount);
-        transaction.setAddInfo(addInfo);
         transaction.setStatus(TransactionStatus.PENDING);
         this.transactionService.save(transaction);
-        return "";
+        return "client/checkout/confirm";
     }
 
     private boolean isImageFile(String contentType) {

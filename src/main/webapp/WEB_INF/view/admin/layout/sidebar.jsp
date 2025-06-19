@@ -19,6 +19,12 @@
                     </a>
                 </li>
                 <li class="nav-item mb-2">
+                    <a class="nav-link text-white ${activePage == 'transaction' ? 'bg-primary rounded' : ''}"
+                        href="/admin/transaction" style="padding: 8px 15px;">
+                        <i class="bi bi-cash-stack me-2"></i> Giao dịch
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
                     <a class="nav-link text-white" href="/admin/notification" style="padding: 8px 15px;">
                         <i class="bi bi-bell me-2"></i> Thông báo
                     </a>
@@ -35,7 +41,7 @@
                 </li>
                 <li class="nav-item mb-2">
                     <a class="nav-link text-white" href="/admin/questions" style="padding: 8px 15px;">
-                        <i class="bi bi-question-square me-2"></i>  Câu hỏi
+                        <i class="bi bi-question-square me-2"></i> Câu hỏi
                     </a>
                 </li>
             </ul>
