@@ -28,6 +28,10 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
+    @ManyToOne
+    @JoinColumn(name = "student_id", nullable = false)
+    User student;
+
     @ManyToMany
     @JoinTable(name = "transaction_package", joinColumns = @JoinColumn(name = "transaction_id"), inverseJoinColumns = @JoinColumn(name = "package_id"))
     List<Package> packages;
@@ -39,7 +43,7 @@ public class Transaction extends BaseEntity {
     @Size(min = 8, max = 20, message = "Mã giao dịch phải từ 8 đến 20 ký tự!")
     @Pattern(regexp = "^[A-Za-z0-9]+$", message = "Mã giao dịch chỉ được chứa chữ in hoa, chữ thường và số!")
     @Column(unique = true)
-    private String transferCode;
+    String transferCode;
 
     @Column(name = "add_info", nullable = false)
     String addInfo;
@@ -63,7 +67,6 @@ public class Transaction extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     @Size(min = 5, max = 1000, message = "Lý do từ chối phải từ 5 đến 1000 ký tự")
-    @NotBlank(message = "Lý do từ chối không được để trống")
-    private String rejectionReason;
+    String rejectionReason;
 
 }

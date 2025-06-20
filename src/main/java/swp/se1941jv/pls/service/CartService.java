@@ -82,4 +82,8 @@ public class CartService {
             session.setAttribute("sum", 0);
         }
     }
+
+    public void deleteCart(Cart cart) {
+        this.cartRepository.delete(cart);
+    }
 }

@@ -40,6 +40,6 @@ public class Cart {
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CartPackage> cartPackages;
 }

@@ -86,4 +86,9 @@ public class PaymentController {
         model.addAttribute("transaction", transactionOptional.get());
         return "admin/transaction/detail";
     }
+
+    // @GetMapping("/admin/transaction/confirm/{id}")
+    // public String confirmTransaction(Model model, @PathVariable long id){
+
+    // }
 }

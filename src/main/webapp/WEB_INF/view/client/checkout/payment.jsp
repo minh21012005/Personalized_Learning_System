@@ -73,6 +73,26 @@
                                                     cssClass="form-control" value="${addInfo}" />
                                             </div>
 
+                                            <!-- Chọn học sinh -->
+                                            <div class="form-group">
+                                                <label for="studentId">Chọn học sinh</label>
+                                                <select name="studentId" id="studentId"
+                                                    class="form-control ${not empty studentIdError?'is-invalid':''}">
+                                                    <option value="">-- Vui lòng chọn --</option>
+                                                    <c:forEach var="s" items="${students}">
+                                                        <option value="${s.userId}" ${param.studentId==s.userId
+                                                            ? 'selected' : '' }>
+                                                            ${s.fullName}
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+                                                <c:if test="${not empty studentIdError}">
+                                                    <div class="invalid-feedback d-block">${studentIdError}</div>
+                                                </c:if>
+                                            </div>
+
+
+
                                             <!-- Ảnh biên lai -->
                                             <div class="form-group">
                                                 <label for="receipt-upload">Ảnh biên lai</label>
