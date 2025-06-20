@@ -9,9 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.request.AnswerOptionDto;
-import swp.se1941jv.pls.dto.response.LessonResponseDTO;
-import swp.se1941jv.pls.dto.response.PackagePracticeDTO;
-import swp.se1941jv.pls.dto.response.QuestionDisplayDto;
+import swp.se1941jv.pls.dto.response.*;
 import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.repository.*;
 import swp.se1941jv.pls.service.PracticesService;
@@ -61,4 +59,26 @@ public class PracticeController {
 
         return "client/practice/PackageDetail";
     }
+
+    @GetMapping("/subject")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String lessonSelection(@RequestParam("packageId") Long packageId,@RequestParam("subjectId") Long subjectId, Model model) {
+
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        SubjectResponseDTO subject = practicesService.getSubjectDetail(packageId, subjectId);
+        List<ChapterResponseDTO> chapters = practicesService.getChapters(subjectId);
+
+        model.addAttribute("subject", subject);
+        model.addAttribute("chapters", chapters);
+
+
+        return "client/practice/LessonSelection";
+    }
+
+
 }

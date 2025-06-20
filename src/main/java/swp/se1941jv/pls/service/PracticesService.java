@@ -6,15 +6,15 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.config.SecurityUtils;
+import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
+import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.dto.response.PackagePracticeDTO;
 import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
+import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.entity.UserPackage;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
-import swp.se1941jv.pls.repository.PackageRepository;
-import swp.se1941jv.pls.repository.QuestionBankRepository;
-import swp.se1941jv.pls.repository.UserPackageRepository;
-import swp.se1941jv.pls.repository.UserRepository;
+import swp.se1941jv.pls.repository.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,10 +27,8 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PracticesService {
 
-    QuestionBankRepository questionBankRepository;
-    PackageRepository packageRepository;
     UserPackageRepository userPackageRepository;
-    UserRepository userRepository;
+    SubjectRepository subjectRepository;
 
     @PreAuthorize("hasAnyRole('STUDENT')")
     public List<PackagePracticeDTO> getPackagePractices() {
@@ -88,7 +86,7 @@ public class PracticesService {
         List<SubjectResponseDTO> subjectResponseDTOS = new ArrayList<>();
 
 //        get subjects from userPackage
-        if(userPackage != null) {
+        if (userPackage != null) {
             userPackage.getPkg().getPackageSubjects().stream().forEach(packageSubject -> {
                 SubjectResponseDTO subjectResponseDTO = SubjectResponseDTO.builder()
                         .subjectId(packageSubject.getSubject().getSubjectId())
@@ -111,8 +109,67 @@ public class PracticesService {
                 .listSubject(subjectResponseDTOS)
 
                 .build() : null;
+    }
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public SubjectResponseDTO getSubjectDetail(Long packageId, Long subjectId) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return null;
+        }
+
+        KeyUserPackage keyUserPackage = KeyUserPackage.builder()
+                .userId(userId)
+                .packageId(packageId)
+                .build();
+
+        UserPackage userPackage = userPackageRepository.findById(keyUserPackage).orElse(null);
+
+        if (userPackage == null) {
+            return null;
+        }
+
+        return userPackage.getPkg().getPackageSubjects().stream()
+                .filter(packageSubject -> packageSubject.getSubject().getSubjectId().equals(subjectId))
+                .map(packageSubject -> SubjectResponseDTO.builder()
+                        .subjectId(packageSubject.getSubject().getSubjectId())
+                        .subjectName(packageSubject.getSubject().getSubjectName())
+                        .subjectDescription(packageSubject.getSubject().getSubjectDescription())
+                        .subjectImage(packageSubject.getSubject().getSubjectImage())
+                        .build())
+                .findFirst()
+                .orElse(null);
+    }
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public List<ChapterResponseDTO> getChapters(Long subjectId) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        Subject subject = subjectRepository.findById(subjectId).orElse(null);
+
+        List<ChapterResponseDTO> chapterResponseDTOS = new ArrayList<>();
+
+        if (subject != null) {
+            chapterResponseDTOS = subject.getChapters().stream()
+                    .map(chapter -> ChapterResponseDTO.builder()
+                            .chapterId(chapter.getChapterId())
+                            .chapterName(chapter.getChapterName())
+                            .chapterDescription(chapter.getChapterDescription())
+                            .listLesson(chapter.getLessons().stream().map(lesson -> LessonResponseDTO.builder()
+                                    .lessonId(lesson.getLessonId())
+                                    .lessonName(lesson.getLessonName())
+                                    .lessonDescription(lesson.getLessonDescription())
+                                    .build()).collect(Collectors.toList()))
+
+                            .build())
+                    .collect(Collectors.toList());
+        }
 
 
+        return chapterResponseDTOS;
     }
 
 }
