@@ -10,6 +10,8 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -57,16 +59,20 @@ public class Transaction extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     String note;
 
-    LocalDateTime confirmedAt; // Thời điểm xác nhận SUCCESS
+    LocalDateTime confirmedAt;
 
-    LocalDateTime rejectedAt; // Thời điểm từ chối REJECTED
+    LocalDateTime rejectedAt;
 
     @ManyToOne
     @JoinColumn(name = "processed_by")
-    User processedBy; // Người xử lý (SUCCESS hoặc REJECTED)
+    User processedBy;
 
     @Column(columnDefinition = "TEXT")
     @Size(min = 5, max = 1000, message = "Lý do từ chối phải từ 5 đến 1000 ký tự")
     String rejectionReason;
+
+    public Date getConfirmedAtAsDate() {
+        return confirmedAt == null ? null : java.util.Date.from(confirmedAt.atZone(ZoneId.systemDefault()).toInstant());
+    }
 
 }

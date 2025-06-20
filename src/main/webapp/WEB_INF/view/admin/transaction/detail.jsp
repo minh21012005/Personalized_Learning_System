@@ -179,7 +179,7 @@
                                                     <th>Thời điểm xác nhận</th>
                                                     <td>
                                                         <c:if test="${not empty transaction.confirmedAt}">
-                                                            <fmt:formatDate value="${transaction.confirmedAt}"
+                                                            <fmt:formatDate value="${transaction.confirmedAtAsDate}"
                                                                 pattern="dd/MM/yyyy HH:mm" />
                                                         </c:if>
                                                         <c:if test="${empty transaction.confirmedAt}">

@@ -1,6 +1,7 @@
 package swp.se1941jv.pls.controller.admin;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,19 +18,32 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpSession;
+import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.Transaction;
+import swp.se1941jv.pls.entity.TransactionStatus;
+import swp.se1941jv.pls.entity.User;
+import swp.se1941jv.pls.entity.UserPackage;
+import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 import swp.se1941jv.pls.service.PackageService;
 import swp.se1941jv.pls.service.TransactionService;
+import swp.se1941jv.pls.service.UserPackageService;
+import swp.se1941jv.pls.service.UserService;
 
 @Controller
 public class PaymentController {
 
     private final TransactionService transactionService;
     private final PackageService packageService;
+    private final UserPackageService userPackageService;
+    private final UserService userService;
 
-    public PaymentController(TransactionService transactionService, PackageService packageService) {
+    public PaymentController(TransactionService transactionService, PackageService packageService,
+            UserPackageService userPackageService, UserService userService) {
         this.transactionService = transactionService;
         this.packageService = packageService;
+        this.userPackageService = userPackageService;
+        this.userService = userService;
     }
 
     @GetMapping("/admin/transaction")
@@ -89,8 +103,31 @@ public class PaymentController {
         return "admin/transaction/detail";
     }
 
-    // @GetMapping("/admin/transaction/confirm/{id}")
-    // public String confirmTransaction(Model model, @PathVariable long id){
+    @GetMapping("/admin/transaction/confirm/{id}")
+    public String confirmTransaction(Model model, @PathVariable long id, HttpSession session) {
+        Optional<Transaction> transactionOptional = this.transactionService.findById(id);
+        if (transactionOptional.isPresent()) {
+            Transaction transaction = transactionOptional.get();
+            User student = transaction.getStudent();
+            List<Package> packages = transaction.getPackages();
+            User user = this.userService.getUserById((long) session.getAttribute("id"));
+            for (Package pkg : packages) {
+                UserPackage userPackage = new UserPackage();
 
-    // }
+                KeyUserPackage key = new KeyUserPackage();
+                key.setUserId(student.getUserId());
+                key.setPackageId(pkg.getPackageId());
+
+                userPackage.setId(key);
+                userPackage.setUser(student);
+                userPackage.setPkg(pkg);
+                this.userPackageService.save(userPackage);
+            }
+            transaction.setStatus(TransactionStatus.APPROVED);
+            transaction.setConfirmedAt(LocalDateTime.now());
+            transaction.setProcessedBy(user);
+            transactionService.save(transaction);
+        }
+        return "redirect:/admin/transaction";
+    }
 }
