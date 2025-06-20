@@ -76,7 +76,7 @@
 
                         /* Define specific widths for each column */
                         .col-id {
-                            width: 5%;
+                            width: 4%;
                             min-width: 50px;
                         }
 
@@ -93,7 +93,7 @@
                         }
 
                         .col-package {
-                            width: 20%;
+                            width: 17%;
                             min-width: 180px;
                             word-break: break-word;
                         }
@@ -105,19 +105,19 @@
                         }
 
                         .col-created-at {
-                            width: 15%;
+                            width: 14%;
                             min-width: 140px;
                             white-space: nowrap;
                         }
 
                         .col-status {
-                            width: 10%;
+                            width: 9%;
                             min-width: 100px;
                             text-align: center;
                         }
 
                         .col-action {
-                            width: 10%;
+                            width: 9%;
                             min-width: 100px;
                             text-align: center;
                         }
@@ -190,14 +190,16 @@
                                                     <!-- Lọc cơ bản -->
                                                     <div class="d-flex gap-2 flex-wrap mb-3">
                                                         <!-- Mã GD -->
-                                                        <label for="transferCode" class="mb-0 fw-bold me-1">Mã
+                                                        <label for="transferCode" style="margin-top: 3px;"
+                                                            class="mb-0 fw-bold me-1">Mã
                                                             GD:</label>
                                                         <input type="text" id="transferCode" name="transferCode"
                                                             class="form-control form-control-sm w-auto"
                                                             value="${param.transferCode}" placeholder="Nhập mã...">
 
                                                         <!-- Email -->
-                                                        <label for="email" class="mb-0 fw-bold me-1">Email KH:</label>
+                                                        <label for="email" style="margin-top: 3px;"
+                                                            class="mb-0 fw-bold me-1">Email PH:</label>
                                                         <input type="text" id="email" name="email"
                                                             class="form-control form-control-sm w-auto"
                                                             value="${param.email}" placeholder="Nhập email...">
@@ -223,6 +225,15 @@
                                                                 data-bs-dismiss="offcanvas" aria-label="Close"></button>
                                                         </div>
                                                         <div class="offcanvas-body d-flex flex-column gap-3">
+                                                            <!-- Email -->
+                                                            <div>
+                                                                <label for="studentEmail" class="fw-bold">Email
+                                                                    HS:</label>
+                                                                <input type="text" id="studentEmail" name="studentEmail"
+                                                                    class="form-control" value="${param.studentEmail}"
+                                                                    placeholder="Nhập email...">
+                                                            </div>
+
                                                             <!-- Multi-select khóa học -->
                                                             <div>
                                                                 <label for="packageSelect" class="fw-bold">Khóa
@@ -308,7 +319,9 @@
                                                             giao
                                                             dịch
                                                         </th>
-                                                        <th scope="col" class="text-center col-customer">Khách hàng
+                                                        <th scope="col" class="text-center col-customer">Phụ huynh
+                                                        </th>
+                                                        <th scope="col" class="text-center col-customer">Học sinh
                                                         </th>
                                                         <th scope="col" class="text-center col-package">Khóa học
                                                         </th>
@@ -336,7 +349,9 @@
                                                             <td class="col-customer">
                                                                 ${transaction.user.email}
                                                             </td>
-
+                                                            <td class="col-customer">
+                                                                ${transaction.student.email}
+                                                            </td>
                                                             <td class="col-package">
                                                                 <div class="d-flex flex-wrap gap-1">
                                                                     <c:forEach var="pkg"
@@ -457,6 +472,11 @@
                                                 <c:if test="${not empty param.email}">
                                                     <c:set var="queryString"
                                                         value="${queryString}&email=${param.email}" />
+                                                </c:if>
+
+                                                <c:if test="${not empty param.studentEmail}">
+                                                    <c:set var="queryString"
+                                                        value="${queryString}&studentEmail=${param.studentEmail}" />
                                                 </c:if>
 
                                                 <c:if test="${not empty param.packages}">

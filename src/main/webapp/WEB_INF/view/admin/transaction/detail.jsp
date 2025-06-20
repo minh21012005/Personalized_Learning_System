@@ -95,8 +95,12 @@
                                                     <td>${transaction.transferCode}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Khách hàng</th>
+                                                    <th>Phụ huynh</th>
                                                     <td>${transaction.user.email}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Học sinh</th>
+                                                    <td>${transaction.student.email}</td>
                                                 </tr>
                                                 <tr>
                                                     <th>Khóa học</th>

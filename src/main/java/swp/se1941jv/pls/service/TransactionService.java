@@ -38,10 +38,11 @@ public class TransactionService {
         return this.transactionRepository.findById(id);
     }
 
-    public Page<Transaction> getFilteredTransactions(String transferCode, String email, List<Long> packageIds,
+    public Page<Transaction> getFilteredTransactions(String transferCode, String email, String studentEmail,
+            List<Long> packageIds,
             String status, LocalDate createdAt, Pageable pageable) {
         Specification<Transaction> spec = TransactionSpecification.filterTransactions(
-                transferCode, email, packageIds, status, createdAt);
+                transferCode, email, studentEmail, packageIds, status, createdAt);
         return transactionRepository.findAll(spec, pageable);
     }
 }

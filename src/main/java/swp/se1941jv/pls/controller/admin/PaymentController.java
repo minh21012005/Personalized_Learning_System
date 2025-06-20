@@ -36,6 +36,7 @@ public class PaymentController {
     public String getTransactionPage(
             @RequestParam(required = false) String transferCode,
             @RequestParam(required = false) String email,
+            @RequestParam(required = false) String studentEmail,
             @RequestParam(required = false) List<Long> packages,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String sort,
@@ -59,7 +60,7 @@ public class PaymentController {
         Pageable pageable = PageRequest.of(page - 1, size, sortOption);
 
         Page<Transaction> transactions = transactionService.getFilteredTransactions(
-                transferCode, email, packages, status, createdAt, pageable);
+                transferCode, email, studentEmail, packages, status, createdAt, pageable);
 
         model.addAttribute("transactions", transactions.getContent());
         model.addAttribute("totalPage", transactions.getTotalPages());
@@ -68,6 +69,7 @@ public class PaymentController {
         Map<String, Object> param = new HashMap<>();
         param.put("transferCode", transferCode);
         param.put("email", email);
+        param.put("studentEmail", studentEmail);
         param.put("packages", packages);
         param.put("status", status);
         param.put("sort", sort);

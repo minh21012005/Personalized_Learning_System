@@ -18,6 +18,7 @@ public class TransactionSpecification {
     public static Specification<Transaction> filterTransactions(
             String transferCode,
             String email,
+            String studentEmail,
             List<Long> packageIds,
             String status,
             LocalDate createdAt) {
@@ -32,6 +33,13 @@ public class TransactionSpecification {
             if (email != null && !email.isEmpty()) {
                 predicates
                         .add(cb.like(cb.lower(root.get("user").get("email")), "%" + email.trim().toLowerCase() + "%"));
+            }
+
+            if (studentEmail != null && !studentEmail.isEmpty()) {
+                predicates.add(
+                        cb.like(
+                                cb.lower(root.get("student").get("email")),
+                                "%" + studentEmail.trim().toLowerCase() + "%"));
             }
 
             if (packageIds != null && !packageIds.isEmpty()) {
