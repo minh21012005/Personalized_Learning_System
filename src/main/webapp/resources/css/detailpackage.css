@@ -30,7 +30,10 @@
 
 a {
     text-decoration: none !important;
-    color: #0F172A;
+}
+
+h3 {
+    color: #0F172A !important;
 }
 
 body {

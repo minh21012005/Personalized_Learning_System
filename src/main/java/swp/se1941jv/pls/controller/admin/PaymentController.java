@@ -111,6 +111,7 @@ public class PaymentController {
             User student = transaction.getStudent();
             List<Package> packages = transaction.getPackages();
             User user = this.userService.getUserById((long) session.getAttribute("id"));
+            LocalDateTime now = LocalDateTime.now();
             for (Package pkg : packages) {
                 UserPackage userPackage = new UserPackage();
 
@@ -121,6 +122,8 @@ public class PaymentController {
                 userPackage.setId(key);
                 userPackage.setUser(student);
                 userPackage.setPkg(pkg);
+                userPackage.setStartDate(now);
+                userPackage.setEndDate(now.plusDays(pkg.getDurationDays()));
                 this.userPackageService.save(userPackage);
             }
             transaction.setStatus(TransactionStatus.APPROVED);

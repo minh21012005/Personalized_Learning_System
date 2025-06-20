@@ -111,13 +111,13 @@
                         }
 
                         .col-status {
-                            width: 9%;
+                            width: 10%;
                             min-width: 100px;
                             text-align: center;
                         }
 
                         .col-action {
-                            width: 9%;
+                            width: 10%;
                             min-width: 100px;
                             text-align: center;
                         }
