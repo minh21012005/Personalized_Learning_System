@@ -263,6 +263,25 @@
                                                                 </select>
                                                             </div>
 
+                                                            <div>
+                                                                <label for="sort" class="fw-bold">Sắp xếp theo:</label>
+                                                                <select name="sort" id="sort" class="form-select">
+                                                                    <option value="">Mặc định</option>
+                                                                    <option value="createdAtDesc"
+                                                                        ${param.sort=='createdAtDesc' ? 'selected' : ''
+                                                                        }>
+                                                                        Mới nhất</option>
+                                                                    <option value="createdAtAsc"
+                                                                        ${param.sort=='createdAtAsc' ? 'selected' : ''
+                                                                        }>Cũ
+                                                                        nhất</option>
+                                                                    <option value="priceAsc" ${param.sort=='priceAsc'
+                                                                        ? 'selected' : '' }>Giá tăng dần</option>
+                                                                    <option value="priceDesc" ${param.sort=='priceDesc'
+                                                                        ? 'selected' : '' }>Giá giảm dần</option>
+                                                                </select>
+                                                            </div>
+
                                                             <!-- Ngày thanh toán -->
                                                             <div>
                                                                 <label for="createdAt" class="fw-bold">Ngày thanh
@@ -450,6 +469,11 @@
                                                 <c:if test="${not empty param.status}">
                                                     <c:set var="queryString"
                                                         value="${queryString}&status=${param.status}" />
+                                                </c:if>
+
+                                                <c:if test="${not empty param.sort}">
+                                                    <c:set var="queryString"
+                                                        value="${queryString}&sort=${param.sort}" />
                                                 </c:if>
 
                                                 <c:if test="${not empty param.createdAt}">

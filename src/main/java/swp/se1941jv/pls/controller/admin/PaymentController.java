@@ -38,11 +38,25 @@ public class PaymentController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false) List<Long> packages,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sort,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAt,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+
+        Sort sortOption = Sort.by("createdAt").descending();
+
+        if ("priceAsc".equals(sort)) {
+            sortOption = Sort.by("amount").ascending();
+        } else if ("priceDesc".equals(sort)) {
+            sortOption = Sort.by("amount").descending();
+        } else if ("createdAtAsc".equals(sort)) {
+            sortOption = Sort.by("createdAt").ascending();
+        } else if ("createdAtDesc".equals(sort)) {
+            sortOption = Sort.by("createdAt").descending();
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, size, sortOption);
 
         Page<Transaction> transactions = transactionService.getFilteredTransactions(
                 transferCode, email, packages, status, createdAt, pageable);
@@ -56,6 +70,7 @@ public class PaymentController {
         param.put("email", email);
         param.put("packages", packages);
         param.put("status", status);
+        param.put("sort", sort);
         param.put("createdAt", createdAt != null ? createdAt.toString() : "");
 
         model.addAttribute("param", param);
