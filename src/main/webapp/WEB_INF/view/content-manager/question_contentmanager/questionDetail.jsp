@@ -96,7 +96,7 @@
                             <p><c:out value="${question.content}" escapeXml="false"/></p>
                             <c:if test="${not empty question.image}">
                                 <p><strong>Hình ảnh:</strong></p>
-                                <img src="/uploads/question_bank/${question.image}" alt="Question Image" class="question-image">
+                                <img style="width: 500px;height:auto;" src="/img/question_bank/${question.image}" alt="Question Image" class="question-image">
                             </c:if>
                             <p><strong>Đáp án:</strong></p>
                             <ul>
