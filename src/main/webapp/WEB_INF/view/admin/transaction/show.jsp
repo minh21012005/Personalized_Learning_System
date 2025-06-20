@@ -356,8 +356,11 @@
                                                                 <div class="d-flex flex-wrap gap-1">
                                                                     <c:forEach var="pkg"
                                                                         items="${transaction.packages}">
-                                                                        <span
-                                                                            class="badge bg-secondary d-inline-block">${pkg.name}</span>
+                                                                        <a href="/parent/course/detail/${pkg.packageId}"
+                                                                            style="text-decoration: none;">
+                                                                            <span
+                                                                                class="badge bg-secondary d-inline-block">${pkg.name}</span>
+                                                                        </a>
                                                                     </c:forEach>
                                                                 </div>
                                                             </td>
