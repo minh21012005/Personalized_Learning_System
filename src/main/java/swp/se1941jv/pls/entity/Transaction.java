@@ -75,4 +75,7 @@ public class Transaction extends BaseEntity {
         return confirmedAt == null ? null : java.util.Date.from(confirmedAt.atZone(ZoneId.systemDefault()).toInstant());
     }
 
+    public Date getRejectedAtAsDate() {
+        return rejectedAt == null ? null : java.util.Date.from(rejectedAt.atZone(ZoneId.systemDefault()).toInstant());
+    }
 }

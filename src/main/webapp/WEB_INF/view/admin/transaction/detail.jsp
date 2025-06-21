@@ -61,19 +61,13 @@
             </head>
 
             <body>
-                <!-- Header -->
                 <header>
                     <jsp:include page="../layout/header.jsp" />
                 </header>
-
-                <!-- Main Container for Sidebar and Content -->
                 <div class="main-container">
-                    <!-- Sidebar -->
                     <div class="sidebar d-flex flex-column">
                         <jsp:include page="../layout/sidebar.jsp" />
                     </div>
-
-                    <!-- Main Content Area -->
                     <div class="content">
                         <div style="width: 70%;">
                             <div class="mt-3">
@@ -176,50 +170,50 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Thời điểm xác nhận</th>
+                                                    <th>Thời điểm xử lí</th>
                                                     <td>
                                                         <c:if test="${not empty transaction.confirmedAt}">
                                                             <fmt:formatDate value="${transaction.confirmedAtAsDate}"
                                                                 pattern="dd/MM/yyyy HH:mm" />
                                                         </c:if>
-                                                        <c:if test="${empty transaction.confirmedAt}">
-                                                            Chưa xác nhận
+                                                        <c:if test="${not empty transaction.rejectedAt}">
+                                                            <fmt:formatDate value="${transaction.rejectedAtAsDate}"
+                                                                pattern="dd/MM/yyyy HH:mm" />
+                                                        </c:if>
+                                                        <c:if
+                                                            test="${empty transaction.confirmedAt and empty transaction.rejectedAt}">
+                                                            Chưa xử lí
                                                         </c:if>
                                                     </td>
                                                 </tr>
-                                                <tr>
-                                                    <th>Lý do từ chối</th>
-                                                    <td>
-                                                        <c:out value="${transaction.rejectionReason}"
-                                                            default="Không có" />
-                                                    </td>
-                                                </tr>
+                                                <c:if test="${not empty transaction.rejectedAt}">
+                                                    <tr>
+                                                        <th>Lý do từ chối</th>
+                                                        <td>
+                                                            <c:out value="${transaction.rejectionReason}"
+                                                                default="Không có" />
+                                                        </td>
+                                                    </tr>
+                                                </c:if>
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 mb-3 d-flex gap-2 flex-wrap">
                                     <c:if test="${transaction.status.name() == 'PENDING'}">
                                         <form action="/admin/transaction/confirm/${transaction.transactionId}"
-                                            method="get">
+                                            method="post">
                                             <button type="submit" class="btn btn-success"
                                                 onclick="return confirm('Bạn có chắc muốn xác nhận giao dịch này?')">Xác
                                                 nhận</button>
                                         </form>
-
-                                        <!-- Nút Từ chối -->
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                            data-bs-target="#rejectModal">
-                                            Từ chối
-                                        </button>
-
-                                        <!-- Modal nhập lý do từ chối -->
+                                            data-bs-target="#rejectModal">Từ chối</button>
                                         <div class="modal fade" id="rejectModal" tabindex="-1"
                                             aria-labelledby="rejectModalLabel" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <form action="/admin/transaction/reject/${transaction.transactionId}"
-                                                    method="get">
+                                                    method="post" id="rejectForm">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="rejectModalLabel">Nhập lý do từ
@@ -233,6 +227,8 @@
                                                                     chối:</label>
                                                                 <textarea class="form-control" id="rejectionReason"
                                                                     name="rejectionReason" rows="4" required></textarea>
+                                                                <div class="invalid-feedback" id="feedback">Lý do từ
+                                                                    chối phải từ 5 đến 1000 ký tự.</div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -245,23 +241,46 @@
                                                 </form>
                                             </div>
                                         </div>
-
                                     </c:if>
                                     <a href="/admin/transaction" class="btn btn-primary">Quay lại</a>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Footer -->
                 <footer>
                     <jsp:include page="../layout/footer.jsp" />
                 </footer>
-
-                <!-- Bootstrap JS -->
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const form = document.getElementById('rejectForm');
+                        const textarea = document.getElementById('rejectionReason');
+                        const feedback = document.getElementById('feedback');
+
+                        form.addEventListener('submit', function (event) {
+                            event.preventDefault(); // Prevent default submission
+                            const value = textarea.value.trim();
+                            const isValid = value.length >= 5 && value.length <= 1000;
+
+                            if (!isValid) {
+                                textarea.classList.add('is-invalid');
+                                feedback.style.display = 'block';
+                            } else {
+                                textarea.classList.remove('is-invalid');
+                                feedback.style.display = 'none';
+                                form.submit(); // Proceed with form submission
+                            }
+                        });
+
+                        // Clear validation state when modal is closed
+                        document.getElementById('rejectModal').addEventListener('hidden.bs.modal', function () {
+                            textarea.classList.remove('is-invalid');
+                            feedback.style.display = 'none';
+                            textarea.value = ''; // Clear textarea
+                        });
+                    });
+                </script>
             </body>
 
             </html>

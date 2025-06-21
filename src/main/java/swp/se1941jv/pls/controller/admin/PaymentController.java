@@ -16,7 +16,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import swp.se1941jv.pls.entity.Package;
@@ -103,7 +105,7 @@ public class PaymentController {
         return "admin/transaction/detail";
     }
 
-    @GetMapping("/admin/transaction/confirm/{id}")
+    @PostMapping("/admin/transaction/confirm/{id}")
     public String confirmTransaction(Model model, @PathVariable long id, HttpSession session) {
         Optional<Transaction> transactionOptional = this.transactionService.findById(id);
         if (transactionOptional.isPresent()) {
@@ -128,6 +130,28 @@ public class PaymentController {
             }
             transaction.setStatus(TransactionStatus.APPROVED);
             transaction.setConfirmedAt(LocalDateTime.now());
+            transaction.setProcessedBy(user);
+            transactionService.save(transaction);
+        }
+        return "redirect:/admin/transaction";
+    }
+
+    @PostMapping("/admin/transaction/reject/{id}")
+    public String rejectTransaction(Model model, @PathVariable long id, HttpSession session,
+            @RequestParam(required = false) String rejectionReason,
+            RedirectAttributes redirectAttributes) {
+        Optional<Transaction> transactionOptional = this.transactionService.findById(id);
+        if (rejectionReason == null || rejectionReason.trim().length() < 5 || rejectionReason.trim().length() > 1000) {
+            redirectAttributes.addFlashAttribute("error", "Lý do từ chối phải từ 5 đến 1000 ký tự.");
+            return "redirect:/admin/transaction";
+        }
+        if (transactionOptional.isPresent()) {
+            Transaction transaction = transactionOptional.get();
+            User user = this.userService.getUserById((long) session.getAttribute("id"));
+
+            transaction.setRejectionReason(rejectionReason.trim());
+            transaction.setStatus(TransactionStatus.REJECTED);
+            transaction.setRejectedAt(LocalDateTime.now());
             transaction.setProcessedBy(user);
             transactionService.save(transaction);
         }
