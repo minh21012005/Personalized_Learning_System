@@ -91,13 +91,13 @@
                                         <!-- Bộ lọc -->
                                         <form action="/transaction/history" method="get" class="mb-3">
                                             <div class="row g-2 align-items-end">
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <label for="transferCode" class="form-label">Mã giao dịch</label>
                                                     <input type="text" id="transferCode" name="transferCode"
                                                         value="${param.transferCode}"
                                                         class="form-control form-control-sm" placeholder="Nhập mã...">
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <label for="status" class="form-label">Trạng thái</label>
                                                     <select name="status" id="status"
                                                         class="form-select form-select-sm">
@@ -111,10 +111,21 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2">
+                                                    <label for="fromDate" class="form-label">Từ ngày</label>
+                                                    <input type="date" id="fromDate" name="fromDate"
+                                                        value="${param.fromDate}" class="form-control form-control-sm">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label for="toDate" class="form-label">Đến ngày</label>
+                                                    <input type="date" id="toDate" name="toDate" value="${param.toDate}"
+                                                        class="form-control form-control-sm">
+                                                </div>
+                                                <div class="col-md-2">
                                                     <button type="submit" class="btn btn-dark btn-sm w-100">Lọc</button>
                                                 </div>
                                             </div>
                                         </form>
+
 
                                         <!-- Bảng giao dịch -->
                                         <div class="table-responsive">
@@ -184,7 +195,7 @@
                                                                 </c:choose>
                                                             </td>
                                                             <td>
-                                                                <a href="/user/transaction/${transaction.transactionId}"
+                                                                <a href="/transaction/history/${transaction.transactionId}"
                                                                     class="btn btn-sm btn-outline-primary">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>

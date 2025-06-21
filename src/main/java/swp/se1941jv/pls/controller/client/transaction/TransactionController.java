@@ -2,6 +2,7 @@ package swp.se1941jv.pls.controller.client.transaction;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -181,6 +183,27 @@ public class TransactionController {
         model.addAttribute("transactions", transactions);
         return "client/profile/transaction_history";
     }
+
+    @GetMapping("transaction/history/{id}")
+    public String getDetailTransactionHistoryPage(Model model, HttpSession session, @PathVariable long id) {
+        Optional<Transaction> transactionOptional = this.transactionService.findById(id);
+        if (!transactionOptional.isPresent()) {
+            return "error/404";
+        }
+        Transaction transaction = transactionOptional.get();
+        model.addAttribute("transaction", transaction);
+        return "client/profile/transaction_detail";
+    }
+
+    // if (fromDate != null) {
+    // predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"),
+    // fromDate.atStartOfDay()));
+    // }
+
+    // if (toDate != null) {
+    // predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"),
+    // toDate.atTime(LocalTime.MAX)));
+    // }
 
     private boolean isImageFile(String contentType) {
         return contentType != null &&

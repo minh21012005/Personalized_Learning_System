@@ -51,7 +51,11 @@
 
                     $('.nav-link').each(function () {
                         const href = $(this).attr('href');
-                        if (currentPath === href || (href === '/student/profile' && currentPath === '/parent/profile')) {
+                        if (
+                            currentPath === href ||
+                            (href === '/student/profile' && currentPath === '/parent/profile') ||
+                            (href === '/transaction/history' && currentPath.startsWith('/transaction/history'))
+                        ) {
                             $(this).addClass('active');
                         }
                     });
