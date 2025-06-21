@@ -501,6 +501,8 @@
     </div>
 </div>
 
+<script src="${pageContext.request.contextPath}/js/client_notification.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const menu = document.querySelector(".menu");

@@ -129,7 +129,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
         userNotificationRepository.saveAll(userNotifications);
         logger.info("Saved {} UserNotification records for Notification ID: {}", userNotifications.size(), finalNotification.getNotificationId());
-        
+
         return savedNotification;
     }
 

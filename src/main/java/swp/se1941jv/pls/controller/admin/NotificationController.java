@@ -106,7 +106,7 @@ public class NotificationController {
         model.addAttribute("pageTitle", "Danh sách thông báo");
 
         try {
-            Sort sort = Sort.by(Sort.Direction.DESC, "notificationId"); 
+            Sort sort = Sort.by(Sort.Direction.DESC, "notificationId");
             Pageable pageable = PageRequest.of(page, size, sort);
             Page<Notification> notificationPage = notificationService.getAllNotificationsPageable(keyword, filterTargetType, pageable);
 
@@ -136,16 +136,15 @@ public class NotificationController {
                 model.addAttribute("pageTitle", "Sửa thông báo");
                 populateFormModelAttributes(model);
                 Notification notification = notificationOpt.get();
-                model.addAttribute("isEditMode", true); 
+                model.addAttribute("isEditMode", true);
                 model.addAttribute("notificationId", notification.getNotificationId());
                 model.addAttribute("title", notification.getTitle());
                 model.addAttribute("content", notification.getContent());
                 model.addAttribute("link", notification.getLink());
                 model.addAttribute("thumbnail", notification.getThumbnail());
-                model.addAttribute("selectedTargetType", notification.getTargetType()); 
-                model.addAttribute("selectedTargetValues", Collections.emptyList()); 
-                
-                model.addAttribute("formAction", "/admin/notification/edit/" + id); 
+                model.addAttribute("selectedTargetType", notification.getTargetType());
+                model.addAttribute("selectedTargetValues", Collections.emptyList());
+                model.addAttribute("formAction", "/admin/notification/edit/" + id);
                 model.addAttribute("contentPage", "form_content.jsp");
                 return "admin/notification/show";
             } else {
@@ -163,24 +162,24 @@ public class NotificationController {
     public String processUpdateNotification(@PathVariable("id") Long id,
                                          @RequestParam String title, @RequestParam String content,
                                          @RequestParam String link, @RequestParam(required = false) String thumbnail,
-                                         
+
                                          RedirectAttributes redirectAttributes, Model model) {
         logger.info("Processing update for notification ID: {}", id);
 
-        
+
         if (title == null || title.trim().isEmpty()) model.addAttribute("errorMessage", "Tiêu đề không được để trống!");
         else if (content == null || content.trim().isEmpty()) model.addAttribute("errorMessage", "Nội dung không được để trống!");
         else if (link == null || link.trim().isEmpty()) model.addAttribute("errorMessage", "Link không được để trống!");
-        
+
         if (model.containsAttribute("errorMessage")) {
              logger.warn("Validation failed for updating notification ID {}: {}", id, model.getAttribute("errorMessage"));
             model.addAttribute("pageTitle", "Sửa thông báo (Lỗi)");
-            populateFormModelAttributes(model); // Vẫn cần nếu form có select box chung
+            populateFormModelAttributes(model);
             model.addAttribute("isEditMode", true);
             model.addAttribute("notificationId", id);
             model.addAttribute("title", title); model.addAttribute("content", content);
             model.addAttribute("link", link); model.addAttribute("thumbnail", thumbnail);
-            // Lấy lại targetType của notification hiện tại để hiển thị, không cho sửa
+
              Optional<Notification> currentNotifOpt = notificationService.findNotificationById(id);
              currentNotifOpt.ifPresent(n -> model.addAttribute("selectedTargetType", n.getTargetType()));
 
@@ -193,7 +192,7 @@ public class NotificationController {
             notificationService.updateNotification(id, title, content, link, thumbnail);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông báo thành công!");
             return "redirect:/admin/notification/show";
-        } catch (IllegalArgumentException ex) { // Ví dụ: ID không tìm thấy từ service
+        } catch (IllegalArgumentException ex) {
             handleServiceException(ex, "Sửa thông báo (Lỗi)", model, title, content, link, thumbnail, null, null, true, id, "/admin/notification/edit/" + id);
         } catch (Exception ex) {
             handleGenericException(ex, "Sửa thông báo (Lỗi)", "cập nhật", model, title, content, link, thumbnail, null, null, true, id, "/admin/notification/edit/" + id);
@@ -207,10 +206,10 @@ public class NotificationController {
         try {
             notificationService.deleteNotificationById(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa thông báo thành công!");
-        } catch (IllegalArgumentException ex) { 
+        } catch (IllegalArgumentException ex) {
              logger.warn("Error deleting notification ID {}: {}", id, ex.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        } 
+        }
         catch (Exception e) {
             logger.error("Error deleting notification ID: " + id, e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa thông báo.");
@@ -218,9 +217,9 @@ public class NotificationController {
         return "redirect:/admin/notification/show";
     }
 
-   
+
     private void populateFormModelAttributes(Model model) {
-        String formErrorAccumulator = ""; 
+        String formErrorAccumulator = "";
 
         try {
             List<User> users = notificationService.getTargetableUsersForForm();
@@ -228,7 +227,7 @@ public class NotificationController {
             logger.debug("Populated 'allUsers' with {} entries for notification form.", users.size());
         } catch (Exception e) {
             logger.error("Error populating users for notification form", e);
-            model.addAttribute("allUsers", Collections.emptyList()); 
+            model.addAttribute("allUsers", Collections.emptyList());
             formErrorAccumulator += "Lỗi khi tải danh sách Người dùng. ";
         }
 
@@ -262,7 +261,7 @@ public class NotificationController {
             formErrorAccumulator += "Lỗi khi tải danh sách Vai trò.";
         }
 
-       
+
         if (!formErrorAccumulator.isEmpty()) {
             model.addAttribute("formErrorMessage", formErrorAccumulator.trim());
         }
@@ -276,7 +275,7 @@ public class NotificationController {
         if (targetValue == null || targetValue.isEmpty()) { model.addAttribute("errorMessage", "Vui lòng chọn ít nhất một giá trị cho đối tượng nhận!"); return false; }
         return true;
     }
-    
+
     private void setEmptyPageAttributes(Model model, int size, String keyword, String filterTargetType) {
         model.addAttribute("notificationList", Collections.emptyList());
         model.addAttribute("totalPages", 0);
@@ -314,7 +313,7 @@ public class NotificationController {
         model.addAttribute("isEditMode", isEditMode);
         if (isEditMode) {
             model.addAttribute("notificationId", notificationId);
-             
+
             if (targetType == null && notificationId != null) {
                  Optional<Notification> currentNotifOpt = notificationService.findNotificationById(notificationId);
                  currentNotifOpt.ifPresent(n -> model.addAttribute("selectedTargetType", n.getTargetType()));

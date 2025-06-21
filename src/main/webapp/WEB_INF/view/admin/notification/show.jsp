@@ -135,8 +135,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
-            
-            <%-- 
+
+            <%--
                 Include nội dung chính (list_content.jsp hoặc form_content.jsp)
                 Controller sẽ truyền biến 'contentPage' với giá trị là tên file JSP (ví dụ: "list_content.jsp")
                 VÀ 'pageTitle' cho tiêu đề.
