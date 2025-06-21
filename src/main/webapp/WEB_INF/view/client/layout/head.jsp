@@ -9,12 +9,25 @@
             <script src="https://unpkg.com/lucide@latest"></script>
             <link rel="stylesheet" href="/css/head.css">
             <!-- Bootstrap CSS -->
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+                integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+                crossorigin="anonymous">
             <!-- Font Awesome -->
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+                integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+                crossorigin="anonymous" referrerpolicy="no-referrer" />
             <!-- Bootstrap Icons -->
             <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-            <!-- Custom CSS -->
+            <!-- Custom CSS for Dropdown -->
+            <style>
+                .avatar {
+                    cursor: pointer;
+                }
+
+                .dropdown-menu {
+                    min-width: 160px;
+                }
+            </style>
         </head>
 
         <body>
@@ -64,13 +77,25 @@
                             <c:if test="${sessionScope.role eq 'PARENT'}">
                                 <a href="/invite/create"><i data-lucide="user-plus" class="action-icon"></i></a>
                             </c:if>
-                            <div class="avatar">
-                                <span class="avatar-text">J</span>
+                            <div class="dropdown">
+                                <div class="avatar" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="avatar-text">J</span>
+                                </div>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="/transaction/history">Lịch sử giao dịch</a></li>
+                                    <li><a class="dropdown-item" href="/learning/stats">Thống kê học tập</a></li>
+                                    <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </header>
+
+            <!-- Bootstrap JS -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+                crossorigin="anonymous"></script>
             <script>
                 // Initialize Lucide icons
                 lucide.createIcons();

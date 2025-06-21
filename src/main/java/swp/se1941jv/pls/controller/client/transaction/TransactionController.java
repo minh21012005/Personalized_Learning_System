@@ -173,6 +173,15 @@ public class TransactionController {
         return "client/checkout/confirm";
     }
 
+    @GetMapping("/transaction/history")
+    public String getTransactionHistoryPage(Model model, HttpSession session) {
+
+        User user = this.userService.getUserById((long) session.getAttribute("id"));
+        List<Transaction> transactions = user.getTransactions();
+        model.addAttribute("transactions", transactions);
+        return "client/profile/transaction_history";
+    }
+
     private boolean isImageFile(String contentType) {
         return contentType != null &&
                 (contentType.equals("image/png") ||
