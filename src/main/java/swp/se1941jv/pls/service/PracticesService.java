@@ -6,10 +6,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.config.SecurityUtils;
-import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
-import swp.se1941jv.pls.dto.response.LessonResponseDTO;
-import swp.se1941jv.pls.dto.response.PackagePracticeDTO;
-import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
+import swp.se1941jv.pls.dto.request.AnswerOptionDto;
+import swp.se1941jv.pls.dto.response.*;
+import swp.se1941jv.pls.entity.QuestionBank;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.entity.UserPackage;
@@ -19,6 +18,7 @@ import swp.se1941jv.pls.repository.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +29,8 @@ public class PracticesService {
 
     UserPackageRepository userPackageRepository;
     SubjectRepository subjectRepository;
+    QuestionBankRepository questionBankRepository;
+    QuestionService questionService;
 
     @PreAuthorize("hasAnyRole('STUDENT')")
     public List<PackagePracticeDTO> getPackagePractices() {
@@ -170,6 +172,63 @@ public class PracticesService {
 
 
         return chapterResponseDTOS;
+    }
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public List<QuestionBank> generateInitialQuestions(List<Long> lessionIds) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        // Fetch questions from the question bank based on chapter IDs
+        List<QuestionBank> questions = questionBankRepository.findByLessonIdsIn(lessionIds);
+//
+//        // Shuffle the questions to randomize them
+        Collections.shuffle(questions);
+//
+//        // Limit to the first 5 questions
+        return questions.stream().limit(5).collect(Collectors.toList());
+    }
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public List<QuestionDisplayDto> generateQuestionsFirst(List<Long> lessonIds) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        // Fetch questions from the question bank based on lesson IDs
+        List<QuestionBank> questions = questionBankRepository.findByLessonIdsIn(lessonIds);
+
+        // Shuffle the questions to randomize them
+        Collections.shuffle(questions);
+
+        // Limit to the specified number of questions
+        List<QuestionBank> selectedQuestions = questions.stream().limit(5).collect(Collectors.toList());
+
+        return selectedQuestions.stream()
+                .map(question -> {
+                    try {
+                        return QuestionDisplayDto.builder()
+                                .questionId(question.getQuestionId())
+                                .content(question.getContent())
+                                .image(question.getImage())
+                                .options(questionService.getQuestionOptions(question).stream()
+                                        .map(AnswerOptionDto::getText)
+                                        .collect(Collectors.toList()))
+                                .build();
+                    } catch (Exception e) {
+                        // Log the error and return a default DTO or handle appropriately
+                        return QuestionDisplayDto.builder()
+                                .questionId(question.getQuestionId())
+                                .content("Error loading question")
+                                .image(null)
+                                .options(new ArrayList<>())
+                                .build();
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
 }

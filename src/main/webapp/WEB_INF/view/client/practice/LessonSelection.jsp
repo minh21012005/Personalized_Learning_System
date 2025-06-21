@@ -215,23 +215,23 @@
                         <label for="questionCount">Số lượng câu hỏi:</label>
                         <input type="number" id="questionCount" name="questionCount" value="30" min="1" max="100" style="width: 80px;">
                         <label for="timePerQuestion">Thời gian mỗi câu (phút):</label>
-                        <input type="number" id="timePerQuestion" name="timePerQuestion" value="1" min="1" max="10" style="width: 80px;" >
+                        <input type="number" id="timePerQuestion" name="timePerQuestion" value="1" min="1" max="10" style="width: 80px;">
                     </div>
                     <div class="option-buttons" id="optionButtons">
                         <button type="button" class="btn-timed" formaction="/practices/start-practice?timed=true" formmethod="post">Luyện tập có thời gian</button>
                         <button type="button" class="btn-untimed" formaction="/practices/start-practice?timed=false" formmethod="post">Luyện tập không thời gian</button>
                     </div>
                     <form action="/practices/start-practice" method="post" id="practiceForm" style="display: none;">
-                        <%--                <input type="hidden" name="packageId" value="${package.packageId}">--%>
+<%--                        <input type="hidden" name="packageId" value="${package.packageId}">--%>
                         <input type="hidden" name="questionCount" id="hiddenQuestionCount">
                         <input type="hidden" name="timePerQuestion" id="hiddenTimePerQuestion">
+                        <input type="hidden" name="allLessonIds" id="hiddenAllLessonIds">
                     </form>
                 </div>
                 <div class="col-md-4">
                     <img src="/img/subjectImg/${subject.subjectImage != null ? subject.subjectImage : '/img/default-subject.jpg'}" alt="Lesson Image" class="w-full h-full object-cover">
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -285,6 +285,17 @@
                 var questionCount = $('#questionCount').val();
                 var timePerQuestion = $('#timePerQuestion').val();
                 var timed = $(this).hasClass('btn-timed');
+
+                // Collect all lessonIds from selected chapters
+                var allLessonIds = [];
+                $('input[name="chapterIds"]:checked').each(function() {
+                    var chapterId = $(this).val();
+                    $('#lessonIds_' + chapterId + ' input[type="checkbox"]').each(function() {
+                        allLessonIds.push($(this).val());
+                    });
+                });
+                $('#hiddenAllLessonIds').val(allLessonIds.join(','));
+
                 $('#hiddenQuestionCount').val(questionCount);
                 $('#hiddenTimePerQuestion').val(timed ? timePerQuestion : 0);
                 form.attr('action', '/practices/start-practice?timed=' + timed);

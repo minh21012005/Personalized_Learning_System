@@ -19,6 +19,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -79,11 +80,6 @@ public class QuestionService {
         }
         if (correctCount >= optionTexts.size()) {
             throw new IllegalArgumentException("Chỉ được phép có tối đa " + (optionTexts.size() - 1) + " đáp án đúng.");
-        }
-
-        // Set default values if not provided
-        if (question.getAnswer() == null) {
-            question.setAnswer("");
         }
 
         // Set question type (assuming multiple-choice type has ID 1)
@@ -230,10 +226,6 @@ public class QuestionService {
             throw new IllegalArgumentException("Chỉ được phép có tối đa " + (optionTexts.size() - 1) + " đáp án đúng.");
         }
 
-        // Set default values if not provided
-        if (question.getAnswer() == null) {
-            question.setAnswer("");
-        }
 
         // Handle image upload or retain existing
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -281,26 +273,4 @@ public class QuestionService {
         }
         questionBankRepository.delete(question);
     }
-
-    public List<QuestionBank> getRandomQuestions(Long subjectId, List<Long> chapterIds, List<Long> lessonIds, List<Long> levelIds, int count) throws Exception {
-        Specification<QuestionBank> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            predicates.add(cb.equal(root.get("subject").get("subjectId"), subjectId));
-            if (!chapterIds.isEmpty()) {
-                predicates.add(root.get("chapter").get("chapterId").in(chapterIds));
-            }
-            if (!lessonIds.isEmpty()) {
-                predicates.add(root.get("lesson").get("lessonId").in(lessonIds));
-            }
-            if (!levelIds.isEmpty()) {
-                predicates.add(root.get("levelQuestion").get("levelQuestionId").in(levelIds));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        List<QuestionBank> questions = questionBankRepository.findAll(spec);
-        Collections.shuffle(questions);
-        return questions.subList(0, Math.min(count, questions.size()));
-    }
-
 }

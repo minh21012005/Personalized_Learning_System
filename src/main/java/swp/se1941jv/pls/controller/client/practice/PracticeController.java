@@ -17,6 +17,7 @@ import swp.se1941jv.pls.service.QuestionService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 public class PracticeController {
 
     private final PracticesService practicesService;
-
+    private final QuestionService questionService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('STUDENT')")
@@ -79,6 +80,42 @@ public class PracticeController {
 
         return "client/practice/LessonSelection";
     }
+
+    @PostMapping("/start-practice")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String startPracticeWithLessons(
+                                           @RequestParam(value = "timed", required = false) Boolean timed,
+                                           @RequestParam(value = "questionCount", defaultValue = "30") Integer questionCount,
+                                           @RequestParam(value = "timePerQuestion", defaultValue = "0") Integer timePerQuestion,
+                                           @RequestParam(value = "allLessonIds", required = false) String allLessonIds,
+                                           Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        // Parse allLessonIds into a List<Long> if provided
+        List<Long> allLessonIdsList = (allLessonIds != null && !allLessonIds.isEmpty())
+                ? Arrays.stream(allLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
+                : new ArrayList<>();
+
+//        // Generate initial 5 random questions
+        List<QuestionDisplayDto> initialQuestions = practicesService.generateQuestionsFirst(allLessonIdsList);
+
+        model.addAttribute("questions", initialQuestions);
+        model.addAttribute("lessonIds", allLessonIds); // Selected lessonIds for immediate practice
+        model.addAttribute("allLessonIds", allLessonIdsList); // All lessonIds for context
+//        model.addAttribute("packageId", packageId);
+        model.addAttribute("timed", timed != null && timed);
+        model.addAttribute("questionCount", questionCount);
+        model.addAttribute("timePerQuestion", timePerQuestion);
+        model.addAttribute("userId", userId);
+
+        return "client/practice/PracticeSession";
+    }
+
+
 
 
 }
