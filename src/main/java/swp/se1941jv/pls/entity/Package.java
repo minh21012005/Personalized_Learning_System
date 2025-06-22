@@ -15,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "package")
 @Data
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -61,6 +60,9 @@ public class Package extends BaseEntity {
 
     @OneToMany(mappedBy = "pkg")
     List<CartPackage> cartPackages;
+
+    @ManyToMany(mappedBy = "packages")
+    private List<Transaction> transactions;
 
     @ManyToOne()
     @JoinColumn(name = "grade_id")

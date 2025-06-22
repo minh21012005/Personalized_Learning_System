@@ -450,9 +450,7 @@ figure {
 }
 
 img,
-svg {
-  vertical-align: middle;
-}
+svg {}
 
 table {
   caption-side: bottom;
