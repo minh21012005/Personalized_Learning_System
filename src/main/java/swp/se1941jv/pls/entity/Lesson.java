@@ -19,6 +19,24 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString(exclude = {"questions", "subjectTests", "test", "chapter"})
 public class Lesson extends BaseEntity {
+
+    public enum LessonStatus {
+        DRAFT("Bản nháp"),
+        PENDING("Chờ xử lí "),
+        APPROVED("Chấp nhận"),
+        REJECTED("Từ chối");
+
+        private final String description;
+
+        LessonStatus(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lesson_id")
@@ -46,6 +64,10 @@ public class Lesson extends BaseEntity {
 
     @Column(name = "materials_json", columnDefinition = "TEXT")
     private String materialsJson;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "lesson_status", columnDefinition = "VARCHAR(20) DEFAULT 'DRAFT'")
+    LessonStatus lessonStatus;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")

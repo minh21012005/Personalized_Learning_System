@@ -147,7 +147,7 @@
                     </c:if>
                 </td>
                 <td>
-                    <a href="<c:url value='/admin/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1" >
+                    <a href="<c:url value='/staff/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1" >
                         <i class="fas fa-eye"></i> View
                     </a>
                     <a href="<c:url value='/admin/subject/edit/${subject.subjectId}'/>" class="btn btn-sm btn-warning me-1" title="<spring:message code="button.edit"/>">

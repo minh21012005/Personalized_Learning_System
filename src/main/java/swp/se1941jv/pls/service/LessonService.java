@@ -29,54 +29,86 @@ public class LessonService {
     private final ObjectMapper objectMapper;
 
     /**
-     * Lưu hoặc cập nhật bài học từ entity.
-     *
-     * @param lesson Entity chứa thông tin bài học
-     * @throws ValidationException nếu dữ liệu đầu vào không hợp lệ
-     * @throws DuplicateNameException nếu tên bài học đã tồn tại
-     * @throws NotFoundException nếu bài học không tồn tại khi cập nhật
+     * Tạo bài học mới.
      */
     @Transactional
-    public void saveLesson(Lesson lesson) {
-        if (lesson == null) {
-            throw new ValidationException("Dữ liệu bài học không được để trống");
+    public void createLesson(Lesson lesson) {
+        if (lesson == null || lesson.getChapter() == null || lesson.getChapter().getChapterId() == null) {
+            throw new ValidationException("Dữ liệu bài học không hợp lệ");
         }
-        if (lesson.getChapter() == null || lesson.getChapter().getChapterId() == null) {
-            throw new ValidationException("ID chương không hợp lệ");
-        }
-
         Long chapterId = lesson.getChapter().getChapterId();
-        // Kiểm tra tên bài học trùng lặp
-        if (lessonRepository.existsByLessonNameAndChapter_ChapterId(lesson.getLessonName(), chapterId)) {
-            if (lesson.getLessonId() == null ||
-                    !lessonRepository.findById(lesson.getLessonId())
-                            .map(l -> l.getLessonName().equals(lesson.getLessonName()))
-                            .orElse(false)) {
-                throw new DuplicateNameException("Tên bài học đã tồn tại trong chương này");
-            }
-        }
 
-        if (lesson.getLessonId() != null && !lessonRepository.existsById(lesson.getLessonId())) {
-            throw new NotFoundException("Bài học không tồn tại");
+        if (lessonRepository.existsByLessonNameAndChapter_ChapterId(lesson.getLessonName(), chapterId)) {
+            throw new DuplicateNameException("Tên bài học đã tồn tại trong chương này");
         }
 
         try {
             lessonRepository.save(lesson);
-            log.info("Lesson saved: lessonId={}", lesson.getLessonId());
+            log.info("Lesson created: lessonId={}", lesson.getLessonId());
         } catch (Exception e) {
-            log.error("Failed to save lesson: {}", e.getMessage(), e);
-            throw new ApplicationException("SAVE_ERROR", "Lỗi khi lưu bài học", e);
+            log.error("Failed to create lesson: {}", e.getMessage(), e);
+            throw new ApplicationException("CREATE_ERROR", "Lỗi khi tạo bài học", e);
+        }
+    }
+
+    /**
+     * Cập nhật bài học hiện có.
+     */
+    @Transactional
+    public void updateLesson(Lesson lesson) {
+        if (lesson == null || lesson.getLessonId() == null || lesson.getChapter() == null || lesson.getChapter().getChapterId() == null) {
+            throw new ValidationException("Dữ liệu bài học không hợp lệ");
+        }
+        Long chapterId = lesson.getChapter().getChapterId();
+
+        if (!lessonRepository.existsById(lesson.getLessonId())) {
+            throw new NotFoundException("Bài học không tồn tại");
+        }
+
+        if (lessonRepository.existsByLessonNameAndChapter_ChapterId(lesson.getLessonName(), chapterId) &&
+                !lessonRepository.findById(lesson.getLessonId())
+                        .map(l -> l.getLessonName().equals(lesson.getLessonName()))
+                        .orElse(false)) {
+            throw new DuplicateNameException("Tên bài học đã tồn tại trong chương này");
+        }
+
+        try {
+            lessonRepository.save(lesson);
+            log.info("Lesson updated: lessonId={}", lesson.getLessonId());
+        } catch (Exception e) {
+            log.error("Failed to update lesson: {}", e.getMessage(), e);
+            throw new ApplicationException("UPDATE_ERROR", "Lỗi khi cập nhật bài học", e);
+        }
+    }
+
+    /**
+     * Nộp bài học (chuyển trạng thái từ DRAFT sang PENDING).
+     */
+    @Transactional
+    public void submitLesson(Long lessonId) {
+        if (lessonId == null || lessonId <= 0) {
+            throw new ValidationException("ID bài học không hợp lệ");
+        }
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new NotFoundException("Bài học không tồn tại"));
+
+        if (lesson.getLessonStatus() != Lesson.LessonStatus.DRAFT) {
+            throw new ApplicationException("SUBMIT_ERROR", "Bài học không ở trạng thái DRAFT");
+        }
+
+        try {
+            lesson.setLessonStatus(Lesson.LessonStatus.PENDING);
+            lessonRepository.save(lesson);
+            log.info("Lesson submitted: lessonId={}", lessonId);
+        } catch (Exception e) {
+            log.error("Failed to submit lesson: {}", e.getMessage(), e);
+            throw new ApplicationException("SUBMIT_ERROR", "Lỗi khi nộp bài học", e);
         }
     }
 
     /**
      * Tìm danh sách bài học theo chapterId, tên, và trạng thái với dữ liệu cơ bản.
-     *
-     * @param chapterId ID của chương
-     * @param lessonName Tên bài học (tùy chọn)
-     * @param status Trạng thái (tùy chọn)
-     * @return Danh sách LessonResponseDTO với dữ liệu cơ bản
-     * @throws ValidationException nếu chapterId không hợp lệ
      */
     public List<LessonResponseDTO> findLessonsByChapterId(Long chapterId, String lessonName, Boolean status) {
         if (chapterId == null || chapterId <= 0) {
@@ -99,6 +131,10 @@ public class LessonService {
                             .videoSrc(lesson.getVideoSrc())
                             .videoTime(lesson.getVideoTime())
                             .status(lesson.getStatus())
+                            .lessonStatus(LessonResponseDTO.LessonStatusDTO.builder()
+                                    .statusCode(lesson.getLessonStatus().name())
+                                    .description(lesson.getLessonStatus().getDescription())
+                                    .build())
                             .build())
                     .toList();
         } catch (Exception e) {
@@ -109,9 +145,6 @@ public class LessonService {
 
     /**
      * Lấy thông tin bài học theo ID dưới dạng entity.
-     *
-     * @param lessonId ID của bài học
-     * @return Optional chứa Lesson entity
      */
     public Optional<Lesson> getLessonById(Long lessonId) {
         if (lessonId == null || lessonId <= 0) {
@@ -122,11 +155,6 @@ public class LessonService {
 
     /**
      * Lấy thông tin bài học theo ID dưới dạng DTO đầy đủ.
-     *
-     * @param lessonId ID của bài học
-     * @return LessonResponseDTO
-     * @throws NotFoundException nếu bài học không tồn tại
-     * @throws ValidationException nếu lessonId không hợp lệ
      */
     public LessonResponseDTO getLessonResponseById(Long lessonId) {
         if (lessonId == null || lessonId <= 0) {
@@ -151,16 +179,16 @@ public class LessonService {
                 .videoSrc(lesson.getVideoSrc())
                 .videoTime(lesson.getVideoTime())
                 .status(lesson.getStatus())
+                .lessonStatus(LessonResponseDTO.LessonStatusDTO.builder()
+                        .statusCode(lesson.getLessonStatus().name())
+                        .description(lesson.getLessonStatus().getDescription())
+                        .build())
                 .materials(materials)
                 .build();
     }
 
     /**
      * Cập nhật trạng thái của nhiều bài học.
-     *
-     * @param lessonIds Danh sách ID bài học
-     * @throws ValidationException nếu danh sách lessonIds không hợp lệ
-     * @throws NotFoundException nếu không tìm thấy bài học
      */
     @Transactional
     public void toggleLessonsStatus(List<Long> lessonIds) {

@@ -34,7 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     User findByEmailVerifyToken(String token);
 
-
+    List<User> findByRole_RoleName(String roleName);
 
 
 

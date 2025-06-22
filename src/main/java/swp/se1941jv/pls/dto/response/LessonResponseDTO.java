@@ -12,16 +12,19 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LessonResponseDTO {
     Long lessonId;
-
     String lessonName;
-
     String lessonDescription;
-
     String videoSrc;
-
     String videoTime;
-
     Boolean status;
-
+    LessonStatusDTO lessonStatus;
     List<String> materials;
+
+    @Data
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+    public static class LessonStatusDTO {
+        String statusCode;
+        String description;
+    }
 }

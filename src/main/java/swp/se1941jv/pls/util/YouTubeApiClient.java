@@ -40,7 +40,7 @@ public class YouTubeApiClient {
      * Lấy thời lượng video từ YouTube API.
      *
      * @param videoId ID của video
-     * @return Thời lượng video định dạng "X tiếng Y phút Z giây" hoặc null nếu lỗi
+     * @return Thời lượng video định dạng " phút Z giâX tiếng Yy" hoặc null nếu lỗi
      */
     public String getVideoDuration(String videoId) {
         try {
@@ -57,6 +57,7 @@ public class YouTubeApiClient {
             String duration = items.get(0).get("contentDetails").get("duration").asText();
             return formatDuration(duration);
         } catch (Exception e) {
+            System.out.printf("Error fetching video duration for ID %s: %s%n", e.getMessage());
             return null;
         }
     }
