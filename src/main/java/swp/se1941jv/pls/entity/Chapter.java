@@ -22,6 +22,24 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString(exclude = {"subjectTests", "test", "lessons"})
 public class Chapter extends BaseEntity {
+
+    public enum ChapterStatus {
+        DRAFT("Bản nháp"),
+        PENDING("Chờ xử lí"),
+        APPROVED("Chấp nhận"),
+        REJECTED("Từ chối");
+
+        private final String description;
+
+        ChapterStatus(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chapter_id")
@@ -39,6 +57,10 @@ public class Chapter extends BaseEntity {
 
     @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT TRUE")
     Boolean status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "chapter_status", columnDefinition = "VARCHAR(20) DEFAULT 'DRAFT'")
+    ChapterStatus chapterStatus;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")

@@ -200,4 +200,16 @@ public class UserService {
         this.saveUser(user);
     }
 
+    public String getUserFullName(Long userId) {
+        if (userId == null || userId <= 0) {
+            return "Unknown";
+        }
+        return userRepository.findById(userId)
+                .map(User::getFullName)
+                .orElse("Unknown");
+    }
+
+    public List<User> findContentManagers() {
+        return userRepository.findByRole_RoleName("CONTENT_MANAGER");
+    }
 }
