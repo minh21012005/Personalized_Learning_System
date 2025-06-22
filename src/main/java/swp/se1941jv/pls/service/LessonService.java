@@ -188,6 +188,20 @@ public class LessonService {
     }
 
     /**
+     * Lấy danh sách bài học đã được phê duyệt (APPROVED) của một chương.
+     */
+    public List<LessonResponseDTO> getApprovedLessonsByChapterId(Long chapterId) {
+        if (chapterId == null || chapterId <= 0) {
+            throw new ValidationException("ID chương không hợp lệ");
+        }
+
+        // Gọi findLessonsByChapterId và lọc theo trạng thái APPROVED
+        return findLessonsByChapterId(chapterId, null, null).stream()
+                .filter(lesson -> "APPROVED".equals(lesson.getLessonStatus().getStatusCode()))
+                .toList();
+    }
+
+    /**
      * Cập nhật trạng thái của nhiều bài học.
      */
     @Transactional

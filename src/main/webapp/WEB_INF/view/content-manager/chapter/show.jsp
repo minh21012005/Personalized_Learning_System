@@ -262,7 +262,22 @@
                                             <td class="text-center col-subject">${chapter.subjectName}</td>
                                             <td class="text-center col-user">${chapter.userFullName}</td>
                                             <td class="text-center col-date">${chapter.updatedAt}</td>
-                                            <td class="text-center col-status"><span class="badge bg-warning">${chapter.chapterStatus.description}</span></td>
+                                            <td class="text-center col-status">
+                                                <c:choose>
+                                                    <c:when test="${chapter.chapterStatus.statusCode == 'DRAFT'}">
+                                                        <span class="badge bg-warning">${chapter.chapterStatus.description}</span>
+                                                    </c:when>
+                                                    <c:when test="${chapter.chapterStatus.statusCode == 'PENDING'}">
+                                                        <span class="badge bg-primary">${chapter.chapterStatus.description}</span>
+                                                    </c:when>
+                                                    <c:when test="${chapter.chapterStatus.statusCode == 'APPROVED'}">
+                                                        <span class="badge bg-success">${chapter.chapterStatus.description}</span>
+                                                    </c:when>
+                                                    <c:when test="${chapter.chapterStatus.statusCode == 'REJECTED'}">
+                                                        <span class="badge bg-danger">${chapter.chapterStatus.description}</span>
+                                                    </c:when>
+                                            </c:choose>
+                                            </td>
                                             <td class="text-center col-active"><span class="badge ${chapter.status ? 'bg-success' : 'bg-danger'}">${chapter.status ? 'Đang hoạt động' : 'Không hoạt động'}</span></td>
                                             <td class="text-center col-action">
                                                 <div class="d-flex gap-2 d-flex flex-column align-items-center justify-content-center">

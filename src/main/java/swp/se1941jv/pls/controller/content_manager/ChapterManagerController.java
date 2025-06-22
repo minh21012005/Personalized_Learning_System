@@ -10,11 +10,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
+import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
-import swp.se1941jv.pls.dto.response.UserReponseDTO;
+import swp.se1941jv.pls.dto.response.UserResponseDTO;
 import swp.se1941jv.pls.exception.ApplicationException;
 import swp.se1941jv.pls.exception.ValidationException;
 import swp.se1941jv.pls.service.ChapterService;
+import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
 import swp.se1941jv.pls.service.UserService;
 
@@ -30,6 +32,7 @@ public class ChapterManagerController {
     private final ChapterService chapterService;
     private final SubjectService subjectService;
     private final UserService userService;
+    private final LessonService lessonService;
 
     /**
      * Render JSP ban đầu cho quản lý chương.
@@ -55,8 +58,8 @@ public class ChapterManagerController {
                     .toList();
 
             // Lấy danh sách người dùng CONTENT_MANAGER
-            List<UserReponseDTO> contentManagers = userService.findContentManagers().stream()
-                    .map(user -> UserReponseDTO.builder()
+            List<UserResponseDTO> contentManagers = userService.findContentManagers().stream()
+                    .map(user -> UserResponseDTO.builder()
                             .userId(user.getUserId())
                             .fullName(user.getFullName())
                             .build())
@@ -110,10 +113,6 @@ public class ChapterManagerController {
                     chapterService.rejectChapter(chapterId);
                     redirectAttributes.addFlashAttribute("successMessage", "Từ chối chương thành công");
                     break;
-                case "DRAFT":
-                    chapterService.cancelChapter(chapterId);
-                    redirectAttributes.addFlashAttribute("successMessage", "Đưa chương về trạng thái chờ thành công");
-                    break;
                 default:
                     throw new ValidationException("Trạng thái không hợp lệ: " + newStatus);
             }
@@ -125,5 +124,34 @@ public class ChapterManagerController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái chương");
         }
         return "redirect:/admin/chapters";
+    }
+
+    /**
+     * Xem chi tiết một chapter.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{chapterId}/detail")
+    public String showChapterDetail(@PathVariable Long chapterId, Model model) {
+        try {
+            // Lấy thông tin chi tiết chapter dưới dạng DTO từ ChapterService
+            ChapterResponseDTO chapterResponse = chapterService.getChapterResponseByChapterId(chapterId);
+            if (chapterResponse == null) {
+                throw new ApplicationException("ERROR", "Không tìm thấy chapter với ID: " + chapterId);
+            }
+            // Lấy danh sách bài học có trạng thái APPROVED
+            List<LessonResponseDTO> lessons = lessonService.getApprovedLessonsByChapterId(chapterId);
+
+            model.addAttribute("chapter", chapterResponse);
+            model.addAttribute("lessons", lessons);
+            return "content-manager/chapter/detail";
+        } catch (ApplicationException e) {
+            log.error("Error fetching chapter detail: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/chapters";
+        } catch (Exception e) {
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Lỗi khi tải chi tiết chương");
+            return "redirect:/admin/chapters";
+        }
     }
 }
