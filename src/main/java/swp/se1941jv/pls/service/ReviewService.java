@@ -6,14 +6,19 @@ import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.PackageSubject;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.entity.ReviewStatus;
+import swp.se1941jv.pls.entity.Transaction;
+import swp.se1941jv.pls.entity.TransactionStatus;
 import swp.se1941jv.pls.repository.ReviewRepository;
 import swp.se1941jv.pls.repository.UserPackageRepository;
 import swp.se1941jv.pls.repository.PackageSubjectRepository;
+import swp.se1941jv.pls.repository.TransactionRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
@@ -21,12 +26,16 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserPackageRepository userPackageRepository;
     private final PackageSubjectRepository packageSubjectRepository;
+    private final TransactionRepository transactionRepository;
+    @Autowired
+    private UserService userService;
 
     public ReviewService(ReviewRepository reviewRepository, UserPackageRepository userPackageRepository,
-            PackageSubjectRepository packageSubjectRepository) {
+            PackageSubjectRepository packageSubjectRepository, TransactionRepository transactionRepository) {
         this.reviewRepository = reviewRepository;
         this.userPackageRepository = userPackageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public List<Review> getReviewsByPackage(Long packageId) {
@@ -34,14 +43,15 @@ public class ReviewService {
     }
 
     public List<Review> getReviewsBySubject(Long subjectId) {
-        return reviewRepository.findBySubject_SubjectId(subjectId); // Có thể thêm lọc status nếu cần
+        return reviewRepository.findBySubject_SubjectId(subjectId);
     }
 
     public boolean canUserReviewPackage(Long userId, Long packageId) {
         if (userId == null || packageId == null) {
             return false;
         }
-        return userPackageRepository.existsByUser_UserIdAndPkg_PackageId(userId, packageId);
+        return transactionRepository.existsByUser_UserIdAndPackages_PackageIdAndStatus(userId, packageId,
+                TransactionStatus.APPROVED);
     }
 
     public boolean canUserReviewSubject(Long userId, Long subjectId, Long packageId) {
@@ -53,7 +63,10 @@ public class ReviewService {
         if (packageSubject == null || !packageSubject.getSubject().getIsActive()) {
             return false;
         }
-        return userPackageRepository.existsByUser_UserIdAndPkg_PackageId(userId, packageId);
+        User user = userService.getUserById(userId);
+        return user != null && "ROLE_STUDENT".equals(user.getRole()) &&
+                transactionRepository.existsByUser_UserIdAndPackages_PackageIdAndStatus(userId, packageId,
+                        TransactionStatus.APPROVED);
     }
 
     public List<Review> getReviewsByPackageAndFilters(Long packageId, String comment, Integer rating) {
@@ -82,8 +95,15 @@ public class ReviewService {
     }
 
     @Transactional
-    public void incrementUsefulCount(Long reviewId) {
-        reviewRepository.incrementUsefulCount(reviewId);
+    public void toggleUsefulCount(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        if (review.getUsefulCount() > 0) {
+            review.setUsefulCount(review.getUsefulCount() - 1);
+        } else {
+            review.setUsefulCount(review.getUsefulCount() + 1);
+        }
+        reviewRepository.save(review);
     }
 
     public boolean hasUserReviewedPackage(Long userId, Long packageId) {

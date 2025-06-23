@@ -2,6 +2,7 @@ package swp.se1941jv.pls.repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,18 +27,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Query("UPDATE Review r SET r.usefulCount = r.usefulCount + 1 WHERE r.reviewId = :reviewId")
         void incrementUsefulCount(Long reviewId);
 
-        // Lọc review APPROVED theo packageId
+        @EntityGraph(attributePaths = { "user" })
         List<Review> findByPkg_PackageIdAndStatus(Long packageId, ReviewStatus status);
 
-        // Lọc review APPROVED theo packageId, status và comment
+        @EntityGraph(attributePaths = { "user" })
         List<Review> findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCase(Long packageId, ReviewStatus status,
                         String comment);
 
-        // Lọc review APPROVED theo packageId, status, comment và rating
+        @EntityGraph(attributePaths = { "user" })
         List<Review> findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCaseAndRating(Long packageId,
                         ReviewStatus status, String comment, Integer rating);
 
-        // Lọc review APPROVED theo packageId, status và rating
+        @EntityGraph(attributePaths = { "user" })
         List<Review> findByPkg_PackageIdAndStatusAndRating(Long packageId, ReviewStatus status, Integer rating);
 
         // Phương thức để lấy review mới nhất (hoặc duy nhất) của người dùng cho một
