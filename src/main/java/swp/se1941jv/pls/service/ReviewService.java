@@ -1,0 +1,103 @@
+package swp.se1941jv.pls.service;
+
+import swp.se1941jv.pls.entity.Review;
+import swp.se1941jv.pls.entity.User;
+import swp.se1941jv.pls.entity.Package;
+import swp.se1941jv.pls.entity.PackageSubject;
+import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.entity.ReviewStatus;
+import swp.se1941jv.pls.repository.ReviewRepository;
+import swp.se1941jv.pls.repository.UserPackageRepository;
+import swp.se1941jv.pls.repository.PackageSubjectRepository;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final UserPackageRepository userPackageRepository;
+    private final PackageSubjectRepository packageSubjectRepository;
+
+    public ReviewService(ReviewRepository reviewRepository, UserPackageRepository userPackageRepository,
+            PackageSubjectRepository packageSubjectRepository) {
+        this.reviewRepository = reviewRepository;
+        this.userPackageRepository = userPackageRepository;
+        this.packageSubjectRepository = packageSubjectRepository;
+    }
+
+    public List<Review> getReviewsByPackage(Long packageId) {
+        return reviewRepository.findByPkg_PackageIdAndStatus(packageId, ReviewStatus.APPROVED);
+    }
+
+    public List<Review> getReviewsBySubject(Long subjectId) {
+        return reviewRepository.findBySubject_SubjectId(subjectId); // Có thể thêm lọc status nếu cần
+    }
+
+    public boolean canUserReviewPackage(Long userId, Long packageId) {
+        if (userId == null || packageId == null) {
+            return false;
+        }
+        return userPackageRepository.existsByUser_UserIdAndPkg_PackageId(userId, packageId);
+    }
+
+    public boolean canUserReviewSubject(Long userId, Long subjectId, Long packageId) {
+        if (userId == null || subjectId == null || packageId == null) {
+            return false;
+        }
+        PackageSubject packageSubject = packageSubjectRepository.findByPkg_PackageIdAndSubject_SubjectId(packageId,
+                subjectId);
+        if (packageSubject == null || !packageSubject.getSubject().getIsActive()) {
+            return false;
+        }
+        return userPackageRepository.existsByUser_UserIdAndPkg_PackageId(userId, packageId);
+    }
+
+    public List<Review> getReviewsByPackageAndFilters(Long packageId, String comment, Integer rating) {
+        if (comment != null && !comment.isEmpty() && rating != null) {
+            return reviewRepository.findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCaseAndRating(
+                    packageId, ReviewStatus.APPROVED, comment, rating);
+        } else if (comment != null && !comment.isEmpty()) {
+            return reviewRepository.findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCase(
+                    packageId, ReviewStatus.APPROVED, comment);
+        } else if (rating != null) {
+            return reviewRepository.findByPkg_PackageIdAndStatusAndRating(
+                    packageId, ReviewStatus.APPROVED, rating);
+        }
+        return getReviewsByPackage(packageId);
+    }
+
+    public Review saveReview(Review review, User user, Package pkg, Subject subject) {
+        if (user == null || (pkg == null && subject == null) || (pkg != null && subject != null)) {
+            throw new IllegalArgumentException("Invalid review data");
+        }
+        review.setUser(user);
+        review.setPkg(pkg);
+        review.setSubject(subject);
+        review.setStatus(ReviewStatus.PENDING);
+        return reviewRepository.save(review);
+    }
+
+    @Transactional
+    public void incrementUsefulCount(Long reviewId) {
+        reviewRepository.incrementUsefulCount(reviewId);
+    }
+
+    public boolean hasUserReviewedPackage(Long userId, Long packageId) {
+        return reviewRepository.existsByUser_UserIdAndPkg_PackageId(userId, packageId);
+    }
+
+    public boolean hasPendingOrApprovedReview(Long userId, Long packageId) {
+        List<Review> reviews = reviewRepository.findByUser_UserIdAndPkg_PackageId(userId, packageId);
+        return reviews.stream().anyMatch(
+                review -> review.getStatus() == ReviewStatus.PENDING || review.getStatus() == ReviewStatus.APPROVED);
+    }
+
+    public ReviewStatus getLatestReviewStatusForUser(Long userId, Long packageId) {
+        Review review = reviewRepository.findTopByUser_UserIdAndPkg_PackageIdOrderByCreatedAtDesc(userId, packageId);
+        return (review != null) ? review.getStatus() : null;
+    }
+}
