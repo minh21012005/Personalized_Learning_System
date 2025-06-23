@@ -102,46 +102,6 @@ public class ChapterService {
     }
 
     /**
-     * Lấy danh sách chương theo chapterStatus với phân trang và sắp xếp.
-     */
-    public Page<ChapterResponseDTO> findChaptersByChapterStatus(
-            String status,
-            int page,
-            int size) {
-        if (page < 0 || size <= 0) {
-            throw new ValidationException("Thông số phân trang không hợp lệ");
-        }
-
-        Chapter.ChapterStatus chapterStatus;
-        try {
-            chapterStatus = status == null ? null : Chapter.ChapterStatus.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Trạng thái không hợp lệ: " + status);
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Chapter> chapters;
-        if (chapterStatus == null) {
-            chapters = chapterRepository.findAll(pageable);
-        } else {
-            chapters = chapterRepository.findByChapterStatus(chapterStatus, pageable);
-        }
-
-        return chapters.map(chapter -> ChapterResponseDTO.builder()
-                .chapterId(chapter.getChapterId())
-                .chapterName(chapter.getChapterName())
-                .chapterDescription(chapter.getChapterDescription())
-                .status(chapter.getStatus())
-                .chapterStatus(ChapterResponseDTO.ChapterStatusDTO.builder()
-                        .statusCode(chapter.getChapterStatus().name())
-                        .description(chapter.getChapterStatus().getDescription())
-                        .build())
-                .listLesson(new ArrayList<>())
-                .build());
-    }
-
-
-    /**
      * Nộp chương (chuyển trạng thái từ DRAFT sang PENDING).
      */
     @Transactional
@@ -372,6 +332,34 @@ public class ChapterService {
             throw new ValidationException("ID chương không hợp lệ");
         }
         return chapterRepository.findById(chapterId);
+    }
+
+
+    /**
+     * Lấy thông tin chương dưới dạng DTO đầy đủ theo ID.
+     */
+    public ChapterResponseDTO getChapterResponseByChapterId(Long chapterId) {
+        if (chapterId == null || chapterId <= 0) {
+            throw new ValidationException("ID chương không hợp lệ");
+        }
+
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new NotFoundException("Chương không tồn tại"));
+
+        return ChapterResponseDTO.builder()
+                .chapterId(chapter.getChapterId())
+                .chapterName(chapter.getChapterName())
+                .chapterDescription(chapter.getChapterDescription())
+                .status(chapter.getStatus())
+                .chapterStatus(ChapterResponseDTO.ChapterStatusDTO.builder()
+                        .statusCode(chapter.getChapterStatus().name())
+                        .description(chapter.getChapterStatus().getDescription())
+                        .build())
+                .subjectName(chapter.getSubject() != null ? chapter.getSubject().getSubjectName() : null)
+                .userCreated(chapter.getUserCreated())
+                .userFullName(chapter.getUserCreated() != null ? userService.getUserFullName(chapter.getUserCreated()) : null)
+                .updatedAt(chapter.getUpdatedAt())
+                .build();
     }
 
     /**
