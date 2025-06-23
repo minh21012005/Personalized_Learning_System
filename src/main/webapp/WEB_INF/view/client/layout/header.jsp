@@ -501,6 +501,18 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    window.APP_CONTEXT_PATH = "${pageContext.request.contextPath}";
+    <c:if test="${_csrf != null}">
+        window.CSRF_HEADER_NAME = "${_csrf.parameterName}"; 
+        window.CSRF_TOKEN = "${_csrf.token}"; 
+    </c:if>
+</script>
+
 <script src="${pageContext.request.contextPath}/js/client_notification.js"></script>
 
 <script>
@@ -510,7 +522,7 @@
         const closeMenuBtn = document.querySelector(".menu .close-menu-btn");
 
         if (menu && openMenuBtn && closeMenuBtn) {
-            // Initialize menu state
+
             if (window.location.pathname !== "${pageContext.request.contextPath}/") {
                 menu.classList.remove("open");
             }
@@ -527,18 +539,7 @@
                     this.closest(".dropdown").classList.toggle("active");
                 });
             });
-
-            // Ensure dropdowns work on page load
-            const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-            dropdownToggles.forEach(toggle => {
-                toggle.addEventListener('click', function (e) {
-                    const dropdown = document.querySelector(this.getAttribute('aria-controls') || this.nextElementSibling);
-                    if (dropdown) {
-                        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-                        this.setAttribute('aria-expanded', dropdown.style.display === 'block');
-                    }
-                });
-            });
         }
     });
 </script>
+
