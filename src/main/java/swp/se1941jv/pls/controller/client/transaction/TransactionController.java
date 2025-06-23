@@ -187,7 +187,7 @@ public class TransactionController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "5") int size,
             Model model,
             HttpSession session) {
 
@@ -212,16 +212,6 @@ public class TransactionController {
         model.addAttribute("transaction", transaction);
         return "client/profile/transaction_detail";
     }
-
-    // if (fromDate != null) {
-    // predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"),
-    // fromDate.atStartOfDay()));
-    // }
-
-    // if (toDate != null) {
-    // predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"),
-    // toDate.atTime(LocalTime.MAX)));
-    // }
 
     private boolean isImageFile(String contentType) {
         return contentType != null &&
