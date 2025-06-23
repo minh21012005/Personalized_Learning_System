@@ -101,8 +101,9 @@
                                                     <td>
                                                         <div class="d-flex flex-wrap gap-1">
                                                             <c:forEach var="pkg" items="${transaction.packages}">
-                                                                <span
-                                                                    class="badge bg-secondary text-wrap">${pkg.name}</span>
+                                                                <a href="/parent/course/detail/${pkg.packageId}"
+                                                                    style="text-decoration: none;" target="_blank"><span
+                                                                        class="badge bg-secondary text-wrap">${pkg.name}</span></a>
                                                             </c:forEach>
                                                         </div>
                                                     </td>
@@ -123,7 +124,7 @@
                                                     <th>Ngày thanh toán</th>
                                                     <td>
                                                         <fmt:formatDate value="${transaction.createdAtAsUtilDate}"
-                                                            pattern="dd/MM/yyyy HH:mm" />
+                                                            pattern="dd/MM/yyyy HH:mm:ss" />
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -174,11 +175,11 @@
                                                     <td>
                                                         <c:if test="${not empty transaction.confirmedAt}">
                                                             <fmt:formatDate value="${transaction.confirmedAtAsDate}"
-                                                                pattern="dd/MM/yyyy HH:mm" />
+                                                                pattern="dd/MM/yyyy HH:mm:ss" />
                                                         </c:if>
                                                         <c:if test="${not empty transaction.rejectedAt}">
                                                             <fmt:formatDate value="${transaction.rejectedAtAsDate}"
-                                                                pattern="dd/MM/yyyy HH:mm" />
+                                                                pattern="dd/MM/yyyy HH:mm:ss" />
                                                         </c:if>
                                                         <c:if
                                                             test="${empty transaction.confirmedAt and empty transaction.rejectedAt}">

@@ -169,11 +169,11 @@
                                         <span class="detail-value">
                                             <c:if test="${not empty transaction.confirmedAt}">
                                                 <fmt:formatDate value="${transaction.confirmedAtAsDate}"
-                                                    pattern="dd/MM/yyyy HH:mm" />
+                                                    pattern="dd/MM/yyyy HH:mm:ss" />
                                             </c:if>
                                             <c:if test="${not empty transaction.rejectedAt}">
                                                 <fmt:formatDate value="${transaction.rejectedAtAsDate}"
-                                                    pattern="dd/MM/yyyy HH:mm" />
+                                                    pattern="dd/MM/yyyy HH:mm:ss" />
                                             </c:if>
                                             <c:if
                                                 test="${empty transaction.confirmedAt and empty transaction.rejectedAt}">

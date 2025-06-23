@@ -75,7 +75,7 @@
                         }
 
                         .col-transfer-code {
-                            width: 12.5%;
+                            width: 15%;
                             min-width: 120px;
                             word-break: break-word;
                         }
@@ -99,7 +99,7 @@
                         }
 
                         .col-created-at {
-                            width: 14%;
+                            width: 16%;
                             min-width: 140px;
                             white-space: nowrap;
                         }
@@ -162,7 +162,7 @@
                         </div>
                         <div class="content">
                             <main>
-                                <div class="container-fluid px-4">
+                                <div class="container-fluid">
                                     <div class="mt-4">
                                         <div class="row col-12 mx-auto">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -305,7 +305,8 @@
                                                                     <c:forEach var="pkg"
                                                                         items="${transaction.packages}">
                                                                         <a href="/parent/course/detail/${pkg.packageId}"
-                                                                            style="text-decoration: none;">
+                                                                            style="text-decoration: none;"
+                                                                            target="_blank">
                                                                             <span
                                                                                 class="badge bg-secondary d-inline-block">${pkg.name}</span>
                                                                         </a>
@@ -320,7 +321,7 @@
                                                             <td class="col-created-at text-center">
                                                                 <fmt:formatDate
                                                                     value="${transaction.createdAtAsUtilDate}"
-                                                                    pattern="dd/MM/yyyy HH:mm" />
+                                                                    pattern="dd/MM/yyyy HH:mm:ss" />
                                                             </td>
                                                             <td class="col-status text-center">
                                                                 <c:choose>

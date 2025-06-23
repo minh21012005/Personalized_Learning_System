@@ -89,21 +89,21 @@
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Lịch sử mua khóa học của bạn</h2>
                             <!-- Filter Section -->
                             <form action="/transaction/history" method="get"
-                                class="filter-section bg-white p-6 rounded-xl shadow-md mb-6">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                                class="filter-section bg-white p-4 rounded-xl shadow-md mb-6">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                     <div>
-                                        <label for="transferCode" class="block text-sm font-medium text-gray-700">Mã
+                                        <label for="transferCode" class="block text-xs font-medium text-gray-700">Mã
                                             giao dịch</label>
                                         <input type="text" id="transferCode" name="transferCode"
                                             value="${param.transferCode}"
-                                            class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500"
+                                            class="mt-1 w-full p-1.5 text-sm border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500"
                                             placeholder="Nhập mã...">
                                     </div>
                                     <div>
-                                        <label for="status" class="block text-sm font-medium text-gray-700">Trạng
+                                        <label for="status" class="block text-xs font-medium text-gray-700">Trạng
                                             thái</label>
                                         <select name="status" id="status"
-                                            class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500">
+                                            class="mt-1 w-full p-1.5 text-sm border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500">
                                             <option value="">Tất cả</option>
                                             <option value="APPROVED" ${param.status=='APPROVED' ? 'selected' : '' }>
                                                 Thành công</option>
@@ -113,91 +113,96 @@
                                                 chối</option>
                                         </select>
                                     </div>
-                                    <div>
-                                        <label for="fromDate" class="block text-sm font-medium text-gray-700">Từ
+                                    <div class="w-[110px]">
+                                        <label for="fromDate" class="block text-xs font-medium text-gray-700">Từ
                                             ngày</label>
                                         <input type="date" id="fromDate" name="fromDate" value="${param.fromDate}"
-                                            class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500">
+                                            class="mt-1 w-full p-1.5 text-sm border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500">
                                     </div>
-                                    <div>
-                                        <label for="toDate" class="block text-sm font-medium text-gray-700">Đến
+                                    <div class="w-[110px]">
+                                        <label for="toDate" class="block text-xs font-medium text-gray-700">Đến
                                             ngày</label>
                                         <input type="date" id="toDate" name="toDate" value="${param.toDate}"
-                                            class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500">
+                                            class="mt-1 w-full p-1.5 text-sm border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500">
                                     </div>
-                                    <div class="flex items-end">
+                                    <div class="w-[70px] flex items-end">
                                         <button type="submit"
-                                            class="w-full p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">Lọc</button>
+                                            class="w-full p-1.5 text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">Lọc</button>
                                     </div>
                                 </div>
                             </form>
                             <!-- Transaction List -->
                             <c:forEach var="transaction" items="${transactions}">
-                                <div class="transaction-card bg-white p-6 rounded-xl shadow-md mb-4">
-                                    <div class="flex justify-between items-center">
-                                        <div class="text-lg font-semibold text-gray-800">Mã: ${transaction.transferCode}
+                                <div class="transaction-card bg-white p-4 rounded-xl shadow-md mb-4">
+                                    <div class="flex flex-row gap-4">
+                                        <!-- Left Column -->
+                                        <div class="flex-1">
+                                            <div class="text-lg font-semibold text-gray-800">Mã:
+                                                ${transaction.transferCode}</div>
+                                            <div class="mt-2 text-gray-600 text-sm">
+                                                <p><strong>Số tiền:</strong>
+                                                    <c:choose>
+                                                        <c:when test="${transaction.amount % 1 == 0}">
+                                                            <fmt:formatNumber value="${transaction.amount}"
+                                                                type="number" groupingUsed="true"
+                                                                maxFractionDigits="0" /> ₫
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <fmt:formatNumber value="${transaction.amount}"
+                                                                type="number" groupingUsed="true" minFractionDigits="2"
+                                                                maxFractionDigits="2" /> ₫
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </p>
+                                                <p><strong>Ngày thanh toán:</strong>
+                                                    <fmt:formatDate value="${transaction.createdAtAsUtilDate}"
+                                                        pattern="dd/MM/yyyy HH:mm:ss" />
+                                                </p>
+                                                <p><strong>Khóa học:</strong>
+                                                    <c:forEach var="pkg" items="${transaction.packages}">
+                                                        <a href="/parent/course/detail/${pkg.packageId}"
+                                                            class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs hover:bg-gray-200 transition"
+                                                            target="_blank">${pkg.name}</a>
+                                                    </c:forEach>
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div class="text-sm">
-                                            <c:choose>
-                                                <c:when test="${transaction.status == 'APPROVED'}">
-                                                    <span
-                                                        class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full">
-                                                        <i class="fas fa-check-circle mr-1"></i> Thành công
-                                                    </span>
-                                                </c:when>
-                                                <c:when test="${transaction.status == 'PENDING'}">
-                                                    <span
-                                                        class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                                                        <i class="fas fa-hourglass-half mr-1"></i> Chờ xử lý
-                                                    </span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span
-                                                        class="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full">
-                                                        <i class="fas fa-times-circle mr-1"></i> Từ chối
-                                                    </span>
-                                                </c:otherwise>
-                                            </c:choose>
+                                        <!-- Right Column -->
+                                        <div class="flex flex-col justify-between items-end w-40">
+                                            <div class="text-sm">
+                                                <c:choose>
+                                                    <c:when test="${transaction.status == 'APPROVED'}">
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                                                            <i class="fas fa-check-circle mr-1"></i> Thành công
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${transaction.status == 'PENDING'}">
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                                                            <i class="fas fa-hourglass-half mr-1"></i> Chờ xử lý
+                                                        </span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full">
+                                                            <i class="fas fa-times-circle mr-1"></i> Từ chối
+                                                        </span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <a href="/transaction/history/${transaction.transactionId}"
+                                                class="inline-flex items-center px-3 py-1 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition">
+                                                Xem chi tiết <i class="fas fa-eye ml-2"></i>
+                                            </a>
                                         </div>
-                                    </div>
-                                    <div class="mt-3 text-gray-600 text-sm">
-                                        <p><strong>Số tiền:</strong>
-                                            <c:choose>
-                                                <c:when test="${transaction.amount % 1 == 0}">
-                                                    <fmt:formatNumber value="${transaction.amount}" type="number"
-                                                        groupingUsed="true" maxFractionDigits="0" /> ₫
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <fmt:formatNumber value="${transaction.amount}" type="number"
-                                                        groupingUsed="true" minFractionDigits="2"
-                                                        maxFractionDigits="2" /> ₫
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </p>
-                                        <p><strong>Ngày thanh toán:</strong>
-                                            <fmt:formatDate value="${transaction.createdAtAsUtilDate}"
-                                                pattern="dd/MM/yyyy HH:mm:ss" />
-                                        </p>
-                                        <p><strong>Khóa học:</strong>
-                                            <c:forEach var="pkg" items="${transaction.packages}">
-                                                <a href="/package/${pkg.packageId}"
-                                                    class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs hover:bg-gray-200 transition"
-                                                    target="_blank">${pkg.name}</a>
-                                            </c:forEach>
-                                        </p>
-                                    </div>
-                                    <div class="mt-4 text-right">
-                                        <a href="/transaction/history/${transaction.transactionId}"
-                                            class="inline-flex items-center px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">
-                                            Xem chi tiết <i class="fas fa-eye ml-2"></i>
-                                        </a>
                                     </div>
                                 </div>
                             </c:forEach>
                             <c:if test="${empty transactions}">
-                                <div class="text-center text-gray-500 mt-8">
+                                <div class="text-center text-gray-600 mt-8">
                                     <i class="fas fa-box-open text-4xl mb-2"></i>
-                                    <p>Bạn chưa có giao dịch nào.</p>
+                                    <p>Không tìm thấy giao dịch nào.</p>
                                 </div>
                             </c:if>
                             <!-- Pagination -->
