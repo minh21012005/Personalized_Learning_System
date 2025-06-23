@@ -13,8 +13,10 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import swp.se1941jv.pls.entity.Transaction;
 import swp.se1941jv.pls.entity.TransactionStatus;
+import swp.se1941jv.pls.entity.User;
 
 public class TransactionSpecification {
+
     public static Specification<Transaction> filterTransactions(
             String transferCode,
             String email,
@@ -56,6 +58,33 @@ public class TransactionSpecification {
                 LocalDateTime start = createdAt.atStartOfDay();
                 LocalDateTime end = createdAt.atTime(LocalTime.MAX);
                 predicates.add(cb.between(root.get("createdAt"), start, end));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<Transaction> filterForUser(User user, String transferCode, String status,
+            LocalDate fromDate, LocalDate toDate) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("user"), user));
+
+            if (transferCode != null && !transferCode.isBlank()) {
+                predicates.add(
+                        cb.like(cb.lower(root.get("transferCode")), "%" + transferCode.toLowerCase().trim() + "%"));
+            }
+
+            if (status != null && !status.isBlank()) {
+                predicates.add(cb.equal(root.get("status"), TransactionStatus.valueOf(status)));
+            }
+
+            if (fromDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), fromDate.atStartOfDay()));
+            }
+
+            if (toDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), toDate.atTime(23, 59, 59)));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
