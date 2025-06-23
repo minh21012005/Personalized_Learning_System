@@ -2,6 +2,7 @@ package swp.se1941jv.pls.controller.client.transaction;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,6 +10,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -176,11 +182,23 @@ public class TransactionController {
     }
 
     @GetMapping("/transaction/history")
-    public String getTransactionHistoryPage(Model model, HttpSession session) {
+    public String getTransactionHistoryPage(@RequestParam(required = false) String transferCode,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model,
+            HttpSession session) {
 
         User user = this.userService.getUserById((long) session.getAttribute("id"));
-        List<Transaction> transactions = user.getTransactions();
-        model.addAttribute("transactions", transactions);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Transaction> transactions = transactionService.filterUserTransactions(user, transferCode, status, fromDate,
+                toDate, pageable);
+
+        model.addAttribute("transactions", transactions.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", transactions.getTotalPages());
         return "client/profile/transaction_history";
     }
 
@@ -194,16 +212,6 @@ public class TransactionController {
         model.addAttribute("transaction", transaction);
         return "client/profile/transaction_detail";
     }
-
-    // if (fromDate != null) {
-    // predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"),
-    // fromDate.atStartOfDay()));
-    // }
-
-    // if (toDate != null) {
-    // predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"),
-    // toDate.atTime(LocalTime.MAX)));
-    // }
 
     private boolean isImageFile(String contentType) {
         return contentType != null &&

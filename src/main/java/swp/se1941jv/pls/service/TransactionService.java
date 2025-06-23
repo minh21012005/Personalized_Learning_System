@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import swp.se1941jv.pls.entity.Transaction;
+import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.repository.TransactionRepository;
 import swp.se1941jv.pls.service.specification.TransactionSpecification;
 
@@ -40,9 +41,16 @@ public class TransactionService {
 
     public Page<Transaction> getFilteredTransactions(String transferCode, String email, String studentEmail,
             List<Long> packageIds,
-            String status, LocalDate createdAt, Pageable pageable) {
+            String status, LocalDate fromDate, LocalDate toDate, Pageable pageable) {
         Specification<Transaction> spec = TransactionSpecification.filterTransactions(
-                transferCode, email, studentEmail, packageIds, status, createdAt);
+                transferCode, email, studentEmail, packageIds, status, fromDate, toDate);
+        return transactionRepository.findAll(spec, pageable);
+    }
+
+    public Page<Transaction> filterUserTransactions(User user, String transferCode, String status, LocalDate fromDate,
+            LocalDate toDate, Pageable pageable) {
+        Specification<Transaction> spec = TransactionSpecification.filterForUser(user, transferCode, status, fromDate,
+                toDate);
         return transactionRepository.findAll(spec, pageable);
     }
 }

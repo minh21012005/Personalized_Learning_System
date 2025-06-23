@@ -75,7 +75,7 @@
                         }
 
                         .col-transfer-code {
-                            width: 12.5%;
+                            width: 15%;
                             min-width: 120px;
                             word-break: break-word;
                         }
@@ -99,7 +99,7 @@
                         }
 
                         .col-created-at {
-                            width: 14%;
+                            width: 16%;
                             min-width: 140px;
                             white-space: nowrap;
                         }
@@ -162,7 +162,7 @@
                         </div>
                         <div class="content">
                             <main>
-                                <div class="container-fluid px-4">
+                                <div class="container-fluid">
                                     <div class="mt-4">
                                         <div class="row col-12 mx-auto">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -224,7 +224,8 @@
                                                                 </select>
                                                             </div>
                                                             <div>
-                                                                <label for="status" class="fw-bold">Trạng thái:</label>
+                                                                <label for="status" class="fw-bold">Trạng
+                                                                    thái:</label>
                                                                 <select name="status" id="status" class="form-select">
                                                                     <option value="">Tất cả</option>
                                                                     <option value="APPROVED" ${param.status=='APPROVED'
@@ -236,7 +237,8 @@
                                                                 </select>
                                                             </div>
                                                             <div>
-                                                                <label for="sort" class="fw-bold">Sắp xếp theo:</label>
+                                                                <label for="sort" class="fw-bold">Sắp xếp
+                                                                    theo:</label>
                                                                 <select name="sort" id="sort" class="form-select">
                                                                     <option value="">Mặc định</option>
                                                                     <option value="createdAtDesc"
@@ -251,11 +253,20 @@
                                                                         ? 'selected' : '' }>Giá giảm dần</option>
                                                                 </select>
                                                             </div>
-                                                            <div>
-                                                                <label for="createdAt" class="fw-bold">Ngày thanh
-                                                                    toán:</label>
-                                                                <input type="date" id="createdAt" name="createdAt"
-                                                                    class="form-control" value="${param.createdAt}" />
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label for="fromDate" class="fw-bold">Từ
+                                                                        ngày:</label>
+                                                                    <input type="date" id="fromDate" name="fromDate"
+                                                                        class="form-control"
+                                                                        value="${param.fromDate}" />
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label for="toDate" class="fw-bold">Đến
+                                                                        ngày:</label>
+                                                                    <input type="date" id="toDate" name="toDate"
+                                                                        class="form-control" value="${param.toDate}" />
+                                                                </div>
                                                             </div>
                                                             <button type="submit" class="btn btn-outline-primary">Áp
                                                                 dụng lọc</button>
@@ -294,7 +305,8 @@
                                                                     <c:forEach var="pkg"
                                                                         items="${transaction.packages}">
                                                                         <a href="/parent/course/detail/${pkg.packageId}"
-                                                                            style="text-decoration: none;">
+                                                                            style="text-decoration: none;"
+                                                                            target="_blank">
                                                                             <span
                                                                                 class="badge bg-secondary d-inline-block">${pkg.name}</span>
                                                                         </a>
@@ -309,7 +321,7 @@
                                                             <td class="col-created-at text-center">
                                                                 <fmt:formatDate
                                                                     value="${transaction.createdAtAsUtilDate}"
-                                                                    pattern="dd/MM/yyyy HH:mm" />
+                                                                    pattern="dd/MM/yyyy HH:mm:ss" />
                                                             </td>
                                                             <td class="col-status text-center">
                                                                 <c:choose>
@@ -436,9 +448,13 @@
                                                     <c:set var="queryString"
                                                         value="${queryString}&sort=${param.sort}" />
                                                 </c:if>
-                                                <c:if test="${not empty param.createdAt}">
+                                                <c:if test="${not empty param.fromDate}">
                                                     <c:set var="queryString"
-                                                        value="${queryString}&createdAt=${param.createdAt}" />
+                                                        value="${queryString}&fromDate=${param.fromDate}" />
+                                                </c:if>
+                                                <c:if test="${not empty param.toDate}">
+                                                    <c:set var="queryString"
+                                                        value="${queryString}&toDate=${param.toDate}" />
                                                 </c:if>
                                                 <c:if test="${totalPage > 1}">
                                                     <nav aria-label="Page navigation example">
