@@ -20,6 +20,7 @@ import java.util.List;
 @ToString(exclude = {"questions", "subjectTests", "test", "chapter"})
 public class Lesson extends BaseEntity {
 
+    @Getter
     public enum LessonStatus {
         DRAFT("Bản nháp"),
         PENDING("Chờ xử lí "),
@@ -32,9 +33,6 @@ public class Lesson extends BaseEntity {
             this.description = description;
         }
 
-        public String getDescription() {
-            return description;
-        }
     }
 
     @Id

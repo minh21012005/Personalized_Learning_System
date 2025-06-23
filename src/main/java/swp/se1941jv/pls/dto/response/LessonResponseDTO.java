@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -19,6 +20,11 @@ public class LessonResponseDTO {
     Boolean status;
     LessonStatusDTO lessonStatus;
     List<String> materials;
+    Long chapterId;
+    String chapterName;
+    String userFullName;
+    String updatedAt;
+    String subjectName;
 
     @Data
     @Builder
