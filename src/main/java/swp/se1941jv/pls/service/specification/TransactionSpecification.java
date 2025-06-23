@@ -23,7 +23,8 @@ public class TransactionSpecification {
             String studentEmail,
             List<Long> packageIds,
             String status,
-            LocalDate createdAt) {
+            LocalDate fromDate,
+            LocalDate toDate) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -54,10 +55,12 @@ public class TransactionSpecification {
                 predicates.add(cb.equal(root.get("status"), TransactionStatus.valueOf(status)));
             }
 
-            if (createdAt != null) {
-                LocalDateTime start = createdAt.atStartOfDay();
-                LocalDateTime end = createdAt.atTime(LocalTime.MAX);
-                predicates.add(cb.between(root.get("createdAt"), start, end));
+            if (fromDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), fromDate.atStartOfDay()));
+            }
+
+            if (toDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), toDate.atTime(23, 59, 59)));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

@@ -224,7 +224,8 @@
                                                                 </select>
                                                             </div>
                                                             <div>
-                                                                <label for="status" class="fw-bold">Trạng thái:</label>
+                                                                <label for="status" class="fw-bold">Trạng
+                                                                    thái:</label>
                                                                 <select name="status" id="status" class="form-select">
                                                                     <option value="">Tất cả</option>
                                                                     <option value="APPROVED" ${param.status=='APPROVED'
@@ -236,7 +237,8 @@
                                                                 </select>
                                                             </div>
                                                             <div>
-                                                                <label for="sort" class="fw-bold">Sắp xếp theo:</label>
+                                                                <label for="sort" class="fw-bold">Sắp xếp
+                                                                    theo:</label>
                                                                 <select name="sort" id="sort" class="form-select">
                                                                     <option value="">Mặc định</option>
                                                                     <option value="createdAtDesc"
@@ -251,11 +253,20 @@
                                                                         ? 'selected' : '' }>Giá giảm dần</option>
                                                                 </select>
                                                             </div>
-                                                            <div>
-                                                                <label for="createdAt" class="fw-bold">Ngày thanh
-                                                                    toán:</label>
-                                                                <input type="date" id="createdAt" name="createdAt"
-                                                                    class="form-control" value="${param.createdAt}" />
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label for="fromDate" class="fw-bold">Từ
+                                                                        ngày:</label>
+                                                                    <input type="date" id="fromDate" name="fromDate"
+                                                                        class="form-control"
+                                                                        value="${param.fromDate}" />
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label for="toDate" class="fw-bold">Đến
+                                                                        ngày:</label>
+                                                                    <input type="date" id="toDate" name="toDate"
+                                                                        class="form-control" value="${param.toDate}" />
+                                                                </div>
                                                             </div>
                                                             <button type="submit" class="btn btn-outline-primary">Áp
                                                                 dụng lọc</button>
@@ -436,9 +447,13 @@
                                                     <c:set var="queryString"
                                                         value="${queryString}&sort=${param.sort}" />
                                                 </c:if>
-                                                <c:if test="${not empty param.createdAt}">
+                                                <c:if test="${not empty param.fromDate}">
                                                     <c:set var="queryString"
-                                                        value="${queryString}&createdAt=${param.createdAt}" />
+                                                        value="${queryString}&fromDate=${param.fromDate}" />
+                                                </c:if>
+                                                <c:if test="${not empty param.toDate}">
+                                                    <c:set var="queryString"
+                                                        value="${queryString}&toDate=${param.toDate}" />
                                                 </c:if>
                                                 <c:if test="${totalPage > 1}">
                                                     <nav aria-label="Page navigation example">
