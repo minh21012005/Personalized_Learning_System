@@ -52,10 +52,6 @@ public class Test extends BaseEntity {
     @Transient
     private List<QuestionBank> randomQuestions;
 
-    public void generateRandomQuestions(QuestionService questionService, Long subjectId, List<Long> chapterIds, List<Long> lessonIds, List<Long> levelIds, int questionCount) throws Exception {
-        this.randomQuestions = questionService.getRandomQuestions(subjectId, chapterIds, lessonIds, levelIds, questionCount);
-//        this.testCategory = ;
-    }
 
     @ManyToOne
     @JoinColumn(name = "test_category_id")

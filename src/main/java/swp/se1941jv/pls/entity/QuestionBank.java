@@ -46,9 +46,6 @@ public class QuestionBank extends BaseEntity {
     @Column(name = "options", columnDefinition = "TEXT")
     String options;
 
-    @Column(name = "answer", columnDefinition = "NVARCHAR(255)")
-    String answer;
-
     @Column(name = "active")
     boolean active;
 

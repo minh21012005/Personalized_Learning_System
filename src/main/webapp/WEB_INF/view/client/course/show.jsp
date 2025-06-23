@@ -13,8 +13,8 @@
                         <title>Course Listing Page</title>
                         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
                             rel="stylesheet">
-                        <link rel="stylesheet" href="/css/listpackage.css">
                         <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
+                        <link rel="stylesheet" href="/css/listpackage.css">
                         <script src="https://unpkg.com/lucide@latest"></script>
                         <link rel="stylesheet"
                             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />

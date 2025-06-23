@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "user_package")
 @Data
@@ -25,4 +27,10 @@ public class UserPackage {
     @MapsId("packageId")
     @JoinColumn(name = "package_id")
     Package pkg;
+
+    @Column(name = "start_date")
+    LocalDateTime startDate;
+
+    @Column(name = "end_date")
+    LocalDateTime endDate;
 }

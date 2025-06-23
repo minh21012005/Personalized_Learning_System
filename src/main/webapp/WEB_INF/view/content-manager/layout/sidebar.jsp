@@ -36,5 +36,11 @@
                 <i class="bi bi-question-square me-2"></i> Câu hỏi
             </a>
         </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white ${activePage == 'questions' ? 'bg-primary rounded' : ''}"
+               href="/admin/chapters" style="padding: 8px 15px;">
+                <i class="bi bi-question-square me-2"></i> Chương học
+            </a>
+        </li>
     </ul>
 </div>

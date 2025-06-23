@@ -125,4 +125,7 @@ public class PackageService {
 
     }
 
+    public List<Package> getActivePackages() {
+        return this.packageRepository.findAllByIsActiveTrue();
+    }
 }

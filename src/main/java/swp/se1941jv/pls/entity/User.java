@@ -88,8 +88,11 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     List<UserTest> userTests;
 
-    @OneToMany(mappedBy = "userCreated")
-    List<Transaction> transactions;
+    @OneToMany(mappedBy = "user")
+    List<Transaction> transactions; // Danh sách các transaction mà user này thực hiện
+
+    @OneToMany(mappedBy = "processedBy")
+    List<Transaction> processedTransactions; // Danh sách các transaction mà user này (admin) xử lý
 
     @Column(name = "reset_password_token")
     String resetPasswordToken;
