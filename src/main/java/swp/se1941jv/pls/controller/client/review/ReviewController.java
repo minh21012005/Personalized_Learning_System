@@ -110,6 +110,8 @@ public class ReviewController {
                         reviewStatusMessage = "Bạn đã bình luận thành công!";
                     } else if (latestStatus == ReviewStatus.PENDING) {
                         reviewStatusMessage = "Bình luận của bạn đang chờ duyệt, vui lòng đợi một chút!";
+                    } else if (latestStatus == ReviewStatus.REJECTED) {
+                        reviewStatusMessage = "Bình luận của bạn vi phạm nguyên tắc chung! Bạn không thể bình luận ở mục này ";
                     }
                 }
             }
@@ -134,54 +136,6 @@ public class ReviewController {
         }
     }
 
-    // @PostMapping("/{packageId}/review")
-    // public String submitReview(@PathVariable Long packageId,
-    // @ModelAttribute("newReview") Review review,
-    // @RequestParam(value = "subjectId", required = false) Long subjectId,
-    // HttpServletRequest request) {
-    // Authentication authentication =
-    // SecurityContextHolder.getContext().getAuthentication();
-    // User currentUser = null;
-    // if (authentication != null && authentication.isAuthenticated()
-    // && authentication.getPrincipal() instanceof UserDetails) {
-    // String username = authentication.getName();
-    // currentUser = userService.getUserByEmail(username);
-    // }
-    // if (currentUser == null) {
-    // return "redirect:/parent/course/detail/" + packageId + "?fail=Vui lòng đăng
-    // nhập để đánh giá.";
-    // }
-
-    // Package pkg = packageRepository.findById(packageId)
-    // .orElseThrow(() -> new RuntimeException("Gói không tìm thấy"));
-    // Subject subject = subjectId != null ? subjectRepository.findById(subjectId)
-    // .orElseThrow(() -> new RuntimeException("Môn học không tìm thấy")) : null;
-
-    // boolean reviewExists =
-    // reviewService.hasUserReviewedPackage(currentUser.getUserId(), packageId);
-    // if (reviewExists) {
-    // return "redirect:/parent/course/detail/" + packageId
-    // + "?fail=Bạn đã gửi đánh giá cho gói này rồi.";
-    // }
-
-    // if (reviewService.canUserReviewPackage(currentUser.getUserId(), packageId) ||
-    // (subject != null &&
-    // reviewService.canUserReviewSubject(currentUser.getUserId(),
-    // subjectId, packageId))) {
-    // try {
-    // reviewService.saveReview(review, currentUser, subject == null ? pkg : null,
-    // subject);
-    // return "redirect:/parent/course/detail/" + packageId
-    // + "?success=Đánh giá của bạn đã được gửi và đang chờ phê duyệt.";
-    // } catch (Exception e) {
-    // return "redirect:/parent/course/detail/" + packageId
-    // + "?fail=Đã xảy ra lỗi khi lưu đánh giá.";
-    // }
-    // } else {
-    // return "redirect:/parent/course/detail/" + packageId
-    // + "?fail=Bạn phải mua gói này để đánh giá.";
-    // }
-    // }
     @PostMapping("/{packageId}/review")
     public String submitReview(@PathVariable Long packageId,
             @ModelAttribute("newReview") Review review,
@@ -204,6 +158,7 @@ public class ReviewController {
                 .orElseThrow(() -> new RuntimeException("Subject not found")) : null;
 
         boolean reviewExists = reviewService.hasUserReviewedPackage(currentUser.getUserId(), packageId);
+
         if (reviewExists) {
             return "redirect:/parent/course/detail/" + packageId
                     + "?fail=You have already submitted a review for this package.";

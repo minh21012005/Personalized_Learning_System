@@ -6,10 +6,10 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "review", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "user_id", "package_id" }),
-        @UniqueConstraint(columnNames = { "user_id", "subject_id" })
-})
+@Table(name = "review" // , uniqueConstraints = {
+// @UniqueConstraint(columnNames = { "user_id", "package_id" }),
+// @UniqueConstraint(columnNames = { "user_id", "subject_id" })}
+)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
