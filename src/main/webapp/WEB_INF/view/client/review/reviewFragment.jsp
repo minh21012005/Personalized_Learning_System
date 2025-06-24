@@ -312,16 +312,17 @@
                             <c:if test="${canReview}">
                                 <c:choose>
                                     <c:when test="${not empty reviewStatusMessage}">
-                                        <p style="color: #e67e22;">${reviewStatusMessage}</p>
+                                        <p style="color: orange;">${reviewStatusMessage}</p>
+                                        <!-- Ẩn form khi có reviewStatusMessage (PENDING hoặc APPROVED) -->
                                         <div class="review-form disabled-form" style="display: none;">
                                             <h3>Viết đánh giá của bạn</h3>
                                             <form action="/package/${pkg.packageId}/review" method="post"
-                                                modelAttribute="newReview" commandName="newReview" class="row g-3">
+                                                modelAttribute="newReview" commandName="newReview">
                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                     value="${_csrf.token}" />
-                                                <div class="col-md-6">
-                                                    <label for="rating" class="form-label">Số sao:</label>
-                                                    <select name="rating" id="rating" class="form-select" required>
+                                                <div class="form-group">
+                                                    <label for="rating">Số sao:</label>
+                                                    <select name="rating" id="rating" class="form-control" required>
                                                         <option value="1">1</option>
                                                         <option value="2">2</option>
                                                         <option value="3">3</option>
@@ -329,16 +330,14 @@
                                                         <option value="5">5</option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label for="comment" class="form-label">Bình luận:</label>
+                                                <div class="form-group">
+                                                    <label for="comment">Bình luận:</label>
                                                     <textarea name="comment" id="comment" class="form-control" rows="4"
                                                         maxlength="500" placeholder="Nhập bình luận của bạn..."
                                                         required></textarea>
                                                 </div>
-                                                <div class="col-12">
-                                                    <button type="submit" class="submit-review-btn" disabled>Gửi đánh
-                                                        giá</button>
-                                                </div>
+                                                <button type="submit" class="submit-review-btn" disabled>Gửi đánh
+                                                    giá</button>
                                             </form>
                                         </div>
                                     </c:when>
@@ -346,12 +345,12 @@
                                         <div class="review-form">
                                             <h3>Viết đánh giá của bạn</h3>
                                             <form action="/package/${pkg.packageId}/review" method="post"
-                                                modelAttribute="newReview" commandName="newReview" class="row g-3">
+                                                modelAttribute="newReview" commandName="newReview">
                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                     value="${_csrf.token}" />
-                                                <div class="col-md-6">
-                                                    <label for="rating" class="form-label">Số sao:</label>
-                                                    <select name="rating" id="rating" class="form-select" required>
+                                                <div class="form-group">
+                                                    <label for="rating">Số sao:</label>
+                                                    <select name="rating" id="rating" class="form-control" required>
                                                         <option value="1">1</option>
                                                         <option value="2">2</option>
                                                         <option value="3">3</option>
@@ -359,21 +358,20 @@
                                                         <option value="5">5</option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label for="comment" class="form-label">Bình luận:</label>
+                                                <div class="form-group">
+                                                    <label for="comment">Bình luận:</label>
                                                     <textarea name="comment" id="comment" class="form-control" rows="4"
                                                         maxlength="500" placeholder="Nhập bình luận của bạn..."
                                                         required></textarea>
                                                 </div>
-                                                <div class="col-12">
-                                                    <button type="submit" class="submit-review-btn">Gửi đánh
-                                                        giá</button>
-                                                </div>
+                                                <button type="submit" class="submit-review-btn">Gửi đánh giá</button>
                                             </form>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
                             </c:if>
+
+
                         </div>
                     </div>
                 </div>

@@ -22,8 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -57,6 +58,12 @@ public class ReviewController {
                     .orElseThrow(() -> new RuntimeException("Gói không tìm thấy"));
             model.addAttribute("pkg", pkg);
 
+            // Giải mã comment để xử lý ký tự Unicode
+            if (comment != null && !comment.isEmpty()) {
+                comment = URLDecoder.decode(comment, StandardCharsets.UTF_8);
+                logger.debug("Decoded comment: {}", comment);
+            }
+
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User currentUser = null;
             if (authentication != null && authentication.isAuthenticated()
@@ -74,6 +81,8 @@ public class ReviewController {
             model.addAttribute("currentUserId", currentUserId);
 
             List<Review> packageReviews = reviewService.getReviewsByPackageAndFilters(packageId, comment, rating);
+            logger.debug("Found {} reviews for packageId={}, comment={}, rating={}",
+                    packageReviews.size(), packageId, comment, rating);
 
             long reviewCount = packageReviews.size();
             double averageRating = packageReviews.stream()
@@ -107,21 +116,72 @@ public class ReviewController {
             model.addAttribute("reviewStatusMessage", reviewStatusMessage);
 
             if (render) {
+                logger.debug("Rendering fragment with {} reviews", packageReviews.size());
                 return "client/review/reviewFragment";
             }
-            // Chuyển hướng đến render=true cho lần tải ban đầu
-            return "redirect:/package/" + packageId + "/reviews?render=true&comment=" + (comment != null ? comment : "")
-                    + "&rating=" + (rating != null ? rating : "");
+            // Giữ nguyên chuyển hướng
+            String encodedComment = comment != null ? URLEncoder.encode(comment, StandardCharsets.UTF_8) : "";
+            return "redirect:/package/" + packageId + "/reviews?render=true&comment=" + encodedComment +
+                    "&rating=" + (rating != null ? rating : "");
         } catch (RuntimeException e) {
+            logger.error("Package not found: {}", packageId, e);
             model.addAttribute("error", "Gói không tìm thấy: " + packageId);
             return "error/404";
         } catch (Exception e) {
-            logger.error("Lỗi không mong đợi: {}", e.getMessage(), e);
+            logger.error("Unexpected error: {}", e.getMessage(), e);
             model.addAttribute("error", "Đã xảy ra lỗi không mong đợi");
             return "error/500";
         }
     }
 
+    // @PostMapping("/{packageId}/review")
+    // public String submitReview(@PathVariable Long packageId,
+    // @ModelAttribute("newReview") Review review,
+    // @RequestParam(value = "subjectId", required = false) Long subjectId,
+    // HttpServletRequest request) {
+    // Authentication authentication =
+    // SecurityContextHolder.getContext().getAuthentication();
+    // User currentUser = null;
+    // if (authentication != null && authentication.isAuthenticated()
+    // && authentication.getPrincipal() instanceof UserDetails) {
+    // String username = authentication.getName();
+    // currentUser = userService.getUserByEmail(username);
+    // }
+    // if (currentUser == null) {
+    // return "redirect:/parent/course/detail/" + packageId + "?fail=Vui lòng đăng
+    // nhập để đánh giá.";
+    // }
+
+    // Package pkg = packageRepository.findById(packageId)
+    // .orElseThrow(() -> new RuntimeException("Gói không tìm thấy"));
+    // Subject subject = subjectId != null ? subjectRepository.findById(subjectId)
+    // .orElseThrow(() -> new RuntimeException("Môn học không tìm thấy")) : null;
+
+    // boolean reviewExists =
+    // reviewService.hasUserReviewedPackage(currentUser.getUserId(), packageId);
+    // if (reviewExists) {
+    // return "redirect:/parent/course/detail/" + packageId
+    // + "?fail=Bạn đã gửi đánh giá cho gói này rồi.";
+    // }
+
+    // if (reviewService.canUserReviewPackage(currentUser.getUserId(), packageId) ||
+    // (subject != null &&
+    // reviewService.canUserReviewSubject(currentUser.getUserId(),
+    // subjectId, packageId))) {
+    // try {
+    // reviewService.saveReview(review, currentUser, subject == null ? pkg : null,
+    // subject);
+    // return "redirect:/parent/course/detail/" + packageId
+    // + "?success=Đánh giá của bạn đã được gửi và đang chờ phê duyệt.";
+    // } catch (Exception e) {
+    // return "redirect:/parent/course/detail/" + packageId
+    // + "?fail=Đã xảy ra lỗi khi lưu đánh giá.";
+    // }
+    // } else {
+    // return "redirect:/parent/course/detail/" + packageId
+    // + "?fail=Bạn phải mua gói này để đánh giá.";
+    // }
+    // }
     @PostMapping("/{packageId}/review")
     public String submitReview(@PathVariable Long packageId,
             @ModelAttribute("newReview") Review review,
