@@ -8,12 +8,8 @@ import java.util.List;
 @Data
 @Builder
 public class PracticeSubmissionDto {
-    private String lessonIds;
-    private Long userId;
-    private String allLessonIds;
-    private Boolean timed;
-    private Integer questionCount;
-    private Integer timePerQuestion;
-    private Integer currentIndex;
+    private String selectedLessonIds;
+    private Long testId;
+    private Long currentQuestionIndex;
     private List<QuestionAnswerDto> answers;
 }

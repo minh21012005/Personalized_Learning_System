@@ -3,6 +3,7 @@ package swp.se1941jv.pls.controller.client.practice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import swp.se1941jv.pls.config.SecurityUtils;
@@ -98,44 +99,61 @@ public class PracticeController {
         model.addAttribute("testId", practiceResponse.getTestId());
         model.addAttribute("selectedLessonIds", practiceResponse.getSelectedLessonId());
         model.addAttribute("questions", practiceResponse.getQuestions());
+        model.addAttribute("currentQuestionIndex", 0);
 
-        return "client/practice/PracticeSession";
+        return "client/practice/PracticeTest";
     }
+
+    @PostMapping("/continue-practice")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String continuePracticeWithLessons(@RequestParam(value = "allLessonIds", required = false) String selectedLessonIds, @RequestParam(value = "currentQuestionIndex") Long currentQuestionIndex, @RequestParam(value = "testId") Long testId, @RequestParam(value = "correctCount") Long correctCount,
+                                              Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        // Parse selectedLessonIds into a List<Long> if provided
+        List<Long> selectedLessonIdList = (selectedLessonIds != null && !selectedLessonIds.isEmpty())
+                ? Arrays.stream(selectedLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
+                : new ArrayList<>();
+
+        PracticeResponseDTO practiceResponse = practicesService.startPracticeWithLessons(selectedLessonIdList);
+
+
+        model.addAttribute("testId", practiceResponse.getTestId());
+        model.addAttribute("selectedLessonIds", practiceResponse.getSelectedLessonId());
+        model.addAttribute("questions", practiceResponse.getQuestions());
+        model.addAttribute("currentQuestionIndex", currentQuestionIndex != null ? currentQuestionIndex + 5 : 0);
+
+        return "client/practice/PracticeTest";
+    }
+
 
     @PostMapping("/submit-answers")
     @PreAuthorize("hasAnyRole('STUDENT')")
     public String submitAnswers(
             @ModelAttribute PracticeSubmissionDto submissionDto,
-            Model model,
-            @ModelAttribute("initialQuestions") List<QuestionDisplayDto> initialQuestions) {
+            Model model) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null || !currentUserId.equals(submissionDto.getUserId())) {
+        if (currentUserId == null) {
             model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
             return "redirect:/login";
         }
 
-        submissionDto.getAnswers();
-
         List<QuestionAnswerResDTO> results = practicesService.checkResults(submissionDto);
 
+        int correctCount = (int) results.stream().filter(QuestionAnswerResDTO::isCorrect).count();
 
-        // Add attributes to model
-//        model.addAttribute("questions", initialQuestions);
-//        model.addAttribute("results", results);
-//        model.addAttribute("correctCount", correctCount);
-//        model.addAttribute("showResults", true); // Show results after submission
-//        model.addAttribute("questionBackgrounds", questionBackgrounds);
-//        model.addAttribute("questionAnswerStates", questionAnswerStates); // For JSP to display correct/incorrect states
-//        model.addAttribute("lessonIds", submissionDto.getLessonIds());
-//        model.addAttribute("allLessonIds", submissionDto.getAllLessonIds());
-//        model.addAttribute("timed", submissionDto.getTimed() != null && submissionDto.getTimed());
-//        model.addAttribute("questionCount", submissionDto.getQuestionCount());
-//        model.addAttribute("timePerQuestion", submissionDto.getTimePerQuestion());
-//        model.addAttribute("userId", submissionDto.getUserId());
-//        model.addAttribute("currentIndex", (submissionDto.getCurrentIndex() != null ? submissionDto.getCurrentIndex() + 1 : 1));
-//        model.addAttribute("canGoBack", submissionDto.getCurrentIndex() != null && submissionDto.getCurrentIndex() > 0);
+        model.addAttribute("results", results);
+        model.addAttribute("correctCount", correctCount);
+        model.addAttribute("selectedLessonIds", submissionDto.getSelectedLessonIds());
+        model.addAttribute("testId", submissionDto.getTestId());
+        model.addAttribute("currentQuestionIndex", submissionDto.getCurrentQuestionIndex());
 
-        return "client/practice/PracticeSession";
+
+        return "client/practice/PracticeResults";
     }
 
 

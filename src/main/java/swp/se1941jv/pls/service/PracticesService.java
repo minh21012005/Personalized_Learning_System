@@ -240,11 +240,13 @@ public class PracticesService {
                         .collect(Collectors.toList());
                 List<String> listAnswerSelected = questionAnswer.getSelectedAnswers();
 
-                boolean isCorrect = correctAnswers.containsAll(listAnswerSelected) && listAnswerSelected.containsAll(correctAnswers);
+                boolean isCorrect = (listAnswerSelected != null) && (correctAnswers != null) && correctAnswers.containsAll(listAnswerSelected) && listAnswerSelected.containsAll(correctAnswers);
 
                 QuestionAnswerResDTO questionAnswerResDTO = QuestionAnswerResDTO.builder()
                         .questionId(questionAnswer.getQuestionId())
                         .isCorrect(isCorrect)
+                        .content(question.getContent())
+                        .image(question.getImage())
                         .selectedAnswers(listAnswerSelected)
                         .correctAnswers(correctAnswers)
                         .answerOptions(allOptions.stream().map(AnswerOptionDto::getText).collect(Collectors.toList()))

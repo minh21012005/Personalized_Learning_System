@@ -10,6 +10,8 @@ import java.util.List;
 public class QuestionAnswerResDTO {
     Long questionId;
     boolean isCorrect;
+    String content;
+    String image;
     List<String> selectedAnswers;
     List<String> correctAnswers;
     List<String> answerOptions;
