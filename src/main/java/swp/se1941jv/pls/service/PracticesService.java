@@ -1,5 +1,7 @@
 package swp.se1941jv.pls.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,6 +36,7 @@ public class PracticesService {
     UserTestRepository userTestRepository;
     QuestionTestRepository questionTestRepository;
     UserRepository userRepository;
+    AnswerHistoryTestRepository answerHistoryTestRepository;
 
 
     @PreAuthorize("hasAnyRole('STUDENT')")
@@ -219,7 +222,18 @@ public class PracticesService {
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public List<QuestionAnswerResDTO> checkResults(PracticeSubmissionDto submission) {
+    public List<QuestionAnswerResDTO> checkResults(PracticeSubmissionDto submission,Long testId) {
+
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        UserTest userTest = userTestRepository.findByTestIdUserId(testId,userId);
+
+
         List<QuestionAnswerResDTO> questionAnswerResDTOS = new ArrayList<>();
         if (submission.getAnswers() != null) {
             submission.getAnswers().stream().forEach(questionAnswer -> {
@@ -239,6 +253,19 @@ public class PracticesService {
                         .map(AnswerOptionDto::getText)
                         .collect(Collectors.toList());
                 List<String> listAnswerSelected = questionAnswer.getSelectedAnswers();
+
+
+                try {
+                    answerHistoryTestRepository.save(AnswerHistoryTest.builder()
+                                    .question(question)
+                                    .userTest(userTest)
+                                    .answer(new ObjectMapper().writeValueAsString(listAnswerSelected))
+
+                            .build());
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+
 
                 boolean isCorrect = (listAnswerSelected != null) && (correctAnswers != null) && correctAnswers.containsAll(listAnswerSelected) && listAnswerSelected.containsAll(correctAnswers);
 

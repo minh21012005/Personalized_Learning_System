@@ -142,7 +142,7 @@ public class PracticeController {
             return "redirect:/login";
         }
 
-        List<QuestionAnswerResDTO> results = practicesService.checkResults(submissionDto);
+        List<QuestionAnswerResDTO> results = practicesService.checkResults(submissionDto, submissionDto.getTestId());
 
         int correctCount = (int) results.stream().filter(QuestionAnswerResDTO::isCorrect).count();
 
