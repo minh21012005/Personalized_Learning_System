@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -181,6 +182,47 @@ public class QuestionService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Lỗi khi chuyển đổi đáp án sang JSON.", e);
         }
+    }
+
+
+    /**
+     * Kiểm tra xem các đáp án được chọn có đúng hay không dựa trên questionId.
+     * @param questionId ID của câu hỏi
+     * @param selectedAnswers Danh sách các đáp án được người dùng chọn
+     * @return true nếu tất cả đáp án được chọn khớp với đáp án đúng, false nếu không
+     */
+    public boolean checkAnswers(Long questionId, List<String> selectedAnswers) {
+        // Lấy câu hỏi từ cơ sở dữ liệu
+        QuestionBank question = questionBankRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Câu hỏi không tồn tại với ID: " + questionId));
+
+        // Lấy danh sách các đáp án đúng từ JSON
+        List<AnswerOptionDto> correctOptions = null;
+        try {
+            correctOptions = getQuestionOptions(question).stream()
+                    .filter(AnswerOptionDto::isCorrect)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Chuyển danh sách đáp án đúng sang danh sách text để so sánh
+        List<String> correctAnswerTexts = correctOptions.stream()
+                .map(AnswerOptionDto::getText)
+                .collect(Collectors.toList());
+
+        // Kiểm tra nếu danh sách đáp án chọn khớp với đáp án đúng (có thể có thứ tự khác nhau)
+        if (selectedAnswers == null || selectedAnswers.isEmpty()) {
+            return correctAnswerTexts.isEmpty(); // Nếu không chọn gì, đúng khi không có đáp án đúng
+        }
+
+        // Sắp xếp cả hai danh sách để so sánh không phụ thuộc thứ tự
+        List<String> sortedSelected = new ArrayList<>(selectedAnswers);
+        List<String> sortedCorrect = new ArrayList<>(correctAnswerTexts);
+        Collections.sort(sortedSelected);
+        Collections.sort(sortedCorrect);
+
+        return sortedSelected.equals(sortedCorrect);
     }
 
     public QuestionBank updateQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList, MultipartFile imageFile, String existingImage) throws Exception {

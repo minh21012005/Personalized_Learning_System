@@ -1,4 +1,4 @@
-package swp.se1941jv.pls.dto.response;
+package swp.se1941jv.pls.dto.response.practice;
 
 import lombok.Builder;
 import lombok.Data;
