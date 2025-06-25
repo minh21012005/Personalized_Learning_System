@@ -163,7 +163,7 @@
                     }
                 </style>
 
-                <div class="reviews-section container mt-4" th:fragment="reviews-section">
+                <div class="reviews-section container mt-4">
                     <c:if test="${not empty message}">
                         <script>
                             document.addEventListener('DOMContentLoaded', function () {
@@ -205,28 +205,33 @@
                     </div>
 
                     <div class="row">
-                        <!-- Filter Sidebar (Bên trái) -->
+                        <!-- Filter Sidebar -->
                         <div class="col-md-3 filter-sidebar">
-                            <form action="/package/${pkg.packageId}/reviews?render=true" method="get" class="row g-3"
-                                id="filterForm">
+                            <form action="/subject/${subject.subjectId}/reviews?render=true" method="get"
+                                class="row g-3" id="filterForm">
                                 <div class="col-12">
                                     <label class="filter-label">Lọc theo sao:</label>
                                     <div class="btn-group-vertical" role="group" aria-label="Filter by rating">
                                         <button type="button" name="rating" value="5"
-                                            class="btn btn-filter ${selectedRating == 5 ? 'active' : ''}"><span
-                                                class="star filled">★★★★★</span></button>
+                                            class="btn btn-filter ${selectedRating == 5 ? 'active' : ''}">
+                                            <span class="star filled">★★★★★</span>
+                                        </button>
                                         <button type="button" name="rating" value="4"
-                                            class="btn btn-filter ${selectedRating == 4 ? 'active' : ''}"><span
-                                                class="star filled">★★★★☆</span></button>
+                                            class="btn btn-filter ${selectedRating == 4 ? 'active' : ''}">
+                                            <span class="star filled">★★★★☆</span>
+                                        </button>
                                         <button type="button" name="rating" value="3"
-                                            class="btn btn-filter ${selectedRating == 3 ? 'active' : ''}"><span
-                                                class="star filled">★★★☆☆</span></button>
+                                            class="btn btn-filter ${selectedRating == 3 ? 'active' : ''}">
+                                            <span class="star filled">★★★☆☆</span>
+                                        </button>
                                         <button type="button" name="rating" value="2"
-                                            class="btn btn-filter ${selectedRating == 2 ? 'active' : ''}"><span
-                                                class="star filled">★★☆☆☆</span></button>
+                                            class="btn btn-filter ${selectedRating == 2 ? 'active' : ''}">
+                                            <span class="star filled">★★☆☆☆</span>
+                                        </button>
                                         <button type="button" name="rating" value="1"
-                                            class="btn btn-filter ${selectedRating == 1 ? 'active' : ''}"><span
-                                                class="star filled">★☆☆☆☆</span></button>
+                                            class="btn btn-filter ${selectedRating == 1 ? 'active' : ''}">
+                                            <span class="star filled">★☆☆☆☆</span>
+                                        </button>
                                         <button type="button" name="rating" value=""
                                             class="btn btn-filter ${selectedRating == null ? 'active' : ''}">Tất
                                             cả</button>
@@ -234,7 +239,7 @@
                                     <input type="hidden" name="rating" id="selectedRating" value="${selectedRating}" />
                                 </div>
                                 <div class="col-12 mt-3">
-                                    <label class="filter-label">Nội dung bình luận:</label>
+                                    <label for="commentInput">Nội dung bình luận:</label>
                                     <input type="text" id="commentInput" name="comment" value="${selectedComment}"
                                         class="form-control" placeholder="Nhập nội dung..." />
                                 </div>
@@ -245,13 +250,13 @@
                             </form>
                         </div>
 
-                        <!-- Danh sách đánh giá (Bên phải) -->
+                        <!-- Danh sách đánh giá -->
                         <div class="col-md-9">
                             <div class="review-list">
-                                <c:if test="${empty packageReviews}">
+                                <c:if test="${empty subjectReviews}">
                                     <p>Không tìm thấy đánh giá nào với bộ lọc hiện tại!</p>
                                 </c:if>
-                                <c:forEach var="review" items="${packageReviews}">
+                                <c:forEach var="review" items="${subjectReviews}">
                                     <div class="review-card">
                                         <div class="review-avatar">
                                             <c:choose>
@@ -263,7 +268,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <img src="/img/default-avatar.png" alt="Người dùng ẩn danh"
-                                                        style="max-height: 250px; display: block" />
+                                                        style="max-height: 250px; display: block;" />
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -291,38 +296,21 @@
                                                 </c:choose>
                                             </small>
                                         </div>
-                                        <!-- <c:if test="${canReview}">
-                                            <form id="useful-form-${review.reviewId}"
-                                                action="/package/${pkg.packageId}/review/${review.reviewId}/useful"
-                                                method="post" style="display:inline;">
-                                                <input type="hidden" name="${_csrf.parameterName}"
-                                                    value="${_csrf.token}" />
-                                                <input type="hidden" name="userId" value="${currentUserId}" />
-                                                <button type="submit"
-                                                    class="useful-btn ${review.usefulCount > 0 ? 'liked' : ''}">
-                                                    Hữu ích (${review.usefulCount})
-                                                </button>
-                                            </form>
-                                        </c:if> -->
                                     </div>
                                 </c:forEach>
                             </div>
+                            <div>${canReview}</div>
                             <c:if test="${canReview}">
                                 <c:choose>
                                     <c:when test="${not empty reviewStatusMessage}">
                                         <p style="color: orange;">${reviewStatusMessage}</p>
-                                        <!-- SỬA: Hiển thị form khi trạng thái là REJECTED -->
                                         <c:if test="${latestReviewStatus == 'REJECTED'}">
                                             <div class="review-form">
                                                 <h3>Gửi lại đánh giá của bạn</h3>
-                                                <form action="/package/${pkg.packageId}/review" method="post"
+                                                <form action="/subject/${subject.subjectId}/review" method="post"
                                                     modelAttribute="newReview" commandName="newReview">
                                                     <input type="hidden" name="${_csrf.parameterName}"
                                                         value="${_csrf.token}" />
-                                                    <!-- SỬA: Giữ input subjectId -->
-                                                    <c:if test="${not empty subjectId}">
-                                                        <input type="hidden" name="subjectId" value="${subjectId}" />
-                                                    </c:if>
                                                     <div class="form-group">
                                                         <label for="rating">Số sao:</label>
                                                         <select name="rating" id="rating" class="form-control" required>
@@ -344,50 +332,18 @@
                                                 </form>
                                             </div>
                                         </c:if>
-                                        <!-- SỬA: Ẩn form khi trạng thái là APPROVED hoặc PENDING -->
                                         <c:if
                                             test="${latestReviewStatus == 'APPROVED' || latestReviewStatus == 'PENDING'}">
-                                            <div class="review-form disabled-form" style="display: none;">
-                                                <h3>Viết đánh giá của bạn</h3>
-                                                <form action="/package/${pkg.packageId}/review" method="post"
-                                                    modelAttribute="newReview" commandName="newReview">
-                                                    <input type="hidden" name="${_csrf.parameterName}"
-                                                        value="${_csrf.token}" />
-                                                    <c:if test="${not empty subjectId}">
-                                                        <input type="hidden" name="subjectId" value="${subjectId}" />
-                                                    </c:if>
-                                                    <div class="form-group">
-                                                        <label for="rating">Số sao:</label>
-                                                        <select name="rating" id="rating" class="form-control" required>
-                                                            <option value="1">1</option>
-                                                            <option value="2">2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
-                                                            <option value="5">5</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="comment">Bình luận:</label>
-                                                        <textarea name="comment" id="comment" class="form-control"
-                                                            rows="4" maxlength="500"
-                                                            placeholder="Nhập bình luận của bạn..." required></textarea>
-                                                    </div>
-                                                    <button type="submit" class="submit-review-btn" disabled>Gửi đánh
-                                                        giá</button>
-                                                </form>
-                                            </div>
+                                            <!-- Không hiển thị form, chỉ hiển thị thông báo -->
                                         </c:if>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="review-form">
                                             <h3>Viết đánh giá của bạn</h3>
-                                            <form action="/package/${pkg.packageId}/review" method="post"
+                                            <form action="/subject/${subject.subjectId}/review" method="post"
                                                 modelAttribute="newReview" commandName="newReview">
                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                     value="${_csrf.token}" />
-                                                <c:if test="${not empty subjectId}">
-                                                    <input type="hidden" name="subjectId" value="${subjectId}" />
-                                                </c:if>
                                                 <div class="form-group">
                                                     <label for="rating">Số sao:</label>
                                                     <select name="rating" id="rating" class="form-control" required>

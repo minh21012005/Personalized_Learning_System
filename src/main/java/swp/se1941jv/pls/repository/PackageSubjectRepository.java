@@ -1,6 +1,7 @@
 package swp.se1941jv.pls.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,5 +21,5 @@ public interface PackageSubjectRepository extends JpaRepository<PackageSubject, 
 
         void deleteByPkg_PackageId(Long packageId);
 
-        PackageSubject findByPkg_PackageIdAndSubject_SubjectId(Long packageId, Long subjectId);
+        Optional<PackageSubject> findByPkg_PackageIdAndSubject_SubjectId(Long packageId, Long subjectId);
 }

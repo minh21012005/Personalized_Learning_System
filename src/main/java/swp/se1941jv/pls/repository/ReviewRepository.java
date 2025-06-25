@@ -1,6 +1,7 @@
 package swp.se1941jv.pls.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,8 +9,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import swp.se1941jv.pls.entity.PackageSubject;
 import swp.se1941jv.pls.entity.Review;
 import swp.se1941jv.pls.entity.ReviewStatus;
+import swp.se1941jv.pls.entity.UserPackage;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
@@ -44,4 +47,20 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         // Phương thức để lấy review mới nhất (hoặc duy nhất) của người dùng cho một
         // package
         Review findTopByUser_UserIdAndPkg_PackageIdOrderByCreatedAtDesc(Long userId, Long packageId);
+
+        Optional<Review> findByUser_UserIdAndSubject_SubjectIdAndStatus(Long userId, Long subjectId,
+                        ReviewStatus status);
+
+        Optional<Review> findTopByUser_UserIdAndSubject_SubjectIdOrderByCreatedAtDesc(Long userId, Long subjectId);
+
+        List<Review> findBySubject_SubjectIdAndStatus(Long subjectId, ReviewStatus status);
+
+        List<Review> findBySubject_SubjectIdAndStatusAndRating(Long subjectId, ReviewStatus status, Integer rating);
+
+        List<Review> findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCase(Long subjectId, ReviewStatus status,
+                        String comment);
+
+        List<Review> findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCaseAndRating(Long subjectId,
+                        ReviewStatus status, String comment, Integer rating);
+
 }
