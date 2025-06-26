@@ -143,29 +143,30 @@
 </header>
 <div class="main-container">
     <c:if test="${not empty questions}">
-        <form action="/practices/submit-answers" method="post" id="practiceForm">
+        <form action="/practices/submit-answers" method="post" id="practiceForm" onsubmit="return prepareForm()">
             <c:forEach var="question" items="${questions}" varStatus="loop">
                 <div class="question-card">
                     <h4>Câu hỏi ${loop.count + currentQuestionIndex}</h4>
-                    <p>${question.content}</p>
+                    <p>${fn:escapeXml(question.content)}</p>
                     <c:if test="${not empty question.image}">
-                        <img src="/img/question_bank/${question.image}" alt="Question Image">
+                        <img src="/img/question_bank/${fn:escapeXml(question.image)}" alt="Question Image">
                     </c:if>
                     <div class="answer-options">
-                        <input type="hidden" name="answers[${loop.index}].questionId" value="${question.questionId}">
+                        <input type="hidden" class="question-id" value="${question.questionId}">
                         <c:forEach var="option" items="${question.options}">
                             <label class="neutral">
-                                <input type="checkbox" name="answers[${loop.index}].selectedAnswers" value="${option}">
-                                    ${option}
+                                <input type="checkbox" class="answer-option" value="${fn:escapeXml(option)}">
+                                    ${fn:escapeXml(option)}
                             </label>
                         </c:forEach>
                     </div>
                 </div>
             </c:forEach>
             <div class="navigation">
-                <input type="hidden" name="testId" value="${testId}">
-                <input type="hidden" name="selectedLessonIds" value="${selectedLessonIds}">
-                <input type="hidden" name="currentQuestionIndex" value="${currentQuestionIndex}">
+                <input type="hidden" id="testId" name="testId" value="${testId}">
+                <input type="hidden" id="selectedLessonIds" name="selectedLessonIds" value="${selectedLessonIds}">
+                <input type="hidden" id="currentQuestionIndex" name="currentQuestionIndex" value="${currentQuestionIndex}">
+                <input type="hidden" id="submissionData" name="submissionData">
                 <button type="submit" class="btn-submit">Nộp bài</button>
             </div>
         </form>
@@ -182,6 +183,62 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
         crossorigin="anonymous"></script>
+<script>
+    function prepareForm() {
+        // Kiểm tra ít nhất một đáp án được chọn cho ít nhất một câu hỏi
+        var hasSelection = false;
+        $('input.answer-option').each(function () {
+            if ($(this).is(':checked')) {
+                hasSelection = true;
+                return false;
+            }
+        });
+        if (!hasSelection) {
+            alert('Vui lòng chọn ít nhất một đáp án.');
+            return false; // Ngăn form gửi đi
+        }
 
+        // Lấy và kiểm tra dữ liệu
+        var testId = $('#testId').val();
+        var selectedLessonIds = $('#selectedLessonIds').val();
+        var currentQuestionIndex = $('#currentQuestionIndex').val();
+
+        if (!testId || isNaN(testId) || !currentQuestionIndex || isNaN(currentQuestionIndex)) {
+            alert('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.');
+            return false;
+        }
+
+        // Tạo đối tượng JSON
+        var submissionDto = {
+            testId: parseInt(testId),
+            selectedLessonIds: selectedLessonIds || "",
+            currentQuestionIndex: parseInt(currentQuestionIndex),
+            answers: []
+        };
+
+        // Thu thập tất cả câu hỏi, kể cả câu không có đáp án
+        $('.question-card').each(function () {
+            var questionId = parseInt($(this).find('.question-id').val());
+            if (isNaN(questionId)) return;
+
+            var selectedAnswers = [];
+            $(this).find('.answer-option:checked').each(function () {
+                selectedAnswers.push($(this).val());
+            });
+
+            submissionDto.answers.push({
+                questionId: questionId,
+                selectedAnswers: selectedAnswers
+            });
+        });
+
+
+        // Gán JSON vào input ẩn
+        $('#submissionData').val(JSON.stringify(submissionDto));
+
+        // Cho phép form gửi đi
+        return true;
+    }
+</script>
 </body>
 </html>

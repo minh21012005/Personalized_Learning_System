@@ -210,13 +210,7 @@
                 <div class="col-md-8">
                     <h3>${subject.subjectName}</h3>
                     <p>${subject.subjectDescription}</p>
-                    <button type="button" class="btn-start"
-                            formaction="/practices/start-practice" formmethod="post">Bắt đầu luyện tập
-                    </button>
-                    <%--                    <div class="option-buttons" id="optionButtons">--%>
-                    <%--                        <button type="button" class="btn-timed" formaction="/practices/start-practice?timed=true" formmethod="post">Luyện tập có thời gian</button>--%>
-                    <%--                        <button type="button" class="btn-untimed" formaction="/practices/start-practice?timed=false" formmethod="post">Luyện tập không thời gian</button>--%>
-                    <%--                    </div>--%>
+                    <button type="button" class="btn-start">Bắt đầu luyện tập</button>
                     <form action="/practices/start-practice" method="post" id="practiceForm" style="display: none;">
                         <input type="hidden" name="allLessonIds" id="hiddenAllLessonIds">
                     </form>
@@ -261,14 +255,6 @@
     }
 
     $(document).ready(function () {
-        // // Show settings and options when start button is clicked
-        // $('#startButton').on('click', function () {
-        //     $('#settingsForm').show();
-        //     $('#optionButtons').show();
-        //     $('#startButton').hide();
-        // });
-
-        // Handle form submission for timed/untimed options
         $('.btn-start').on('click', function (e) {
             var checkedLessons = $('input[name="lessonIds"]:checked');
             if (checkedLessons.length === 0) {
@@ -276,22 +262,14 @@
                 alert('Vui lòng chọn ít nhất một bài học.');
             } else {
                 var form = $('#practiceForm');
-                // var questionCount = $('#questionCount').val();
-                // var timePerQuestion = $('#timePerQuestion').val();
-                // var timed = $(this).hasClass('btn-timed');
-
-                // Collect all lessonIds from selected chapters
                 var allLessonIds = [];
-                $('input[name="chapterIds"]:checked').each(function () {
-                    var chapterId = $(this).val();
-                    $('#lessonIds_' + chapterId + ' input[type="checkbox"]').each(function () {
-                        allLessonIds.push($(this).val());
-                    });
-                });
-                $('#hiddenAllLessonIds').val(allLessonIds.join(','));
 
-                // $('#hiddenQuestionCount').val(questionCount);
-                // $('#hiddenTimePerQuestion').val(timed ? timePerQuestion : 0);
+                // Thu thập tất cả lessonIds từ các lesson được chọn
+                checkedLessons.each(function () {
+                    allLessonIds.push($(this).val());
+                });
+
+                $('#hiddenAllLessonIds').val(allLessonIds.join(','));
                 form.attr('action', '/practices/start-practice');
                 form.submit();
             }

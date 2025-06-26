@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.controller.client.practice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -133,7 +134,7 @@ public class PracticeController {
     @PostMapping("/submit-answers")
     @PreAuthorize("hasAnyRole('STUDENT')")
     public String submitAnswers(
-            @ModelAttribute PracticeSubmissionDto submissionDto,
+            @RequestParam("submissionData") String submissionData,
             Model model) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) {
@@ -141,18 +142,28 @@ public class PracticeController {
             return "redirect:/login";
         }
 
-        List<QuestionAnswerResDTO> results = practicesService.checkResults(submissionDto, submissionDto.getTestId());
+        try {
+            // Parse chuỗi JSON thành PracticeSubmissionDto
+            ObjectMapper mapper = new ObjectMapper();
+            PracticeSubmissionDto submissionDto = mapper.readValue(submissionData, PracticeSubmissionDto.class);
 
-        int correctCount = (int) results.stream().filter(QuestionAnswerResDTO::isCorrect).count();
+            // Kiểm tra kết quả
+            List<QuestionAnswerResDTO> results = practicesService.checkResults(submissionDto, submissionDto.getTestId());
 
-        model.addAttribute("results", results);
-        model.addAttribute("correctCount", correctCount);
-        model.addAttribute("selectedLessonIds", submissionDto.getSelectedLessonIds());
-        model.addAttribute("testId", submissionDto.getTestId());
-        model.addAttribute("currentQuestionIndex", submissionDto.getCurrentQuestionIndex());
+            int correctCount = (int) results.stream().filter(QuestionAnswerResDTO::isCorrect).count();
 
+            // Thêm dữ liệu vào model để hiển thị trên trang kết quả
+            model.addAttribute("results", results);
+            model.addAttribute("correctCount", correctCount);
+            model.addAttribute("selectedLessonIds", submissionDto.getSelectedLessonIds());
+            model.addAttribute("testId", submissionDto.getTestId());
+            model.addAttribute("currentQuestionIndex", submissionDto.getCurrentQuestionIndex());
 
-        return "client/practice/PracticeResults";
+            return "client/practice/PracticeResults";
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi xử lý dữ liệu: " + e.getMessage());
+            return "error";
+        }
     }
 
 
