@@ -451,7 +451,19 @@
                 </ul>
             </div>
             <c:if test="${sessionScope.role eq 'PARENT'}">
-                <a style="color: #64748B" class="action-icon" href="/invite/create"><i class="fa fa-user-plus"></i></a>
+                <div class="dropdown">
+        <a href="#" class="action-icon" style="color: #64748B" data-bs-toggle="dropdown" aria-expanded="false" title="Quản lý con">
+            <i class="fa fa-user-plus"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <a class="dropdown-item" href="${pageContext.request.contextPath}/invite/create">1. Liên kết tài khoản </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="${pageContext.request.contextPath}/parent/create-student">2. Tạo tài khoản mới cho con</a>
+            </li>
+        </ul>
+    </div>
                 <a style="color: #64748B" class="action-icon" href="/parent/cart"><i class="fa fa-shopping-cart"></i></a>
             </c:if>
 
