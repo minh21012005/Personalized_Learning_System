@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${lesson != null ? lesson.lessonName : subject != null ? subject.subjectName : 'Không tìm thấy môn học'}</title>
+    <title>${subject != null ? subject.subjectName : 'Không tìm thấy môn học'}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -27,11 +27,12 @@
             background-color: #f8f9fa;
         }
         .sidebar {
+            border-radius: 6px;
             background-color: #ffffff;
-            border-left: 1px solid #dee2e6;
+            border: 1px solid #dee2e6;
             height: 100%;
             padding: 20px;
-            max-height: 100vh;
+            max-height: 728px;
             overflow-y: auto;
             position: sticky;
             top: 60px;
@@ -114,7 +115,7 @@
         .chapter-container .list-group {
             margin-top: 5px;
         }
-        @media (max-width: 767.98px) {
+        @media (max-width: 991.98px) {
             .sidebar {
                 display: none;
             }
@@ -133,6 +134,7 @@
     if (!window.YT) {
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
+        tag.onerror = () => console.error('Failed to load YouTube API');
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     }
@@ -159,10 +161,12 @@
         </c:forEach>
     };
 
-    // Lấy userId từ server
+    // Lấy userId, subjectId, packageId từ server
     const userId = ${sessionScope.id != null ? sessionScope.id : 'null'};
-    if (!userId) {
-        console.error('Thiếu userId. Không thể theo dõi tiến trình.');
+    const subjectId = ${subject != null ? subject.subjectId : 'null'};
+    const packageId = ${param.packageId != null ? param.packageId : 'null'};
+    if (!userId || !subjectId || !packageId) {
+        console.error('Thiếu userId, subjectId hoặc packageId.', { userId, subjectId, packageId });
     }
 
     let player = null;
@@ -184,25 +188,32 @@
 
     // Lưu tiến trình vào localStorage
     function saveToLocalStorage(lessonId, watchedTime, isCompleted) {
-        if (!userId || !lessonId) return;
+        if (!userId || !lessonId || !subjectId || !packageId) return;
         const storageKey = `lesson_progress_`+userId+`_`+lessonId;
-        const progress = { watchedTime: Math.floor(watchedTime), isCompleted, timestamp: Date.now() };
+        const progress = {
+            watchedTime: Math.floor(watchedTime),
+            isCompleted,
+            timestamp: Date.now(),
+            subjectId,
+            packageId
+        };
         localStorage.setItem(storageKey, JSON.stringify(progress));
     }
 
     // Đồng bộ tiến trình với backend
     async function syncProgressToBackend(lessonId) {
-        if (!userId || !lessonId) {
-            console.error('Thiếu userId hoặc lessonId');
+        if (!userId || !lessonId || !subjectId || !packageId) {
+            console.error('Thiếu userId, lessonId, subjectId hoặc packageId');
             return;
         }
         const storageKey = `lesson_progress_`+userId+`_`+lessonId;
-
         const progress = JSON.parse(localStorage.getItem(storageKey));
         if (progress) {
             const data = {
                 userId: userId,
                 lessonId: parseInt(lessonId),
+                subjectId: subjectId,
+                packageId: packageId,
                 watchedTime: progress.watchedTime || 0,
                 isCompleted: progress.isCompleted || false
             };
@@ -228,9 +239,8 @@
 
     // Tải tiến trình khi chuyển bài học
     async function loadProgress(lessonId) {
-        if (!userId || !lessonId) return;
+        if (!userId || !lessonId || !subjectId || !packageId) return;
         const storageKey = `lesson_progress_`+userId+`_`+lessonId;
-
         const localProgress = JSON.parse(localStorage.getItem(storageKey));
         if (localProgress && localProgress.watchedTime) {
             lastWatchedTime = localProgress.watchedTime;
@@ -241,7 +251,7 @@
         }
 
         try {
-            const response = await fetch(`/api/lesson-progress?userId=`+userId+`&lessonId=`+lessonId, {
+            const response = await fetch(`/api/lesson-progress?userId=`+userId+`&lessonId=`+lessonId+`&subjectId=`+subjectId+`&packageId=`+packageId, {
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
                 }
@@ -250,13 +260,21 @@
                 const progress = await response.json();
                 if (progress && progress.watchedTime) {
                     lastWatchedTime = progress.watchedTime;
+                    console.log('Loaded progress from API:', lastWatchedTime);
                     if (player && player.seekTo && isYouTubeAPIReady) {
                         player.seekTo(lastWatchedTime, true);
                     }
                     saveToLocalStorage(lessonId, progress.watchedTime, progress.isCompleted);
+                } else {
+                    lastWatchedTime = 0; // Reset nếu không có tiến trình
+                    console.log('No progress found, resetting lastWatchedTime to 0');
                 }
+            } else {
+                lastWatchedTime = 0; // Reset nếu API trả về lỗi
+                console.error('API error, resetting lastWatchedTime to 0:', response.statusText);
             }
         } catch (error) {
+            lastWatchedTime = 0; // Reset nếu có lỗi
             console.error('Lỗi khi tải tiến trình:', error);
         }
     }
@@ -264,6 +282,15 @@
     // Hàm chuyển đổi videoTime (HH:MM:SS) sang giây
     function parseVideoTime(timeStr) {
         if (!timeStr) return 0;
+        // Xử lý định dạng "1 tiếng 0 phút 32 giây"
+        const timeMatch = timeStr.match(/(\d+)\s*tiếng\s*(\d+)\s*phút\s*(\d+)\s*giây/);
+        if (timeMatch) {
+            const hours = parseInt(timeMatch[1]) || 0;
+            const minutes = parseInt(timeMatch[2]) || 0;
+            const seconds = parseInt(timeMatch[3]) || 0;
+            return hours * 3600 + minutes * 60 + seconds;
+        }
+        // Fallback cho định dạng "HH:MM:SS"
         const [hours, minutes, seconds] = timeStr.split(':').map(Number);
         return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
     }
@@ -353,8 +380,16 @@
                         clearInterval(player.timeUpdateInterval);
                         const lesson = lessonsData[lessonId];
                         const totalTime = lesson.videoTime ? parseVideoTime(lesson.videoTime) : player.getDuration();
+                        lessonsData[lessonId].isCompleted = true; // Cập nhật trạng thái hoàn thành trong lessonsData
                         saveToLocalStorage(lessonId, totalTime, true);
                         syncProgressToBackend(lessonId);
+
+                        // Cập nhật giao diện: thêm biểu tượng check
+                        const lessonElement = $(`.list-group-item-action[data-lesson-id="`+lessonId+`"]`);
+                        if (!lessonElement.find('.bi-check-circle-fill').length) {
+                            lessonElement.append('<i class="bi bi-check-circle-fill text-success ms-2"></i>');
+                        }
+                        console.log('Updated UI with completed icon for lesson:', lessonId);
                     }
                 }
             }
@@ -362,6 +397,7 @@
     }
 
     $(document).ready(function() {
+        lastWatchedTime = 0;
         // Gắn sự kiện click cho tất cả lesson
         $('.list-group-item-action').on('click', function(e) {
             e.preventDefault();
@@ -383,17 +419,20 @@
             currentLessonId = lessonId;
 
             $('.list-group-item-action').removeClass('active');
-            $(`.list-group-item-action[data-lesson-id="${lessonId}"]`).addClass('active');
+            $(`.list-group-item-action[data-lesson-id="`+lessonId+`"]`).addClass('active');
 
             if (lesson) {
+                $('#lessonTitle').text(lesson.lessonName || 'Không tìm thấy bài học');
+                console.log('Materials for lesson:', lesson.materials);
                 $('#lessonDescription').text(lesson.lessonDescription || 'Không có mô tả cho bài học này.');
                 const materialsList = $('#materialsList');
                 materialsList.empty();
                 if (lesson.materials && lesson.materials.length > 0) {
                     lesson.materials.forEach(material => {
+                        const path ="/files/taiLieu/"+material;
                         materialsList.append(`
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="/files/taiLieu/${material}" target="_blank">${material}</a>
+                                <a href=`+path+`   "target=_blank">`+material+`</a>
                             </li>
                         `);
                     });
@@ -438,10 +477,10 @@
 </script>
 
 <div class="content">
-    <h1 class="mb-4">${lesson != null ? lesson.lessonName : subject != null ? subject.subjectName : 'Không tìm thấy môn học'}</h1>
+    <h1 id="lessonTitle" class="mb-4">${lesson != null ? lesson.lessonName : subject != null ? subject.subjectName : 'Không tìm thấy môn học'}</h1>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-lg-8">
             <div class="video-container ratio ratio-16x9" id="videoContainer">
                 <iframe id="lessonVideo" src="${lesson != null && lesson.videoSrc != null ? lesson.videoSrc : ''}"
                         title="${lesson != null ? lesson.lessonName : ''}" frameborder="0"
@@ -450,7 +489,7 @@
             </div>
 
             <ul class="nav nav-tabs mb-4" id="lessonTabs" role="tablist">
-                <li class="nav-item d-block d-md-none" role="presentation">
+                <li class="nav-item d-block d-lg-none" role="presentation">
                     <button class="nav-link" id="chapters-tab" data-bs-toggle="tab" data-bs-target="#chapters"
                             type="button" role="tab" aria-controls="chapters" aria-selected="false">Nội dung môn học</button>
                 </li>
@@ -481,7 +520,7 @@
                                     <c:when test="${not empty lesson.materials}">
                                         <c:forEach var="material" items="${lesson.materials}">
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <a href="/files/taiLieu/${material}" target="_blank">${material}</a>
+                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" target="_blank">12333</a>
                                             </li>
                                         </c:forEach>
                                     </c:when>
@@ -493,7 +532,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade d-block d-md-none" id="chapters" role="tabpanel" aria-labelledby="chapters-tab">
+                <div class="tab-pane fade d-block d-lg-none" id="chapters" role="tabpanel" aria-labelledby="chapters-tab">
                     <div class="card">
                         <div class="card-body">
                             <h2 class="card-title">Nội dung môn học</h2>
@@ -544,7 +583,7 @@
             </div>
         </div>
 
-        <div class="col-md-4 d-none d-md-block">
+        <div class="col-lg-4 d-none d-lg-block">
             <div class="sidebar">
                 <h4 class="mb-3">Nội dung môn học</h4>
                 <div>
