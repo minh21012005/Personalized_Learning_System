@@ -17,12 +17,14 @@ import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.response.*;
 import swp.se1941jv.pls.entity.*;
+import swp.se1941jv.pls.entity.keys.KeyLessonUser;
 import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 import swp.se1941jv.pls.exception.ApplicationException;
 import swp.se1941jv.pls.exception.NotFoundException;
 import swp.se1941jv.pls.exception.ValidationException;
 import swp.se1941jv.pls.exception.subject.SubjectNotFoundException;
+import swp.se1941jv.pls.repository.LessonProgressRepository;
 import swp.se1941jv.pls.repository.PackageSubjectRepository;
 import swp.se1941jv.pls.repository.SubjectRepository;
 import swp.se1941jv.pls.repository.UserPackageRepository;
@@ -34,13 +36,15 @@ public class SubjectService {
     private final UserPackageRepository userPackageRepository;
     private final PackageSubjectRepository packageSubjectRepository;
     private final ObjectMapper objectMapper;
+    private final LessonProgressRepository lessonProgressRepository;
 
-    public SubjectService(SubjectRepository subjectRepository, ChapterService chapterService, UserPackageRepository userPackageRepository, PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper) {
+    public SubjectService(SubjectRepository subjectRepository, ChapterService chapterService, UserPackageRepository userPackageRepository, PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper, LessonProgressRepository lessonProgressRepository) {
         this.subjectRepository = subjectRepository;
         this.chapterService = chapterService;
         this.userPackageRepository = userPackageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
         this.objectMapper = objectMapper;
+        this.lessonProgressRepository = lessonProgressRepository;
     }
 
     public List<Subject> getSubjectsByGradeId(Long gradeId, boolean isActive) {
@@ -209,6 +213,21 @@ public class SubjectService {
             materials = Collections.emptyList();
         }
 
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        KeyLessonUser keyLessonUser = KeyLessonUser.builder()
+                .lessonId(lesson.getLessonId())
+                .userId(userId)
+                .build();
+
+        LessonProgress lessonProgress = lessonProgressRepository.findById(keyLessonUser).orElse(null);
+
+        Boolean isCompleted = false;
+        if (lessonProgress != null) {
+            isCompleted = lessonProgress.getIsCompleted();
+        }
+
+
         return LessonResponseDTO.builder()
                 .lessonId(lesson.getLessonId())
                 .lessonName(lesson.getLessonName())
@@ -221,6 +240,7 @@ public class SubjectService {
                         .description(lesson.getLessonStatus().getDescription())
                         .build())
                 .materials(materials)
+                .isCompleted(isCompleted)
                 .build();
     }
 }

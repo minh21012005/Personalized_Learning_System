@@ -27,6 +27,7 @@ public class LessonResponseDTO {
     String userFullName;
     String updatedAt;
     String subjectName;
+    Boolean isCompleted;
 
     @Data
     @Builder

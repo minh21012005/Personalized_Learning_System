@@ -3,7 +3,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -114,7 +114,6 @@
         .chapter-container .list-group {
             margin-top: 5px;
         }
-
         @media (max-width: 767.98px) {
             .sidebar {
                 display: none;
@@ -130,6 +129,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 <script>
+    // Tải YouTube API nếu chưa có
+    if (!window.YT) {
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+</script>
+<script>
     // Dữ liệu lessons được truyền từ server
     const lessonsData = {
         <c:forEach var="chapterItem" items="${chapters}" varStatus="chapterStatus">
@@ -144,61 +152,240 @@
                 "${fn:escapeXml(material)}"${materialStatus.last ? '' : ','}
                 </c:forEach>
             ],
-            videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}"
+            videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}",
+            isCompleted: ${lessonItem.isCompleted}
         }${lessonStatus.last && chapterStatus.last ? '' : ','}
         </c:forEach>
         </c:forEach>
     };
 
-    // Lấy userId từ server (giả sử SecurityUtils.getCurrentUserId() được truyền vào)
-    const userId = ${user.userId != null ? user.userId : 'null'};
+    // Lấy userId từ server
+    const userId = ${sessionScope.id != null ? sessionScope.id : 'null'};
     if (!userId) {
-        console.error('User ID not found. Progress tracking disabled.');
+        console.error('Thiếu userId. Không thể theo dõi tiến trình.');
     }
 
-    const video = document.getElementById('lessonVideo');
+    let player = null;
+    let currentLessonId = null;
+    let lastWatchedTime = 0;
+    let isYouTubeAPIReady = false;
+    let pendingLessonId = null;
 
-    // Chuyển iframe thành video element để hỗ trợ sự kiện HTML5
-    function updateVideoElement(src) {
-        const videoContainer = $('#videoContainer');
-        videoContainer.empty();
-        if (src) {
-            const videoElement = document.createElement('video');
-            videoElement.id = 'lessonVideo';
-            videoElement.controls = true;
-            videoElement.innerHTML = `<source src="${src}" type="video/mp4">Your browser does not support the video tag.`;
-            videoContainer.append(videoElement);
-            videoContainer.show();
-            return videoElement;
-        } else {
-            videoContainer.hide();
-            return null;
+    // Hàm được gọi khi YouTube API sẵn sàng
+    window.onYouTubeIframeAPIReady = function() {
+        console.log('YouTube API is ready');
+        isYouTubeAPIReady = true;
+        if (pendingLessonId) {
+            console.log('Initializing player for pending lesson:', pendingLessonId);
+            initializeYouTubePlayer(pendingLessonId);
+            pendingLessonId = null;
+        }
+    };
+
+    // Lưu tiến trình vào localStorage
+    function saveToLocalStorage(lessonId, watchedTime, isCompleted) {
+        if (!userId || !lessonId) return;
+        const storageKey = `lesson_progress_`+userId+`_`+lessonId;
+        const progress = { watchedTime: Math.floor(watchedTime), isCompleted, timestamp: Date.now() };
+        localStorage.setItem(storageKey, JSON.stringify(progress));
+    }
+
+    // Đồng bộ tiến trình với backend
+    async function syncProgressToBackend(lessonId) {
+        if (!userId || !lessonId) {
+            console.error('Thiếu userId hoặc lessonId');
+            return;
+        }
+        const storageKey = `lesson_progress_`+userId+`_`+lessonId;
+
+        const progress = JSON.parse(localStorage.getItem(storageKey));
+        if (progress) {
+            const data = {
+                userId: userId,
+                lessonId: parseInt(lessonId),
+                watchedTime: progress.watchedTime || 0,
+                isCompleted: progress.isCompleted || false
+            };
+            try {
+                const response = await fetch('/api/lesson-progress/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    localStorage.removeItem(storageKey);
+                } else {
+                    console.error('Lỗi khi lưu tiến trình:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Lỗi đồng bộ tiến trình:', error);
+            }
         }
     }
 
+    // Tải tiến trình khi chuyển bài học
+    async function loadProgress(lessonId) {
+        if (!userId || !lessonId) return;
+        const storageKey = `lesson_progress_`+userId+`_`+lessonId;
 
-    let currentLessonId = null;
+        const localProgress = JSON.parse(localStorage.getItem(storageKey));
+        if (localProgress && localProgress.watchedTime) {
+            lastWatchedTime = localProgress.watchedTime;
+            if (player && player.seekTo && isYouTubeAPIReady) {
+                player.seekTo(lastWatchedTime, true);
+            }
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/lesson-progress?userId=`+userId+`&lessonId=`+lessonId, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                }
+            });
+            if (response.ok) {
+                const progress = await response.json();
+                if (progress && progress.watchedTime) {
+                    lastWatchedTime = progress.watchedTime;
+                    if (player && player.seekTo && isYouTubeAPIReady) {
+                        player.seekTo(lastWatchedTime, true);
+                    }
+                    saveToLocalStorage(lessonId, progress.watchedTime, progress.isCompleted);
+                }
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải tiến trình:', error);
+        }
+    }
+
+    // Hàm chuyển đổi videoTime (HH:MM:SS) sang giây
+    function parseVideoTime(timeStr) {
+        if (!timeStr) return 0;
+        const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+        return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
+    }
+
+    // Trích xuất YouTube video ID từ URL nhúng
+    function extractYouTubeVideoId(url) {
+        console.log('Extracting video ID from URL:', url);
+        const regex = /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([^?&\s]+)/;
+        const match = url.match(regex);
+        const videoId = match ? match[1] : null;
+        console.log('Extracted video ID:', videoId);
+        return videoId;
+    }
+
+    // Khởi tạo YouTube Player
+    function initializeYouTubePlayer(lessonId) {
+        console.log('Initializing YouTube Player for lesson:', lessonId);
+        if (!isYouTubeAPIReady) {
+            console.log('YouTube API not ready, storing pending lesson:', lessonId);
+            pendingLessonId = lessonId;
+            return;
+        }
+        const lesson = lessonsData[lessonId];
+        if (!lesson || !lesson.videoSrc) {
+            console.log('No lesson or video source found for lesson:', lessonId);
+            $('#videoContainer').hide();
+            return;
+        }
+
+        const videoId = extractYouTubeVideoId(lesson.videoSrc);
+        if (!videoId) {
+            console.error('Invalid YouTube URL:', lesson.videoSrc);
+            $('#videoContainer').hide();
+            return;
+        }
+
+        // Hủy player cũ
+        if (player) {
+            console.log('Destroying old player');
+            player.destroy();
+            player = null;
+        }
+
+        // Xóa và tạo lại iframe
+        $('#videoContainer').empty().append(`
+            <iframe id="lessonVideo" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        `);
+
+        // Cập nhật iframe src
+        const videoSrc = lesson.videoSrc + (lesson.videoSrc.includes('?') ? '&' : '?') + 'enablejsapi=1';
+        console.log('Setting iframe src:', videoSrc);
+        $('#lessonVideo').attr('src', videoSrc);
+        $('#videoContainer').show();
+
+        // Tạo player mới
+        console.log('Creating new YouTube Player with videoId:', videoId);
+        player = new YT.Player('lessonVideo', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+                'playsinline': 1,
+                'enablejsapi': 1
+            },
+            events: {
+                'onReady': (event) => {
+                    console.log('Player is ready for lesson:', lessonId);
+                    loadProgress(lessonId);
+                },
+                'onStateChange': (event) => {
+                    console.log('Player state changed:', event.data);
+                    if (event.data === YT.PlayerState.PLAYING) {
+                        const timeUpdateInterval = setInterval(() => {
+                            if (player && player.getCurrentTime) {
+                                lastWatchedTime = player.getCurrentTime();
+                                saveToLocalStorage(lessonId, lastWatchedTime, false);
+                            }
+                        }, 5000);
+                        player.timeUpdateInterval = timeUpdateInterval;
+                    } else if (event.data === YT.PlayerState.PAUSED) {
+                        clearInterval(player.timeUpdateInterval);
+                        saveToLocalStorage(lessonId, lastWatchedTime, false);
+                        syncProgressToBackend(lessonId);
+                    } else if (event.data === YT.PlayerState.ENDED) {
+                        clearInterval(player.timeUpdateInterval);
+                        const lesson = lessonsData[lessonId];
+                        const totalTime = lesson.videoTime ? parseVideoTime(lesson.videoTime) : player.getDuration();
+                        saveToLocalStorage(lessonId, totalTime, true);
+                        syncProgressToBackend(lessonId);
+                    }
+                }
+            }
+        });
+    }
 
     $(document).ready(function() {
         // Gắn sự kiện click cho tất cả lesson
         $('.list-group-item-action').on('click', function(e) {
             e.preventDefault();
             const lessonId = $(this).data('lesson-id');
-            console.log('Clicked lessonId:', lessonId); // Debug
+            console.log('Clicked lessonId:', lessonId);
             loadLessonDetails(lessonId);
         });
 
         function loadLessonDetails(lessonId) {
+            console.log('Loading lesson details for lessonId:', lessonId);
             const lesson = lessonsData[lessonId];
+            console.log('Lesson data:', lesson);
 
-            // Xóa lớp active khỏi tất cả các lesson items
+            if (currentLessonId && currentLessonId != lessonId) {
+                console.log('Syncing progress for previous lesson:', currentLessonId);
+                syncProgressToBackend(currentLessonId);
+            }
+
+            currentLessonId = lessonId;
+
             $('.list-group-item-action').removeClass('active');
-            // Thêm lớp active vào lesson item được chọn
             $(`.list-group-item-action[data-lesson-id="${lessonId}"]`).addClass('active');
 
             if (lesson) {
-                $('#lessonVideo').attr('src', lesson.videoSrc || '');
-                $('#videoContainer').toggle(!!lesson.videoSrc); // Ẩn/hiện video container
                 $('#lessonDescription').text(lesson.lessonDescription || 'Không có mô tả cho bài học này.');
                 const materialsList = $('#materialsList');
                 materialsList.empty();
@@ -206,37 +393,44 @@
                     lesson.materials.forEach(material => {
                         materialsList.append(`
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="/files/taiLieu/` + material + `" target="_blank">` + material + `</a>
+                                <a href="/files/taiLieu/${material}" target="_blank">${material}</a>
                             </li>
                         `);
                     });
                 } else {
                     materialsList.append('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
                 }
+
+                // Cập nhật video
+                if (lesson.videoSrc && extractYouTubeVideoId(lesson.videoSrc)) {
+                    console.log('Valid video source, initializing player for lesson:', lessonId);
+                    initializeYouTubePlayer(lessonId);
+                } else {
+                    console.log('Invalid or missing video source for lesson:', lessonId);
+                    $('#lessonVideo').attr('src', '');
+                    $('#videoContainer').hide();
+                }
             } else {
+                console.log('Lesson not found for lessonId:', lessonId);
                 $('#lessonVideo').attr('src', '');
                 $('#videoContainer').hide();
                 $('#lessonDescription').text('Không tìm thấy bài học.');
                 $('#materialsList').html('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
             }
 
-            // Chuyển sang tab "Mô tả bài học" sau khi tải xong
             new bootstrap.Tab(document.querySelector('#description-tab')).show();
         }
 
-        // Tải chi tiết bài học ban đầu nếu có lesson được truyền vào
+        window.addEventListener('beforeunload', () => {
+            if (currentLessonId) {
+                syncProgressToBackend(currentLessonId);
+            }
+        });
+
         <c:if test="${lesson != null}">
         loadLessonDetails(${lesson.lessonId});
         </c:if>
 
-        // Logic để hiển thị/ẩn video container nếu không có videoSrc ban đầu
-        if ($('#lessonVideo').attr('src') === '') {
-            $('#videoContainer').hide();
-        } else {
-            $('#videoContainer').show();
-        }
-
-        // Logic cho việc xoay icon mũi tên khi mở/đóng chapter
         $('.toggle-chapter-btn').on('click', function() {
             $(this).find('.bi-chevron-down').toggleClass('rotate-180');
         });
@@ -250,7 +444,9 @@
         <div class="col-md-8">
             <div class="video-container ratio ratio-16x9" id="videoContainer">
                 <iframe id="lessonVideo" src="${lesson != null && lesson.videoSrc != null ? lesson.videoSrc : ''}"
-                        title="${lesson != null ? lesson.lessonName : ''}" allowfullscreen></iframe>
+                        title="${lesson != null ? lesson.lessonName : ''}" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
             </div>
 
             <ul class="nav nav-tabs mb-4" id="lessonTabs" role="tablist">
@@ -325,6 +521,9 @@
                                                                 <a href="#" class="list-group-item list-group-item-action ${lessonItem.lessonId == (lesson != null ? lesson.lessonId : 0) ? 'active' : ''}"
                                                                    data-lesson-id="${lessonItem.lessonId}">
                                                                         ${stt}. ${lessonItem.lessonName}
+                                                                    <c:if test="${lessonItem.isCompleted}">
+                                                                        <i class="bi bi-check-circle-fill text-success ms-2"></i>
+                                                                    </c:if>
                                                                 </a>
                                                                 <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A'}</span>
                                                             </div>
@@ -372,6 +571,9 @@
                                                     <a href="#" class="list-group-item list-group-item-action ${lessonItem.lessonId == (lesson != null ? lesson.lessonId : 0) ? 'active' : ''}"
                                                        data-lesson-id="${lessonItem.lessonId}">
                                                             ${stt}. ${lessonItem.lessonName}
+                                                        <c:if test="${lessonItem.isCompleted}">
+                                                            <i class="bi bi-check-circle-fill text-success ms-2"></i>
+                                                        </c:if>
                                                     </a>
                                                     <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A'}</span>
                                                 </div>
