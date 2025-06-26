@@ -18,6 +18,7 @@ import swp.se1941jv.pls.repository.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -224,7 +225,7 @@ public class PracticesService {
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public List<QuestionAnswerResDTO> checkResults(PracticeSubmissionDto submission,Long testId) {
+    public List<QuestionAnswerResDTO> checkResults(PracticeSubmissionDto submission, Long testId) {
 
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -233,7 +234,9 @@ public class PracticesService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId,userId);
+        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId);
+
+        AtomicInteger correctAnswersCount = new AtomicInteger();
 
 
         List<QuestionAnswerResDTO> questionAnswerResDTOS = new ArrayList<>();
@@ -259,9 +262,9 @@ public class PracticesService {
 
                 try {
                     answerHistoryTestRepository.save(AnswerHistoryTest.builder()
-                                    .question(question)
-                                    .userTest(userTest)
-                                    .answer(new ObjectMapper().writeValueAsString(listAnswerSelected))
+                            .question(question)
+                            .userTest(userTest)
+                            .answer(new ObjectMapper().writeValueAsString(listAnswerSelected))
 
                             .build());
                 } catch (JsonProcessingException e) {
@@ -270,6 +273,9 @@ public class PracticesService {
 
 
                 boolean isCorrect = (listAnswerSelected != null) && (correctAnswers != null) && correctAnswers.containsAll(listAnswerSelected) && listAnswerSelected.containsAll(correctAnswers);
+                if (isCorrect) {
+                    correctAnswersCount.getAndIncrement();
+                }
 
                 QuestionAnswerResDTO questionAnswerResDTO = QuestionAnswerResDTO.builder()
                         .questionId(questionAnswer.getQuestionId())
@@ -285,6 +291,11 @@ public class PracticesService {
 
             });
         }
+
+        // Update user test with the total correct answers
+        userTest.setCorrectAnswers(userTest.getCorrectAnswers() + correctAnswersCount.get());
+        userTest.setTimeEnd(LocalDateTime.now());
+        userTestRepository.save(userTest);
 
         return questionAnswerResDTOS;
     }
@@ -303,12 +314,18 @@ public class PracticesService {
 
         Test test = Test.builder()
                 .startAt(LocalDateTime.now())
+                .endAt(LocalDateTime.now())
+                .testName("Practice Test - " + user.getFullName() + " - " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")))
                 .build();
         test = testRepository.save(test);
 
         Test finalTest = test;
         userTestRepository.save(UserTest.builder()
                 .test(finalTest)
+                .timeStart(LocalDateTime.now())
+                .timeEnd(LocalDateTime.now())
+                .totalQuestions(initialQuestions.size())
+                .correctAnswers(0) // Initially, no answers are correct
                 .user(user)
                 .build());
         initialQuestions.stream().forEach(question -> {
@@ -437,8 +454,10 @@ public class PracticesService {
             return null;
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId);
+        userTest.setTimeEnd(LocalDateTime.now());
+        userTest.setTotalQuestions(userTest.getTotalQuestions() + QUESTIONS_PER_SET);
+        userTestRepository.save(userTest);
 
         List<QuestionDisplayDto> nextQuestions = generateNextQuestions(lessonIds, correctCount);
         Test test = testRepository.findById(testId)

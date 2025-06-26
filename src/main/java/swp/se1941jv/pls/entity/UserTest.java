@@ -32,4 +32,10 @@ public class UserTest {
 
     @Column(name = "time_end")
     LocalDateTime timeEnd;
+
+    @Column(name = "total_questions")
+    Integer totalQuestions;
+
+    @Column(name = "correct_answers")
+    Integer correctAnswers;
 }
