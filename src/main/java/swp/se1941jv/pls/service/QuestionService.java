@@ -39,7 +39,8 @@ public class QuestionService {
     private static final String UPLOAD_DIR = "question_bank";
     private static final Long PENDING_STATUS_ID = 1L; // Assuming status_id=1 is "Pending"
 
-    public QuestionBank saveQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList, MultipartFile imageFile) throws Exception {
+    public QuestionBank saveQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList,
+            MultipartFile imageFile) throws Exception {
         // Validate mandatory fields
         if (question.getGrade() == null || question.getGrade().getGradeId() == null) {
             throw new IllegalArgumentException("Khối là bắt buộc.");
@@ -62,7 +63,8 @@ public class QuestionService {
             throw new IllegalArgumentException("Nội dung câu hỏi không được để trống.");
         }
 
-        // Validate options: at least 2 options, at least 1 correct, at most n-1 correct, no empty options
+        // Validate options: at least 2 options, at least 1 correct, at most n-1
+        // correct, no empty options
         if (optionTexts == null || optionTexts.size() < 2) {
             throw new IllegalArgumentException("Phải có ít nhất 2 đáp án.");
         }
@@ -91,7 +93,6 @@ public class QuestionService {
         QuestionStatus pendingStatus = questionStatusRepository.findById(PENDING_STATUS_ID)
                 .orElseThrow(() -> new RuntimeException("Trạng thái Pending không tìm thấy."));
         question.setStatus(pendingStatus);
-
 
         // Handle image upload using UploadService
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -127,7 +128,6 @@ public class QuestionService {
         }
         return null;
     }
-
 
     public Page<QuestionBank> findQuestionsByCreatorAndFilters(
             Long creatorUserId,
@@ -183,7 +183,8 @@ public class QuestionService {
         }
     }
 
-    public QuestionBank updateQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList, MultipartFile imageFile, String existingImage) throws Exception {
+    public QuestionBank updateQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList,
+            MultipartFile imageFile, String existingImage) throws Exception {
         // Validate mandatory fields
         if (question.getGrade() == null || question.getGrade().getGradeId() == null) {
             throw new IllegalArgumentException("Khối là bắt buộc.");
@@ -206,7 +207,8 @@ public class QuestionService {
             throw new IllegalArgumentException("Nội dung câu hỏi không được để trống.");
         }
 
-        // Validate options: at least 2 options, at least 1 correct, at most n-1 correct, no empty options
+        // Validate options: at least 2 options, at least 1 correct, at most n-1
+        // correct, no empty options
         if (optionTexts == null || optionTexts.size() < 2) {
             throw new IllegalArgumentException("Phải có ít nhất 2 đáp án.");
         }
@@ -225,7 +227,6 @@ public class QuestionService {
         if (correctCount >= optionTexts.size()) {
             throw new IllegalArgumentException("Chỉ được phép có tối đa " + (optionTexts.size() - 1) + " đáp án đúng.");
         }
-
 
         // Handle image upload or retain existing
         if (imageFile != null && !imageFile.isEmpty()) {

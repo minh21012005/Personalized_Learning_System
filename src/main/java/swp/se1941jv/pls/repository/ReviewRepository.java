@@ -3,6 +3,8 @@ package swp.se1941jv.pls.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -62,5 +64,35 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
         List<Review> findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCaseAndRating(Long subjectId,
                         ReviewStatus status, String comment, Integer rating);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findByPkg_PackageIdAndStatus(Long packageId, ReviewStatus status, Pageable pageable);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCase(Long packageId, ReviewStatus status,
+                        String comment, Pageable pageable);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findByPkg_PackageIdAndStatusAndRating(Long packageId, ReviewStatus status, Integer rating,
+                        Pageable pageable);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCaseAndRating(Long packageId,
+                        ReviewStatus status, String comment, Integer rating, Pageable pageable);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findBySubject_SubjectIdAndStatus(Long subjectId, ReviewStatus status, Pageable pageable);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCase(Long subjectId, ReviewStatus status,
+                        String comment, Pageable pageable);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findBySubject_SubjectIdAndStatusAndRating(Long subjectId, ReviewStatus status, Integer rating,
+                        Pageable pageable);
+
+        @EntityGraph(attributePaths = { "user" })
+        Page<Review> findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCaseAndRating(Long subjectId,
+                        ReviewStatus status, String comment, Integer rating, Pageable pageable);
 
 }

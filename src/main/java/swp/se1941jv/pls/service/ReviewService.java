@@ -15,6 +15,8 @@ import swp.se1941jv.pls.repository.PackageSubjectRepository;
 import swp.se1941jv.pls.repository.TransactionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -168,6 +170,43 @@ public class ReviewService {
             return latestReview.map(Review::getStatus).orElse(null);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    // Hàm filter chính
+    public Page<Review> filterReviews(String type, Long packageId, Long subjectId, ReviewStatus status, Integer rating,
+            String comment, Pageable pageable) {
+        if (type != null && type.equals("Package") && packageId != null) {
+            if (comment != null && !comment.isEmpty() && rating != null) {
+                return reviewRepository.findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCaseAndRating(
+                        packageId, status != null ? status : ReviewStatus.APPROVED, comment, rating, pageable);
+            } else if (comment != null && !comment.isEmpty()) {
+                return reviewRepository.findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCase(
+                        packageId, status != null ? status : ReviewStatus.APPROVED, comment, pageable);
+            } else if (rating != null) {
+                return reviewRepository.findByPkg_PackageIdAndStatusAndRating(
+                        packageId, status != null ? status : ReviewStatus.APPROVED, rating, pageable);
+            } else {
+                return reviewRepository.findByPkg_PackageIdAndStatus(
+                        packageId, status != null ? status : ReviewStatus.APPROVED, pageable);
+            }
+        } else if (type != null && type.equals("Subject") && subjectId != null) {
+            if (comment != null && !comment.isEmpty() && rating != null) {
+                return reviewRepository.findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCaseAndRating(
+                        subjectId, status != null ? status : ReviewStatus.APPROVED, comment, rating, pageable);
+            } else if (comment != null && !comment.isEmpty()) {
+                return reviewRepository.findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCase(
+                        subjectId, status != null ? status : ReviewStatus.APPROVED, comment, pageable);
+            } else if (rating != null) {
+                return reviewRepository.findBySubject_SubjectIdAndStatusAndRating(
+                        subjectId, status != null ? status : ReviewStatus.APPROVED, rating, pageable);
+            } else {
+                return reviewRepository.findBySubject_SubjectIdAndStatus(
+                        subjectId, status != null ? status : ReviewStatus.APPROVED, pageable);
+            }
+        } else {
+            // Default: get all reviews
+            return reviewRepository.findAll(pageable);
         }
     }
 }
