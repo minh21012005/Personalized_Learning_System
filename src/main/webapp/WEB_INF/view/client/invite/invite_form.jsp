@@ -21,7 +21,7 @@
                 }
 
                 .container-fluid {
-                    height: 85vh;
+                    height: 100vh;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -208,8 +208,6 @@
                 </div>
             </div>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-                crossorigin="anonymous"></script>
             <script src="/js/scripts.js"></script>
         </body>
 
