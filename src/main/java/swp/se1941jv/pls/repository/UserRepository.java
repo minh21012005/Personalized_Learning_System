@@ -15,42 +15,39 @@ import swp.se1941jv.pls.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
-    User findByEmail(String email);
+       User findByEmail(String email);
 
-    List<User> findAll();
+       List<User> findAll();
 
-    Page<User> findAll(Pageable pageable);
+       Page<User> findAll(Pageable pageable);
 
-    Page<User> findAll(Specification<User> spec, Pageable pageable);
+       Page<User> findAll(Specification<User> spec, Pageable pageable);
 
-    boolean existsByEmail(String email);
+       boolean existsByEmail(String email);
 
-    boolean existsByPhoneNumber(String phone);
+       boolean existsByPhoneNumber(String phone);
 
-    boolean existsByEmailAndUserIdNot(String email, Long userId);
+       boolean existsByEmailAndUserIdNot(String email, Long userId);
 
-    boolean existsByPhoneNumberAndUserIdNot(String phoneNumber, Long userId);
-    User findByResetPasswordToken(String token);
+       boolean existsByPhoneNumberAndUserIdNot(String phoneNumber, Long userId);
 
-    User findByEmailVerifyToken(String token);
+       User findByResetPasswordToken(String token);
 
-    List<User> findByRole_RoleName(String roleName);
+       User findByEmailVerifyToken(String token);
 
+       List<User> findByRole_RoleName(String roleName);
 
+       List<User> findAllByIsActiveTrue();
 
-     List<User> findAllByIsActiveTrue();
+       @Query("SELECT u FROM User u WHERE u.isActive = true AND UPPER(u.role.roleName) IN :upperCaseRoleNames")
+       List<User> findActiveUsersByRoleNames(@Param("upperCaseRoleNames") List<String> upperCaseRoleNames);
 
+       @Query("SELECT DISTINCT u FROM User u JOIN u.userPackages up JOIN up.pkg p " +
+                     "WHERE u.isActive = true AND p.isActive = true AND p.packageId IN :packageIds")
+       List<User> findActiveUsersByPackageIds(@Param("packageIds") List<Long> packageIds);
 
-    @Query("SELECT u FROM User u WHERE u.isActive = true AND UPPER(u.role.roleName) IN :upperCaseRoleNames")
-    List<User> findActiveUsersByRoleNames(@Param("upperCaseRoleNames") List<String> upperCaseRoleNames);
-
-
-    @Query("SELECT DISTINCT u FROM User u JOIN u.userPackages up JOIN up.pkg p " +
-           "WHERE u.isActive = true AND p.isActive = true AND p.packageId IN :packageIds")
-    List<User> findActiveUsersByPackageIds(@Param("packageIds") List<Long> packageIds);
-
-
-    @Query("SELECT DISTINCT u FROM User u JOIN u.userPackages up JOIN up.pkg p JOIN p.packageSubjects ps JOIN ps.subject s " +
-           "WHERE u.isActive = true AND p.isActive = true AND s.isActive = true AND s.subjectId IN :subjectIds")
-    List<User> findActiveUsersBySubjectIds(@Param("subjectIds") List<Long> subjectIds);
+       @Query("SELECT DISTINCT u FROM User u JOIN u.userPackages up JOIN up.pkg p JOIN p.packageSubjects ps JOIN ps.subject s "
+                     +
+                     "WHERE u.isActive = true AND p.isActive = true AND s.isActive = true AND s.subjectId IN :subjectIds")
+       List<User> findActiveUsersBySubjectIds(@Param("subjectIds") List<Long> subjectIds);
 }

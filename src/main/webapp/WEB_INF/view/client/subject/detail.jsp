@@ -70,6 +70,9 @@
                     </div>
 
                 </div>
+                <div id="review-content">
+                    <jsp:include page="/subject/${subject.subjectId}/reviews?render=true" />
+                </div>
             </main>
 
             <footer>
