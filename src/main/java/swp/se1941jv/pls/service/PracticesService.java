@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.config.SecurityUtils;
@@ -15,7 +19,9 @@ import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 import swp.se1941jv.pls.repository.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +42,9 @@ public class PracticesService {
     UserRepository userRepository;
     AnswerHistoryTestRepository answerHistoryTestRepository;
     ConfigRepository configRepository;
+    NotificationService notificationService;
+
+    ObjectMapper objectMapper;
 
     private static final String QUESTION_GENERATION_CONFIG_KEY = "questionPracticeGenerate";
 
@@ -481,4 +490,93 @@ public class PracticesService {
                 .questions(nextQuestions)
                 .build();
     }
+
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public TestHistoryDTO getTestHistory(Long testId) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            throw new RuntimeException("Không thể xác định người dùng hiện tại.");
+        }
+
+        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId);
+        if (userTest == null) {
+            throw new RuntimeException("Không tìm thấy lịch sử bài kiểm tra.");
+        }
+
+        List<AnswerHistoryTest> answerHistoryTests = answerHistoryTestRepository.findByUserTestId(userTest.getUserTestId());
+        List<QuestionAnswerResDTO> answers = answerHistoryTests.stream().map(answerHistory -> {
+            try {
+                QuestionBank question = answerHistory.getQuestion();
+                List<String> selectedAnswers = objectMapper.readValue(answerHistory.getAnswer(), List.class);
+                List<AnswerOptionDto> allOptions = questionService.getQuestionOptions(question);
+                List<String> correctAnswers = allOptions.stream()
+                        .filter(AnswerOptionDto::isCorrect)
+                        .map(AnswerOptionDto::getText)
+                        .collect(Collectors.toList());
+                boolean isCorrect = (selectedAnswers != null && correctAnswers != null) &&
+                        correctAnswers.containsAll(selectedAnswers) && selectedAnswers.containsAll(correctAnswers);
+
+                return QuestionAnswerResDTO.builder()
+                        .questionId(question.getQuestionId())
+                        .content(question.getContent())
+                        .image(question.getImage())
+                        .selectedAnswers(selectedAnswers)
+                        .correctAnswers(correctAnswers)
+                        .answerOptions(allOptions.stream().map(AnswerOptionDto::getText).collect(Collectors.toList()))
+                        .isCorrect(isCorrect)
+                        .build();
+            } catch (Exception e) {
+                return QuestionAnswerResDTO.builder()
+                        .questionId(answerHistory.getQuestion().getQuestionId())
+                        .content("Error loading answer")
+                        .image(null)
+                        .selectedAnswers(new ArrayList<>())
+                        .correctAnswers(new ArrayList<>())
+                        .answerOptions(new ArrayList<>())
+                        .isCorrect(false)
+                        .build();
+            }
+        }).collect(Collectors.toList());
+
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+
+        return TestHistoryDTO.builder()
+                .userTest(userTest)
+                .testName(userTest.getTest().getTestName())
+                .startTime(userTest.getTimeStart() != null ? userTest.getTimeStart().format(formatter) : "")
+                .endTime(userTest.getTimeEnd() != null ? userTest.getTimeEnd().format(formatter) : "")
+                .answers(answers)
+                .build();
+    }
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public Page<TestHistoryListDTO> getTestHistoryList(Long userId, LocalDate startDate, LocalDate endDate, int page, int size) {
+        if (userId == null) {
+            throw new RuntimeException("Không thể xác định người dùng hiện tại.");
+        }
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Chuyển LocalDate thành LocalDateTime
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+
+        Page<UserTest> userTestPage = userTestRepository.findByUserIdAndDateRange(userId, startDateTime, endDateTime, pageable);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        List<TestHistoryListDTO> testHistoryList = userTestPage.getContent().stream()
+                .map(userTest -> TestHistoryListDTO.builder()
+                        .testId(userTest.getTest().getTestId())
+                        .testName(userTest.getTest().getTestName())
+                        .totalQuestions(userTest.getTotalQuestions())
+                        .correctAnswers(userTest.getCorrectAnswers())
+                        .startTime(userTest.getTimeStart() != null ? userTest.getTimeStart().format(formatter) : "")
+                        .endTime(userTest.getTimeEnd() != null ? userTest.getTimeEnd().format(formatter) : "")
+                        .build())
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(testHistoryList, pageable, userTestPage.getTotalElements());
+    }
+
 }

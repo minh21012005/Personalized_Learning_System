@@ -2,6 +2,8 @@ package swp.se1941jv.pls.controller.client.practice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
@@ -9,13 +11,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.response.*;
-import swp.se1941jv.pls.dto.response.practice.PracticeResponseDTO;
-import swp.se1941jv.pls.dto.response.practice.PracticeSubmissionDto;
-import swp.se1941jv.pls.dto.response.practice.QuestionAnswerResDTO;
-import swp.se1941jv.pls.dto.response.practice.QuestionDisplayDto;
+import swp.se1941jv.pls.dto.response.practice.*;
+import swp.se1941jv.pls.entity.UserTest;
 import swp.se1941jv.pls.service.PracticesService;
 import swp.se1941jv.pls.service.QuestionService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -162,6 +164,52 @@ public class PracticeController {
             return "client/practice/PracticeResults";
         } catch (Exception e) {
             model.addAttribute("error", "Lỗi khi xử lý dữ liệu: " + e.getMessage());
+            return "error";
+        }
+    }
+
+    @GetMapping("/history")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String showTestHistoryList(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        try {
+            Page<TestHistoryListDTO> testHistoryPage = practicesService.getTestHistoryList(userId, startDate, endDate, page, size);
+            model.addAttribute("testHistoryPage", testHistoryPage);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("startDate", startDate != null ? startDate.toString() : "");
+            model.addAttribute("endDate", endDate != null ? endDate.toString() : "");
+            return "client/practice/PracticeHistory";
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi lấy danh sách lịch sử bài kiểm tra: " + e.getMessage());
+            return "error";
+        }
+    }
+
+    @GetMapping("/history/{testId}")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String showTestHistory(@PathVariable("testId") Long testId, Model model) {
+
+        try {
+            TestHistoryDTO testHistory = practicesService.getTestHistory(testId);
+            model.addAttribute("userTest", testHistory.getUserTest());
+            model.addAttribute("testName", testHistory.getTestName());
+            model.addAttribute("answers", testHistory.getAnswers());
+            return "client/practice/PracticeHistoryDetail";
+
+        } catch (Exception e) {
+
+            model.addAttribute("error", "Lỗi khi lấy lịch sử bài kiểm tra: " + e.getMessage());
             return "error";
         }
     }
