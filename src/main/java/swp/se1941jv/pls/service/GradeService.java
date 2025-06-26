@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.repository.GradeRepository;
@@ -26,12 +27,28 @@ public class GradeService {
         return this.gradeRepository.findAll();
     }
 
+    @Transactional
     public Grade saveGrade(Grade grade) {
-        Grade existingGrade = gradeRepository.findByGradeName(grade.getGradeName());
-        if (existingGrade != null && !existingGrade.getGradeId().equals(grade.getGradeId())) {
-            throw new IllegalArgumentException("Grade name '" + grade.getGradeName() + "' already exists.");
+        if (grade == null || grade.getGradeName() == null || grade.getGradeName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên khối lớp không được để trống.");
         }
-        return this.gradeRepository.save(grade);
+
+        String trimmedName = grade.getGradeName().trim().replaceAll("\\s+", " ");
+
+        if (!trimmedName.matches("[\\p{L}0-9\\s]+")) {
+            throw new IllegalArgumentException(
+                    "Tên khối lớp không được chứa ký tự đặc biệt. Chỉ cho phép chữ cái, số và khoảng trắng.");
+        }
+
+        Grade existingGrade = gradeRepository.findByGradeNameIgnoreCase(trimmedName);
+        if (existingGrade != null
+                && (grade.getGradeId() == null || !existingGrade.getGradeId().equals(grade.getGradeId()))) {
+            throw new IllegalArgumentException("Tên khối lớp '" + trimmedName + "' đã tồn tại.");
+        }
+
+        grade.setGradeName(trimmedName);
+        Grade savedGrade = gradeRepository.save(grade);
+        return savedGrade;
     }
 
     public void deleteById(long gradeId) {

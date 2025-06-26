@@ -36,7 +36,7 @@
                     .sidebar {
                         position: fixed;
 
-                        top: 9%;
+                        top: 8%;
                         left: 0;
                         width: 250px;
                         height: calc(110vh - 70px - 50px);
@@ -190,6 +190,13 @@
                             <h2 class="text-center mb-4">Gói ${pkg.name}</h2>
 
                             <div class="description-box">
+                                <div><strong>Loại gói:</strong>
+                                    <c:choose>
+                                        <c:when test="${pkg.packageType == 'FULL_COURSE'}">Gói học</c:when>
+                                        <c:otherwise>Gói luyện tập</c:otherwise>
+
+                                    </c:choose>
+                                </div>
                                 <div><strong>Mô tả:</strong> ${pkg.description}</div>
 
                                 <div><strong>Giá tiền:</strong>
