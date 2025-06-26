@@ -33,7 +33,7 @@
                     </head>
 
                     <body>
-                        <jsp:include page="../layout/head.jsp" />
+                        <jsp:include page="../layout/header.jsp" />
 
                         <main class="main-content">
                             <div class="container">
@@ -267,8 +267,6 @@
                                 </div>
                             </div>
                         </footer>
-                        <script
-                            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
                         <c:if test="${not empty success}">
                             <script>
                                 document.addEventListener('DOMContentLoaded', function () {

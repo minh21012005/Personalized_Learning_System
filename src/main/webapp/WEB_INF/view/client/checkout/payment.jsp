@@ -16,7 +16,7 @@
                 <body>
                     <div class="checkout-minhnb">
                         <div class="container">
-                            <jsp:include page="../layout/head.jsp" />
+                            <jsp:include page="../layout/header.jsp" />
                             <main class="main-content">
                                 <div class="payment-info">
                                     <section class="qr-section">

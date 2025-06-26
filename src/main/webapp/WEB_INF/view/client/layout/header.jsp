@@ -376,9 +376,12 @@
 </style>
 <head>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+          integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Custom CSS -->
@@ -400,12 +403,17 @@
             </div>
             <ul>
                 <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                <li>
-                    <a href="javascript:void(0);">Gói học</a>
+                <c:if test="${ sessionScope.role  eq 'STUDENT'}">
+                    <li>
+                        <a href="/packages">Gói học của tôi</a>
 
-                </li>
-                <li><a href="/practices">Luyện tập</a></li>
-                <li><a href="#">Báo cáo học tập</a></li>
+                    </li>
+                    <li><a href="/practices">Luyện tập</a></li>
+                    <li><a href="#">Báo cáo học tập</a></li>
+                </c:if>
+                <c:if test="${sessionScope.role eq 'PARENT'}">
+                    <li><a href="/parent/course">khóa học</a></li>
+                </c:if>
             </ul>
         </div>
 
@@ -442,11 +450,22 @@
                     </li>
                 </ul>
             </div>
-
-            <%-- Heart Button --%>
-            <button type="button" class="heart-btn icon-btn" title="Yêu thích">
-                <i class="fa-regular fa-heart"></i>
-            </button>
+            <c:if test="${sessionScope.role eq 'PARENT'}">
+                <div class="dropdown">
+        <a href="#" class="action-icon" style="color: #64748B" data-bs-toggle="dropdown" aria-expanded="false" title="Quản lý con">
+            <i class="fa fa-user-plus"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <a class="dropdown-item" href="${pageContext.request.contextPath}/invite/create">1. Liên kết tài khoản </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="${pageContext.request.contextPath}/parent/create-student">2. Tạo tài khoản mới cho con</a>
+            </li>
+        </ul>
+    </div>
+                <a style="color: #64748B" class="action-icon" href="/parent/cart"><i class="fa fa-shopping-cart"></i></a>
+            </c:if>
 
             <%-- User Info/Login Button - Sử dụng JSTL --%>
             <c:set var="sessionFullName" value="${sessionScope.fullName}"/>
@@ -482,6 +501,10 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/profile">Thông
                                 tin cá nhân</a></li>
+                            <c:if test="${sessionScope.role eq 'PARENT'}">
+                                <li><a class="dropdown-item" href="/transaction/history">Lịch sử giao dịch</a></li>
+                                <li><a class="dropdown-item" href="/learning/stats">Thống kê học tập</a></li>
+                            </c:if>
                             <li>
                                 <form method="post" action="${pageContext.request.contextPath}/logout"
                                       style="margin:0;">
@@ -489,17 +512,33 @@
                                     <button type="submit" class="dropdown-item">Logout</button>
                                 </form>
                             </li>
+
+
                         </ul>
                     </div>
                 </c:otherwise>
             </c:choose>
 
-            <button type="button"  class="open-menu-btn icon-btn" aria-label="Mở menu">
+            <button type="button" class="open-menu-btn icon-btn" aria-label="Mở menu">
                 <i style="color: #212529;" class="fa-solid fa-bars"></i>
             </button>
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    window.APP_CONTEXT_PATH = "${pageContext.request.contextPath}";
+    <c:if test="${_csrf != null}">
+    window.CSRF_HEADER_NAME = "${_csrf.parameterName}";
+    window.CSRF_TOKEN = "${_csrf.token}";
+    </c:if>
+</script>
 
 <script src="${pageContext.request.contextPath}/js/client_notification.js"></script>
 
@@ -510,7 +549,7 @@
         const closeMenuBtn = document.querySelector(".menu .close-menu-btn");
 
         if (menu && openMenuBtn && closeMenuBtn) {
-            // Initialize menu state
+
             if (window.location.pathname !== "${pageContext.request.contextPath}/") {
                 menu.classList.remove("open");
             }
@@ -527,18 +566,7 @@
                     this.closest(".dropdown").classList.toggle("active");
                 });
             });
-
-            // Ensure dropdowns work on page load
-            const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-            dropdownToggles.forEach(toggle => {
-                toggle.addEventListener('click', function (e) {
-                    const dropdown = document.querySelector(this.getAttribute('aria-controls') || this.nextElementSibling);
-                    if (dropdown) {
-                        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-                        this.setAttribute('aria-expanded', dropdown.style.display === 'block');
-                    }
-                });
-            });
         }
     });
 </script>
+

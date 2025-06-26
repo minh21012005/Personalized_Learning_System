@@ -33,7 +33,7 @@ public class ClientNotificationController {
     private final NotificationService notificationService;
     private final UserService userService; 
 
-    
+
     private User getCurrentAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String && authentication.getPrincipal().equals("anonymousUser"))) {

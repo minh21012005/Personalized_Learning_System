@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChapterResponseDTO {
     Long chapterId;
 

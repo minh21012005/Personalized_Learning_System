@@ -93,7 +93,7 @@ public class LessonController {
             model.addAttribute("lesson", new Lesson());
             model.addAttribute("materialsTemp", new ArrayList<String>());
             model.addAttribute("isEdit", false);
-            return "admin/lesson/save";
+            return "staff/lesson/save";
         } catch (ApplicationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
@@ -149,7 +149,7 @@ public class LessonController {
             model.addAttribute("lesson", lesson);
             model.addAttribute("materialsTemp", materialsTemp);
             model.addAttribute("isEdit", true);
-            return "admin/lesson/save";
+            return "staff/lesson/save";
         } catch (ApplicationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";

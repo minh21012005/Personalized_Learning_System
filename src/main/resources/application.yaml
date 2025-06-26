@@ -8,7 +8,7 @@ spring:
     password: ${DBMS_PASSWORD:Swp1941@}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
   session:
     store-type: jdbc
@@ -37,3 +37,7 @@ app:
   base-url: http://localhost:5555
 server:
   port: 5555
+
+logging:
+  level:
+    root: warn

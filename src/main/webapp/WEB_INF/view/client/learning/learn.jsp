@@ -22,7 +22,6 @@
         .content {
             width: 96%;
             margin: 0 auto;
-            margin-top: 60px;
             flex: 1;
             padding: 20px;
             background-color: #f8f9fa;
@@ -34,8 +33,8 @@
             padding: 20px;
             max-height: 100vh;
             overflow-y: auto;
-            position: sticky; /* Đảm bảo sidebar luôn ở vị trí khi cuộn */
-            top: 60px; /* Điều chỉnh nếu header của bạn có chiều cao khác */
+            position: sticky;
+            top: 60px;
         }
         .list-group-item {
             border: none;
@@ -45,12 +44,11 @@
             transition: background-color 0.2s, color 0.2s, border-left-color 0.2s;
         }
         .list-group-item:hover {
-            background-color: #f0f0f0; /* Màu nền khi hover */
+            background-color: #f0f0f0;
             color: #0056b3;
         }
-        /* Quy tắc active mạnh hơn để đảm bảo hiển thị */
         .list-group-item-action.active {
-            background-color: #e7f1ff !important; /* Sử dụng !important để đảm bảo ghi đè */
+            background-color: #e7f1ff !important;
             color: #0056b3 !important;
             font-weight: bold;
             border-left: 3px solid #007bff !important;
@@ -58,12 +56,11 @@
         }
         .video-container {
             margin-bottom: 20px;
-            /* display: none; will be controlled by JS */
         }
         .video-time {
-            font-size: 0.85em; /* Kích thước chữ nhỏ hơn */
-            color: #6c757d; /* Màu xám cho thời gian video */
-            padding: 0 20px 8px; /* Padding dưới để tách khỏi item tiếp theo */
+            font-size: 0.85em;
+            color: #6c757d;
+            padding: 0 20px 8px;
         }
         .card {
             border: none;
@@ -76,13 +73,6 @@
             color: #0d6efd;
             font-weight: bold;
         }
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            font-size: 1.1em;
-            color: #0d6efd;
-        }
         header, footer {
             background-color: #1a252f;
             color: white;
@@ -93,7 +83,7 @@
             border: none;
             padding: 12px 20px;
             cursor: pointer;
-            color: #212529; /* Màu chữ mặc định */
+            color: #212529;
             font-weight: 600;
             width: 100%;
             text-align: left;
@@ -101,28 +91,28 @@
             justify-content: space-between;
             align-items: center;
             transition: color 0.2s;
-            border-bottom: 1px solid #dee2e6; /* Đường viền dưới cho mỗi chương */
+            border-bottom: 1px solid #dee2e6;
         }
         .toggle-chapter-btn:hover {
             color: #0056b3;
             background-color: #f8f9fa;
         }
         .toggle-chapter-btn .bi {
-            font-size: 1em; /* Kích thước icon nhỏ hơn */
+            font-size: 1em;
             transition: transform 0.2s;
         }
         .toggle-chapter-btn[aria-expanded="true"] .bi-chevron-down {
-            transform: rotate(180deg); /* Xoay mũi tên khi mở */
+            transform: rotate(180deg);
         }
         .chapter-container {
-            margin-bottom: 5px; /* Giảm khoảng cách giữa các chương */
+            margin-bottom: 5px;
             border: 1px solid #e9ecef;
             border-radius: .25rem;
             margin-top: 10px;
             background-color: #ffffff;
         }
         .chapter-container .list-group {
-            margin-top: 5px; /* Khoảng cách từ nút mở/đóng đến danh sách bài học */
+            margin-top: 5px;
         }
 
         @media (max-width: 767.98px) {
@@ -130,7 +120,7 @@
                 display: none;
             }
             .tab-content .chapter-container {
-                padding: 0; /* Bỏ padding để điều chỉnh tốt hơn */
+                padding: 0;
             }
         }
     </style>
@@ -140,6 +130,55 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 <script>
+    // Dữ liệu lessons được truyền từ server
+    const lessonsData = {
+        <c:forEach var="chapterItem" items="${chapters}" varStatus="chapterStatus">
+        <c:forEach var="lessonItem" items="${chapterItem.listLesson}" varStatus="lessonStatus">
+        "${lessonItem.lessonId}": {
+            lessonId: ${lessonItem.lessonId},
+            lessonName: "${fn:escapeXml(lessonItem.lessonName)}",
+            videoSrc: "${fn:escapeXml(lessonItem.videoSrc != null ? lessonItem.videoSrc : '')}",
+            lessonDescription: "${fn:escapeXml(lessonItem.lessonDescription != null ? lessonItem.lessonDescription : '')}",
+            materials: [
+                <c:forEach var="material" items="${lessonItem.materials}" varStatus="materialStatus">
+                "${fn:escapeXml(material)}"${materialStatus.last ? '' : ','}
+                </c:forEach>
+            ],
+            videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}"
+        }${lessonStatus.last && chapterStatus.last ? '' : ','}
+        </c:forEach>
+        </c:forEach>
+    };
+
+    // Lấy userId từ server (giả sử SecurityUtils.getCurrentUserId() được truyền vào)
+    const userId = ${user.userId != null ? user.userId : 'null'};
+    if (!userId) {
+        console.error('User ID not found. Progress tracking disabled.');
+    }
+
+    const video = document.getElementById('lessonVideo');
+
+    // Chuyển iframe thành video element để hỗ trợ sự kiện HTML5
+    function updateVideoElement(src) {
+        const videoContainer = $('#videoContainer');
+        videoContainer.empty();
+        if (src) {
+            const videoElement = document.createElement('video');
+            videoElement.id = 'lessonVideo';
+            videoElement.controls = true;
+            videoElement.innerHTML = `<source src="${src}" type="video/mp4">Your browser does not support the video tag.`;
+            videoContainer.append(videoElement);
+            videoContainer.show();
+            return videoElement;
+        } else {
+            videoContainer.hide();
+            return null;
+        }
+    }
+
+
+    let currentLessonId = null;
+
     $(document).ready(function() {
         // Gắn sự kiện click cho tất cả lesson
         $('.list-group-item-action').on('click', function(e) {
@@ -150,55 +189,43 @@
         });
 
         function loadLessonDetails(lessonId) {
-            console.log('Loading lesson details for lessonId:', lessonId); // Debug
+            const lesson = lessonsData[lessonId];
 
             // Xóa lớp active khỏi tất cả các lesson items
             $('.list-group-item-action').removeClass('active');
             // Thêm lớp active vào lesson item được chọn
             $(`.list-group-item-action[data-lesson-id="${lessonId}"]`).addClass('active');
 
-            $('#loading').show(); // Hiển thị trạng thái tải
-            $.get(`/api/lessons/` + lessonId, function(data) {
-                console.log('API response:', data); // Debug
-                if (data) {
-                    $('#lessonVideo').attr('src', data.videoSrc || '');
-                    $('#videoContainer').toggle(!!data.videoSrc); // Ẩn/hiện video container
-                    $('#lessonDescription').text(data.lessonDescription || 'Không có mô tả cho bài học này.');
-                    const materialsList = $('#materialsList');
-                    materialsList.empty();
-                    if (data.materials && data.materials.length > 0) {
-                        data.materials.forEach(material => {
-                            materialsList.append(`
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="/files/taiLieu/` + material + `" target="_blank">` + material + `</a>
-                                </li>
-                            `);
-                        });
-                    } else {
-                        materialsList.append('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
-                    }
+            if (lesson) {
+                $('#lessonVideo').attr('src', lesson.videoSrc || '');
+                $('#videoContainer').toggle(!!lesson.videoSrc); // Ẩn/hiện video container
+                $('#lessonDescription').text(lesson.lessonDescription || 'Không có mô tả cho bài học này.');
+                const materialsList = $('#materialsList');
+                materialsList.empty();
+                if (lesson.materials && lesson.materials.length > 0) {
+                    lesson.materials.forEach(material => {
+                        materialsList.append(`
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="/files/taiLieu/` + material + `" target="_blank">` + material + `</a>
+                            </li>
+                        `);
+                    });
                 } else {
-                    $('#lessonVideo').attr('src', '');
-                    $('#videoContainer').hide();
-                    $('#lessonDescription').text('Không tìm thấy bài học.');
-                    $('#materialsList').html('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
+                    materialsList.append('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
                 }
-                $('#loading').hide(); // Ẩn trạng thái tải
-                // Chuyển sang tab "Mô tả bài học" sau khi tải xong
-                new bootstrap.Tab(document.querySelector('#description-tab')).show();
-            }).fail(function(xhr, status, error) {
-                console.error('API error:', status, error); // Debug
+            } else {
                 $('#lessonVideo').attr('src', '');
                 $('#videoContainer').hide();
-                $('#lessonDescription').text('Không thể tải chi tiết bài học. Vui lòng thử lại sau.');
-                $('#materialsList').html('<li class="list-group-item text-muted">Không thể tải tài liệu.</li>');
-                $('#loading').hide(); // Ẩn trạng thái tải
-            });
+                $('#lessonDescription').text('Không tìm thấy bài học.');
+                $('#materialsList').html('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
+            }
+
+            // Chuyển sang tab "Mô tả bài học" sau khi tải xong
+            new bootstrap.Tab(document.querySelector('#description-tab')).show();
         }
 
         // Tải chi tiết bài học ban đầu nếu có lesson được truyền vào
         <c:if test="${lesson != null}">
-        console.log('Initial lessonId:', ${lesson.lessonId}); // Debug
         loadLessonDetails(${lesson.lessonId});
         </c:if>
 
@@ -216,18 +243,14 @@
     });
 </script>
 
-<header>
-    <jsp:include page="../layout/header.jsp" />
-</header>
-
 <div class="content">
     <h1 class="mb-4">${lesson != null ? lesson.lessonName : subject != null ? subject.subjectName : 'Không tìm thấy môn học'}</h1>
 
     <div class="row">
         <div class="col-md-8">
             <div class="video-container ratio ratio-16x9" id="videoContainer">
-                <iframe id="lessonVideo" src="${lesson != null ? lesson.videoSrc : ''}" title="${lesson != null ? lesson.lessonName : ''}"
-                        allowfullscreen></iframe>
+                <iframe id="lessonVideo" src="${lesson != null && lesson.videoSrc != null ? lesson.videoSrc : ''}"
+                        title="${lesson != null ? lesson.lessonName : ''}" allowfullscreen></iframe>
             </div>
 
             <ul class="nav nav-tabs mb-4" id="lessonTabs" role="tablist">
@@ -249,7 +272,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h2 class="card-title">Mô tả bài học</h2>
-                            <p id="lessonDescription">${lesson != null ? lesson.lessonDescription : 'Không có mô tả cho bài học này.'}</p>
+                            <p id="lessonDescription">${lesson != null && lesson.lessonDescription != null ? lesson.lessonDescription : 'Không có mô tả cho bài học này.'}</p>
                         </div>
                     </div>
                 </div>
@@ -303,7 +326,7 @@
                                                                    data-lesson-id="${lessonItem.lessonId}">
                                                                         ${stt}. ${lessonItem.lessonName}
                                                                 </a>
-                                                                <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime}</span>
+                                                                <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A'}</span>
                                                             </div>
                                                         </c:forEach>
                                                     </c:when>
@@ -320,7 +343,6 @@
                     </div>
                 </div>
             </div>
-            <div class="loading" id="loading">Đang tải...</div>
         </div>
 
         <div class="col-md-4 d-none d-md-block">
@@ -351,7 +373,7 @@
                                                        data-lesson-id="${lessonItem.lessonId}">
                                                             ${stt}. ${lessonItem.lessonName}
                                                     </a>
-                                                    <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime}</span>
+                                                    <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A'}</span>
                                                 </div>
                                             </c:forEach>
                                         </c:when>
@@ -368,10 +390,6 @@
         </div>
     </div>
 </div>
-
-<footer>
-    <jsp:include page="../layout/footer.jsp" />
-</footer>
 
 </body>
 </html>

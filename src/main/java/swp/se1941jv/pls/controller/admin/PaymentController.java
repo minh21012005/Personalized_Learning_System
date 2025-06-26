@@ -56,7 +56,8 @@ public class PaymentController {
             @RequestParam(required = false) List<Long> packages,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAt,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
@@ -76,7 +77,7 @@ public class PaymentController {
         Pageable pageable = PageRequest.of(page - 1, size, sortOption);
 
         Page<Transaction> transactions = transactionService.getFilteredTransactions(
-                transferCode, email, studentEmail, packages, status, createdAt, pageable);
+                transferCode, email, studentEmail, packages, status, fromDate, toDate, pageable);
 
         model.addAttribute("transactions", transactions.getContent());
         model.addAttribute("totalPage", transactions.getTotalPages());
@@ -89,7 +90,8 @@ public class PaymentController {
         param.put("packages", packages);
         param.put("status", status);
         param.put("sort", sort);
-        param.put("createdAt", createdAt != null ? createdAt.toString() : "");
+        param.put("fromDate", fromDate != null ? fromDate.toString() : "");
+        param.put("toDate", toDate != null ? toDate.toString() : "");
 
         model.addAttribute("param", param);
         return "admin/transaction/show";

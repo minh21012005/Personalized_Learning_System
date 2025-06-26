@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +40,7 @@ public class QuestionService {
     private static final String UPLOAD_DIR = "question_bank";
     private static final Long PENDING_STATUS_ID = 1L; // Assuming status_id=1 is "Pending"
 
-    public QuestionBank saveQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList,
-            MultipartFile imageFile) throws Exception {
+    public QuestionBank saveQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList, MultipartFile imageFile) throws Exception {
         // Validate mandatory fields
         if (question.getGrade() == null || question.getGrade().getGradeId() == null) {
             throw new IllegalArgumentException("Khối là bắt buộc.");
@@ -63,8 +63,7 @@ public class QuestionService {
             throw new IllegalArgumentException("Nội dung câu hỏi không được để trống.");
         }
 
-        // Validate options: at least 2 options, at least 1 correct, at most n-1
-        // correct, no empty options
+        // Validate options: at least 2 options, at least 1 correct, at most n-1 correct, no empty options
         if (optionTexts == null || optionTexts.size() < 2) {
             throw new IllegalArgumentException("Phải có ít nhất 2 đáp án.");
         }
@@ -93,6 +92,7 @@ public class QuestionService {
         QuestionStatus pendingStatus = questionStatusRepository.findById(PENDING_STATUS_ID)
                 .orElseThrow(() -> new RuntimeException("Trạng thái Pending không tìm thấy."));
         question.setStatus(pendingStatus);
+
 
         // Handle image upload using UploadService
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -128,6 +128,7 @@ public class QuestionService {
         }
         return null;
     }
+
 
     public Page<QuestionBank> findQuestionsByCreatorAndFilters(
             Long creatorUserId,
@@ -183,8 +184,48 @@ public class QuestionService {
         }
     }
 
-    public QuestionBank updateQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList,
-            MultipartFile imageFile, String existingImage) throws Exception {
+
+    /**
+     * Kiểm tra xem các đáp án được chọn có đúng hay không dựa trên questionId.
+     * @param questionId ID của câu hỏi
+     * @param selectedAnswers Danh sách các đáp án được người dùng chọn
+     * @return true nếu tất cả đáp án được chọn khớp với đáp án đúng, false nếu không
+     */
+    public boolean checkAnswers(Long questionId, List<String> selectedAnswers) {
+        // Lấy câu hỏi từ cơ sở dữ liệu
+        QuestionBank question = questionBankRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Câu hỏi không tồn tại với ID: " + questionId));
+
+        // Lấy danh sách các đáp án đúng từ JSON
+        List<AnswerOptionDto> correctOptions = null;
+        try {
+            correctOptions = getQuestionOptions(question).stream()
+                    .filter(AnswerOptionDto::isCorrect)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Chuyển danh sách đáp án đúng sang danh sách text để so sánh
+        List<String> correctAnswerTexts = correctOptions.stream()
+                .map(AnswerOptionDto::getText)
+                .collect(Collectors.toList());
+
+        // Kiểm tra nếu danh sách đáp án chọn khớp với đáp án đúng (có thể có thứ tự khác nhau)
+        if (selectedAnswers == null || selectedAnswers.isEmpty()) {
+            return correctAnswerTexts.isEmpty(); // Nếu không chọn gì, đúng khi không có đáp án đúng
+        }
+
+        // Sắp xếp cả hai danh sách để so sánh không phụ thuộc thứ tự
+        List<String> sortedSelected = new ArrayList<>(selectedAnswers);
+        List<String> sortedCorrect = new ArrayList<>(correctAnswerTexts);
+        Collections.sort(sortedSelected);
+        Collections.sort(sortedCorrect);
+
+        return sortedSelected.equals(sortedCorrect);
+    }
+
+    public QuestionBank updateQuestion(QuestionBank question, List<String> optionTexts, List<Boolean> isCorrectList, MultipartFile imageFile, String existingImage) throws Exception {
         // Validate mandatory fields
         if (question.getGrade() == null || question.getGrade().getGradeId() == null) {
             throw new IllegalArgumentException("Khối là bắt buộc.");
@@ -207,8 +248,7 @@ public class QuestionService {
             throw new IllegalArgumentException("Nội dung câu hỏi không được để trống.");
         }
 
-        // Validate options: at least 2 options, at least 1 correct, at most n-1
-        // correct, no empty options
+        // Validate options: at least 2 options, at least 1 correct, at most n-1 correct, no empty options
         if (optionTexts == null || optionTexts.size() < 2) {
             throw new IllegalArgumentException("Phải có ít nhất 2 đáp án.");
         }
@@ -227,6 +267,7 @@ public class QuestionService {
         if (correctCount >= optionTexts.size()) {
             throw new IllegalArgumentException("Chỉ được phép có tối đa " + (optionTexts.size() - 1) + " đáp án đúng.");
         }
+
 
         // Handle image upload or retain existing
         if (imageFile != null && !imageFile.isEmpty()) {

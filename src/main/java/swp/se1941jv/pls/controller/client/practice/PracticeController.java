@@ -1,24 +1,22 @@
 package swp.se1941jv.pls.controller.client.practice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import swp.se1941jv.pls.config.SecurityUtils;
-import swp.se1941jv.pls.dto.request.AnswerOptionDto;
 import swp.se1941jv.pls.dto.response.*;
-import swp.se1941jv.pls.entity.*;
-import swp.se1941jv.pls.repository.*;
+import swp.se1941jv.pls.dto.response.practice.PracticeResponseDTO;
+import swp.se1941jv.pls.dto.response.practice.PracticeSubmissionDto;
+import swp.se1941jv.pls.dto.response.practice.QuestionAnswerResDTO;
+import swp.se1941jv.pls.dto.response.practice.QuestionDisplayDto;
 import swp.se1941jv.pls.service.PracticesService;
 import swp.se1941jv.pls.service.QuestionService;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -63,7 +61,7 @@ public class PracticeController {
 
     @GetMapping("/subject")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String lessonSelection(@RequestParam("packageId") Long packageId,@RequestParam("subjectId") Long subjectId, Model model) {
+    public String lessonSelection(@RequestParam("packageId") Long packageId, @RequestParam("subjectId") Long subjectId, Model model) {
 
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -83,11 +81,7 @@ public class PracticeController {
 
     @PostMapping("/start-practice")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String startPracticeWithLessons(
-                                           @RequestParam(value = "timed", required = false) Boolean timed,
-                                           @RequestParam(value = "questionCount", defaultValue = "30") Integer questionCount,
-                                           @RequestParam(value = "timePerQuestion", defaultValue = "0") Integer timePerQuestion,
-                                           @RequestParam(value = "allLessonIds", required = false) String allLessonIds,
+    public String startPracticeWithLessons(@RequestParam(value = "allLessonIds", required = false) String selectedLessonIds,
                                            Model model) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -95,27 +89,82 @@ public class PracticeController {
             return "redirect:/login";
         }
 
-        // Parse allLessonIds into a List<Long> if provided
-        List<Long> allLessonIdsList = (allLessonIds != null && !allLessonIds.isEmpty())
-                ? Arrays.stream(allLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
+        // Parse selectedLessonIds into a List<Long> if provided
+        List<Long> selectedLessonIdList = (selectedLessonIds != null && !selectedLessonIds.isEmpty())
+                ? Arrays.stream(selectedLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
                 : new ArrayList<>();
 
-//        // Generate initial 5 random questions
-        List<QuestionDisplayDto> initialQuestions = practicesService.generateQuestionsFirst(allLessonIdsList);
+        PracticeResponseDTO practiceResponse = practicesService.startPracticeWithLessons(selectedLessonIdList);
 
-        model.addAttribute("questions", initialQuestions);
-        model.addAttribute("lessonIds", allLessonIds); // Selected lessonIds for immediate practice
-        model.addAttribute("allLessonIds", allLessonIdsList); // All lessonIds for context
-//        model.addAttribute("packageId", packageId);
-        model.addAttribute("timed", timed != null && timed);
-        model.addAttribute("questionCount", questionCount);
-        model.addAttribute("timePerQuestion", timePerQuestion);
-        model.addAttribute("userId", userId);
 
-        return "client/practice/PracticeSession";
+        model.addAttribute("testId", practiceResponse.getTestId());
+        model.addAttribute("selectedLessonIds", practiceResponse.getSelectedLessonId());
+        model.addAttribute("questions", practiceResponse.getQuestions());
+        model.addAttribute("currentQuestionIndex", 0);
+
+        return "client/practice/PracticeTest";
+    }
+
+    @PostMapping("/continue-practice")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String continuePracticeWithLessons(@RequestParam(value = "allLessonIds", required = false) String selectedLessonIds,
+                                              @RequestParam(value = "currentQuestionIndex") Long currentQuestionIndex,
+                                              @RequestParam(value = "testId") Long testId,
+                                              @RequestParam(value = "correctCount") Integer correctCount,
+                                              Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        List<Long> selectedLessonIdList = (selectedLessonIds != null && !selectedLessonIds.isEmpty())
+                ? Arrays.stream(selectedLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
+                : new ArrayList<>();
+
+        PracticeResponseDTO practiceResponse = practicesService.continuePracticeWithLessons(selectedLessonIdList, testId, correctCount);
+        model.addAttribute("testId", practiceResponse.getTestId());
+        model.addAttribute("selectedLessonIds", practiceResponse.getSelectedLessonId());
+        model.addAttribute("questions", practiceResponse.getQuestions());
+        model.addAttribute("currentQuestionIndex", currentQuestionIndex + 5);
+        return "client/practice/PracticeTest";
     }
 
 
+    @PostMapping("/submit-answers")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String submitAnswers(
+            @RequestParam("submissionData") String submissionData,
+            Model model) {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        try {
+            // Parse chuỗi JSON thành PracticeSubmissionDto
+            ObjectMapper mapper = new ObjectMapper();
+            PracticeSubmissionDto submissionDto = mapper.readValue(submissionData, PracticeSubmissionDto.class);
+
+            // Kiểm tra kết quả
+            List<QuestionAnswerResDTO> results = practicesService.checkResults(submissionDto, submissionDto.getTestId());
+
+            int correctCount = (int) results.stream().filter(QuestionAnswerResDTO::isCorrect).count();
+
+            // Thêm dữ liệu vào model để hiển thị trên trang kết quả
+            model.addAttribute("results", results);
+            model.addAttribute("correctCount", correctCount);
+            model.addAttribute("selectedLessonIds", submissionDto.getSelectedLessonIds());
+            model.addAttribute("testId", submissionDto.getTestId());
+            model.addAttribute("currentQuestionIndex", submissionDto.getCurrentQuestionIndex());
+
+            return "client/practice/PracticeResults";
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi xử lý dữ liệu: " + e.getMessage());
+            return "error";
+        }
+    }
 
 
 }

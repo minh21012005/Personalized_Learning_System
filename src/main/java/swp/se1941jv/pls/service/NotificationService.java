@@ -217,7 +217,29 @@ public class NotificationService {
         return userNotificationRepository.findByUser(currentUser, pageable);
     }
 
+    @Transactional
+    public void sendNotificationForRole(String roleName, String title, String content, String link, String thumbnail){
+        logger.info("Prepare send notification for role: {}", roleName);
+        try {
+            createNotification(title, content, link, thumbnail, "ROLE", Collections.singletonList(roleName.toUpperCase()));
+            logger.info("Successfully initiated notification process for role: {}", roleName);
+        } catch (Exception e) {
+            logger.error("Failed send notification for role: {}", roleName, e.getMessage());
+        }
+    }
 
+    public void sendNotificationToAdmin(String title, String content, String link, String thumbnail ){
+        sendNotificationForRole("ADMIN", title, content, link, thumbnail);
+    }
 
+    
+    public void sendNotificationToStaff(String title, String content, String link, String thumbnail ){
+        sendNotificationForRole("STAFF", title, content, link, thumbnail);
+    }
+    
+    
+    public void sendNotificationToContentManager(String title, String content, String link, String thumbnail ){
+        sendNotificationForRole("CONTENT_MANAGER", title, content, link, thumbnail);
+    }
 
 }

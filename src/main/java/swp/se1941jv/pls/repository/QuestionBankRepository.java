@@ -14,5 +14,8 @@ public interface QuestionBankRepository extends JpaRepository<QuestionBank, Long
     @Query("SELECT q FROM QuestionBank q WHERE q.lesson.lessonId IN :lessonIds AND q.active = true")
     List<QuestionBank> findByLessonIdsIn(List<Long> lessonIds);
 
+    @Query("SELECT q FROM QuestionBank q WHERE q.lesson.lessonId IN :lessonIds AND q.levelQuestion.levelQuestionName = :levelName AND q.active = true")
+    List<QuestionBank> findByLessonLessonIdInAndLevelQuestionLevelName(List<Long> lessonIds, String levelName);
+
 
 }
