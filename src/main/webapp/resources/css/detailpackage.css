@@ -158,7 +158,7 @@ body {
 /* Course List Section */
 .course-list {
     background-color: var(--greybackground);
-    padding: 60px 0;
+    padding: 120px 0 60px 0;
 }
 
 .course-list-container {
