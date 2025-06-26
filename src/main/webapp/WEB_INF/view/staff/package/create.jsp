@@ -219,6 +219,22 @@
                                 <div class="invalid-feedback">${subjectsError}</div>
                             </c:if>
                         </div>
+
+                        <div class="mb-3">
+                            <c:set var="errorPackageType">
+                                <form:errors path="packageType" cssClass="invalid-feedback" />
+                            </c:set>
+                            <label for="packageType" class="form-label">Loại gói</label>
+                            <form:select path="packageType"
+                                class="form-select ${not empty errorPackageType ? 'is-invalid' : ''}" id="packageType">
+                                <form:option value="" label="-- Chọn loại gói --" />
+                                <form:option value="FULL_COURSE" label="Học và luyện tập" />
+                                <form:option value="PRACTICE_ONLY" label="Chỉ luyện tập" />
+                            </form:select>
+                            ${errorPackageType}
+                        </div>
+
+
                         <div class="mb-3">
                             <c:set var="errorImage">
                                 <form:errors path="image" cssClass="invalid-feedback" />
