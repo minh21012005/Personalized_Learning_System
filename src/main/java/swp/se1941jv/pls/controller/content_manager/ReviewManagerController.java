@@ -39,10 +39,10 @@ public class ReviewManagerController {
     @GetMapping
     public String listReviews(
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) Long packageId,
-            @RequestParam(required = false) Long subjectId,
-            @RequestParam(required = false) ReviewStatus status,
-            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false) String packageId, // Changed to String
+            @RequestParam(required = false) String subjectId, // Changed to String
+            @RequestParam(required = false) String status, // Changed to String
+            @RequestParam(required = false) String rating, // Changed to String
             @RequestParam(required = false) String comment,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -54,10 +54,30 @@ public class ReviewManagerController {
             model.addAttribute("statuses", ReviewStatus.values());
             model.addAttribute("ratings", List.of(1, 2, 3, 4, 5));
 
+            // Handle packageId and subjectId
+            Long packageIdLong = null;
+            Long subjectIdLong = null;
+            if (packageId != null && !packageId.equals("all") && !packageId.isEmpty()) {
+                packageIdLong = Long.parseLong(packageId);
+            }
+            if (subjectId != null && !subjectId.equals("all") && !subjectId.isEmpty()) {
+                subjectIdLong = Long.parseLong(subjectId);
+            }
+
+            // Handle status and rating
+            ReviewStatus statusEnum = null;
+            Integer ratingInt = null;
+            if (status != null && !status.isEmpty()) {
+                statusEnum = ReviewStatus.valueOf(status);
+            }
+            if (rating != null && !rating.isEmpty()) {
+                ratingInt = Integer.parseInt(rating);
+            }
+
             // Call filterReviews from ReviewService
             Pageable pageable = PageRequest.of(page, size);
-            Page<Review> reviewPage = reviewService.filterReviews(type, packageId, subjectId, status, rating, comment,
-                    pageable);
+            Page<Review> reviewPage = reviewService.filterReviews(type, packageIdLong, subjectIdLong, statusEnum,
+                    ratingInt, comment, pageable);
 
             // Add attributes to model
             model.addAttribute("reviews", reviewPage.getContent());
@@ -76,19 +96,6 @@ public class ReviewManagerController {
         } catch (Exception e) {
             model.addAttribute("error", "Đã xảy ra lỗi khi tải danh sách đánh giá: " + e.getMessage());
             return "error/500";
-        }
-    }
-
-    @GetMapping("/{reviewId}")
-    public String getReviewDetails(@PathVariable Long reviewId, Model model) {
-        try {
-            Review review = reviewRepository.findById(reviewId)
-                    .orElseThrow(() -> new RuntimeException("Đánh giá không tìm thấy"));
-            model.addAttribute("review", review);
-            return "admin/reviews/detail";
-        } catch (Exception e) {
-            model.addAttribute("error", "Đánh giá không tìm thấy: " + e.getMessage());
-            return "error/404";
         }
     }
 

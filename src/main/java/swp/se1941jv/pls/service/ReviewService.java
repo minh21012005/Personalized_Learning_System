@@ -4,10 +4,8 @@ import swp.se1941jv.pls.entity.Review;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.entity.UserPackage;
 import swp.se1941jv.pls.entity.Package;
-
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.entity.ReviewStatus;
-
 import swp.se1941jv.pls.entity.TransactionStatus;
 import swp.se1941jv.pls.repository.ReviewRepository;
 import swp.se1941jv.pls.repository.UserPackageRepository;
@@ -17,13 +15,17 @@ import swp.se1941jv.pls.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @Service
 public class ReviewService {
@@ -136,7 +138,6 @@ public class ReviewService {
         return (review != null) ? review.getStatus() : null;
     }
 
-    // SUBJECT
     public boolean hasUserReviewedSubject(Long userId, Long subjectId) {
         boolean hasApproved = reviewRepository
                 .findByUser_UserIdAndSubject_SubjectIdAndStatus(userId, subjectId, ReviewStatus.APPROVED).isPresent();
@@ -173,40 +174,49 @@ public class ReviewService {
         }
     }
 
-    // Hàm filter chính
     public Page<Review> filterReviews(String type, Long packageId, Long subjectId, ReviewStatus status, Integer rating,
             String comment, Pageable pageable) {
-        if (type != null && type.equals("Package") && packageId != null) {
-            if (comment != null && !comment.isEmpty() && rating != null) {
-                return reviewRepository.findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCaseAndRating(
-                        packageId, status != null ? status : ReviewStatus.APPROVED, comment, rating, pageable);
-            } else if (comment != null && !comment.isEmpty()) {
-                return reviewRepository.findByPkg_PackageIdAndStatusAndCommentContainingIgnoreCase(
-                        packageId, status != null ? status : ReviewStatus.APPROVED, comment, pageable);
-            } else if (rating != null) {
-                return reviewRepository.findByPkg_PackageIdAndStatusAndRating(
-                        packageId, status != null ? status : ReviewStatus.APPROVED, rating, pageable);
-            } else {
-                return reviewRepository.findByPkg_PackageIdAndStatus(
-                        packageId, status != null ? status : ReviewStatus.APPROVED, pageable);
+        Specification<Review> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Xử lý type (Package hoặc Subject)
+            if (type != null && !type.isEmpty()) {
+                if ("Package".equals(type)) {
+                    if (packageId != null) {
+                        predicates.add(criteriaBuilder.equal(root.get("pkg").get("packageId"), packageId));
+                    } else {
+                        predicates.add(criteriaBuilder.isNotNull(root.get("pkg")));
+                    }
+                } else if ("Subject".equals(type)) {
+                    if (subjectId != null) {
+                        predicates.add(criteriaBuilder.equal(root.get("subject").get("subjectId"), subjectId));
+                    } else {
+                        predicates.add(criteriaBuilder.isNotNull(root.get("subject")));
+                    }
+                }
             }
-        } else if (type != null && type.equals("Subject") && subjectId != null) {
-            if (comment != null && !comment.isEmpty() && rating != null) {
-                return reviewRepository.findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCaseAndRating(
-                        subjectId, status != null ? status : ReviewStatus.APPROVED, comment, rating, pageable);
-            } else if (comment != null && !comment.isEmpty()) {
-                return reviewRepository.findBySubject_SubjectIdAndStatusAndCommentContainingIgnoreCase(
-                        subjectId, status != null ? status : ReviewStatus.APPROVED, comment, pageable);
-            } else if (rating != null) {
-                return reviewRepository.findBySubject_SubjectIdAndStatusAndRating(
-                        subjectId, status != null ? status : ReviewStatus.APPROVED, rating, pageable);
-            } else {
-                return reviewRepository.findBySubject_SubjectIdAndStatus(
-                        subjectId, status != null ? status : ReviewStatus.APPROVED, pageable);
+
+            // Lọc theo trạng thái (không mặc định là APPROVED)
+            if (status != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
             }
-        } else {
-            // Default: get all reviews
-            return reviewRepository.findAll(pageable);
-        }
+
+            // Lọc theo rating
+            if (rating != null) {
+                predicates.add(criteriaBuilder.equal(root.get("rating"), rating));
+            }
+
+            // Lọc theo bình luận (không phân biệt hoa thường)
+            if (comment != null && !comment.isEmpty()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("comment")),
+                        "%" + comment.toLowerCase() + "%"));
+            }
+
+            // Kết hợp các điều kiện với AND
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return reviewRepository.findAll(spec, pageable);
     }
 }

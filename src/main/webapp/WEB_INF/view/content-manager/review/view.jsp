@@ -21,7 +21,7 @@
                 }
 
                 .comment-preview {
-                    max-width: 200px;
+                    max-width: 400px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -48,32 +48,38 @@
                             <label>Package/Subject</label>
                             <select name="packageId" class="form-select" ${type !='Package' ? 'disabled' : '' }>
                                 <option value="">Chọn Package</option>
+                                <option value="" ${packageId=='all' ? 'selected' : '' }>Tất cả</option>
                                 <c:forEach var="pkg" items="${packages}">
                                     <option value="${pkg.packageId}" ${packageId==pkg.packageId ? 'selected' : '' }>
-                                        ${pkg.name}</option>
+                                        ${pkg.name}
+                                    </option>
                                 </c:forEach>
                             </select>
                             <select name="subjectId" class="form-select" ${type !='Subject' ? 'disabled' : '' }>
                                 <option value="">Chọn Subject</option>
+                                <option value="" ${subjectId=='all' ? 'selected' : '' }>Tất cả</option>
                                 <c:forEach var="subject" items="${subjects}">
                                     <option value="${subject.subjectId}" ${subjectId==subject.subjectId ? 'selected'
-                                        : '' }>${subject.subjectName}</option>
+                                        : '' }>
+                                        ${subject.subjectName}
+                                    </option>
                                 </c:forEach>
                             </select>
                         </div>
                         <div class="col-md-2">
                             <label>Trạng thái</label>
                             <select name="status" class="form-select">
-                                <option value="">Tất cả</option>
-                                <c:forEach var="status" items="${statuses}">
-                                    <option value="${status}" ${status==status ? 'selected' : '' }>${status}</option>
+                                <option value="" ${param.status==null || param.status=='' ? 'selected' : '' }>Tất cả
+                                </option>
+                                <c:forEach var="s" items="${statuses}">
+                                    <option value="${s}" ${s==param.status ? 'selected' : '' }>${s}</option>
                                 </c:forEach>
                             </select>
                         </div>
                         <div class="col-md-2">
                             <label>Rating</label>
                             <select name="rating" class="form-select">
-                                <option value="">Tất cả</option>
+                                <option value="" ${rating==null || rating=='' ? 'selected' : '' }>Tất cả</option>
                                 <c:forEach var="r" items="${ratings}">
                                     <option value="${r}" ${rating==r ? 'selected' : '' }>${r} sao</option>
                                 </c:forEach>
@@ -137,7 +143,7 @@
                 </table>
 
                 <!-- Pagination -->
-                <nav>
+                <!-- <nav>
                     <ul class="pagination">
                         <c:if test="${currentPage > 0}">
                             <li class="page-item">
@@ -165,7 +171,29 @@
                         <option value="20" ${size==20 ? 'selected' : '' }>20</option>
                         <option value="50" ${size==50 ? 'selected' : '' }>50</option>
                     </select>
-                </nav>
+                </nav> -->
+                <c:if test="${totalPages > 1}">
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                    href="/admin/reviews?page=${currentPage - 1}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">«</a>
+                            </li>
+                            <c:forEach begin="0" end="${totalPages - 1}" var="i">
+                                <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                    <a class="page-link"
+                                        href="/admin/reviews?page=${i}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">${i
+                                        + 1}</a>
+                                </li>
+                            </c:forEach>
+                            <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                    href="/admin/reviews?page=${currentPage + 1}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">»</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </c:if>
+
 
                 <!-- Success/Error Messages -->
                 <c:if test="${not empty success}">
