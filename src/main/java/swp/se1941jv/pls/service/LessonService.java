@@ -53,9 +53,7 @@ public class LessonService {
 
         try {
             lessonRepository.save(lesson);
-            log.info("Lesson created: lessonId={}", lesson.getLessonId());
         } catch (Exception e) {
-            log.error("Failed to create lesson: {}", e.getMessage(), e);
             throw new ApplicationException("CREATE_ERROR", "Lỗi khi tạo bài học", e);
         }
     }
@@ -83,9 +81,7 @@ public class LessonService {
 
         try {
             lessonRepository.save(lesson);
-            log.info("Lesson updated: lessonId={}", lesson.getLessonId());
         } catch (Exception e) {
-            log.error("Failed to update lesson: {}", e.getMessage(), e);
             throw new ApplicationException("UPDATE_ERROR", "Lỗi khi cập nhật bài học", e);
         }
     }
@@ -109,10 +105,58 @@ public class LessonService {
         try {
             lesson.setLessonStatus(Lesson.LessonStatus.PENDING);
             lessonRepository.save(lesson);
-            log.info("Lesson submitted: lessonId={}", lessonId);
         } catch (Exception e) {
-            log.error("Failed to submit lesson: {}", e.getMessage(), e);
             throw new ApplicationException("SUBMIT_ERROR", "Lỗi khi nộp bài học", e);
+        }
+    }
+
+    /**
+     * Phê duyệt bài học (chuyển trạng thái sang APPROVED).
+     */
+    @Transactional
+    public void approveLesson(Long lessonId) {
+        if (lessonId == null || lessonId <= 0) {
+            throw new ValidationException("ID bài học không hợp lệ");
+        }
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new NotFoundException("Bài học không tồn tại"));
+
+        if (lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED) {
+            throw new ApplicationException("APPROVE_ERROR", "Bài học đã được phê duyệt");
+        }
+
+        try {
+            lesson.setLessonStatus(Lesson.LessonStatus.APPROVED);
+            lessonRepository.save(lesson);
+            log.info("Lesson approved: lessonId={}", lessonId);
+        } catch (Exception e) {
+            log.error("Failed to approve lesson: {}", e.getMessage(), e);
+            throw new ApplicationException("APPROVE_ERROR", "Lỗi khi phê duyệt bài học", e);
+        }
+    }
+
+    /**
+     * Từ chối bài học (chuyển trạng thái sang REJECTED).
+     */
+    @Transactional
+    public void rejectLesson(Long lessonId) {
+        if (lessonId == null || lessonId <= 0) {
+            throw new ValidationException("ID bài học không hợp lệ");
+        }
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new NotFoundException("Bài học không tồn tại"));
+
+        if (lesson.getLessonStatus() == Lesson.LessonStatus.REJECTED) {
+            throw new ApplicationException("REJECT_ERROR", "Bài học đã bị từ chối");
+        }
+
+        try {
+            lesson.setLessonStatus(Lesson.LessonStatus.REJECTED);
+            lessonRepository.save(lesson);
+        } catch (Exception e) {
+            throw new ApplicationException("REJECT_ERROR", "Lỗi khi từ chối bài học", e);
         }
     }
 
@@ -147,7 +191,6 @@ public class LessonService {
                             .build())
                     .toList();
         } catch (Exception e) {
-            log.error("Failed to fetch lessons: {}", e.getMessage(), e);
             throw new ApplicationException("FETCH_ERROR", "Lỗi khi lấy danh sách bài học", e);
         }
     }
@@ -303,55 +346,6 @@ public class LessonService {
                     .build();
         });
     }
-    /**
-     * Phê duyệt bài học (chuyển trạng thái sang APPROVED).
-     */
-    @Transactional
-    public void approveLesson(Long lessonId) {
-        if (lessonId == null || lessonId <= 0) {
-            throw new ValidationException("ID bài học không hợp lệ");
-        }
-
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new NotFoundException("Bài học không tồn tại"));
-
-        if (lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED) {
-            throw new ApplicationException("APPROVE_ERROR", "Bài học đã được phê duyệt");
-        }
-
-        try {
-            lesson.setLessonStatus(Lesson.LessonStatus.APPROVED);
-            lessonRepository.save(lesson);
-            log.info("Lesson approved: lessonId={}", lessonId);
-        } catch (Exception e) {
-            log.error("Failed to approve lesson: {}", e.getMessage(), e);
-            throw new ApplicationException("APPROVE_ERROR", "Lỗi khi phê duyệt bài học", e);
-        }
-    }
-
-    /**
-     * Từ chối bài học (chuyển trạng thái sang REJECTED).
-     */
-    @Transactional
-    public void rejectLesson(Long lessonId) {
-        if (lessonId == null || lessonId <= 0) {
-            throw new ValidationException("ID bài học không hợp lệ");
-        }
-
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new NotFoundException("Bài học không tồn tại"));
-
-        if (lesson.getLessonStatus() == Lesson.LessonStatus.REJECTED) {
-            throw new ApplicationException("REJECT_ERROR", "Bài học đã bị từ chối");
-        }
-
-        try {
-            lesson.setLessonStatus(Lesson.LessonStatus.REJECTED);
-            lessonRepository.save(lesson);
-        } catch (Exception e) {
-            throw new ApplicationException("REJECT_ERROR", "Lỗi khi từ chối bài học", e);
-        }
-    }
 
     public LessonResponseDTO getFullLessonResponseById(Long lessonId) {
         if (lessonId == null || lessonId <= 0) {
@@ -393,5 +387,18 @@ public class LessonService {
                         : "Chưa có dữ liệu")
                 .updatedAt(lesson.getUpdatedAt().format(formatter))
                 .build();
+    }
+
+
+
+    private List<String> parseMaterialsJson(String materialsJson) {
+        try {
+            if (materialsJson != null && !materialsJson.isEmpty()) {
+                return objectMapper.readValue(materialsJson, new TypeReference<List<String>>() {});
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse materialsJson: {}", e.getMessage());
+        }
+        return new ArrayList<>();
     }
 }
