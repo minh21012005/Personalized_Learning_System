@@ -28,7 +28,5 @@ public class CreateStudentRequest {
     @Pattern(regexp = "^(03[2-9]|05[6-9]|07[0-9]|08[1-9]|09[0-9])\\d{7}$", message = "Số điện thoại không hợp lệ! Phải bắt đầu bằng các đầu số Việt Nam hợp lệ và gồm đúng 10 chữ số.")
     private String phoneNumber;
 
-    @NotNull(message = "Vui lòng chọn trạng thái.")
-    private Boolean isActive;
 
 }

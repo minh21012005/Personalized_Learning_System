@@ -243,7 +243,7 @@ public class UserService {
         student.setPhoneNumber(request.getPhoneNumber());
         student.setRole(studentRole);
         student.setParent(parent);
-        student.setIsActive(request.getIsActive());
+        student.setIsActive(true);
         student.setAvatar(avatarFileName);
         student.setEmailVerify(true);
         return userRepository.save(student);
