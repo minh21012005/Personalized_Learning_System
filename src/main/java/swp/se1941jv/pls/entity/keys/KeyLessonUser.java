@@ -14,10 +14,10 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class KeyPackageSubject implements Serializable {
-    @Column(name = "package_id")
-    private Long packageId;
+public class KeyLessonUser implements Serializable {
+    @Column(name = "user_id", nullable = false)
+    Long userId;
 
-    @Column(name = "subject_id")
-    private Long subjectId;
+    @Column(name = "lesson_id", nullable = false)
+    Long lessonId;
 }

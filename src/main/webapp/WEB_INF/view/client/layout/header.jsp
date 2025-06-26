@@ -401,7 +401,7 @@
             <ul>
                 <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
                 <li>
-                    <a href="javascript:void(0);">Gói học</a>
+                    <a href="/packages">Gói học của tôi</a>
 
                 </li>
                 <li><a href="/practices">Luyện tập</a></li>
