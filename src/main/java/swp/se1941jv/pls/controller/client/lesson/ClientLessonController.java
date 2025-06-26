@@ -65,9 +65,6 @@ public class ClientLessonController {
     }
 
 
-
-
-
     /**
      * Hiển thị trang tổng quan của môn học với danh sách chapter và lesson.
      *
@@ -103,7 +100,7 @@ public class ClientLessonController {
                 return "redirect:/login";
             }
 
-            SubjectResponseDTO subject = subjectService.getSubjectResponseDTOById(subjectId);
+            SubjectResponseDTO subject = subjectService.getSubjectResponseDTOById(subjectId,packageId, userId);
 
             // Lấy danh sách chapter đã phê duyệt
             List<ChapterResponseDTO> chapters = subject.getListChapter();

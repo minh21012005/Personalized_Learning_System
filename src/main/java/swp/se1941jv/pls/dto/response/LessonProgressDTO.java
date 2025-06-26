@@ -10,9 +10,15 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LessonProgressDTO {
 
+    Long id;
+
     Long userId;
 
     Long lessonId;
+
+    Long subjectId;
+
+    Long packageId;
 
     Integer watchedTime;
 
