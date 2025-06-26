@@ -164,34 +164,10 @@
                 </style>
 
                 <div class="reviews-section container mt-4" th:fragment="reviews-section">
-                    <c:if test="${not empty message}">
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                Toastify({
-                                    text: "<i class='fas fa-info-circle'></i> ${fn:escapeXml(message)}",
-                                    duration: 4000,
-                                    close: true,
-                                    gravity: "top",
-                                    position: "right",
-                                    style: {
-                                        background: "${not empty success || message.contains('thành công') ? 'linear-gradient(to right, #28a745, #34c759)' : 'linear-gradient(to right, #ffc107, #ffca2c)'}",
-                                        borderRadius: "8px",
-                                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                                        fontFamily: "'Roboto', sans-serif",
-                                        fontSize: "16px",
-                                        padding: "12px 20px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "10px"
-                                    },
-                                    className: "toastify-custom",
-                                    escapeMarkup: false
-                                }).showToast();
-                            });
-                        </script>
-                    </c:if>
+
 
                     <h2 class="section-title">Đánh giá từ học viên (${reviewCount})</h2>
+
                     <div class="average-rating">
                         <p>Đánh giá trung bình:
                             <c:forEach begin="1" end="${averageRating.intValue()}">
@@ -291,19 +267,7 @@
                                                 </c:choose>
                                             </small>
                                         </div>
-                                        <!-- <c:if test="${canReview}">
-                                            <form id="useful-form-${review.reviewId}"
-                                                action="/package/${pkg.packageId}/review/${review.reviewId}/useful"
-                                                method="post" style="display:inline;">
-                                                <input type="hidden" name="${_csrf.parameterName}"
-                                                    value="${_csrf.token}" />
-                                                <input type="hidden" name="userId" value="${currentUserId}" />
-                                                <button type="submit"
-                                                    class="useful-btn ${review.usefulCount > 0 ? 'liked' : ''}">
-                                                    Hữu ích (${review.usefulCount})
-                                                </button>
-                                            </form>
-                                        </c:if> -->
+
                                     </div>
                                 </c:forEach>
                             </div>
@@ -412,6 +376,7 @@
                             </c:if>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Thêm Bootstrap JS và các CDN khác -->

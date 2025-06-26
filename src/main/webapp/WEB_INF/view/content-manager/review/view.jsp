@@ -26,10 +26,71 @@
                     text-overflow: ellipsis;
                     white-space: nowrap;
                 }
+
+                .container {
+                    margin-left: 300px;
+                    flex: 1;
+                }
+
+                .body {
+                    margin: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    overflow-x: hidden;
+                    /* Prevent horizontal scroll from fixed elements */
+                }
+
+                .sidebar {
+                    width: 250px;
+                    background-color: #1a252f;
+                    color: white;
+                    overflow-y: auto;
+
+                }
+
+                .header {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    z-index: 3;
+                    /* On top */
+                    background-color: #212529;
+                    /* Dark background to match image */
+                }
+
+                .content {
+                    margin-left: 100px;
+                    /* Match sidebar width */
+                    margin-top: 60px;
+                    /* Space for header height */
+                    padding: 800px;
+                    flex: 1;
+                    /* Fill available space */
+                }
+
+                .footer {
+                    margin-top: 18.6%;
+                    background-color: #212529;
+                    color: white;
+                    height: 40px;
+                    text-align: center;
+                    line-height: 40px;
+                }
             </style>
         </head>
 
         <body>
+            <header>
+                <jsp:include page="../layout/header.jsp" />
+            </header>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <jsp:include page="../layout/sidebar.jsp" />
+            </div>
+
             <div class="container mt-4">
                 <h1>Quản lý đánh giá</h1>
 
@@ -142,36 +203,6 @@
                     </tbody>
                 </table>
 
-                <!-- Pagination -->
-                <!-- <nav>
-                    <ul class="pagination">
-                        <c:if test="${currentPage > 0}">
-                            <li class="page-item">
-                                <a class="page-link"
-                                    href="/admin/reviews?page=${currentPage - 1}&size=${size}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">Previous</a>
-                            </li>
-                        </c:if>
-                        <c:forEach begin="0" end="${totalPages - 1}" var="i">
-                            <li class="page-item ${i == currentPage ? 'active' : ''}">
-                                <a class="page-link"
-                                    href="/admin/reviews?page=${i}&size=${size}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">${i
-                                    + 1}</a>
-                            </li>
-                        </c:forEach>
-                        <c:if test="${currentPage < totalPages - 1}">
-                            <li class="page-item">
-                                <a class="page-link"
-                                    href="/admin/reviews?page=${currentPage + 1}&size=${size}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">Next</a>
-                            </li>
-                        </c:if>
-                    </ul>
-                    <select class="form-select d-inline w-auto"
-                        onchange="window.location.href='/admin/reviews?page=0&size=' + this.value + '&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}'">
-                        <option value="10" ${size==10 ? 'selected' : '' }>10</option>
-                        <option value="20" ${size==20 ? 'selected' : '' }>20</option>
-                        <option value="50" ${size==50 ? 'selected' : '' }>50</option>
-                    </select>
-                </nav> -->
                 <c:if test="${totalPages > 1}">
                     <nav>
                         <ul class="pagination justify-content-center">
@@ -203,6 +234,11 @@
                     <div class="alert alert-danger">${error}</div>
                 </c:if>
             </div>
+            <!-- Footer -->
+            <footer class="footer">
+                <jsp:include page="../layout/footer.jsp" />
+            </footer>
         </body>
+
 
         </html>

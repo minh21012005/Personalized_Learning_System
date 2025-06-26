@@ -164,7 +164,7 @@
                 </style>
 
                 <div class="reviews-section container mt-4">
-                    <c:if test="${not empty message}">
+                    <!-- <c:if test="${not empty message}">
                         <script>
                             document.addEventListener('DOMContentLoaded', function () {
                                 Toastify({
@@ -189,7 +189,7 @@
                                 }).showToast();
                             });
                         </script>
-                    </c:if>
+                    </c:if> -->
 
                     <h2 class="section-title">Đánh giá từ học viên (${reviewCount})</h2>
                     <div class="average-rating">
@@ -299,7 +299,7 @@
                                     </div>
                                 </c:forEach>
                             </div>
-                            <div>${canReview}</div>
+
                             <c:if test="${canReview}">
                                 <c:choose>
                                     <c:when test="${not empty reviewStatusMessage}">

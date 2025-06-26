@@ -55,8 +55,6 @@ public class SubjectReviewController {
 
             if (comment != null && !comment.isEmpty()) {
                 comment = URLDecoder.decode(comment, StandardCharsets.UTF_8).trim();
-                ;
-
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -121,8 +119,9 @@ public class SubjectReviewController {
             }
 
             String encodedComment = comment != null ? URLEncoder.encode(comment.trim(), StandardCharsets.UTF_8) : "";
-            return "redirect:/subject/" + subjectId + "/reviews?render=true&comment=" + encodedComment +
-                    "&rating=" + (rating != null ? rating : "");
+
+            return "redirect:/subject/detail/" + subjectId + "?render=true&comment=" + encodedComment + "&rating="
+                    + (rating != null ? rating : "");
         } catch (RuntimeException e) {
             model.addAttribute("error", "Môn học không tìm thấy: " + subjectId);
             return "error/404";

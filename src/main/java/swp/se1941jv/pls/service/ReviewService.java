@@ -57,7 +57,7 @@ public class ReviewService {
         if (userId == null || packageId == null) {
             return false;
         }
-        return transactionRepository.existsByUser_UserIdAndPackages_PackageIdAndStatus(userId, packageId,
+        return transactionRepository.existsByUserOrStudentIdAndPackageAndStatus(userId, packageId,
                 TransactionStatus.APPROVED);
     }
 

@@ -121,9 +121,10 @@ public class ReviewController {
                 logger.debug("Rendering fragment with {} reviews", packageReviews.size());
                 return "client/review/reviewFragment";
             }
-            // Giữ nguyên chuyển hướng
+
             String encodedComment = comment != null ? URLEncoder.encode(comment, StandardCharsets.UTF_8) : "";
-            return "redirect:/package/" + packageId + "/reviews?render=true&comment=" + encodedComment +
+
+            return "redirect:/parent/course/detail/" + packageId + "?render=true&comment=" + encodedComment +
                     "&rating=" + (rating != null ? rating : "");
         } catch (RuntimeException e) {
             logger.error("Package not found: {}", packageId, e);
@@ -164,11 +165,7 @@ public class ReviewController {
                     + "?fail=You have already submitted a review for this package.";
         }
 
-        if (reviewService.canUserReviewPackage(currentUser.getUserId(), packageId) // ||
-        // (subject != null &&
-        // reviewService.canUserReviewSubject(currentUser.getUserId(),
-        // subjectId, packageId))
-        ) {
+        if (reviewService.canUserReviewPackage(currentUser.getUserId(), packageId)) {
             try {
                 reviewService.saveReview(review, currentUser, subject == null ? pkg : null, subject);
                 return "redirect:/parent/course/detail/" + packageId
@@ -183,31 +180,4 @@ public class ReviewController {
         }
     }
 
-    // @PostMapping("/{packageId}/review/{reviewId}/useful")
-    // public String markAsUseful(@PathVariable Long packageId, @PathVariable Long
-    // reviewId,
-    // @RequestParam Long userId, RedirectAttributes redirectAttributes,
-    // HttpServletRequest request) {
-    // Authentication authentication =
-    // SecurityContextHolder.getContext().getAuthentication();
-    // if (authentication != null && authentication.isAuthenticated()
-    // && authentication.getPrincipal() instanceof UserDetails) {
-    // User currentUser = userService.getUserByEmail(authentication.getName());
-    // if (currentUser != null && currentUser.getUserId().equals(userId) &&
-    // reviewService.canUserReviewPackage(currentUser.getUserId(), packageId)) {
-    // reviewService.toggleUsefulCount(reviewId);
-    // redirectAttributes.addFlashAttribute("message", "Cập nhật 'Hữu ích' thành
-    // công!");
-    // } else {
-    // redirectAttributes.addFlashAttribute("message",
-    // "Bạn không có quyền cập nhật 'Hữu ích'!");
-    // }
-    // } else {
-    // redirectAttributes.addFlashAttribute("message",
-    // "Vui lòng đăng nhập để thực hiện hành động này!");
-    // }
-    // String referer = request.getHeader("Referer");
-    // return "redirect:" + (referer != null ? referer : "/package/" + packageId +
-    // "/reviews?render=true");
-    // }
 }
