@@ -26,7 +26,7 @@
                         <div class="max-width-container">
                             <div class="bg-white">
                                 <!-- Shopping Cart Header -->
-                                <jsp:include page="../layout/head.jsp" />
+                                <jsp:include page="../layout/header.jsp" />
 
                                 <c:choose>
                                     <c:when test="${empty cartPackages}">
