@@ -25,7 +25,7 @@
                     <body>
                         <div class="detail-package">
                             <!-- Header Section -->
-                            <jsp:include page="../layout/head.jsp" />
+                            <jsp:include page="../layout/header.jsp" />
 
                             <!-- Course List Section -->
                             <section class="course-list">
