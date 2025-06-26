@@ -35,7 +35,7 @@
             background: #fff;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             margin-right: 20px;
             max-height: calc(100vh - 150px); /* Adjust based on header/footer height */
             overflow-y: auto; /* Add scrollbar */
@@ -105,7 +105,7 @@
             background: #fff;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .main-content h1 {
@@ -210,26 +210,20 @@
                 <div class="col-md-8">
                     <h3>${subject.subjectName}</h3>
                     <p>${subject.subjectDescription}</p>
-                    <button type="button" class="btn-start" id="startButton">Bắt đầu luyện tập</button>
-                    <div class="settings-form" id="settingsForm">
-                        <label for="questionCount">Số lượng câu hỏi:</label>
-                        <input type="number" id="questionCount" name="questionCount" value="30" min="1" max="100" style="width: 80px;">
-                        <label for="timePerQuestion">Thời gian mỗi câu (phút):</label>
-                        <input type="number" id="timePerQuestion" name="timePerQuestion" value="1" min="1" max="10" style="width: 80px;">
-                    </div>
-                    <div class="option-buttons" id="optionButtons">
-                        <button type="button" class="btn-timed" formaction="/practices/start-practice?timed=true" formmethod="post">Luyện tập có thời gian</button>
-                        <button type="button" class="btn-untimed" formaction="/practices/start-practice?timed=false" formmethod="post">Luyện tập không thời gian</button>
-                    </div>
+                    <button type="button" class="btn-start"
+                            formaction="/practices/start-practice" formmethod="post">Bắt đầu luyện tập
+                    </button>
+                    <%--                    <div class="option-buttons" id="optionButtons">--%>
+                    <%--                        <button type="button" class="btn-timed" formaction="/practices/start-practice?timed=true" formmethod="post">Luyện tập có thời gian</button>--%>
+                    <%--                        <button type="button" class="btn-untimed" formaction="/practices/start-practice?timed=false" formmethod="post">Luyện tập không thời gian</button>--%>
+                    <%--                    </div>--%>
                     <form action="/practices/start-practice" method="post" id="practiceForm" style="display: none;">
-<%--                        <input type="hidden" name="packageId" value="${package.packageId}">--%>
-                        <input type="hidden" name="questionCount" id="hiddenQuestionCount">
-                        <input type="hidden" name="timePerQuestion" id="hiddenTimePerQuestion">
                         <input type="hidden" name="allLessonIds" id="hiddenAllLessonIds">
                     </form>
                 </div>
                 <div class="col-md-4">
-                    <img src="/img/subjectImg/${subject.subjectImage != null ? subject.subjectImage : '/img/default-subject.jpg'}" alt="Lesson Image" class="w-full h-full object-cover">
+                    <img src="/img/subjectImg/${subject.subjectImage != null ? subject.subjectImage : '/img/default-subject.jpg'}"
+                         alt="Lesson Image" class="w-full h-full object-cover">
                 </div>
             </div>
         </div>
@@ -251,7 +245,7 @@
 
     function toggleChapter(checkbox, lessonGroupId) {
         var lessons = document.querySelectorAll('#' + lessonGroupId + ' input[type="checkbox"]');
-        lessons.forEach(function(lesson) {
+        lessons.forEach(function (lesson) {
             lesson.checked = checkbox.checked;
         });
     }
@@ -259,46 +253,46 @@
     function selectAllChapters() {
         var selectAllCheckbox = document.getElementById('selectAll');
         var chapterCheckboxes = document.querySelectorAll('input[name="chapterIds"]');
-        chapterCheckboxes.forEach(function(checkbox) {
+        chapterCheckboxes.forEach(function (checkbox) {
             checkbox.checked = selectAllCheckbox.checked;
             var lessonGroupId = 'lessonIds_' + checkbox.value;
             toggleChapter(checkbox, lessonGroupId);
         });
     }
 
-    $(document).ready(function() {
-        // Show settings and options when start button is clicked
-        $('#startButton').on('click', function() {
-            $('#settingsForm').show();
-            $('#optionButtons').show();
-            $('#startButton').hide();
-        });
+    $(document).ready(function () {
+        // // Show settings and options when start button is clicked
+        // $('#startButton').on('click', function () {
+        //     $('#settingsForm').show();
+        //     $('#optionButtons').show();
+        //     $('#startButton').hide();
+        // });
 
         // Handle form submission for timed/untimed options
-        $('.btn-timed, .btn-untimed').on('click', function(e) {
+        $('.btn-start').on('click', function (e) {
             var checkedLessons = $('input[name="lessonIds"]:checked');
             if (checkedLessons.length === 0) {
                 e.preventDefault();
                 alert('Vui lòng chọn ít nhất một bài học.');
             } else {
                 var form = $('#practiceForm');
-                var questionCount = $('#questionCount').val();
-                var timePerQuestion = $('#timePerQuestion').val();
-                var timed = $(this).hasClass('btn-timed');
+                // var questionCount = $('#questionCount').val();
+                // var timePerQuestion = $('#timePerQuestion').val();
+                // var timed = $(this).hasClass('btn-timed');
 
                 // Collect all lessonIds from selected chapters
                 var allLessonIds = [];
-                $('input[name="chapterIds"]:checked').each(function() {
+                $('input[name="chapterIds"]:checked').each(function () {
                     var chapterId = $(this).val();
-                    $('#lessonIds_' + chapterId + ' input[type="checkbox"]').each(function() {
+                    $('#lessonIds_' + chapterId + ' input[type="checkbox"]').each(function () {
                         allLessonIds.push($(this).val());
                     });
                 });
                 $('#hiddenAllLessonIds').val(allLessonIds.join(','));
 
-                $('#hiddenQuestionCount').val(questionCount);
-                $('#hiddenTimePerQuestion').val(timed ? timePerQuestion : 0);
-                form.attr('action', '/practices/start-practice?timed=' + timed);
+                // $('#hiddenQuestionCount').val(questionCount);
+                // $('#hiddenTimePerQuestion').val(timed ? timePerQuestion : 0);
+                form.attr('action', '/practices/start-practice');
                 form.submit();
             }
         });
