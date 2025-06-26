@@ -38,24 +38,8 @@
                         flex: 1;
                     }
 
-                    .useful-btn {
-                        background-color: #4CAF50;
-                        color: white;
-                        border: none;
-                        padding: 6px 12px;
-                        cursor: pointer;
-                        border-radius: 5px;
-                        transition: background-color 0.3s ease;
-                        font-size: 0.9rem;
-                    }
 
-                    .useful-btn.liked {
-                        background-color: #ff4444;
-                    }
 
-                    .useful-btn:hover {
-                        opacity: 0.9;
-                    }
 
                     .toastify-custom {
                         position: relative;
@@ -96,12 +80,13 @@
                     }
 
                     .submit-review-btn {
-                        background: linear-gradient(90deg, #007bff, #00c4cc);
+                        background: linear-gradient(90deg, rgba(2, 6, 23, 1), rgba(2, 6, 23, 1));
                         color: white;
                         border: none;
                         padding: 8px 15px;
                         border-radius: 5px;
                         transition: opacity 0.3s ease;
+                        margin-top: 20px;
                     }
 
                     .submit-review-btn:hover {
@@ -145,10 +130,10 @@
                     }
 
                     .btn-filter.active {
-                        background: linear-gradient(90deg, #007bff, #00c4cc);
-                        color: white;
-                        border-color: #007bff;
-                        box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+                        background: linear-gradient(90deg, rgb(233, 234, 236), rgb(233, 234, 236));
+                        color: black;
+                        border-color: rgb(233, 234, 236);
+                        box-shadow: 0 2px 6px rgb(233, 234, 236);
                     }
 
                     .btn-filter .star {
@@ -211,13 +196,19 @@
                                 </div>
                                 <div class="col-12 mt-3">
                                     <label class="filter-label">Nội dung bình luận:</label>
-                                    <input type="text" id="commentInput" name="comment" value="${selectedComment}"
-                                        class="form-control" placeholder="Nhập nội dung..." />
+                                    <div class="d-flex align-items-center">
+                                        <input type="text" id="commentInput" name="comment" value="${selectedComment}"
+                                            class="form-control me-2" placeholder="Nhập nội dung..." />
+                                        <button type="submit" class="btn btn-outline-secondary px-3 py-2"
+                                            style="background-color: white;">
+                                            🔍
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-filter w-100"
-                                        style="background: linear-gradient(90deg, #2ecc71, #27ae60); color: white; font-weight: 500;">Lọc</button>
-                                </div>
+
+
+
+
                             </form>
                         </div>
 

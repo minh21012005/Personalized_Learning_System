@@ -96,12 +96,13 @@
                     }
 
                     .submit-review-btn {
-                        background: linear-gradient(90deg, #007bff, #00c4cc);
+                        background: linear-gradient(90deg, rgba(0, 0, 0, 0.669), rgba(0, 0, 0, 0.669));
                         color: white;
                         border: none;
                         padding: 8px 15px;
                         border-radius: 5px;
                         transition: opacity 0.3s ease;
+                        margin-top: 20px;
                     }
 
                     .submit-review-btn:hover {
@@ -145,10 +146,10 @@
                     }
 
                     .btn-filter.active {
-                        background: linear-gradient(90deg, #007bff, #00c4cc);
-                        color: white;
-                        border-color: #007bff;
-                        box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+                        background: linear-gradient(90deg, rgb(233, 234, 236), rgb(233, 234, 236));
+                        color: black;
+                        border-color: rgb(233, 234, 236);
+                        box-shadow: 0 2px 6px rgb(233, 234, 236);
                     }
 
                     .btn-filter .star {
@@ -164,32 +165,7 @@
                 </style>
 
                 <div class="reviews-section container mt-4">
-                    <!-- <c:if test="${not empty message}">
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                Toastify({
-                                    text: "<i class='fas fa-info-circle'></i> ${fn:escapeXml(message)}",
-                                    duration: 4000,
-                                    close: true,
-                                    gravity: "top",
-                                    position: "right",
-                                    style: {
-                                        background: "${not empty success || message.contains('thành công') ? 'linear-gradient(to right, #28a745, #34c759)' : 'linear-gradient(to right, #ffc107, #ffca2c)'}",
-                                        borderRadius: "8px",
-                                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                                        fontFamily: "'Roboto', sans-serif",
-                                        fontSize: "16px",
-                                        padding: "12px 20px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "10px"
-                                    },
-                                    className: "toastify-custom",
-                                    escapeMarkup: false
-                                }).showToast();
-                            });
-                        </script>
-                    </c:if> -->
+
 
                     <h2 class="section-title">Đánh giá từ học viên (${reviewCount})</h2>
                     <div class="average-rating">
@@ -240,13 +216,16 @@
                                 </div>
                                 <div class="col-12 mt-3">
                                     <label for="commentInput">Nội dung bình luận:</label>
-                                    <input type="text" id="commentInput" name="comment" value="${selectedComment}"
-                                        class="form-control" placeholder="Nhập nội dung..." />
+                                    <div class="d-flex align-items-center">
+                                        <input type="text" id="commentInput" name="comment" value="${selectedComment}"
+                                            class="form-control me-2" placeholder="Nhập nội dung..." />
+                                        <button type="submit" class="btn btn-outline-success px-3 py-2"
+                                            style="background-color: white;">
+                                            🔍
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-filter w-100"
-                                        style="background: linear-gradient(90deg, #2ecc71, #27ae60); color: white; font-weight: 500;">Lọc</button>
-                                </div>
+
                             </form>
                         </div>
 
