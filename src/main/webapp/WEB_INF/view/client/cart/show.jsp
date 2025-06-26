@@ -26,7 +26,7 @@
                         <div class="max-width-container">
                             <div class="bg-white">
                                 <!-- Shopping Cart Header -->
-                                <jsp:include page="../layout/head.jsp" />
+                                <jsp:include page="../layout/header.jsp" />
 
                                 <c:choose>
                                     <c:when test="${empty cartPackages}">
@@ -141,7 +141,17 @@
                                                                         </span>
                                                                     </div>
 
-                                                                    <button class="checkout-button">Thanh toán</button>
+                                                                    <form action="/parent/checkout" method="get">
+                                                                        <input type="hidden" name="price"
+                                                                            value="${totalPrice}" />
+                                                                        <c:forEach var="cartPackage"
+                                                                            items="${cartPackages}">
+                                                                            <input type="hidden" name="packages"
+                                                                                value="${cartPackage.pkg.packageId}" />
+                                                                        </c:forEach>
+                                                                        <button type="submit"
+                                                                            class="checkout-button">Thanh toán</button>
+                                                                    </form>
                                                                 </div>
                                                             </div>
                                                         </c:when>

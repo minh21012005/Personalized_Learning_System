@@ -154,7 +154,7 @@
         </head>
 
         <body>
-            <jsp:include page="../layout/head.jsp" />
+            <jsp:include page="../layout/header.jsp" />
             <div class="container-fluid">
                 <div class="forgot-password-container d-flex">
                     <!-- Left: Forgot Password Form -->

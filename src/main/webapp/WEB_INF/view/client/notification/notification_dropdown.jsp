@@ -26,8 +26,8 @@
     .notification-item-card:last-of-type {
         border-bottom: none;
     }
-    .notification-item-card.is-read { /* Giữ lại class này nếu bạn muốn style khác cho thông báo đã đọc từ server */
-        background-color: #f7f9fc; 
+    .notification-item-card.is-read {
+        background-color: #f7f9fc;
     }
     .notification-item-card.is-read .title,
     .notification-item-card.is-read .summary,
@@ -115,7 +115,7 @@
 </style>
 
 <div class="notification-dropdown-custom-header">
-    Notifications
+    Thông báo
 </div>
 <hr class="dropdown-divider my-0" style="margin-top: 0 !important; margin-bottom: 0 !important;">
 
@@ -125,11 +125,6 @@
             <li>
                 <a class="dropdown-item notification-item-card p-0 <c:if test='${userNotif.isRead}'>is-read</c:if>" 
                    href="<c:url value='${not empty userNotif.notification.link ? userNotif.notification.link : "javascript:void(0);"}'/>"
-                   <%-- Các data-attribute không còn cần thiết cho JS mark-as-read khi click item nữa --%>
-                   <%-- data-notification-id="${userNotif.notification.notificationId}" --%>
-                   <%-- data-user-notification-read="${userNotif.isRead}" --%>
-                   >
-                    
                     <div class="thumbnail-container">
                         <c:if test="${not empty userNotif.notification.thumbnail}">
                             <img src="<c:url value='${userNotif.notification.thumbnail}'/>" alt="Thumb" class="thumbnail-img">
@@ -153,28 +148,22 @@
                         </span>
                         <p class="summary"><c:out value="${userNotif.notification.content}"/></p>
                     </div>
-                    <%-- Đã xóa phần actions-container và checkbox --%>
                 </a>
             </li>
         </c:forEach>
-        
-        <%-- Phần footer của dropdown, bạn có thể xóa "Đánh dấu tất cả đã đọc" nếu không dùng nữa --%>
         <div class="notification-dropdown-footer">
-            <%-- 
             <c:set var="hasAnyUnreadInDropdown" value="${false}"/>
             <c:forEach var="userNotifCheck" items="${clientUserNotifications}">
                 <c:if test="${!userNotifCheck.isRead}">
                     <c:set var="hasAnyUnreadInDropdown" value="${true}"/>
                 </c:if>
             </c:forEach>
-            
             <c:if test="${hasAnyUnreadInDropdown}">
                 <li><hr class="dropdown-divider my-0"></li>
                 <li><a class="dropdown-item text-center" href="#" id="clientMarkAllAsReadLinkJsAction"> 
                     <i class="fas fa-check-double me-1"></i>Đánh dấu tất cả đã đọc
                 </a></li>
             </c:if>
-            --%>
         </div>
 
     </c:when>

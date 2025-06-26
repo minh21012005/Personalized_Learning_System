@@ -71,8 +71,10 @@ public class SecurityConfiguration {
                         .requestMatchers("/invite/create").hasRole("PARENT")
                         .requestMatchers("/invite/confirm").hasRole("STUDENT")
 
+                        .requestMatchers("/transaction/**").hasRole("PARENT")
+
                         .requestMatchers("/admin/**")
-                        .hasAnyRole("ADMIN","CONTENT_MANAGER")
+                        .hasAnyRole("ADMIN", "CONTENT_MANAGER")
 
                         .requestMatchers("/student/**")
                         .hasAnyRole("STUDENT", "ADMIN")
@@ -103,7 +105,7 @@ public class SecurityConfiguration {
                         .successHandler(authenticationSuccessHandler())
                         .permitAll())
 
-                .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny")) ;
+                .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny"));
 
         return http.build();
     }

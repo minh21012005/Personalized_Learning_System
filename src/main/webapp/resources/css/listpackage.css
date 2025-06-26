@@ -366,6 +366,26 @@ body {
     margin-top: 2rem;
 }
 
+.page-link.active,
+.active>.page-link {
+    z-index: 3 !important;
+    color: rgba(2, 6, 23, 1) !important;
+    background-color: #C0C0C0 !important;
+    border-color: #CBD5E1 !important;
+}
+
+.page-link {
+    position: relative !important;
+    display: block !important;
+    padding: var(--bs-pagination-padding-y) var(--bs-pagination-padding-x) !important;
+    font-size: var(--bs-pagination-font-size) !important;
+    color: rgba(2, 6, 23, 1) !important;
+    text-decoration: none !important;
+    background-color: var(--bs-pagination-bg) !important;
+    border: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color) !important;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
 .pagination button {
     padding: 0.5rem 1rem;
     border: 1px solid var(--grey-600);
@@ -457,7 +477,13 @@ body {
     /* Ensures padding is included in width */
 }
 
+a {
+    text-decoration: none !important;
+    /* Ghi đè kiểu của Bootstrap */
+}
+
 .course-title {
+    color: #0F172A;
     white-space: normal;
     /* Allows text to wrap */
     overflow: hidden;

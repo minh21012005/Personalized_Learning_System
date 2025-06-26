@@ -33,7 +33,7 @@ public class ClientNotificationController {
     private final NotificationService notificationService;
     private final UserService userService; 
 
-    
+
     private User getCurrentAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String && authentication.getPrincipal().equals("anonymousUser"))) {
@@ -88,17 +88,17 @@ public class ClientNotificationController {
         User currentUser = getCurrentAuthenticatedUser();
         if (currentUser == null) {
             logger.warn("Attempt to access all notifications page without authentication. Redirecting to login.");
-            return "redirect:/login"; 
+            return "redirect:/login";
         }
-       
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "notification.createdAt"));
         Page<UserNotification> notificationPage = notificationService.getAllNotificationsForUser(currentUser, pageable);
 
         model.addAttribute("notificationPage", notificationPage);
         model.addAttribute("pageTitle", "Tất cả Thông báo");
-        
+
         model.addAttribute("clientContentPage", "client/notification/all_notifications_content"); 
-       
-        return "client/homepage/show"; 
+
+        return "client/homepage/show";
     }
 }
