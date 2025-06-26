@@ -26,8 +26,8 @@
     .notification-item-card:last-of-type {
         border-bottom: none;
     }
-    .notification-item-card.is-read {
-        background-color: #f7f9fc;
+    .notification-item-card.is-read { /* Giữ lại class này nếu bạn muốn style khác cho thông báo đã đọc từ server */
+        background-color: #f7f9fc; 
     }
     .notification-item-card.is-read .title,
     .notification-item-card.is-read .summary,
@@ -120,52 +120,36 @@
 <hr class="dropdown-divider my-0" style="margin-top: 0 !important; margin-bottom: 0 !important;">
 
 <c:choose>
-    <c:when test="${not empty clientUserNotifications}">
-        <c:forEach var="userNotif" items="${clientUserNotifications}" varStatus="loop">
+    <c:when test="${not empty adminUserNotifications}">
+        <c:forEach var="adminUserNotif" items="${adminUserNotifications}">
             <li>
-                <a class="dropdown-item notification-item-card p-0 <c:if test='${userNotif.isRead}'>is-read</c:if>" 
-                   href="<c:url value='${not empty userNotif.notification.link ? userNotif.notification.link : "javascript:void(0);"}'/>"
+                <a class="dropdown-item notification-item-card p-0 <c:if test='${adminUserNotif.isRead}'>is-read</c:if>"
+                   href="<c:url value='${not empty adminUserNotif.notification.link ? adminUserNotif.notification.link : "javascript:void(0);"}'/>">
+
                     <div class="thumbnail-container">
-                        <c:if test="${not empty userNotif.notification.thumbnail}">
-                            <img src="<c:url value='${userNotif.notification.thumbnail}'/>" alt="Thumb" class="thumbnail-img">
+                        <c:if test="${not empty adminUserNotif.notification.thumbnail}">
+                            <img src="<c:url value='${adminUserNotif.notification.thumbnail}'/>" alt="Thumb" class="thumbnail-img">
                         </c:if>
-                        <c:if test="${empty userNotif.notification.thumbnail}">
-                            <div class="thumbnail-placeholder">
-                                <i class="fas fa-bell"></i>
-                            </div>
+                        <c:if test="${empty adminUserNotif.notification.thumbnail}">
+                            <div class="thumbnail-placeholder"><i class="fas fa-bell"></i></div>
                         </c:if>
                     </div>
 
                     <div class="content-container">
-                        <span class="title"><c:out value="${userNotif.notification.title}"/></span>
+                        <span class="title"><c:out value="${adminUserNotif.notification.title}"/></span>
                         <span class="meta-info">
-                            <c:if test="${userNotif.notification.createdAtAsUtilDate != null}">
-                                <fmt:formatDate value="${userNotif.notification.createdAtAsUtilDate}" pattern="dd MMM yyyy HH:mm"/>
+                            <c:if test="${adminUserNotif.notification.createdAt != null}">
+                                <fmt:formatDate value="${adminUserNotif.notification.createdAt}" pattern="dd MMM yyyy HH:mm"/>
                             </c:if>
-                            <c:if test="${userNotif.notification.createdAtAsUtilDate == null}"> 
+                            <c:if test="${adminUserNotif.notification.createdAt == null}">
                                Ngày không xác định
                             </c:if>
                         </span>
-                        <p class="summary"><c:out value="${userNotif.notification.content}"/></p>
+                        <p class="summary"><c:out value="${adminUserNotif.notification.content}"/></p>
                     </div>
                 </a>
             </li>
         </c:forEach>
-        <div class="notification-dropdown-footer">
-            <c:set var="hasAnyUnreadInDropdown" value="${false}"/>
-            <c:forEach var="userNotifCheck" items="${clientUserNotifications}">
-                <c:if test="${!userNotifCheck.isRead}">
-                    <c:set var="hasAnyUnreadInDropdown" value="${true}"/>
-                </c:if>
-            </c:forEach>
-            <c:if test="${hasAnyUnreadInDropdown}">
-                <li><hr class="dropdown-divider my-0"></li>
-                <li><a class="dropdown-item text-center" href="#" id="clientMarkAllAsReadLinkJsAction"> 
-                    <i class="fas fa-check-double me-1"></i>Đánh dấu tất cả đã đọc
-                </a></li>
-            </c:if>
-        </div>
-
     </c:when>
     <c:otherwise>
         <li><p class="dropdown-item no-notification-message-custom mb-0">Bạn không có thông báo nào.</p></li>
