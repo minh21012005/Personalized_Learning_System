@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service;
 import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.request.AnswerOptionDto;
 import swp.se1941jv.pls.dto.response.*;
-import swp.se1941jv.pls.dto.response.practice.PracticeResponseDTO;
-import swp.se1941jv.pls.dto.response.practice.PracticeSubmissionDto;
-import swp.se1941jv.pls.dto.response.practice.QuestionAnswerResDTO;
-import swp.se1941jv.pls.dto.response.practice.QuestionDisplayDto;
+import swp.se1941jv.pls.dto.response.practice.*;
 import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 import swp.se1941jv.pls.repository.*;
@@ -37,6 +34,11 @@ public class PracticesService {
     QuestionTestRepository questionTestRepository;
     UserRepository userRepository;
     AnswerHistoryTestRepository answerHistoryTestRepository;
+    ConfigRepository configRepository;
+
+    private static final String QUESTION_GENERATION_CONFIG_KEY = "questionPracticeGenerate";
+
+    private static final int QUESTIONS_PER_SET = 5;
 
 
     @PreAuthorize("hasAnyRole('STUDENT')")
@@ -331,4 +333,133 @@ public class PracticesService {
         return practiceResponseDTO;
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public List<QuestionDisplayDto> generateNextQuestions(List<Long> lessonIds, Integer correctCount) {
+        return generateQuestions(lessonIds, correctCount);
+    }
+
+    private List<QuestionDisplayDto> generateQuestions(List<Long> lessonIds, Integer correctCount) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null || lessonIds == null || lessonIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Load configuration
+        QuestionGenerationConfigDto config = loadGenerationConfig();
+        Map<String, Integer> levelDistribution = getLevelDistribution(config, correctCount);
+
+        // Generate questions based on level distribution
+        List<QuestionBank> selectedQuestions = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : levelDistribution.entrySet()) {
+            String level = entry.getKey();
+            int count = entry.getValue();
+            if (count > 0) {
+                List<QuestionBank> questions = questionBankRepository
+                        .findByLessonLessonIdInAndLevelQuestionLevelName(lessonIds, level);
+                Collections.shuffle(questions);
+                selectedQuestions.addAll(questions.stream().limit(count).toList());
+            }
+        }
+
+        // Fallback: If not enough questions, fill with any active questions
+        if (selectedQuestions.size() < QUESTIONS_PER_SET) {
+            List<QuestionBank> fallbackQuestions = questionBankRepository.findByLessonIdsIn(lessonIds);
+            Collections.shuffle(fallbackQuestions);
+            int remaining = QUESTIONS_PER_SET - selectedQuestions.size();
+            selectedQuestions.addAll(fallbackQuestions.stream()
+                    .filter(q -> !selectedQuestions.contains(q))
+                    .limit(remaining)
+                    .toList());
+        }
+
+        // Shuffle the final set
+        Collections.shuffle(selectedQuestions);
+
+        return selectedQuestions.stream()
+                .map(question -> {
+                    try {
+                        return QuestionDisplayDto.builder()
+                                .questionId(question.getQuestionId())
+                                .content(question.getContent())
+                                .image(question.getImage())
+                                .options(questionService.getQuestionOptions(question).stream()
+                                        .map(AnswerOptionDto::getText)
+                                        .collect(Collectors.toList()))
+                                .build();
+                    } catch (Exception e) {
+                        return QuestionDisplayDto.builder()
+                                .questionId(question.getQuestionId())
+                                .content("Error loading question")
+                                .image(null)
+                                .options(new ArrayList<>())
+                                .build();
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    private QuestionGenerationConfigDto loadGenerationConfig() {
+        Config config = configRepository.findByConfigKey(QUESTION_GENERATION_CONFIG_KEY)
+                .orElseThrow(() -> new RuntimeException("Configuration not found: " + QUESTION_GENERATION_CONFIG_KEY));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(config.getConfigValue(), QuestionGenerationConfigDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse question generation config", e);
+        }
+    }
+
+    private Map<String, Integer> getLevelDistribution(QuestionGenerationConfigDto config, Integer correctCount) {
+        // Default distribution: all EASY
+        Map<String, Integer> defaultDistribution = new HashMap<>();
+        defaultDistribution.put("Dễ", QUESTIONS_PER_SET);
+        defaultDistribution.put("Trung bình", 0);
+        defaultDistribution.put("Khó", 0);
+
+        if (config == null || config.getRules() == null) {
+            return defaultDistribution;
+        }
+
+        for (QuestionGenerationConfigDto.Rule rule : config.getRules()) {
+            if (correctCount >= rule.getCorrectCountMin() && correctCount <= rule.getCorrectCountMax()) {
+                return rule.getLevels();
+            }
+        }
+
+        return defaultDistribution;
+    }
+
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public PracticeResponseDTO continuePracticeWithLessons(List<Long> lessonIds, Long testId, Integer correctCount) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return null;
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        List<QuestionDisplayDto> nextQuestions = generateNextQuestions(lessonIds, correctCount);
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new RuntimeException("Test not found: " + testId));
+
+        nextQuestions.forEach(question -> {
+            QuestionBank questionBank = questionBankRepository.findById(question.getQuestionId())
+                    .orElseThrow(() -> new RuntimeException("Question not found: " + question.getQuestionId()));
+
+            QuestionTest questionTest = QuestionTest.builder()
+                    .test(test)
+                    .question(questionBank)
+                    .build();
+            questionTestRepository.save(questionTest);
+        });
+
+        return PracticeResponseDTO.builder()
+                .testId(test.getTestId())
+                .userId(userId)
+                .selectedLessonId(lessonIds != null ? lessonIds.stream().map(String::valueOf).collect(Collectors.joining(",")) : "")
+                .questions(nextQuestions)
+                .build();
+    }
 }

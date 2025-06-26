@@ -106,7 +106,10 @@ public class PracticeController {
 
     @PostMapping("/continue-practice")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String continuePracticeWithLessons(@RequestParam(value = "allLessonIds", required = false) String selectedLessonIds, @RequestParam(value = "currentQuestionIndex") Long currentQuestionIndex, @RequestParam(value = "testId") Long testId, @RequestParam(value = "correctCount") Long correctCount,
+    public String continuePracticeWithLessons(@RequestParam(value = "allLessonIds", required = false) String selectedLessonIds,
+                                              @RequestParam(value = "currentQuestionIndex") Long currentQuestionIndex,
+                                              @RequestParam(value = "testId") Long testId,
+                                              @RequestParam(value = "correctCount") Integer correctCount,
                                               Model model) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -114,19 +117,15 @@ public class PracticeController {
             return "redirect:/login";
         }
 
-        // Parse selectedLessonIds into a List<Long> if provided
         List<Long> selectedLessonIdList = (selectedLessonIds != null && !selectedLessonIds.isEmpty())
                 ? Arrays.stream(selectedLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
                 : new ArrayList<>();
 
-        PracticeResponseDTO practiceResponse = practicesService.startPracticeWithLessons(selectedLessonIdList);
-
-
+        PracticeResponseDTO practiceResponse = practicesService.continuePracticeWithLessons(selectedLessonIdList, testId, correctCount);
         model.addAttribute("testId", practiceResponse.getTestId());
         model.addAttribute("selectedLessonIds", practiceResponse.getSelectedLessonId());
         model.addAttribute("questions", practiceResponse.getQuestions());
-        model.addAttribute("currentQuestionIndex", currentQuestionIndex != null ? currentQuestionIndex + 5 : 0);
-
+        model.addAttribute("currentQuestionIndex", currentQuestionIndex + 5);
         return "client/practice/PracticeTest";
     }
 
