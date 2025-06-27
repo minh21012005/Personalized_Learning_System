@@ -93,6 +93,8 @@ public class LessonController {
             model.addAttribute("lesson", new Lesson());
             model.addAttribute("materialsTemp", new ArrayList<String>());
             model.addAttribute("isEdit", false);
+            model.addAttribute("isProcess", false);
+
             return "staff/lesson/save";
         } catch (ApplicationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -143,12 +145,18 @@ public class LessonController {
                 return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
 
+
+
+            boolean isProcess = lesson.getLessonStatus() != Lesson.LessonStatus.DRAFT;
+
+
             List<String> materialsTemp = parseMaterialsJson(lesson.getMaterialsJson());
             model.addAttribute("subject", subject);
             model.addAttribute("chapter", chapter);
             model.addAttribute("lesson", lesson);
             model.addAttribute("materialsTemp", materialsTemp);
             model.addAttribute("isEdit", true);
+            model.addAttribute("isProcess", isProcess);
             return "staff/lesson/save";
         } catch (ApplicationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -175,6 +183,8 @@ public class LessonController {
             @RequestParam(required = false) List<String> materialsTemp,
             RedirectAttributes redirectAttributes,
             Model model) {
+        if (!lesson.getLessonStatus().equals(Lesson.LessonStatus.DRAFT))
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         lesson.setLessonId(lessonId);
         return handleLessonSave(subjectId, chapterId, lesson, bindingResult, materialFiles, materialsTemp, redirectAttributes, model, true);
     }

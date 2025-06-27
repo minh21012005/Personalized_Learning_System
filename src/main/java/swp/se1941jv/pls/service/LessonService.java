@@ -72,6 +72,10 @@ public class LessonService {
             throw new NotFoundException("Bài học không tồn tại");
         }
 
+        if (lesson.getLessonStatus() != Lesson.LessonStatus.DRAFT) {
+            throw new ApplicationException("UPDATE_ERROR", "Bài học không ở trạng thái DRAFT");
+        }
+
         if (lessonRepository.existsByLessonNameAndChapter_ChapterId(lesson.getLessonName(), chapterId) &&
                 !lessonRepository.findById(lesson.getLessonId())
                         .map(l -> l.getLessonName().equals(lesson.getLessonName()))

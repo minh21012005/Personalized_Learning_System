@@ -73,7 +73,7 @@
 </head>
 <body>
 <header>
-    <jsp:include page="../../admin/layout/header.jsp"/>
+    <jsp:include page="../layout_staff/header.jsp"/>
 </header>
 
 <div class="main-container">
@@ -156,7 +156,7 @@
 </div>
 
 <footer>
-    <jsp:include page="../../admin/layout/footer.jsp"/>
+    <jsp:include page="../layout_staff/footer.jsp"/>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

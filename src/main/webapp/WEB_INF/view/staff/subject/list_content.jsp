@@ -3,7 +3,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <%-- FORM FILTER --%>
-<form action="<c:url value='/admin/subject'/>" method="GET" class="mb-3">
+<form action="<c:url value='/staff/subject'/>" method="GET" class="mb-3">
     <div class="row g-3 align-items-center">
         <div class="col-auto">
             <label for="filterGradeId" class="col-form-label"><spring:message code="subject.list.grade"/>:</label>
@@ -29,15 +29,11 @@
             <button type="submit" class="btn btn-info btn-sm">
                 <i class="fas fa-filter"></i> <spring:message code="button.filter"/>
             </button>
-            <a href="<c:url value='/admin/subject'/>" class="btn btn-secondary btn-sm ms-2">
+            <a href="<c:url value='/staff/subject'/>" class="btn btn-secondary btn-sm ms-2">
                 <i class="fas fa-eraser"></i> <spring:message code="button.clear"/>
             </a>
         </div>
-        <div class="col-auto ms-auto">
-             <a href="<c:url value='/admin/subject/new'/>" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus-circle"></i> <spring:message code="subject.list.add.new"/>
-            </a>
-        </div>
+
     </div>
 </form>
 
@@ -46,7 +42,7 @@
         <thead>
         <tr>
             <th>
-                <c:url value="/admin/subject" var="sortByIdUrl">
+                <c:url value="/staff/subject" var="sortByIdUrl">
                     <c:param name="filterName" value="${filterName}" />
                     <c:param name="filterGradeId" value="${filterGradeId}" />
                     <c:param name="page" value="${currentPage}" />
@@ -61,7 +57,7 @@
             </th>
             <th><spring:message code="subject.list.image"/></th>
             <th>
-                 <c:url value="/admin/subject" var="sortByNameUrl">
+                 <c:url value="/staff/subject" var="sortByNameUrl">
                     <c:param name="filterName" value="${filterName}" />
                     <c:param name="filterGradeId" value="${filterGradeId}" />
                     <c:param name="page" value="${currentPage}" />
@@ -78,7 +74,7 @@
             <th><spring:message code="subject.list.grade"/></th>
             <th><spring:message code="subject.list.active"/></th>
             <th>
-                <c:url value="/admin/subject" var="sortByCreatedAtUrl">
+                <c:url value="/staff/subject" var="sortByCreatedAtUrl">
                     <c:param name="filterName" value="${filterName}" />
                     <c:param name="filterGradeId" value="${filterGradeId}" />
                     <c:param name="page" value="${currentPage}" />
@@ -92,7 +88,7 @@
                 </a>
             </th>
             <th>
-                 <c:url value="/admin/subject" var="sortByUpdatedAtUrl">
+                 <c:url value="/staff/subject" var="sortByUpdatedAtUrl">
                     <c:param name="filterName" value="${filterName}" />
                     <c:param name="filterGradeId" value="${filterGradeId}" />
                     <c:param name="page" value="${currentPage}" />
@@ -147,17 +143,10 @@
                     </c:if>
                 </td>
                 <td>
-                    <a href="<c:url value='/admin/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1" >
+                    <a href="<c:url value='/staff/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1" >
                         <i class="fas fa-eye"></i> View
                     </a>
-                    <a href="<c:url value='/admin/subject/edit/${subject.subjectId}'/>" class="btn btn-sm btn-warning me-1" title="<spring:message code="button.edit"/>">
-                        <i class="fas fa-edit"></i> <spring:message code="button.edit"/>
-                    </a>
-                    <a href="<c:url value='/admin/subject/delete/${subject.subjectId}'/>"
-                       class="btn btn-sm btn-danger" title="<spring:message code="button.delete"/>"
-                       onclick="return confirm('<spring:message code="confirm.delete.subject.message" arguments="${subject.subjectName}" text="Are you sure you want to delete subject {0}? This action cannot be undone."/>');">
-                        <i class="fas fa-trash-alt"></i> <spring:message code="button.delete"/>
-                    </a>
+
                 </td>
             </tr>
         </c:forEach>
@@ -180,7 +169,7 @@
                 <ul class="pagination justify-content-center">
                     <%-- Nút First --%>
                     <li class="page-item ${subjectPage.first ? 'disabled' : ''}">
-                        <c:url value="/admin/subject" var="firstPageLink">
+                        <c:url value="/staff/subject" var="firstPageLink">
                             <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="0" />
@@ -192,7 +181,7 @@
                     </li>
                     <%-- Nút Previous --%>
                     <li class="page-item ${subjectPage.first ? 'disabled' : ''}">
-                        <c:url value="/admin/subject" var="prevPageLink">
+                        <c:url value="/staff/subject" var="prevPageLink">
                             <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="${subjectPage.number - 1}" />
@@ -210,7 +199,7 @@
 
                     <%-- Hiển thị nút trang đầu tiên và "..." nếu cần --%>
                     <c:if test="${startPageLoop > 0}">
-                        <c:url value="/admin/subject" var="pageLinkFirstDots">
+                        <c:url value="/staff/subject" var="pageLinkFirstDots">
                              <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="0" />
@@ -227,7 +216,7 @@
                     <%-- Vòng lặp hiển thị các nút số trang trong "cửa sổ" --%>
                     <c:forEach begin="${startPageLoop}" end="${endPageLoop}" var="i">
                         <li class="page-item ${i == subjectPage.number ? 'active' : ''}">
-                            <c:url value="/admin/subject" var="pageLink">
+                            <c:url value="/staff/subject" var="pageLink">
                                 <c:param name="filterName" value="${filterName}" />
                                 <c:param name="filterGradeId" value="${filterGradeId}" />
                                 <c:param name="page" value="${i}" />
@@ -244,7 +233,7 @@
                         <c:if test="${endPageLoop < subjectPage.totalPages - 2}">
                              <li class="page-item disabled"><span class="page-link">...</span></li>
                         </c:if>
-                        <c:url value="/admin/subject" var="pageLinkLastDots">
+                        <c:url value="/staff/subject" var="pageLinkLastDots">
                              <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="${subjectPage.totalPages - 1}" />
@@ -257,7 +246,7 @@
 
                     <%-- Nút Next --%>
                     <li class="page-item ${subjectPage.last ? 'disabled' : ''}">
-                        <c:url value="/admin/subject" var="nextPageLink">
+                        <c:url value="/staff/subject" var="nextPageLink">
                             <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="${subjectPage.number + 1}" />
@@ -269,7 +258,7 @@
                     </li>
                      <%-- Nút Last --%>
                     <li class="page-item ${subjectPage.last ? 'disabled' : ''}">
-                        <c:url value="/admin/subject" var="lastPageLink">
+                        <c:url value="/staff/subject" var="lastPageLink">
                             <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="${subjectPage.totalPages - 1}" />

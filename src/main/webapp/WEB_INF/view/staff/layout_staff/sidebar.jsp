@@ -18,5 +18,11 @@
                 <i class="bi bi-question-square me-2"></i> Câu hỏi
             </a>
         </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white ${activePage == 'questions' ? 'bg-primary rounded' : ''}"
+               href="/staff/subject" style="padding: 8px 15px;">
+                <i class="bi bi-question-square me-2"></i> Môn học
+            </a>
+        </li>
     </ul>
 </div>

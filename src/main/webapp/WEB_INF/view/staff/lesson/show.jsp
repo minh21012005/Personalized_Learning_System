@@ -220,9 +220,11 @@
                                                 </c:choose>
                                             </td>
                                             <td class="text-center col-2">
+
                                                 <a href="/staff/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/${lesson.lessonId}/edit"
-                                                   class="btn btn-warning btn-sm" title="Cập nhật">
-                                                    Cập nhật
+                                                   class="btn ${lesson.lessonStatus.statusCode == 'DRAFT' ? 'btn-warning' : 'btn-info'}  btn-sm"
+                                                   title="${lesson.lessonStatus.statusCode == 'DRAFT' ? 'Cập nhật' : 'Xem'}">
+                                                        ${lesson.lessonStatus.statusCode == 'DRAFT' ? 'Cập nhật' : 'Xem'}
                                                 </a>
                                                 <c:if test="${lesson.lessonStatus.statusCode == 'DRAFT'}">
                                                     <form action="/staff/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/${lesson.lessonId}/submit" method="post" style="display: inline;">

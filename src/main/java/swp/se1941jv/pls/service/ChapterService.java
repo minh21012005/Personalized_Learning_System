@@ -94,6 +94,8 @@ public class ChapterService {
             throw new DuplicateNameException("Tên chương đã tồn tại cho môn học này");
         }
 
+        chapter.setStatus(false);
+        chapter.setChapterStatus(Chapter.ChapterStatus.DRAFT);
         try {
             chapterRepository.save(chapter);
             log.info("Chapter updated: chapterId={}", chapter.getChapterId());

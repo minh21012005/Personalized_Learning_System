@@ -55,11 +55,11 @@ public class ChapterController {
             return "staff/chapter/show";
         } catch (ApplicationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/admin/subject";
+            return "redirect:/staff/subject";
         } catch (Exception e) {
             log.error("Error fetching chapters: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lấy danh sách chương");
-            return "redirect:/admin/subject";
+            return "redirect:/staff/subject";
         }
     }
 
@@ -149,7 +149,7 @@ public class ChapterController {
      * Xử lý cập nhật chương.
      */
     @PreAuthorize("hasAnyRole('STAFF')")
-    @PutMapping("/{chapterId}")
+    @PostMapping("/{chapterId}")
     public String updateChapter(
             @PathVariable Long subjectId,
             @PathVariable Long chapterId,
