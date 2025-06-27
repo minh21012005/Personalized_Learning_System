@@ -50,6 +50,9 @@ public class Subject extends BaseEntity {
     List<Chapter> chapters;
 
     @OneToMany(mappedBy = "subject")
+    List<Test> tests;
+
+    @OneToMany(mappedBy = "subject")
     List<SubjectTest> subjectTests;
 
     @ManyToOne

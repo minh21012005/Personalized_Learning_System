@@ -75,4 +75,8 @@ public class Chapter extends BaseEntity {
 
     @OneToMany(mappedBy = "chapter")
     List<SubjectTest> subjectTests;
+
+    @OneToMany(mappedBy = "chapter")
+    List<Test> tests;
+
 }
