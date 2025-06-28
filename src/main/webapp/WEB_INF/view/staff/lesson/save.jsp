@@ -205,9 +205,11 @@
                                             <h6>Tài liệu hiện có:</h6>
                                             <c:forEach var="material" items="${materialsTemp}" varStatus="status">
                                                 <div class="material-item" data-index="${status.index}">
-                                                    <a href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
-                                                    <button type="button" class="btn btn-link text-danger p-0"
-                                                            onclick="removeMaterial(this, ${status.index})">Xóa</button>
+                                                    <a style="color: #3498db" href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
+                                                   <c:if test="!isProcess">
+                                                       <button type="button" class="btn btn-link text-danger p-0"
+                                                               onclick="removeMaterial(this, ${status.index})">Xóa</button>
+                                                   </c:if>
                                                     <input type="hidden" name="materialsTemp" value="${material}"/>
                                                 </div>
                                             </c:forEach>

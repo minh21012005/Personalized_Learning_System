@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
-
 import swp.se1941jv.pls.dto.response.UserResponseDTO;
-import swp.se1941jv.pls.exception.ApplicationException;
-import swp.se1941jv.pls.exception.ValidationException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
@@ -88,12 +85,10 @@ public class LessonManagerController {
             model.addAttribute("userCreated", userCreated);
 
             return "content-manager/lesson/show";
-        } catch (ApplicationException e) {
-            log.error("Error fetching initial lessons: {}", e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "content-manager/lesson/show";
         } catch (Exception e) {
-            log.error("Unexpected error: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Lỗi khi tải trang quản lý bài học");
             return "content-manager/lesson/show";
         }
@@ -127,7 +122,7 @@ public class LessonManagerController {
                     redirectAttributes.addFlashAttribute("successMessage", "Từ chối bài học thành công");
                     break;
                 default:
-                    throw new ValidationException("Trạng thái không hợp lệ: " + newStatus);
+                    throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
             }
 
             // Xây dựng query string từ các tham số filter
@@ -135,13 +130,11 @@ public class LessonManagerController {
 
             // Redirect về endpoint GET /admin/lessons với trạng thái bộ lọc
             return "redirect:/admin/lessons" + (queryString.isEmpty() ? "" : "?" + queryString);
-        } catch (ApplicationException e) {
-            log.error("Error updating lesson status: {}", e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             String queryString = buildQueryString(subjectId, chapterId, lessonStatus, status, startDate, endDate, userCreated, page);
             return "redirect:/admin/lessons" + (queryString.isEmpty() ? "" : "?" + queryString);
         } catch (Exception e) {
-            log.error("Unexpected error: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái bài học");
             String queryString = buildQueryString(subjectId, chapterId, lessonStatus, status, startDate, endDate, userCreated, page);
             return "redirect:/admin/lessons" + (queryString.isEmpty() ? "" : "?" + queryString);
@@ -158,22 +151,19 @@ public class LessonManagerController {
             // Lấy thông tin chi tiết bài học đầy đủ từ service
             LessonResponseDTO lesson = lessonService.getFullLessonResponseById(lessonId);
             if (lesson == null) {
-                throw new ApplicationException("ERROR", "Không tìm thấy bài học với ID: " + lessonId);
+                throw new IllegalArgumentException("Không tìm thấy bài học với ID: " + lessonId);
             }
 
             model.addAttribute("lesson", lesson);
             return "content-manager/lesson/detail";
-        } catch (ApplicationException e) {
-            log.error("Error fetching lesson detail: {}", e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "redirect:/admin/lessons";
         } catch (Exception e) {
-            log.error("Unexpected error: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Lỗi khi tải chi tiết bài học");
             return "redirect:/admin/lessons";
         }
     }
-
 
     /**
      * Xây dựng query string từ các tham số filter.

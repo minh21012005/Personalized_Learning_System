@@ -1,8 +1,11 @@
 package swp.se1941jv.pls.service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,14 +14,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import swp.se1941jv.pls.dto.response.*;
+import swp.se1941jv.pls.dto.response.learningPageData.LearningChapterDTO;
+import swp.se1941jv.pls.dto.response.learningPageData.LearningLessonDTO;
+import swp.se1941jv.pls.dto.response.learningPageData.LearningPageDataDTO;
 import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
-import swp.se1941jv.pls.exception.ApplicationException;
-import swp.se1941jv.pls.exception.NotFoundException;
-import swp.se1941jv.pls.exception.ValidationException;
-import swp.se1941jv.pls.exception.subject.SubjectNotFoundException;
 import swp.se1941jv.pls.repository.*;
 
 @Service
@@ -109,99 +111,101 @@ public class SubjectService {
         return this.subjectRepository.findById(id);
     }
 
-    public List<SubjectResponseDTO> getSubjectsResponse() {
-        List<Subject> subjects = subjectRepository.findByIsActiveTrue();
-        if (subjects.isEmpty()) {
-            throw new SubjectNotFoundException("Không có môn học nào tồn tại");
-        }
-        return subjects.stream()
-                .map(subject -> SubjectResponseDTO.builder()
-                        .subjectId(subject.getSubjectId())
-                        .subjectName(subject.getSubjectName())
-                        .subjectDescription(subject.getSubjectDescription())
-                        .subjectImage(subject.getSubjectImage())
-                        .build())
-                .toList();
-    }
+
 
     public SubjectResponseDTO getSubjectResponseById(Long subjectId) {
 
 
         if (subjectId == null || subjectId <= 0) {
-            throw new ValidationException("ID môn học không hợp lệ");
+            throw new IllegalArgumentException("ID môn học không hợp lệ");
         }
 
         try {
             Subject subject =  subjectRepository.findById(subjectId)
-                    .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
+                    .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại"));
             return SubjectResponseDTO.builder()
                     .subjectId(subject.getSubjectId())
                     .subjectName(subject.getSubjectName())
                     .listChapter(chapterService.findChaptersBySubjectId(subjectId,null,null))
                     .build();
         } catch (Exception e) {
-            throw new ApplicationException("FETCH_ERROR", "Lỗi khi lấy thông tin môn học", e);
+            throw new RuntimeException("Lỗi khi lấy thông tin môn học");
         }
     }
 
-    public Boolean hasAccessSubjectInPackage(Long packageId, Long subjectId, Long userId) {
+    public Boolean hasAccessSubjectInPackage(Long packageId, Long userId, Long subjectId) {
+        return userPackageRepository.existsByUser_UserIdAndPkg_PackageIdAndPkg_PackageSubjects_Subject_SubjectIdAndEndDateAfter(userId, packageId, subjectId, LocalDateTime.now());
+    }
 
+    public LearningPageDataDTO getLearningPageData(Long subjectId, Long packageId, Long userId) {
+        // 1. Tải Subject, Chapters, Lessons đã được tối ưu hóa bằng phương thức riêng
+        // Bây giờ bạn gọi phương thức mới: findByIdWithChaptersAndLessons
+        Subject subject = subjectRepository.findBySubjectId(subjectId)
+                .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại"));
 
+        // 2. Lấy User và Package một lần duy nhất
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại"));
+        Package packageEntity = packageRepository.findById(packageId)
+                .orElseThrow(() -> new IllegalArgumentException("Gói học không tồn tại"));
 
-        KeyUserPackage keyUserPackage = KeyUserPackage.builder()
-                .userId(userId)
-                .packageId(packageId)
-                .build();
+        // 3. Lấy tất cả LessonProgress cho User, Subject, Package này trong một truy vấn
+        List<LessonProgress> allLessonProgresses = lessonProgressRepository
+                .findByUserAndSubjectAndPackageEntity(user, subject, packageEntity);
 
-        UserPackage userPackage = userPackageRepository.findById(keyUserPackage)
+        // Tạo Map để tra cứu trạng thái hoàn thành nhanh chóng
+        Map<Long, Boolean> lessonCompletionMap = allLessonProgresses.stream()
+                .collect(Collectors.toMap(
+                        lp -> lp.getLesson().getLessonId(),
+                        LessonProgress::getIsCompleted,
+                        (existing, replacement) -> replacement
+                ));
+
+        // 4. Ánh xạ từ Entity sang DTO mới
+        List<LearningChapterDTO> learningChapters = subject.getChapters().stream()
+                .filter(chapter -> chapter.getStatus() && chapter.getChapterStatus() == Chapter.ChapterStatus.APPROVED)
+                .map(chapter -> mapToLearningChapterDTO(chapter, lessonCompletionMap))
+                .toList();
+
+        // 5. Xác định lesson và chapter mặc định
+        LearningLessonDTO defaultLesson = learningChapters.stream()
+                .filter(chapterDto -> chapterDto.getListLesson() != null && !chapterDto.getListLesson().isEmpty())
+                .findFirst()
+                .flatMap(chapterDto -> chapterDto.getListLesson().stream().findFirst())
                 .orElse(null);
 
-        if (userPackage != null ) {
-            KeyPackageSubject keyPackageSubject = KeyPackageSubject.builder()
-                    .packageId(packageId)
-                    .subjectId(subjectId)
-                    .build();
+        LearningChapterDTO defaultChapter = learningChapters.stream()
+                .filter(chapterDto -> chapterDto.getListLesson() != null && chapterDto.getListLesson().contains(defaultLesson))
+                .findFirst()
+                .orElse(null);
 
-            PackageSubject packageSubject = packageSubjectRepository.findById(keyPackageSubject).orElse(null);
-            return packageSubject != null;
-        }
-        return false;
-    }
-
-    public SubjectResponseDTO getSubjectResponseDTOById(Long subjectId, Long packageId, Long userId) {
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
-        return mapToSubjectResponseDTO(subject,packageId,userId);
-    }
-
-    private SubjectResponseDTO mapToSubjectResponseDTO(Subject subject, Long packageId, Long userId) {
-        List<ChapterResponseDTO> chapters = subject.getChapters().stream()
-                .filter(chapter -> chapter.getStatus() && chapter.getChapterStatus() == Chapter.ChapterStatus.APPROVED)
-                .map(chapter ->mapToChapterResponseDTO(chapter, subject.getSubjectId(), packageId, userId))
-                .toList();
-
-        return SubjectResponseDTO.builder()
+        // 6. Xây dựng và trả về LearningPageDataDTO
+        return LearningPageDataDTO.builder()
                 .subjectId(subject.getSubjectId())
                 .subjectName(subject.getSubjectName())
-                .listChapter(chapters)
+                .userId(userId)
+                .packageId(packageId)
+                .chapters(learningChapters)
+                .defaultLesson(defaultLesson)
+                .defaultChapter(defaultChapter)
                 .build();
     }
 
-    private ChapterResponseDTO mapToChapterResponseDTO(Chapter chapter, Long subjectId, Long packageId, Long userId) {
-        List<LessonResponseDTO> lessons = chapter.getLessons().stream()
+    private LearningChapterDTO mapToLearningChapterDTO(Chapter chapter, Map<Long, Boolean> lessonCompletionMap) {
+        List<LearningLessonDTO> learningLessons = chapter.getLessons().stream()
                 .filter(lesson -> lesson.getStatus() && lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED)
-                .map(lesson -> mapToLessonResponseDTO(lesson,  subjectId,  packageId,  userId))
+                .map(lesson -> mapToLearningLessonDTO(lesson, lessonCompletionMap.getOrDefault(lesson.getLessonId(), false)))
                 .toList();
 
-        return ChapterResponseDTO.builder()
+        return LearningChapterDTO.builder()
                 .chapterId(chapter.getChapterId())
                 .chapterName(chapter.getChapterName())
                 .chapterDescription(chapter.getChapterDescription())
-                .listLesson(lessons)
+                .listLesson(learningLessons)
                 .build();
     }
 
-    private LessonResponseDTO mapToLessonResponseDTO(Lesson lesson, Long subjectId, Long packageId, Long userId) {
+    private LearningLessonDTO mapToLearningLessonDTO(Lesson lesson, boolean isCompleted) {
         List<String> materials;
         try {
             materials = objectMapper.readValue(lesson.getMaterialsJson(), new TypeReference<List<String>>() {});
@@ -209,29 +213,12 @@ public class SubjectService {
             materials = Collections.emptyList();
         }
 
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Người dùng không tồn tại"));
-        Package packageEntity = packageRepository.findById(packageId)
-                .orElseThrow(() -> new NotFoundException("Gói học không tồn tại"));
-
-        boolean isCompleted = lessonProgressRepository
-                .findByUserAndLessonAndSubjectAndPackageEntity(user, lesson, subject, packageEntity)
-                .map(LessonProgress::getIsCompleted)
-                .orElse(false);
-
-        return LessonResponseDTO.builder()
+        return LearningLessonDTO.builder()
                 .lessonId(lesson.getLessonId())
                 .lessonName(lesson.getLessonName())
                 .lessonDescription(lesson.getLessonDescription())
                 .videoSrc(lesson.getVideoSrc())
                 .videoTime(lesson.getVideoTime())
-                .status(lesson.getStatus())
-                .lessonStatus(LessonResponseDTO.LessonStatusDTO.builder()
-                        .statusCode(lesson.getLessonStatus().name())
-                        .description(lesson.getLessonStatus().getDescription())
-                        .build())
                 .materials(materials)
                 .isCompleted(isCompleted)
                 .build();

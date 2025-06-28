@@ -18,8 +18,6 @@ import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
 import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
-import swp.se1941jv.pls.exception.ApplicationException;
-import swp.se1941jv.pls.exception.DuplicateNameException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
@@ -64,11 +62,10 @@ public class LessonController {
             model.addAttribute("chapter", chapter);
             model.addAttribute("lessons", lessons);
             return "staff/lesson/show";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
-            log.error("Error fetching lessons: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lấy danh sách bài học");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         }
@@ -96,11 +93,10 @@ public class LessonController {
             model.addAttribute("isProcess", false);
 
             return "staff/lesson/save";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         } catch (Exception e) {
-            log.error("Error showing create lesson form: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị form tạo bài học");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
@@ -140,15 +136,11 @@ public class LessonController {
             Lesson lesson = lessonService.getLessonById(lessonId).orElse(null);
 
             if (lesson == null) {
-                log.warn("Lesson not found: lessonId={}", lessonId);
                 redirectAttributes.addFlashAttribute("errorMessage", "Bài học không tồn tại");
                 return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
 
-
-
             boolean isProcess = lesson.getLessonStatus() != Lesson.LessonStatus.DRAFT;
-
 
             List<String> materialsTemp = parseMaterialsJson(lesson.getMaterialsJson());
             model.addAttribute("subject", subject);
@@ -158,11 +150,10 @@ public class LessonController {
             model.addAttribute("isEdit", true);
             model.addAttribute("isProcess", isProcess);
             return "staff/lesson/save";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         } catch (Exception e) {
-            log.error("Error showing edit lesson form: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị form chỉnh sửa bài học");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
@@ -204,12 +195,35 @@ public class LessonController {
             lessonService.submitLesson(lessonId);
             redirectAttributes.addFlashAttribute("message", "Nộp bài học thành công");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         } catch (Exception e) {
-            log.error("Error submitting lesson: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi nộp bài học");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        }
+    }
+
+    /**
+     * Xử lý hủy nộp bài học (chuyển trạng thái từ PENDING về DRAFT).
+     */
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @PostMapping("/{lessonId}/cancel")
+    public String cancelLesson(
+            @PathVariable Long subjectId,
+            @PathVariable Long chapterId,
+            @PathVariable Long lessonId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Subject subject = validateSubjectAndChapter(subjectId, chapterId);
+            lessonService.cancelLesson(lessonId);
+            redirectAttributes.addFlashAttribute("message", "Hủy nộp bài học thành công");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hủy nộp bài học");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
     }
@@ -229,18 +243,16 @@ public class LessonController {
             ChapterResponseDTO chapter = chapterService.getChapterResponseById(chapterId, subjectId);
 
             if (subject == null || chapter == null) {
-                log.warn("Subject or Chapter not found: subjectId={}, chapterId={}", subjectId, chapterId);
                 return "error/404";
             }
 
             lessonService.toggleLessonsStatus(lessonIds);
             redirectAttributes.addFlashAttribute("message", "Cập nhật trạng thái thành công");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         } catch (Exception e) {
-            log.error("Error updating lesson status: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
@@ -263,7 +275,6 @@ public class LessonController {
         Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
 
         if (subject == null || chapter == null || !chapter.getSubject().getSubjectId().equals(subjectId)) {
-            log.warn("Invalid subject or chapter: subjectId={}, chapterId={}", subjectId, chapterId);
             return "error/404";
         }
 
@@ -323,12 +334,11 @@ public class LessonController {
 
             redirectAttributes.addFlashAttribute("message", isEdit ? "Cập nhật bài học thành công" : "Tạo bài học thành công");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (ApplicationException e) {
-            String field = e instanceof DuplicateNameException ? "lessonName" : null;
+        } catch (IllegalArgumentException e) {
+            String field = e.getMessage().contains("Tên bài học đã tồn tại") ? "lessonName" : null;
             bindingResult.rejectValue(field, "error.lesson", e.getMessage());
             return prepareSaveForm(subject, chapter, lesson, materials, model);
         } catch (Exception e) {
-            log.error("Error saving lesson: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu bài học");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
@@ -353,7 +363,7 @@ public class LessonController {
         Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
         Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
         if (subject == null || chapter == null || !chapter.getSubject().getSubjectId().equals(subjectId)) {
-            throw new ApplicationException("ERROR","Môn học hoặc chương không hợp lệ");
+            throw new IllegalArgumentException("Môn học hoặc chương không hợp lệ.");
         }
         return subject;
     }

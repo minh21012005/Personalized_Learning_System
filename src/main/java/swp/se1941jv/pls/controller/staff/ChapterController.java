@@ -13,8 +13,6 @@ import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
 import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
-import swp.se1941jv.pls.exception.ApplicationException;
-import swp.se1941jv.pls.exception.DuplicateNameException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.SubjectService;
 
@@ -53,7 +51,7 @@ public class ChapterController {
             model.addAttribute("chapterName", chapterName);
             model.addAttribute("status", status);
             return "staff/chapter/show";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject";
         } catch (Exception e) {
@@ -83,7 +81,7 @@ public class ChapterController {
             model.addAttribute("chapter", new Chapter());
             model.addAttribute("isEdit", false);
             return "staff/chapter/save";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
@@ -121,7 +119,7 @@ public class ChapterController {
             model.addAttribute("chapter", chapter);
             model.addAttribute("isEdit", true);
             return "staff/chapter/save";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
@@ -179,11 +177,10 @@ public class ChapterController {
             chapterService.submitChapter(chapterId);
             redirectAttributes.addFlashAttribute("message", "Nộp chương thành công");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
-            log.error("Error submitting chapter: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi nộp chương");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         }
@@ -207,16 +204,14 @@ public class ChapterController {
             chapterService.cancelChapter(chapterId);
             redirectAttributes.addFlashAttribute("message", "Hủy chương thành công");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
-            log.error("Error canceling chapter: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hủy chương");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         }
     }
-
 
     /**
      * Cập nhật trạng thái của các chương.
@@ -230,18 +225,16 @@ public class ChapterController {
         try {
             SubjectResponseDTO subject = subjectService.getSubjectResponseById(subjectId);
             if (subject == null) {
-                log.warn("Subject not found: subjectId={}", subjectId);
                 return "error/404";
             }
 
             chapterService.toggleChaptersStatus(chapterIds);
             redirectAttributes.addFlashAttribute("message", "Cập nhật trạng thái thành công");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
-            log.error("Error updating chapter status: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         }
@@ -259,7 +252,6 @@ public class ChapterController {
             boolean isEdit) {
         Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
         if (subject == null) {
-            log.warn("Subject not found: subjectId={}", subjectId);
             return "error/404";
         }
 
@@ -279,15 +271,14 @@ public class ChapterController {
             }
             redirectAttributes.addFlashAttribute("message", isEdit ? "Cập nhật chương thành công" : "Tạo chương thành công");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (ApplicationException e) {
-            String field = e instanceof DuplicateNameException ? "chapterName" : null;
+        } catch (IllegalArgumentException e) {
+            String field = e.getMessage().contains("Tên chương đã tồn tại") ? "chapterName" : null;
             bindingResult.rejectValue(field, "error.chapter", e.getMessage());
             model.addAttribute("subject", subject);
             model.addAttribute("chapter", chapter);
             model.addAttribute("isEdit", isEdit);
             return "staff/chapter/save";
         } catch (Exception e) {
-            log.error("Error saving chapter: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu chương");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         }

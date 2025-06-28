@@ -13,8 +13,6 @@ import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
 import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
 import swp.se1941jv.pls.dto.response.UserResponseDTO;
-import swp.se1941jv.pls.exception.ApplicationException;
-import swp.se1941jv.pls.exception.ValidationException;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
@@ -83,7 +81,7 @@ public class ChapterManagerController {
             model.addAttribute("userCreated", userCreated);
 
             return "content-manager/chapter/show";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             log.error("Error fetching initial chapters: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", e.getMessage());
             return "content-manager/chapter/show";
@@ -114,16 +112,18 @@ public class ChapterManagerController {
                     redirectAttributes.addFlashAttribute("successMessage", "Từ chối chương thành công");
                     break;
                 default:
-                    throw new ValidationException("Trạng thái không hợp lệ: " + newStatus);
+                    throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
             }
-        } catch (ApplicationException e) {
+            return "redirect:/admin/chapters";
+        } catch (IllegalArgumentException e) {
             log.error("Error updating chapter status: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/chapters";
         } catch (Exception e) {
             log.error("Unexpected error: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái chương");
+            return "redirect:/admin/chapters";
         }
-        return "redirect:/admin/chapters";
     }
 
     /**
@@ -136,7 +136,7 @@ public class ChapterManagerController {
             // Lấy thông tin chi tiết chapter dưới dạng DTO từ ChapterService
             ChapterResponseDTO chapterResponse = chapterService.getChapterResponseByChapterId(chapterId);
             if (chapterResponse == null) {
-                throw new ApplicationException("ERROR", "Không tìm thấy chapter với ID: " + chapterId);
+                throw new IllegalArgumentException("Không tìm thấy chương với ID: " + chapterId);
             }
             // Lấy danh sách bài học có trạng thái APPROVED
             List<LessonResponseDTO> lessons = lessonService.getApprovedLessonsByChapterId(chapterId);
@@ -144,7 +144,7 @@ public class ChapterManagerController {
             model.addAttribute("chapter", chapterResponse);
             model.addAttribute("lessons", lessons);
             return "content-manager/chapter/detail";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             log.error("Error fetching chapter detail: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", e.getMessage());
             return "redirect:/admin/chapters";
