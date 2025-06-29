@@ -20,6 +20,7 @@ import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.service.GradeService;
 import swp.se1941jv.pls.service.SubjectService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Sort;
 
 @Controller
 public class GradeController {
@@ -43,7 +44,7 @@ public class GradeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String isActive) {
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("gradeId").descending());
         if (keyword != null) {
             keyword = keyword.trim();
             if (keyword.isEmpty()) {
@@ -126,6 +127,28 @@ public class GradeController {
         return "admin/grade/view";
     }
 
+    private String loadGradeUpdatePage(Model model, Grade grade, int page, int pendingPage, String keyword,
+            String pendingKeyword) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pendingPageable = PageRequest.of(pendingPage, 10);
+        Page<Subject> subjectPage = subjectService.getSubjectsByGradeId(grade.getGradeId(), true, keyword, pageable);
+        Page<Subject> pendingSubjectPage = subjectService.getPendingSubjects(true, pendingKeyword, pendingPageable);
+
+        model.addAttribute("grade", grade);
+        model.addAttribute("subjects", subjectPage.getContent());
+        model.addAttribute("currentPage", subjectPage.getNumber());
+        model.addAttribute("totalPages", subjectPage.getTotalPages());
+        model.addAttribute("totalItems", subjectPage.getTotalElements());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("pendingSubjects", pendingSubjectPage.getContent());
+        model.addAttribute("pendingCurrentPage", pendingSubjectPage.getNumber());
+        model.addAttribute("pendingTotalPages", pendingSubjectPage.getTotalPages());
+        model.addAttribute("pendingTotalItems", pendingSubjectPage.getTotalElements());
+        model.addAttribute("pendingKeyword", pendingKeyword);
+
+        return "admin/grade/update";
+    }
+
     @GetMapping("/admin/grade/update/{gradeId}")
     public String getUpdateGradePage(Model model, @PathVariable Long gradeId,
             @RequestParam(defaultValue = "0") int page,
@@ -133,37 +156,19 @@ public class GradeController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String pendingKeyword) {
         try {
-
-            Grade grade = this.gradeService.findById(gradeId)
+            Grade grade = gradeService.findById(gradeId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
-            Pageable pageable = PageRequest.of(page, 10);
-            Pageable pendingPageable = PageRequest.of(pendingPage, 10);
-            Page<Subject> subjectPage = this.subjectService.getSubjectsByGradeId(gradeId, true, keyword, pageable);
-            Page<Subject> pendingSubjectPage = this.subjectService.getPendingSubjects(true, pendingKeyword,
-                    pendingPageable);
-
             if (!grade.isActive()) {
                 model.addAttribute("warning",
                         "⚠ Khối lớp này đã ngừng hoạt động. Không thể chỉnh sửa danh sách môn học.");
             }
-
-            model.addAttribute("grade", grade);
-            model.addAttribute("subjects", subjectPage.getContent());
-            model.addAttribute("currentPage", subjectPage.getNumber());
-            model.addAttribute("totalPages", subjectPage.getTotalPages());
-            model.addAttribute("totalItems", subjectPage.getTotalElements());
-            model.addAttribute("keyword", keyword);
-            model.addAttribute("pendingSubjects", pendingSubjectPage.getContent());
-            model.addAttribute("pendingCurrentPage", pendingSubjectPage.getNumber());
-            model.addAttribute("pendingTotalPages", pendingSubjectPage.getTotalPages());
-            model.addAttribute("pendingTotalItems", pendingSubjectPage.getTotalElements());
-            model.addAttribute("pendingKeyword", pendingKeyword);
+            return loadGradeUpdatePage(model, grade, page, pendingPage, keyword, pendingKeyword);
         } catch (IllegalArgumentException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("subjects", java.util.Collections.emptyList());
             model.addAttribute("pendingSubjects", java.util.Collections.emptyList());
+            return "admin/grade/update";
         }
-        return "admin/grade/update";
     }
 
     @PostMapping("/admin/grade/update")
@@ -177,7 +182,6 @@ public class GradeController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String pendingKeyword) {
         try {
-
             Grade existingGrade = gradeService.findById(grade.getGradeId())
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp"));
 
@@ -186,13 +190,11 @@ public class GradeController {
             gradeService.saveGrade(existingGrade);
 
             if (existingGrade.isActive()) {
-
                 if (removeSubjectIds != null && !removeSubjectIds.isEmpty()) {
                     for (Long subjectId : removeSubjectIds) {
                         subjectService.updateSubjectGrade(subjectId, null);
                     }
                 }
-
                 if (addSubjectIds != null && !addSubjectIds.isEmpty()) {
                     for (Long subjectId : addSubjectIds) {
                         subjectService.updateSubjectGrade(subjectId, grade.getGradeId());
@@ -200,36 +202,8 @@ public class GradeController {
                 }
             } else if ((removeSubjectIds != null && !removeSubjectIds.isEmpty()) ||
                     (addSubjectIds != null && !addSubjectIds.isEmpty())) {
-                model.addAttribute("error", "error");
-
-                Pageable pageable = PageRequest.of(page, 10);
-                Pageable pendingPageable = PageRequest.of(pendingPage, 10);
-                model.addAttribute("grade", existingGrade);
-                model.addAttribute("subjects",
-                        subjectService.getSubjectsByGradeId(grade.getGradeId(), true, keyword,
-                                pageable).getContent());
-                model.addAttribute("currentPage", page);
-                model.addAttribute("totalPages", subjectService
-                        .getSubjectsByGradeId(grade.getGradeId(), true, keyword,
-                                pageable)
-                        .getTotalPages());
-                model.addAttribute("totalItems", subjectService
-                        .getSubjectsByGradeId(grade.getGradeId(), true, keyword,
-                                pageable)
-                        .getTotalElements());
-                model.addAttribute("keyword", keyword);
-                model.addAttribute("pendingSubjects",
-                        subjectService.getPendingSubjects(true, pendingKeyword,
-                                pendingPageable).getContent());
-                model.addAttribute("pendingCurrentPage", pendingPage);
-                model.addAttribute("pendingTotalPages",
-                        subjectService.getPendingSubjects(true, pendingKeyword,
-                                pendingPageable).getTotalPages());
-                model.addAttribute("pendingTotalItems",
-                        subjectService.getPendingSubjects(true, pendingKeyword,
-                                pendingPageable).getTotalElements());
-                model.addAttribute("pendingKeyword", pendingKeyword);
-                return "admin/grade/update";
+                model.addAttribute("error", "Không thể chỉnh sửa danh sách môn học cho khối lớp không hoạt động.");
+                return loadGradeUpdatePage(model, existingGrade, page, pendingPage, keyword, pendingKeyword);
             }
 
             return "redirect:/admin/grade/update/" + grade.getGradeId() +
@@ -239,34 +213,16 @@ public class GradeController {
                     (pendingKeyword != null ? "&pendingKeyword=" + pendingKeyword : "");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
-
-            Pageable pageable = PageRequest.of(page, 10);
-            Pageable pendingPageable = PageRequest.of(pendingPage, 10);
-            model.addAttribute("grade", grade);
-            model.addAttribute("subjects",
-                    subjectService.getSubjectsByGradeId(grade.getGradeId(), true, keyword,
-                            pageable).getContent());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages",
-                    subjectService.getSubjectsByGradeId(grade.getGradeId(), true, keyword,
-                            pageable).getTotalPages());
-            model.addAttribute("totalItems", subjectService
-                    .getSubjectsByGradeId(grade.getGradeId(), true, keyword,
-                            pageable)
-                    .getTotalElements());
-            model.addAttribute("keyword", keyword);
-            model.addAttribute("pendingSubjects",
-                    subjectService.getPendingSubjects(true, pendingKeyword,
-                            pendingPageable).getContent());
-            model.addAttribute("pendingCurrentPage", pendingPage);
-            model.addAttribute("pendingTotalPages",
-                    subjectService.getPendingSubjects(true, pendingKeyword,
-                            pendingPageable).getTotalPages());
-            model.addAttribute("pendingTotalItems",
-                    subjectService.getPendingSubjects(true, pendingKeyword,
-                            pendingPageable).getTotalElements());
-            model.addAttribute("pendingKeyword", pendingKeyword);
-            return "admin/grade/update";
+            return loadGradeUpdatePage(model, grade, page, pendingPage, keyword, pendingKeyword);
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException e) {
+            model.addAttribute("error", "Tên khối lớp '" + grade.getGradeName()
+                    + "' đã tồn tại trong cơ sở dữ liệu. Vui lòng chọn tên khác.");
+            return loadGradeUpdatePage(model, grade, page, pendingPage, keyword, pendingKeyword);
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi cập nhật khối lớp: " + e.getMessage());
+            return loadGradeUpdatePage(model, grade, page, pendingPage, keyword, pendingKeyword);
         }
+
     }
+
 }

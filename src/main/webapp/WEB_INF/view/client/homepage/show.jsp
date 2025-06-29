@@ -584,18 +584,5 @@
 <footer>
     <jsp:include page="../layout/footer.jsp" />
 </footer>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
-<script type="text/javascript">
-    window.APP_CONTEXT_PATH = "${pageContext.request.contextPath}";
-    <c:if test="${_csrf != null}">
-        window.CSRF_HEADER_NAME = "${_csrf.parameterName}"; 
-        window.CSRF_TOKEN = "${_csrf.token}"; 
-    </c:if>
-</script>
-<script src="${pageContext.request.contextPath}/js/client_notification.js"></script>
-
 </body>
 </html>

@@ -1,75 +1,69 @@
 package swp.se1941jv.pls.controller.client.practice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import swp.se1941jv.pls.config.SecurityUtils;
-import swp.se1941jv.pls.dto.request.AnswerOptionDto;
-import swp.se1941jv.pls.dto.response.LessonResponseDTO;
-import swp.se1941jv.pls.dto.response.QuestionDisplayDto;
-import swp.se1941jv.pls.entity.*;
-import swp.se1941jv.pls.repository.*;
+import swp.se1941jv.pls.dto.response.*;
+import swp.se1941jv.pls.dto.response.practice.*;
+import swp.se1941jv.pls.entity.UserTest;
+import swp.se1941jv.pls.service.PracticesService;
 import swp.se1941jv.pls.service.QuestionService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/practice")
+@RequestMapping("/practices")
 @RequiredArgsConstructor
 public class PracticeController {
 
-    private final SubjectRepository subjectRepository;
-    private final ChapterRepository chapterRepository;
-    private final LessonRepository lessonRepository;
-    private final LevelQuestionRepository levelQuestionRepository;
-    private final QuestionBankRepository questionBankRepository;
-    private final UserTestRepository userTestRepository;
-    private final AnswerHistoryTestRepository answerHistoryRepository;
+    private final PracticesService practicesService;
     private final QuestionService questionService;
-    private final TestRepository testRepository;
-    private final SubjectTestRepository subjectTestRepository;
-    private final QuestionTestRepository questionTestRepository;
-    private final UserRepository userRepository;
-    private final TestStatusRepository testStatusRepository;
-    private final TestCategoryRepository testCategoryRepository;
 
+    @GetMapping
     @PreAuthorize("hasAnyRole('STUDENT')")
-    @GetMapping("/start")
-    public String showPracticeForm(Model model) {
+    public String showPackagedPractices(Model model) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
             model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
             return "redirect:/login";
         }
 
-        List<Subject> subjects = subjectRepository.findAll();
-        List<Chapter> chapters = chapterRepository.findAll();
-        List<Lesson> lessons = lessonRepository.findAll();
-        List<LevelQuestion> levels = levelQuestionRepository.findAll();
-        model.addAttribute("subjects", subjects);
-        model.addAttribute("chapters", chapters);
-        model.addAttribute("lessons", lessons);
-        model.addAttribute("levels", levels);
-        model.addAttribute("userTest", new UserTest());
-        return "client/practice/practiceForm";
+        List<PackagePracticeDTO> packagePractices = practicesService.getPackagePractices();
+        model.addAttribute("packagePractices", packagePractices);
+
+        return "client/practice/Practices";
     }
 
+    @GetMapping("/start")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    @GetMapping("/start-practice")
-    public String startPractice(
-            @RequestParam("subjectId") Long subjectId,
-            @RequestParam("lessonIds") List<Long> lessonIds,
-            @RequestParam("levelIds") List<Long> levelIds,
-            @RequestParam("questionCount") int questionCount,
-            @ModelAttribute UserTest userTest,
-            Model model) {
+    public String showPackageDetail(@RequestParam("packageId") Long packageId, Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        PackagePracticeDTO packagePractice = practicesService.getPackageDetail(packageId);
+
+        model.addAttribute("packagePractice", packagePractice);
+        model.addAttribute("subjects", packagePractice.getListSubject());
+
+        return "client/practice/PackageDetail";
+    }
+
+    @GetMapping("/subject")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String lessonSelection(@RequestParam("packageId") Long packageId, @RequestParam("subjectId") Long subjectId, Model model) {
 
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -77,175 +71,148 @@ public class PracticeController {
             return "redirect:/login";
         }
 
-        if (lessonIds.isEmpty() || levelIds.isEmpty()) {
-            model.addAttribute("error", "Vui lòng chọn ít nhất một bài học và một cấp độ.");
-            return "client/practice/practiceForm";
+        SubjectResponseDTO subject = practicesService.getSubjectDetail(packageId, subjectId);
+        List<ChapterResponseDTO> chapters = practicesService.getChapters(subjectId);
+
+        model.addAttribute("subject", subject);
+        model.addAttribute("chapters", chapters);
+
+
+        return "client/practice/LessonSelection";
+    }
+
+    @PostMapping("/start-practice")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String startPracticeWithLessons(@RequestParam(value = "allLessonIds", required = false) String selectedLessonIds,
+                                           Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
         }
 
-        if (subjectId == null) {
-            model.addAttribute("error", "Vui lòng chọn một môn học.");
-            return "client/practice/practiceForm";
+        // Parse selectedLessonIds into a List<Long> if provided
+        List<Long> selectedLessonIdList = (selectedLessonIds != null && !selectedLessonIds.isEmpty())
+                ? Arrays.stream(selectedLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
+                : new ArrayList<>();
+
+        PracticeResponseDTO practiceResponse = practicesService.startPracticeWithLessons(selectedLessonIdList);
+
+
+        model.addAttribute("testId", practiceResponse.getTestId());
+        model.addAttribute("selectedLessonIds", practiceResponse.getSelectedLessonId());
+        model.addAttribute("questions", practiceResponse.getQuestions());
+        model.addAttribute("currentQuestionIndex", 0);
+
+        return "client/practice/PracticeTest";
+    }
+
+    @PostMapping("/continue-practice")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String continuePracticeWithLessons(@RequestParam(value = "allLessonIds", required = false) String selectedLessonIds,
+                                              @RequestParam(value = "currentQuestionIndex") Long currentQuestionIndex,
+                                              @RequestParam(value = "testId") Long testId,
+                                              @RequestParam(value = "correctCount") Integer correctCount,
+                                              Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
         }
 
-        for (Long lessonId : lessonIds) {
-            Lesson lesson = lessonRepository.findById(lessonId)
-                    .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
-            if (!lesson.getChapter().getSubject().getSubjectId().equals(subjectId)) {
-                model.addAttribute("error", "Bài học không thuộc môn học đã chọn.");
-                return "client/practice/practiceForm";
-            }
-        }
+        List<Long> selectedLessonIdList = (selectedLessonIds != null && !selectedLessonIds.isEmpty())
+                ? Arrays.stream(selectedLessonIds.split(",")).map(Long::valueOf).collect(Collectors.toList())
+                : new ArrayList<>();
 
-        int duration = 60;
+        PracticeResponseDTO practiceResponse = practicesService.continuePracticeWithLessons(selectedLessonIdList, testId, correctCount);
+        model.addAttribute("testId", practiceResponse.getTestId());
+        model.addAttribute("selectedLessonIds", practiceResponse.getSelectedLessonId());
+        model.addAttribute("questions", practiceResponse.getQuestions());
+        model.addAttribute("currentQuestionIndex", currentQuestionIndex + 5);
+        return "client/practice/PracticeTest";
+    }
 
-        Test test = Test.builder()
-                .testName("Practice Test - " + LocalDateTime.now())
-                .durationTime(duration)
-                .startAt(LocalDateTime.now())
-                .endAt(LocalDateTime.now().plusMinutes(duration))
-                .testStatus(testStatusRepository.findById(1L).orElseThrow(() -> new RuntimeException("Pending status not found")))
-                .testCategory(testCategoryRepository.findById(1L).orElseThrow(() -> new RuntimeException("Default category not found")))
-                .build();
-        test = testRepository.save(test);
 
-        for (Long lessonId : lessonIds) {
-            Lesson lesson = lessonRepository.findById(lessonId)
-                    .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
-            SubjectTest subjectTest = SubjectTest.builder()
-                    .test(test)
-                    .subject(lesson.getChapter().getSubject())
-                    .chapter(lesson.getChapter())
-                    .lesson(lesson)
-                    .build();
-            subjectTestRepository.save(subjectTest);
+    @PostMapping("/submit-answers")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String submitAnswers(
+            @RequestParam("submissionData") String submissionData,
+            Model model) {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
         }
 
         try {
-            test.generateRandomQuestions(questionService, subjectId, new ArrayList<>(), lessonIds, levelIds, questionCount);
+            // Parse chuỗi JSON thành PracticeSubmissionDto
+            ObjectMapper mapper = new ObjectMapper();
+            PracticeSubmissionDto submissionDto = mapper.readValue(submissionData, PracticeSubmissionDto.class);
+
+            // Kiểm tra kết quả
+            List<QuestionAnswerResDTO> results = practicesService.checkResults(submissionDto, submissionDto.getTestId());
+
+            int correctCount = (int) results.stream().filter(QuestionAnswerResDTO::isCorrect).count();
+
+            // Thêm dữ liệu vào model để hiển thị trên trang kết quả
+            model.addAttribute("results", results);
+            model.addAttribute("correctCount", correctCount);
+            model.addAttribute("selectedLessonIds", submissionDto.getSelectedLessonIds());
+            model.addAttribute("testId", submissionDto.getTestId());
+            model.addAttribute("currentQuestionIndex", submissionDto.getCurrentQuestionIndex());
+
+            return "client/practice/PracticeResults";
         } catch (Exception e) {
-            model.addAttribute("error", "Không đủ câu hỏi phù hợp với tiêu chí đã chọn. Vui lòng thử lại.");
-            return "client/practice/practiceForm";
+            model.addAttribute("error", "Lỗi khi xử lý dữ liệu: " + e.getMessage());
+            return "error";
         }
-        List<QuestionBank> questions = test.getRandomQuestions();
-        for (int i = 0; i < questions.size(); i++) {
-            QuestionTest questionTest = QuestionTest.builder()
-                    .test(test)
-                    .question(questions.get(i))
-                    .build();
-            questionTestRepository.save(questionTest);
-        }
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        userTest.setUser(user);
-        userTest.setTest(test);
-        userTest.setTimeStart(LocalDateTime.now());
-        userTest.setTimeEnd(LocalDateTime.now().plusMinutes(duration));
-        userTest = userTestRepository.save(userTest);
-
-        List<QuestionDisplayDto> displayQuestions = questions.stream()
-                .map(question -> {
-                    List<AnswerOptionDto> options;
-                    try {
-                        options = questionService.getQuestionOptions(question);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error retrieving question options for question ID: " + question.getQuestionId(), e);
-                    }
-                    return QuestionDisplayDto.builder()
-                            .questionId(question.getQuestionId())
-                            .content(question.getContent())
-                            .image(question.getImage())
-                            .options(options.stream().map(AnswerOptionDto::getText).collect(Collectors.toList()))
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        model.addAttribute("test", test);
-        model.addAttribute("questions", displayQuestions);
-        model.addAttribute("userTest", userTest);
-        return "client/practice/practiceTest";
     }
 
+    @GetMapping("/history")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    @PostMapping("/submit-test")
-    public String submitTest(
-            @RequestParam("userTestId") Long userTestId,
-            @RequestParam("testId") Long testId,
-            @RequestParam(name = "jsonAnswers", required = false) List<String> jsonAnswers,
+    public String showTestHistoryList(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             Model model) {
-
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
-            model.addAttribute("error", "Không thể xác định người dùng.");
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
             return "redirect:/login";
         }
 
-        UserTest userTest = userTestRepository.findById(userTestId)
-                .orElseThrow(() -> new IllegalArgumentException("UserTest không tồn tại."));
-
-        if (!userTest.getUser().getUserId().equals(userId)) {
-            model.addAttribute("error", "Không có quyền truy cập.");
-            return "redirect:/";
+        try {
+            Page<TestHistoryListDTO> testHistoryPage = practicesService.getTestHistoryList(userId, startDate, endDate, page, size);
+            model.addAttribute("testHistoryPage", testHistoryPage);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("startDate", startDate != null ? startDate.toString() : "");
+            model.addAttribute("endDate", endDate != null ? endDate.toString() : "");
+            return "client/practice/PracticeHistory";
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi lấy danh sách lịch sử bài kiểm tra: " + e.getMessage());
+            return "error";
         }
-
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new IllegalArgumentException("Test không tồn tại."));
-        List<QuestionTest> questionTests = questionTestRepository.findByTestId(testId);
-
-        if (jsonAnswers == null || jsonAnswers.isEmpty()) {
-            model.addAttribute("error", "Không có dữ liệu đáp án được gửi lên.");
-            return "client/practice/practiceTest";
-        }
-
-        for (int i = 0; i < questionTests.size() && i < jsonAnswers.size(); i++) {
-            QuestionBank question = questionTests.get(i).getQuestion();
-            String jsonAnswer = jsonAnswers.get(i);
-            AnswerHistoryTest answerHistory = AnswerHistoryTest.builder()
-                    .userTest(userTest)
-                    .question(question)
-                    .answer(jsonAnswer != null ? jsonAnswer : "[]") // Đảm bảo không null
-                    .build();
-            answerHistoryRepository.save(answerHistory);
-        }
-
-        userTest.setTimeEnd(LocalDateTime.now());
-        userTestRepository.save(userTest);
-
-        model.addAttribute("userTest", userTest);
-        return "redirect:/practice/finish?userTestId=" + userTestId;
     }
 
-    @GetMapping("/finish")
+    @GetMapping("/history/{testId}")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String finishPractice(@RequestParam Long userTestId, Model model) {
-        Long userId = SecurityUtils.getCurrentUserId();
-        if (userId == null) {
-            model.addAttribute("error", "Không thể xác định người dùng.");
-            return "redirect:/login";
+    public String showTestHistory(@PathVariable("testId") Long testId, Model model) {
+
+        try {
+            TestHistoryDTO testHistory = practicesService.getTestHistory(testId);
+            model.addAttribute("userTest", testHistory.getUserTest());
+            model.addAttribute("testName", testHistory.getTestName());
+            model.addAttribute("answers", testHistory.getAnswers());
+            return "client/practice/PracticeHistoryDetail";
+
+        } catch (Exception e) {
+
+            model.addAttribute("error", "Lỗi khi lấy lịch sử bài kiểm tra: " + e.getMessage());
+            return "error";
         }
-
-        UserTest userTest = userTestRepository.findById(userTestId)
-                .orElseThrow(() -> new IllegalArgumentException("UserTest không tồn tại."));
-
-        if (!userTest.getUser().getUserId().equals(userId)) {
-            model.addAttribute("error", "Không có quyền truy cập.");
-            return "redirect:/";
-        }
-
-        List<AnswerHistoryTest> answers = answerHistoryRepository.findByUserTestId(userTestId);
-        model.addAttribute("userTest", userTest);
-        model.addAttribute("answers", answers);
-        return "client/practice/practiceResult";
     }
 
-    @GetMapping("/api/lessons-by-subject/{subjectId}")
-    @ResponseBody
-    public List<LessonResponseDTO> getLessonsBySubjectAndChapters(@PathVariable Long subjectId) {
-        return lessonRepository.findBySubjectId(subjectId, true)
-                .stream()
-                .map(lesson -> LessonResponseDTO.builder()
-                        .lessonId(lesson.getLessonId())
-                        .lessonName(lesson.getLessonName())
-                        .build())
-                .collect(Collectors.toList());
-    }
+
 }

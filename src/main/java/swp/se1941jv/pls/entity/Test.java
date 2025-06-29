@@ -37,11 +37,13 @@ public class Test extends BaseEntity {
     @JoinColumn(name = "test_status_id")
     TestStatus testStatus;
 
-    @OneToMany(mappedBy = "test")
-    List<Chapter> chapters;
+    @ManyToOne
+    @JoinColumn(name="chapter_id")
+    Chapter chapter;
 
-    @OneToMany(mappedBy = "test")
-    List<Lesson> lessons;
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    Subject subject;
 
     @OneToMany(mappedBy = "test")
     List<SubjectTest> subjectTests;
@@ -52,10 +54,6 @@ public class Test extends BaseEntity {
     @Transient
     private List<QuestionBank> randomQuestions;
 
-    public void generateRandomQuestions(QuestionService questionService, Long subjectId, List<Long> chapterIds, List<Long> lessonIds, List<Long> levelIds, int questionCount) throws Exception {
-        this.randomQuestions = questionService.getRandomQuestions(subjectId, chapterIds, lessonIds, levelIds, questionCount);
-//        this.testCategory = ;
-    }
 
     @ManyToOne
     @JoinColumn(name = "test_category_id")

@@ -1,5 +1,8 @@
 package swp.se1941jv.pls.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,15 +11,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import swp.se1941jv.pls.config.SecurityUtils;
+import swp.se1941jv.pls.dto.response.PackagePracticeDTO;
+import swp.se1941jv.pls.dto.response.PackageSubjectDTO;
+import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
+import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.entity.Package;
-import swp.se1941jv.pls.entity.PackageStatus;
-import swp.se1941jv.pls.entity.PackageSubject;
-import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
-import swp.se1941jv.pls.repository.PackageRepository;
-import swp.se1941jv.pls.repository.PackageSubjectRepository;
-import swp.se1941jv.pls.repository.SubjectRepository;
-import swp.se1941jv.pls.repository.UserPackageRepository;
+import swp.se1941jv.pls.entity.keys.KeyUserPackage;
+import swp.se1941jv.pls.repository.*;
 import swp.se1941jv.pls.service.specification.PackageSpecification;
 
 @Service
@@ -26,14 +29,18 @@ public class PackageService {
     private final PackageSubjectRepository packageSubjectRepository;
     private final SubjectRepository subjectRepository;
     private final UserPackageRepository userPackageRepository;
+    private final LessonProgressRepository lessonProgressRepository;
 
     public PackageService(PackageRepository packageRepository,
-            PackageSubjectRepository packageSubjectRepository,
-            SubjectRepository subjectRepository, UserPackageRepository userPackageRepository) {
+                          PackageSubjectRepository packageSubjectRepository,
+                          SubjectRepository subjectRepository,
+                          UserPackageRepository userPackageRepository,
+                          LessonProgressRepository lessonProgressRepository) {
         this.packageRepository = packageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
         this.subjectRepository = subjectRepository;
         this.userPackageRepository = userPackageRepository;
+        this.lessonProgressRepository = lessonProgressRepository;
     }
 
     public List<Package> getListPackages() {
@@ -125,4 +132,104 @@ public class PackageService {
 
     }
 
+    public List<Package> getActivePackages() {
+        return this.packageRepository.findAllByIsActiveTrue();
+    }
+
+    public List<PackageSubjectDTO> getPackageSubjects() {
+
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+
+        List<UserPackage> userPackages = userPackageRepository.findByIdUserId(userId);
+
+        if (userPackages.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<PackageSubjectDTO> packageSubjects = new ArrayList<>();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        userPackages.stream()
+                .filter(userPackage -> {
+                    LocalDateTime endDate = userPackage.getEndDate();
+                    return endDate == null || !endDate.isBefore(now);
+                })
+                .forEach(userPackage -> {
+                    PackageSubjectDTO packageSubject = PackageSubjectDTO.builder()
+                            .packageId(userPackage.getPkg().getPackageId())
+                            .name(userPackage.getPkg().getName())
+                            .description(userPackage.getPkg().getDescription())
+                            .imageUrl(userPackage.getPkg().getImage())
+                            .startDate(userPackage.getStartDate() != null ? userPackage.getStartDate().format(formatter) : null)
+                            .endDate(userPackage.getEndDate() != null ? userPackage.getEndDate().format(formatter) : null)
+                            .build();
+                    packageSubjects.add(packageSubject);
+                });
+
+
+        return packageSubjects;
+    }
+
+    public PackageSubjectDTO getPackageDetail(Long packageId) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return null;
+        }
+        User user = User.builder().userId(userId).build();
+        KeyUserPackage keyUserPackage = KeyUserPackage.builder()
+                .userId(userId)
+                .packageId(packageId)
+                .build();
+
+        UserPackage userPackage = userPackageRepository.findById(keyUserPackage).orElse(null);
+
+        List<SubjectResponseDTO> subjectResponseDTOS = new ArrayList<>();
+
+//        get subjects from userPackage
+        if (userPackage != null) {
+            userPackage.getPkg().getPackageSubjects().forEach(packageSubject -> {
+                List<LessonProgress> lessonProgress = lessonProgressRepository
+                        .findByUserAndSubjectAndPackageEntity(user, packageSubject.getSubject(), packageSubject.getPkg());
+
+                long countCompletedLesson = 0;
+                if (!lessonProgress.isEmpty()) {
+                     countCompletedLesson = lessonProgress.stream()
+                            .filter(LessonProgress::getIsCompleted)
+                            .count();
+                }
+
+                long countLesson = packageSubject.getSubject().getChapters().stream()
+                        .flatMap(chapter -> chapter.getLessons().stream()
+                                .filter(lesson -> lesson.getStatus() && lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED))
+                        .count();
+
+                SubjectResponseDTO subjectResponseDTO = SubjectResponseDTO.builder()
+                        .subjectId(packageSubject.getSubject().getSubjectId())
+                        .subjectName(packageSubject.getSubject().getSubjectName())
+                        .subjectDescription(packageSubject.getSubject().getSubjectDescription())
+                        .subjectImage(packageSubject.getSubject().getSubjectImage())
+                        .numberOfCompletedLessons(countCompletedLesson)
+                        .numberOfLessons(countLesson)
+                        .build();
+                subjectResponseDTOS.add(subjectResponseDTO);
+            });
+        }
+
+
+        return userPackage != null ? PackageSubjectDTO.builder()
+                .packageId(userPackage.getPkg().getPackageId())
+                .name(userPackage.getPkg().getName())
+                .description(userPackage.getPkg().getDescription())
+                .imageUrl(userPackage.getPkg().getImage())
+                .startDate(userPackage.getStartDate() != null ? userPackage.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
+                .endDate(userPackage.getEndDate() != null ? userPackage.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
+                .listSubject(subjectResponseDTOS)
+
+                .build() : null;
+    }
 }

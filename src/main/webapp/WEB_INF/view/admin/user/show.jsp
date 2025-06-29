@@ -88,20 +88,15 @@
 
                 /* Style for pagination container */
                 .pagination-container {
-                    position: fixed;
-                    bottom: 50px;
-                    /* Position above the footer (footer height is 40px) */
-                    left: 250px;
-                    /* Offset by sidebar width */
-                    width: calc(100% - 250px);
-                    /* Span remaining width */
-                    max-width: 1140px;
-                    /* Match container-fluid max-width */
+                    margin-top: 20px;
+                    margin-bottom: -30px;
+                    width: 100%;
                     background-color: #f8f9fa;
-                    /* Match content background */
                     padding: 10px 20px;
                     z-index: 1000;
-                    /* Ensure it appears above other content */
+                    display: flex;
+                    justify-content: center;
+                    /* Căn giữa nội dung bên trong */
                 }
 
                 /* Tùy chỉnh phân trang */

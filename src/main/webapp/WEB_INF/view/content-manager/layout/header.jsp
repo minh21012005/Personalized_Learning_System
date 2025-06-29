@@ -6,6 +6,7 @@
                 <img src="/img/favicon.ico" alt="Logo" style="width: 30px; height: 30px; margin-right: 10px;">
                 <span class="text-white fs-3 fw-bold">PLS</span>
             </div>
+            <jsp:include page="/WEB_INF/view/common/management_bell.jsp"/>
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="userDropdown"
                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -17,7 +18,10 @@
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="#">Logout</a></li>
+                    <li><form method="post" action="/logout">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <button class="dropdown-item">Logout</button>
+                    </form></li>
                 </ul>
             </div>
         </header>

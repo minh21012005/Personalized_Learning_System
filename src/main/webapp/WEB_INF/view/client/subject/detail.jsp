@@ -12,7 +12,7 @@
         </head>
 
         <body>
-            <jsp:include page="../layout/head.jsp" />
+            <jsp:include page="../layout/header.jsp" />
 
             <main class="main-content">
                 <div class="content">
@@ -69,6 +69,9 @@
                         <a href="javascript:history.back()">Quay lại</a>
                     </div>
 
+                </div>
+                <div id="review-content">
+                    <jsp:include page="/subject/${subject.subjectId}/reviews?render=true" />
                 </div>
             </main>
 

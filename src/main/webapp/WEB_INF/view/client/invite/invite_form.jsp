@@ -21,7 +21,7 @@
                 }
 
                 .container-fluid {
-                    height: 85vh;
+                    height: 100vh;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -154,7 +154,7 @@
         </head>
 
         <body>
-            <jsp:include page="../layout/head.jsp" />
+            <jsp:include page="../layout/header.jsp" />
             <div class="container-fluid">
                 <div class="forgot-password-container d-flex">
                     <!-- Left: Forgot Password Form -->
@@ -208,8 +208,6 @@
                 </div>
             </div>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-                crossorigin="anonymous"></script>
             <script src="/js/scripts.js"></script>
         </body>
 

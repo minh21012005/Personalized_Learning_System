@@ -15,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "package")
 @Data
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -62,6 +61,9 @@ public class Package extends BaseEntity {
     @OneToMany(mappedBy = "pkg")
     List<CartPackage> cartPackages;
 
+    @ManyToMany(mappedBy = "packages")
+    private List<Transaction> transactions;
+
     @ManyToOne()
     @JoinColumn(name = "grade_id")
     Grade grade;
@@ -70,4 +72,15 @@ public class Package extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Trạng thái không được để trống")
     private PackageStatus status;
+
+    public enum PackageType {
+        FULL_COURSE, // Học và luyện tập
+        PRACTICE_ONLY // Chỉ luyện tập
+
+    }
+
+    @Column(name = "package_type")
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Loại gói không được để trống")
+    PackageType packageType;
 }

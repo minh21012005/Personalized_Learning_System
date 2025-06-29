@@ -8,22 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropdownContentActualEl = document.getElementById('clientNotificationDropdownContentActual');
     const dropdownContentLoadingEl = document.getElementById('clientNotificationDropdownContentLoading');
 
-    // Hàm getCsrfHeaders() không còn cần thiết nếu không có request POST nào từ file JS này nữa.
-    // Bạn có thể xóa nó nếu không dùng ở đâu khác.
-    /*
-    function getCsrfHeaders() {
-        const headers = {}; 
-        const csrfHeaderName = typeof window.CSRF_HEADER_NAME === 'string' ? window.CSRF_HEADER_NAME.trim() : null;
-        const csrfToken = typeof window.CSRF_TOKEN === 'string' ? window.CSRF_TOKEN.trim() : null;
 
-        if (csrfHeaderName && csrfHeaderName !== "" && csrfToken && csrfToken !== "") {
-            headers[csrfHeaderName] = csrfToken;
-        } else {
-            console.warn('CSRF token or header name not found or empty for client_notification.js.');
-        }
-        return headers;
-    }
-    */
 
     function fetchUnreadCount() {
         fetch(`${contextPath}/notification/client/unread-count`)
@@ -64,10 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(html => {
                 if (dropdownContentActualEl) dropdownContentActualEl.innerHTML = html;
-                addNotificationItemClickListeners(); // Vẫn giữ để xử lý click điều hướng
-                
-                // Xóa hoặc comment out lời gọi đến addMarkAllAsReadClickListener nếu không muốn chức năng này nữa
-                // addMarkAllAsReadClickListener(); 
+                addNotificationItemClickListeners(); 
+
             })
             .catch(error => {
                 console.error('Error fetching notification list:', error);
@@ -119,22 +102,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     */
 
-    // Khởi tạo khi DOM đã sẵn sàng
+
     if (notificationDropdownToggle) {
-        fetchUnreadCount(); // Lấy số lượng khi trang tải lần đầu
-        
+        fetchUnreadCount();
+
         const dropdownParent = notificationDropdownToggle.closest('.dropdown');
         if (dropdownParent) {
             dropdownParent.addEventListener('show.bs.dropdown', function () {
-                fetchNotificationList(); // Tải danh sách khi dropdown được hiển thị
+                fetchNotificationList(); 
             });
         } else {
             console.warn("Dropdown parent element (.dropdown) not found. Fallback to click event on toggle may not work as expected with Bootstrap 5.");
-            // Fallback này có thể không cần thiết nếu cấu trúc HTML Bootstrap đúng
+            
             const newToggle = notificationDropdownToggle.cloneNode(true);
             notificationDropdownToggle.parentNode.replaceChild(newToggle, notificationDropdownToggle);
             newToggle.addEventListener('click', function(){
-                const dropdownMenu = this.nextElementSibling; 
+                const dropdownMenu = this.nextElementSibling;
                 if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
                      setTimeout(function(){ 
                         if(dropdownMenu.classList.contains('show')) {

@@ -1,6 +1,8 @@
 package swp.se1941jv.pls.controller.client.lesson;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,119 +10,127 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
-import swp.se1941jv.pls.dto.response.LessonResponseDTO;
-import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
-import swp.se1941jv.pls.exception.chapter.ChapterNotFoundException;
-import swp.se1941jv.pls.exception.chapter.InvalidChapterException;
-import swp.se1941jv.pls.exception.lesson.LessonNotFoundException;
-import swp.se1941jv.pls.exception.subject.SubjectNotFoundException;
-import swp.se1941jv.pls.service.ChapterService;
-import swp.se1941jv.pls.service.LessonService;
-import swp.se1941jv.pls.service.SubjectService;
+import swp.se1941jv.pls.config.SecurityUtils;
+import swp.se1941jv.pls.dto.response.*;
+import swp.se1941jv.pls.entity.User;
+import swp.se1941jv.pls.exception.ApplicationException;
+import swp.se1941jv.pls.service.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Controller xử lý các yêu cầu từ phía client liên quan đến bài học.
  */
+@Slf4j
 @Controller
+@RequiredArgsConstructor
 public class ClientLessonController {
 
     private final SubjectService subjectService;
-    private final ChapterService chapterService;
     private final LessonService lessonService;
+    private final PackageService packageService;
+    private final ChapterService chapterService;
+    private final UserService userService;
 
-    @Autowired
-    public ClientLessonController(SubjectService subjectService, ChapterService chapterService, LessonService lessonService) {
-        this.subjectService = subjectService;
-        this.chapterService = chapterService;
-        this.lessonService = lessonService;
+    @GetMapping("/packages")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String showPackagedSubject(Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        List<PackageSubjectDTO> packageSubjects = packageService.getPackageSubjects();
+        model.addAttribute("packageSubjects", packageSubjects);
+
+        return "client/learning/packages";
     }
 
+    @GetMapping("/packages/detail")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String showPackageDetail(@RequestParam("packageId") Long packageId, Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        PackageSubjectDTO packageSubject = packageService.getPackageDetail(packageId);
+
+        model.addAttribute("packageSubject", packageSubject);
+        model.addAttribute("subjects", packageSubject.getListSubject());
+
+        return "client/learning/packageDetail";
+    }
+
+
     /**
-     * Hiển thị trang tổng quan của môn học với chapter và lesson đầu tiên.
+     * Hiển thị trang tổng quan của môn học với danh sách chapter và lesson.
      *
      * @param subjectId ID của môn học
      * @param model     Model để truyền dữ liệu đến JSP
      * @param redirectAttributes Để truyền thông báo lỗi
      * @return Tên view JSP hoặc redirect
      */
-    @GetMapping("/subject/{subjectId}")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    @GetMapping("/packages/detail/subject")
     public String viewSubject(
-            @PathVariable("subjectId") Long subjectId,
+            @RequestParam("subjectId") Long subjectId,
+            @RequestParam("packageId") Long packageId,
             Model model,
             RedirectAttributes redirectAttributes) {
-        SubjectResponseDTO subjectResponse;
         try {
-            subjectResponse = subjectService.getSubjectResponseById(subjectId);
-            // Lọc chỉ lấy chapterId và chapterName từ listChapter
-            List<ChapterResponseDTO> simplifiedChapters = subjectResponse.getListChapter().stream()
-                    .map(chapter -> ChapterResponseDTO.builder()
-                            .chapterId(chapter.getChapterId())
-                            .chapterName(chapter.getChapterName())
-                            .build())
-                    .toList();
-            subjectResponse = SubjectResponseDTO.builder()
-                    .subjectId(subjectResponse.getSubjectId())
-                    .subjectName(subjectResponse.getSubjectName())
-                    .subjectDescription(subjectResponse.getSubjectDescription())
-                    .subjectImage(subjectResponse.getSubjectImage())
-                    .isActive(subjectResponse.getIsActive())
-                    .listChapter(simplifiedChapters)
-                    .build();
-            // Lấy chapter và lesson đầu tiên
-            ChapterResponseDTO firstChapter = simplifiedChapters.stream().findFirst().map(chapter ->
-                    chapterService.getChapterResponseById(chapter.getChapterId(), subjectId)).orElse(null);
-            LessonResponseDTO firstLesson = firstChapter != null ? firstChapter.getListLesson().stream().findFirst().orElse(null) : null;
+            Long userId = SecurityUtils.getCurrentUserId();
+            if (userId == null) {
+                model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+                return "redirect:/login";
+            }
 
-            model.addAttribute("subject", subjectResponse);
-            model.addAttribute("chapter", firstChapter);
-            model.addAttribute("lesson", firstLesson);
-            model.addAttribute("chapters", simplifiedChapters);
-        } catch (SubjectNotFoundException e) {
+            // Kiểm tra quyền truy cập gói học
+            if (Boolean.FALSE.equals(subjectService.hasAccessSubjectInPackage(packageId, subjectId, userId))) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập gói học này.");
+                return "redirect:/";
+            }
+
+            User user = userService.getUserById(userId);
+
+            if (user == null) {
+                model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+                return "redirect:/login";
+            }
+
+            SubjectResponseDTO subject = subjectService.getSubjectResponseDTOById(subjectId,packageId, userId);
+
+            // Lấy danh sách chapter đã phê duyệt
+            List<ChapterResponseDTO> chapters = subject.getListChapter();
+
+            // Lấy lesson đầu tiên của chapter đầu tiên (nếu có) để hiển thị mặc định
+            LessonResponseDTO defaultLesson = chapters.stream()
+                    .filter(chapter -> !chapter.getListLesson().isEmpty())
+                    .findFirst()
+                    .flatMap(chapter -> chapter.getListLesson().stream().findFirst())
+                    .orElse(null);
+
+            // Lấy chapter chứa lesson mặc định
+            ChapterResponseDTO defaultChapter = chapters.stream()
+                    .filter(chapter -> chapter.getListLesson().contains(defaultLesson))
+                    .findFirst()
+                    .orElse(null);
+
+            model.addAttribute("user",user);
+            model.addAttribute("subject", subject);
+            model.addAttribute("chapters", chapters);
+            model.addAttribute("chapter", defaultChapter);
+            model.addAttribute("lesson", defaultLesson);
+            return "client/learning/learn";
+        } catch (ApplicationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/";
-        } catch (ChapterNotFoundException | InvalidChapterException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/subject/" + subjectId;
-        }
-        return "client/lesson/show";
-    }
-
-    /**
-     * Lấy chi tiết chapter qua API cho AJAX.
-     *
-     * @param chapterId ID của chương
-     * @param subjectId ID của môn học
-     * @return ChapterResponseDTO dưới dạng JSON
-     */
-    @GetMapping("/api/chapters/{chapterId}")
-    @ResponseBody
-    public ChapterResponseDTO getChapterDetails(
-            @PathVariable("chapterId") Long chapterId,
-            @RequestParam("subjectId") Long subjectId) {
-        try {
-            return chapterService.getChapterResponseById(chapterId, subjectId);
-        } catch (ChapterNotFoundException | InvalidChapterException e) {
-            throw new RuntimeException(e.getMessage()); // Xử lý ngoại lệ qua HTTP status
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị môn học");
+            return "redirect:/";
         }
     }
 
-    /**
-     * Lấy chi tiết lesson qua API cho AJAX.
-     *
-     * @param lessonId ID của bài học
-     * @return LessonResponseDTO dưới dạng JSON
-     */
-    @GetMapping("/api/lessons/{lessonId}")
-    @ResponseBody
-    public LessonResponseDTO getLessonDetails(@PathVariable("lessonId") Long lessonId) {
-        try {
-            return lessonService.getActiveLessonResponseById(lessonId);
-        } catch (LessonNotFoundException e) {
-            throw new RuntimeException(e.getMessage()); // Xử lý ngoại lệ qua HTTP status
-        }
-    }
 }

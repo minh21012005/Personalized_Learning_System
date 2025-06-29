@@ -5,6 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import swp.se1941jv.pls.dto.request.CreateStudentRequest;
 import swp.se1941jv.pls.entity.Role;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.repository.RoleRepository;
@@ -198,6 +201,52 @@ public class UserService {
         user.setEmailVerifyTokenExpiry(null);
         user.setEmailVerify(true); // Đánh dấu email đã được xác thực
         this.saveUser(user);
+    }
+
+    public String getUserFullName(Long userId) {
+        if (userId == null || userId <= 0) {
+            return "Unknown";
+        }
+        return userRepository.findById(userId)
+                .map(User::getFullName)
+                .orElse("Unknown");
+    }
+
+    public List<User> findContentManagers() {
+        return userRepository.findByRole_RoleName("CONTENT_MANAGER");
+    }
+
+    @Transactional
+    public User createStudentByParent(CreateStudentRequest request, String parentEmail, String avatarFileName) {
+        if (existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã được sử dụng cho một tài khoản khác.");
+        }
+         if (existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new RuntimeException("Số điện thoại đã được sử dụng cho một tài khoản khác.");
+        }
+
+        User parent = getUserByEmail(parentEmail);
+        if (parent == null || !parent.getRole().getRoleName().equals("PARENT")) {
+            throw new RuntimeException("Không tìm thấy tài khoản phụ huynh hợp lệ.");
+        }
+
+        Role studentRole = roleRepository.findByRoleName("STUDENT");
+        if (studentRole == null) {
+            throw new IllegalStateException("Vai trò 'STUDENT' không tồn tại trong hệ thống.");
+        }
+
+        User student = new User();
+        student.setFullName(request.getFullName());
+        student.setEmail(request.getEmail());
+        student.setPassword(passwordEncoder.encode(request.getPassword()));
+        student.setDob(request.getDob());
+        student.setPhoneNumber(request.getPhoneNumber());
+        student.setRole(studentRole);
+        student.setParent(parent);
+        student.setIsActive(true);
+        student.setAvatar(avatarFileName);
+        student.setEmailVerify(true);
+        return userRepository.save(student);
     }
 
 }
