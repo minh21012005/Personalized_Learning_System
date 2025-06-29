@@ -10,35 +10,37 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
 import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
 import swp.se1941jv.pls.dto.response.UserResponseDTO;
+import swp.se1941jv.pls.repository.ChapterRepository;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.service.SubjectService;
 import swp.se1941jv.pls.service.UserService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
-@RequestMapping("/admin/lessons")
+
 @RequiredArgsConstructor
 public class LessonManagerController {
 
     private final LessonService lessonService;
     private final SubjectService subjectService;
     private final UserService userService;
-    private final ChapterService chapterService;
+    private final ChapterRepository chapterRepository;
+
 
     /**
      * Render JSP ban đầu cho quản lý bài học.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
+    @GetMapping("/admin/lessons")
     public String showLessons(
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             @RequestParam(value = "chapterId", required = false) Long chapterId,
@@ -49,6 +51,7 @@ public class LessonManagerController {
             @RequestParam(value = "userCreated", required = false) Long userCreated,
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
+
         try {
             // Lấy danh sách môn học
             List<SubjectResponseDTO> subjects = subjectService.findAllSubjects().stream()
@@ -98,7 +101,7 @@ public class LessonManagerController {
      * Xử lý cập nhật trạng thái bài học và redirect về endpoint GET /admin/lessons với trạng thái bộ lọc.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{lessonId}/update-status")
+    @PostMapping("/admin/lessons/{lessonId}/update-status")
     public String updateLessonStatus(
             @PathVariable Long lessonId,
             @RequestParam("newStatus") String newStatus,
@@ -106,11 +109,12 @@ public class LessonManagerController {
             @RequestParam(value = "chapterId", required = false) Long chapterId,
             @RequestParam(value = "lessonStatus", required = false) String lessonStatus,
             @RequestParam(value = "status", required = false) Boolean status,
-            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate,
-            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(value = "userCreated", required = false) Long userCreated,
             @RequestParam(value = "page", required = false) Integer page,
             RedirectAttributes redirectAttributes) {
+
         try {
             switch (newStatus.toUpperCase()) {
                 case "APPROVED":
@@ -125,19 +129,40 @@ public class LessonManagerController {
                     throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
             }
 
-            // Xây dựng query string từ các tham số filter
-            String queryString = buildQueryString(subjectId, chapterId, lessonStatus, status, startDate, endDate, userCreated, page);
+            // Truyền các tham số filter qua RedirectAttributes
+            redirectAttributes.addAttribute("subjectId", subjectId);
+            redirectAttributes.addAttribute("chapterId", chapterId);
+            redirectAttributes.addAttribute("lessonStatus", lessonStatus);
+            redirectAttributes.addAttribute("status", status);
+            redirectAttributes.addAttribute("startDate", startDate);
+            redirectAttributes.addAttribute("endDate", endDate);
+            redirectAttributes.addAttribute("userCreated", userCreated);
+            redirectAttributes.addAttribute("page", page != null ? page : 0);
 
-            // Redirect về endpoint GET /admin/lessons với trạng thái bộ lọc
-            return "redirect:/admin/lessons" + (queryString.isEmpty() ? "" : "?" + queryString);
+            // Redirect về endpoint GET /admin/lessons
+            return "redirect:/admin/lessons";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            String queryString = buildQueryString(subjectId, chapterId, lessonStatus, status, startDate, endDate, userCreated, page);
-            return "redirect:/admin/lessons" + (queryString.isEmpty() ? "" : "?" + queryString);
+            redirectAttributes.addAttribute("subjectId", subjectId);
+            redirectAttributes.addAttribute("chapterId", chapterId);
+            redirectAttributes.addAttribute("lessonStatus", lessonStatus);
+            redirectAttributes.addAttribute("status", status);
+            redirectAttributes.addAttribute("startDate", startDate);
+            redirectAttributes.addAttribute("endDate", endDate);
+            redirectAttributes.addAttribute("userCreated", userCreated);
+            redirectAttributes.addAttribute("page", page != null ? page : 0);
+            return "redirect:/admin/lessons";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái bài học");
-            String queryString = buildQueryString(subjectId, chapterId, lessonStatus, status, startDate, endDate, userCreated, page);
-            return "redirect:/admin/lessons" + (queryString.isEmpty() ? "" : "?" + queryString);
+            redirectAttributes.addAttribute("subjectId", subjectId);
+            redirectAttributes.addAttribute("chapterId", chapterId);
+            redirectAttributes.addAttribute("lessonStatus", lessonStatus);
+            redirectAttributes.addAttribute("status", status);
+            redirectAttributes.addAttribute("startDate", startDate);
+            redirectAttributes.addAttribute("endDate", endDate);
+            redirectAttributes.addAttribute("userCreated", userCreated);
+            redirectAttributes.addAttribute("page", page != null ? page : 0);
+            return "redirect:/admin/lessons";
         }
     }
 
@@ -145,7 +170,7 @@ public class LessonManagerController {
      * Xem chi tiết một bài học.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{lessonId}/detail")
+    @GetMapping("/admin/lessons/{lessonId}/detail")
     public String showLessonDetail(@PathVariable Long lessonId, Model model) {
         try {
             // Lấy thông tin chi tiết bài học đầy đủ từ service
@@ -165,20 +190,15 @@ public class LessonManagerController {
         }
     }
 
-    /**
-     * Xây dựng query string từ các tham số filter.
-     */
-    private String buildQueryString(Long subjectId, Long chapterId, String lessonStatus, Boolean status, LocalDateTime startDate, LocalDateTime endDate, Long userCreated, Integer page) {
-        List<String> params = new ArrayList<>();
-        if (subjectId != null) params.add("subjectId=" + subjectId);
-        if (chapterId != null) params.add("chapterId=" + chapterId);
-        if (lessonStatus != null && !lessonStatus.isEmpty()) params.add("lessonStatus=" + lessonStatus);
-        if (status != null) params.add("status=" + status);
-        if (startDate != null) params.add("startDate=" + startDate.toLocalDate());
-        if (endDate != null) params.add("endDate=" + endDate.toLocalDate());
-        if (userCreated != null) params.add("userCreated=" + userCreated);
-        if (page != null) params.add("page=" + page);
-
-        return String.join("&", params);
+    @GetMapping("admin/api/chapters-by-subject/{subjectId}")
+    @ResponseBody
+    public List<ChapterResponseDTO> getChaptersBySubject(@PathVariable Long subjectId) {
+        return chapterRepository.findBySubjectIdAndIsActive(subjectId, true)
+                .stream()
+                .map(chapter -> ChapterResponseDTO.builder()
+                        .chapterId(chapter.getChapterId())
+                        .chapterName(chapter.getChapterName())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

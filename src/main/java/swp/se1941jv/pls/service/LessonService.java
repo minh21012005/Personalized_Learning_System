@@ -304,11 +304,20 @@ public class LessonService {
             Long subjectId, Long chapterId, String lessonStatus, Boolean status,
             LocalDate startDate, LocalDate endDate, Long userCreated,
             int page, int size, Sort sort) {
-        if (page < 0 || size <= 0) {
-            throw new IllegalArgumentException("Thông số phân trang không hợp lệ.");
+        if (page < 0) {
+            throw new IllegalArgumentException("Số trang không hợp lệ (phải lớn hơn hoặc bằng 0).");
+        }
+        if (size <= 0 || size > 100) { // Giới hạn kích thước trang để tránh tải quá nhiều dữ liệu
+            throw new IllegalArgumentException("Kích thước trang không hợp lệ (phải lớn hơn 0 và không quá 100).");
+        }
+
+        // Validation cho ngày tháng
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Ngày bắt đầu không thể sau ngày kết thúc.");
         }
 
         Specification<Lesson> spec = Specification.where(null);
+
         if (subjectId != null) {
             spec = spec.and(LessonSpecifications.hasSubjectId(subjectId));
         }

@@ -19,8 +19,6 @@ import swp.se1941jv.pls.dto.response.learningPageData.LearningLessonDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningPageDataDTO;
 import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.entity.Package;
-import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
-import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 import swp.se1941jv.pls.repository.*;
 
 @Service

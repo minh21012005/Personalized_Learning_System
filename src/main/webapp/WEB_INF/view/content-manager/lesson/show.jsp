@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!doctype html>
 <html lang="en">
@@ -53,16 +54,16 @@
             width: 100%;
         }
         .table-fixed th, .table-fixed td {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: break-word;
             padding: 0.5rem;
             vertical-align: middle;
         }
         .col-id { width: 5%; }
         .col-name { width: 20%; }
         .col-chapter { width: 15%; }
-        .col-subject {width: 10%}
+        .col-subject { width: 10%; }
         .col-user { width: 15%; }
         .col-date { width: 12%; }
         .col-status { width: 10%; }
@@ -154,10 +155,10 @@
         $(document).ready(function() {
             // Load chapters when subjectId changes
             $('#subjectId').change(function() {
-                var subjectId = $(this).val();
+                var subjectId = $.trim($(this).val());
                 if (subjectId) {
                     $.ajax({
-                        url: '/admin/lessons/chapters-by-subject?subjectId=' + subjectId,
+                        url: 'api/chapters-by-subject/' + encodeURIComponent(subjectId),
                         type: 'GET',
                         contentType: 'application/json',
                         success: function(response) {
@@ -173,9 +174,9 @@
                                     text: chapter.chapterName
                                 }));
                             });
-                            // Set selected value if exists
-                            if (${not empty chapterId}) {
-                                $chapterSelect.val(${chapterId});
+                            var paramChapterId = $.trim('${param.chapterId}');
+                            if (paramChapterId) {
+                                $chapterSelect.val(paramChapterId);
                             }
                         },
                         error: function(xhr, status, error) {
@@ -191,10 +192,18 @@
                 }
             });
 
-            // Trigger change on page load if subjectId is set
-            if (${not empty subjectId}) {
-                $('#subjectId').trigger('change');
+            // Trigger change on page load if subjectId is set from param
+            var paramSubjectId = $.trim('${param.subjectId}');
+            if (paramSubjectId) {
+                $('#subjectId').val(paramSubjectId).trigger('change');
             }
+
+            // Set selected values from param for other filters
+            $('#lessonStatus').val($.trim('${param.lessonStatus}'));
+            $('#status').val($.trim('${param.status}'));
+            $('#userCreated').val($.trim('${param.userCreated}'));
+            $('#startDate').val($.trim('${param.startDate}'));
+            $('#endDate').val($.trim('${param.endDate}'));
         });
     </script>
 </head>
@@ -224,7 +233,7 @@
                                         <select name="subjectId" id="subjectId" class="form-select form-select-sm">
                                             <option value="">Tất cả</option>
                                             <c:forEach var="subject" items="${subjects}">
-                                                <option value="${subject.subjectId}" ${subject.subjectId == subjectId ? 'selected' : ''}>${subject.subjectName}</option>
+                                                <option value="${subject.subjectId}" ${not empty param.subjectId and fn:trim(param.subjectId) == subject.subjectId.toString() ? 'selected' : ''}>${subject.subjectName}</option>
                                             </c:forEach>
                                         </select>
                                     </div>
@@ -239,18 +248,18 @@
                                         <label for="lessonStatus" class="form-label mb-0">Trạng thái phê duyệt:</label>
                                         <select name="lessonStatus" id="lessonStatus" class="form-select form-select-sm">
                                             <option value="">Tất cả</option>
-                                            <option value="DRAFT" ${lessonStatus == 'DRAFT' ? 'selected' : ''}>Bản nháp</option>
-                                            <option value="PENDING" ${lessonStatus == 'PENDING' ? 'selected' : ''}>Chờ xử lí</option>
-                                            <option value="APPROVED" ${lessonStatus == 'APPROVED' ? 'selected' : ''}>Chấp nhận</option>
-                                            <option value="REJECTED" ${lessonStatus == 'REJECTED' ? 'selected' : ''}>Từ chối</option>
+                                            <option value="DRAFT" ${param.lessonStatus == 'DRAFT' ? 'selected' : ''}>Bản nháp</option>
+                                            <option value="PENDING" ${param.lessonStatus == 'PENDING' ? 'selected' : ''}>Chờ xử lí</option>
+                                            <option value="APPROVED" ${param.lessonStatus == 'APPROVED' ? 'selected' : ''}>Chấp nhận</option>
+                                            <option value="REJECTED" ${param.lessonStatus == 'REJECTED' ? 'selected' : ''}>Từ chối</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3 col-sm-6">
                                         <label for="status" class="form-label mb-0">Trạng thái hiển thị:</label>
                                         <select name="status" id="status" class="form-select form-select-sm">
                                             <option value="">Tất cả</option>
-                                            <option value="true" ${status == true ? 'selected' : ''}>Đang hoạt động</option>
-                                            <option value="false" ${status == false ? 'selected' : ''}>Không hoạt động</option>
+                                            <option value="true" ${param.status == 'true' ? 'selected' : ''}>Đang hoạt động</option>
+                                            <option value="false" ${param.status == 'false' ? 'selected' : ''}>Không hoạt động</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3 col-sm-6">
@@ -258,17 +267,17 @@
                                         <select name="userCreated" id="userCreated" class="form-select form-select-sm">
                                             <option value="">Tất cả</option>
                                             <c:forEach var="user" items="${contentManagers}">
-                                                <option value="${user.userId}" ${user.userId == userCreated ? 'selected' : ''}>${user.fullName}</option>
+                                                <option value="${user.userId}" ${param.userCreated == user.userId.toString() ? 'selected' : ''}>${user.fullName}</option>
                                             </c:forEach>
                                         </select>
                                     </div>
                                     <div class="col-md-3 col-sm-6">
                                         <label for="startDate" class="form-label mb-0">Từ ngày:</label>
-                                        <input type="date" name="startDate" id="startDate" class="form-control form-control-sm" value="${startDate != null ? startDate : ''}">
+                                        <input type="date" name="startDate" id="startDate" class="form-control form-control-sm" value="${fn:trim(param.startDate)}">
                                     </div>
                                     <div class="col-md-3 col-sm-6">
                                         <label for="endDate" class="form-label mb-0">Đến ngày:</label>
-                                        <input type="date" name="endDate" id="endDate" class="form-control form-control-sm" value="${endDate != null ? endDate : ''}">
+                                        <input type="date" name="endDate" id="endDate" class="form-control form-control-sm" value="${fn:trim(param.endDate)}">
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -302,8 +311,7 @@
                                     <th scope="col" class="text-center col-id">ID</th>
                                     <th scope="col" class="text-center col-name">Tên bài học</th>
                                     <th scope="col" class="text-center col-chapter">Chương học</th>
-                                    <th scope="col" class="text-center col-chapter">Môn học</th>
-
+                                    <th scope="col" class="text-center col-subject">Môn học</th>
                                     <th scope="col" class="text-center col-user">Người tạo</th>
                                     <th scope="col" class="text-center col-date">Ngày cập nhật</th>
                                     <th scope="col" class="text-center col-status">Trạng thái phê duyệt</th>
@@ -323,7 +331,6 @@
                                             <td class="text-center col-subject">
                                                     ${lesson.subjectName != null ? lesson.subjectName : 'Chưa có dữ liệu'}
                                             </td>
-
                                             <td class="text-center col-user">${lesson.userFullName}</td>
                                             <td class="text-center col-date">
                                                     ${lesson.updatedAt}
@@ -355,11 +362,27 @@
                                                         <form action="/admin/lessons/${lesson.lessonId}/update-status" method="post" style="display:block;">
                                                             <input type="hidden" name="_csrf" value="${_csrf.token}">
                                                             <input type="hidden" name="newStatus" value="APPROVED">
+                                                            <input type="hidden" name="subjectId" value="${not empty param.subjectId ? fn:trim(param.subjectId) : ''}">
+                                                            <input type="hidden" name="chapterId" value="${not empty param.chapterId ? fn:trim(param.chapterId) : ''}">
+                                                            <input type="hidden" name="lessonStatus" value="${not empty param.lessonStatus ? fn:trim(param.lessonStatus) : ''}">
+                                                            <input type="hidden" name="status" value="${not empty param.status ? fn:trim(param.status) : ''}">
+                                                            <input type="hidden" name="startDate" value="${not empty param.startDate ? fn:trim(param.startDate) : ''}">
+                                                            <input type="hidden" name="endDate" value="${not empty param.endDate ? fn:trim(param.endDate) : ''}">
+                                                            <input type="hidden" name="userCreated" value="${not empty param.userCreated ? fn:trim(param.userCreated) : ''}">
+                                                            <input type="hidden" name="page" value="${param.page}">
                                                             <button type="submit" class="btn btn-success btn-sm w-100">Phê duyệt</button>
                                                         </form>
                                                         <form action="/admin/lessons/${lesson.lessonId}/update-status" method="post" style="display:block;">
                                                             <input type="hidden" name="_csrf" value="${_csrf.token}">
                                                             <input type="hidden" name="newStatus" value="REJECTED">
+                                                            <input type="hidden" name="subjectId" value="${not empty param.subjectId ? fn:trim(param.subjectId) : ''}">
+                                                            <input type="hidden" name="chapterId" value="${not empty param.chapterId ? fn:trim(param.chapterId) : ''}">
+                                                            <input type="hidden" name="lessonStatus" value="${not empty param.lessonStatus ? fn:trim(param.lessonStatus) : ''}">
+                                                            <input type="hidden" name="status" value="${not empty param.status ? fn:trim(param.status) : ''}">
+                                                            <input type="hidden" name="startDate" value="${not empty param.startDate ? fn:trim(param.startDate) : ''}">
+                                                            <input type="hidden" name="endDate" value="${not empty param.endDate ? fn:trim(param.endDate) : ''}">
+                                                            <input type="hidden" name="userCreated" value="${not empty param.userCreated ? fn:trim(param.userCreated) : ''}">
+                                                            <input type="hidden" name="page" value="${param.page}">
                                                             <button type="submit" class="btn btn-danger btn-sm w-100">Từ chối</button>
                                                         </form>
                                                     </c:if>
@@ -377,38 +400,19 @@
                             </table>
                         </div>
 
-                        <c:set var="queryString" value=""/>
-                        <c:if test="${not empty subjectId}">
-                            <c:set var="queryString" value="${queryString}&subjectId=${subjectId}"/>
-                        </c:if>
-                        <c:if test="${not empty chapterId}">
-                            <c:set var="queryString" value="${queryString}&chapterId=${chapterId}"/>
-                        </c:if>
-                        <c:if test="${not empty lessonStatus}">
-                            <c:set var="queryString" value="${queryString}&lessonStatus=${lessonStatus}"/>
-                        </c:if>
-                        <c:if test="${not empty status}">
-                            <c:set var="queryString" value="${queryString}&status=${status}"/>
-                        </c:if>
-                        <c:if test="${not empty userCreated}">
-                            <c:set var="queryString" value="${queryString}&userCreated=${userCreated}"/>
-                        </c:if>
-                        <c:if test="${not empty startDate}">
-                            <c:set var="queryString" value="${queryString}&startDate=${startDate}"/>
-                        </c:if>
-                        <c:if test="${not empty endDate}">
-                            <c:set var="queryString" value="${queryString}&endDate=${endDate}"/>
-                        </c:if>
                         <c:if test="${totalPages > 1}">
                             <nav aria-label="Page navigation" class="mt-3">
                                 <ul class="pagination pagination-sm justify-content-center mb-0">
+                                    <c:set var="baseUrl" value="/admin/lessons?page="/>
+                                    <c:set var="queryParams"
+                                           value="&subjectId=${not empty param.subjectId ? fn:trim(param.subjectId) : ''}&chapterId=${not empty param.chapterId ? fn:trim(param.chapterId) : ''}&lessonStatus=${not empty param.lessonStatus ? fn:trim(param.lessonStatus) : ''}&status=${not empty param.status ? fn:trim(param.status) : ''}&startDate=${not empty param.startDate ? fn:trim(param.startDate) : ''}&endDate=${not empty param.endDate ? fn:trim(param.endDate) : ''}&userCreated=${not empty param.userCreated ? fn:trim(param.userCreated) : ''}"/>
                                     <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
-                                        <a class="page-link" href="/admin/lessons?page=0${queryString}" aria-label="First">
+                                        <a class="page-link" href="${baseUrl}0${queryParams}" aria-label="First">
                                             <span aria-hidden="true">««</span>
                                         </a>
                                     </li>
                                     <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
-                                        <a class="page-link" href="/admin/lessons?page=${currentPage - 1}${queryString}" aria-label="Previous">
+                                        <a class="page-link" href="${baseUrl}${currentPage - 1}${queryParams}" aria-label="Previous">
                                             <span aria-hidden="true">«</span>
                                         </a>
                                     </li>
@@ -424,16 +428,16 @@
                                     </c:if>
                                     <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
                                         <li class="page-item ${currentPage == loop.index ? 'active' : ''}">
-                                            <a class="page-link" href="/admin/lessons?page=${loop.index}${queryString}">${loop.index + 1}</a>
+                                            <a class="page-link" href="${baseUrl}${loop.index}${queryParams}">${loop.index + 1}</a>
                                         </li>
                                     </c:forEach>
                                     <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
-                                        <a class="page-link" href="/admin/lessons?page=${currentPage + 1}${queryString}" aria-label="Next">
+                                        <a class="page-link" href="${baseUrl}${currentPage + 1}${queryParams}" aria-label="Next">
                                             <span aria-hidden="true">»</span>
                                         </a>
                                     </li>
                                     <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
-                                        <a class="page-link" href="/admin/lessons?page=${totalPages - 1}${queryString}" aria-label="Last">
+                                        <a class="page-link" href="${baseUrl}${totalPages - 1}${queryParams}" aria-label="Last">
                                             <span aria-hidden="true">»»</span>
                                         </a>
                                     </li>

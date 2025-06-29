@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!doctype html>
 <html lang="en">
@@ -8,6 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="_csrf" content="${_csrf.token}"/>
     <title>Chi tiết bài học</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -258,7 +260,7 @@
                                     <c:choose>
                                         <c:when test="${not empty lesson.videoSrc}">
                                             <div class="video-container">
-                                                <iframe src="${lesson != null ? lesson.videoSrc : ''}"  frameborder="0" allowfullscreen></iframe>
+                                                <iframe src="${lesson != null ? lesson.videoSrc : ''}" frameborder="0" allowfullscreen></iframe>
                                             </div>
                                         </c:when>
                                         <c:otherwise>
@@ -302,6 +304,34 @@
                     </div>
                     <div class="card-footer">
                         <div class="d-flex gap-2 justify-content-end">
+                            <c:if test="${lesson.lessonStatus.statusCode == 'PENDING'}">
+                                <form action="/admin/lessons/${lesson.lessonId}/update-status" method="post" style="display:inline;">
+                                    <input type="hidden" name="_csrf" value="${_csrf.token}">
+                                    <input type="hidden" name="newStatus" value="APPROVED">
+                                    <input type="hidden" name="subjectId" value="${not empty param.subjectId ? fn:trim(param.subjectId) : ''}">
+                                    <input type="hidden" name="chapterId" value="${not empty param.chapterId ? fn:trim(param.chapterId) : ''}">
+                                    <input type="hidden" name="lessonStatus" value="${not empty param.lessonStatus ? fn:trim(param.lessonStatus) : ''}">
+                                    <input type="hidden" name="status" value="${not empty param.status ? fn:trim(param.status) : ''}">
+                                    <input type="hidden" name="startDate" value="${not empty param.startDate ? fn:trim(param.startDate) : ''}">
+                                    <input type="hidden" name="endDate" value="${not empty param.endDate ? fn:trim(param.endDate) : ''}">
+                                    <input type="hidden" name="userCreated" value="${not empty param.userCreated ? fn:trim(param.userCreated) : ''}">
+                                    <input type="hidden" name="page" value="${param.page}">
+                                    <button type="submit" class="btn btn-success btn-sm">Phê duyệt</button>
+                                </form>
+                                <form action="/admin/lessons/${lesson.lessonId}/update-status" method="post" style="display:inline;">
+                                    <input type="hidden" name="_csrf" value="${_csrf.token}">
+                                    <input type="hidden" name="newStatus" value="REJECTED">
+                                    <input type="hidden" name="subjectId" value="${not empty param.subjectId ? fn:trim(param.subjectId) : ''}">
+                                    <input type="hidden" name="chapterId" value="${not empty param.chapterId ? fn:trim(param.chapterId) : ''}">
+                                    <input type="hidden" name="lessonStatus" value="${not empty param.lessonStatus ? fn:trim(param.lessonStatus) : ''}">
+                                    <input type="hidden" name="status" value="${not empty param.status ? fn:trim(param.status) : ''}">
+                                    <input type="hidden" name="startDate" value="${not empty param.startDate ? fn:trim(param.startDate) : ''}">
+                                    <input type="hidden" name="endDate" value="${not empty param.endDate ? fn:trim(param.endDate) : ''}">
+                                    <input type="hidden" name="userCreated" value="${not empty param.userCreated ? fn:trim(param.userCreated) : ''}">
+                                    <input type="hidden" name="page" value="${param.page}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Từ chối</button>
+                                </form>
+                            </c:if>
                             <a href="/admin/lessons" class="btn btn-secondary">Quay lại</a>
                         </div>
                     </div>
@@ -319,6 +349,5 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
 </body>
 </html>
