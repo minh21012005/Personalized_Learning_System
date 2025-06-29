@@ -123,7 +123,7 @@
 </head>
 <body>
 <header>
-    <jsp:include page="../layout/header.jsp"/>
+    <jsp:include page="../layout_staff/header.jsp"/>
 </header>
 
 <div class="main-container">
@@ -154,6 +154,7 @@
                                 <input type="hidden" name="_method" value="PUT"/>
                             </c:if>
                             <form:hidden path="lessonId"/>
+                            <form:hidden path="lessonStatus"/>
                             <div class="row mb-3">
                                 <label for="lessonNameInput" class="col-sm-3 col-form-label">Tên bài học</label>
                                 <div class="col-sm-9">
@@ -204,9 +205,11 @@
                                             <h6>Tài liệu hiện có:</h6>
                                             <c:forEach var="material" items="${materialsTemp}" varStatus="status">
                                                 <div class="material-item" data-index="${status.index}">
-                                                    <a href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
-                                                    <button type="button" class="btn btn-link text-danger p-0"
-                                                            onclick="removeMaterial(this, ${status.index})">Xóa</button>
+                                                    <a style="color: #3498db" href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
+                                                   <c:if test="!isProcess">
+                                                       <button type="button" class="btn btn-link text-danger p-0"
+                                                               onclick="removeMaterial(this, ${status.index})">Xóa</button>
+                                                   </c:if>
                                                     <input type="hidden" name="materialsTemp" value="${material}"/>
                                                 </div>
                                             </c:forEach>
@@ -216,8 +219,16 @@
                             </div>
                             <div class="card-footer">
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
-                                    <a href="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                                    <c:choose>
+                                        <c:when test="${!isProcess}">
+                                            <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
+                                            <a href="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Quay lại</a>
+                                        </c:otherwise>
+                                    </c:choose>
+
                                 </div>
                             </div>
                         </form:form>
@@ -229,7 +240,7 @@
 </div>
 
 <footer>
-    <jsp:include page="../layout/footer.jsp"/>
+    <jsp:include page="../layout_staff/footer.jsp"/>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

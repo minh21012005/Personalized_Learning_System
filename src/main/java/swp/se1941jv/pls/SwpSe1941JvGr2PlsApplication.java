@@ -12,7 +12,7 @@ public class SwpSe1941JvGr2PlsApplication {
         SpringApplication.run(SwpSe1941JvGr2PlsApplication.class, args);
     }
     @Bean
-    public RestTemplate restTemplate() {
+    public RestTemplate restTemplate() {    
         return new RestTemplate();
     }
 }

@@ -265,6 +265,18 @@
                     </div>
                     <div class="card-footer">
                         <div class="d-flex gap-2 justify-content-end">
+                            <c:if test="${chapter.chapterStatus.statusCode == 'PENDING'}">
+                                <form action="/admin/chapters/${chapter.chapterId}/update-status" method="post" style="display:inline;">
+                                    <input type="hidden" name="_csrf" value="${_csrf.token}">
+                                    <input type="hidden" name="newStatus" value="APPROVED">
+                                    <button type="submit" class="btn btn-success btn-sm">Phê duyệt</button>
+                                </form>
+                                <form action="/admin/chapters/${chapter.chapterId}/update-status" method="post" style="display:inline;">
+                                    <input type="hidden" name="_csrf" value="${_csrf.token}">
+                                    <input type="hidden" name="newStatus" value="REJECTED">
+                                    <button type="submit" class="btn btn-danger btn-sm">Từ chối</button>
+                                </form>
+                            </c:if>
                             <a href="/admin/chapters" class="btn btn-secondary">Quay lại</a>
                         </div>
                     </div>

@@ -14,7 +14,6 @@ import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
 import swp.se1941jv.pls.dto.response.LessonResponseDTO;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
-import swp.se1941jv.pls.exception.*;
 import swp.se1941jv.pls.repository.ChapterRepository;
 import swp.se1941jv.pls.repository.SubjectRepository;
 import swp.se1941jv.pls.service.specification.ChapterSpecifications;
@@ -41,18 +40,18 @@ public class ChapterService {
     @Transactional
     public void createChapter(Chapter chapter) {
         if (chapter == null) {
-            throw new ValidationException("Dữ liệu chương không được để trống");
+            throw new IllegalArgumentException("Dữ liệu chương không được để trống.");
         }
         if (chapter.getSubject() == null || chapter.getSubject().getSubjectId() == null) {
-            throw new ValidationException("ID môn học không hợp lệ");
+            throw new IllegalArgumentException("ID môn học không hợp lệ.");
         }
 
         Long subjectId = chapter.getSubject().getSubjectId();
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại."));
 
         if (chapterRepository.existsByChapterNameAndSubject(chapter.getChapterName(), subject)) {
-            throw new DuplicateNameException("Tên chương đã tồn tại cho môn học này");
+            throw new IllegalArgumentException("Tên chương đã tồn tại cho môn học này.");
         }
 
         chapter.setStatus(true);
@@ -63,7 +62,7 @@ public class ChapterService {
             log.info("Chapter created: chapterId={}", chapter.getChapterId());
         } catch (Exception e) {
             log.error("Failed to create chapter: {}", e.getMessage(), e);
-            throw new ApplicationException("CREATE_ERROR", "Lỗi khi tạo chương", e);
+            throw new RuntimeException("Lỗi khi tạo chương.", e);
         }
     }
 
@@ -73,33 +72,35 @@ public class ChapterService {
     @Transactional
     public void updateChapter(Chapter chapter) {
         if (chapter == null || chapter.getChapterId() == null) {
-            throw new ValidationException("Dữ liệu chương không được để trống");
+            throw new IllegalArgumentException("Dữ liệu chương không được để trống.");
         }
         if (chapter.getSubject() == null || chapter.getSubject().getSubjectId() == null) {
-            throw new ValidationException("ID môn học không hợp lệ");
+            throw new IllegalArgumentException("ID môn học không hợp lệ.");
         }
 
         Long subjectId = chapter.getSubject().getSubjectId();
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại."));
 
         if (!chapterRepository.existsById(chapter.getChapterId())) {
-            throw new NotFoundException("Chương không tồn tại");
+            throw new IllegalArgumentException("Chương không tồn tại.");
         }
 
         if (chapterRepository.existsByChapterNameAndSubject(chapter.getChapterName(), subject) &&
                 !chapterRepository.findById(chapter.getChapterId())
                         .map(c -> c.getChapterName().equals(chapter.getChapterName()))
                         .orElse(false)) {
-            throw new DuplicateNameException("Tên chương đã tồn tại cho môn học này");
+            throw new IllegalArgumentException("Tên chương đã tồn tại cho môn học này.");
         }
 
+        chapter.setStatus(false);
+        chapter.setChapterStatus(Chapter.ChapterStatus.DRAFT);
         try {
             chapterRepository.save(chapter);
             log.info("Chapter updated: chapterId={}", chapter.getChapterId());
         } catch (Exception e) {
             log.error("Failed to update chapter: {}", e.getMessage(), e);
-            throw new ApplicationException("UPDATE_ERROR", "Lỗi khi cập nhật chương", e);
+            throw new RuntimeException("Lỗi khi cập nhật chương.", e);
         }
     }
 
@@ -109,14 +110,14 @@ public class ChapterService {
     @Transactional
     public void submitChapter(Long chapterId) {
         if (chapterId == null || chapterId <= 0) {
-            throw new ValidationException("ID chương không hợp lệ");
+            throw new IllegalArgumentException("ID chương không hợp lệ.");
         }
 
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Chương không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
 
         if (chapter.getChapterStatus() != Chapter.ChapterStatus.DRAFT) {
-            throw new ApplicationException("SUBMIT_ERROR", "Chương không ở trạng thái DRAFT");
+            throw new IllegalArgumentException("Chương không ở trạng thái DRAFT.");
         }
 
         try {
@@ -125,7 +126,7 @@ public class ChapterService {
             log.info("Chapter submitted: chapterId={}", chapterId);
         } catch (Exception e) {
             log.error("Failed to submit chapter: {}", e.getMessage(), e);
-            throw new ApplicationException("SUBMIT_ERROR", "Lỗi khi nộp chương", e);
+            throw new RuntimeException("Lỗi khi nộp chương.", e);
         }
     }
 
@@ -135,14 +136,14 @@ public class ChapterService {
     @Transactional
     public void cancelChapter(Long chapterId) {
         if (chapterId == null || chapterId <= 0) {
-            throw new ValidationException("ID chương không hợp lệ");
+            throw new IllegalArgumentException("ID chương không hợp lệ.");
         }
 
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Chương không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
 
         if (chapter.getChapterStatus() != Chapter.ChapterStatus.PENDING) {
-            throw new ApplicationException("CANCEL_ERROR", "Chương không ở trạng thái PENDING");
+            throw new IllegalArgumentException("Chương không ở trạng thái PENDING.");
         }
 
         try {
@@ -151,44 +152,50 @@ public class ChapterService {
             log.info("Chapter canceled: chapterId={}", chapterId);
         } catch (Exception e) {
             log.error("Failed to cancel chapter: {}", e.getMessage(), e);
-            throw new ApplicationException("CANCEL_ERROR", "Lỗi khi hủy chương", e);
+            throw new RuntimeException("Lỗi khi hủy chương.", e);
         }
     }
 
+    /**
+     * Phê duyệt chương.
+     */
+    @Transactional
     public void approveChapter(Long chapterId) {
         if (chapterId == null || chapterId <= 0) {
-            throw new ValidationException("ID chương không hợp lệ");
+            throw new IllegalArgumentException("ID chương không hợp lệ.");
         }
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Chương không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
         if (chapter.getChapterStatus() != Chapter.ChapterStatus.PENDING) {
-            throw new ApplicationException("APPROVE_ERROR", "Chương không ở trạng thái PENDING");
+            throw new IllegalArgumentException("Chương không ở trạng thái PENDING.");
         }
         try {
             chapter.setChapterStatus(Chapter.ChapterStatus.APPROVED);
             chapterRepository.save(chapter);
         } catch (Exception e) {
-            throw new ApplicationException("APPROVE_ERROR", "Lỗi khi phê duyệt chương", e);
+            throw new RuntimeException("Lỗi khi phê duyệt chương.", e);
         }
-        chapterRepository.save(chapter);
     }
 
+    /**
+     * Từ chối chương.
+     */
+    @Transactional
     public void rejectChapter(Long chapterId) {
         if (chapterId == null || chapterId <= 0) {
-            throw new ValidationException("ID chương không hợp lệ");
+            throw new IllegalArgumentException("ID chương không hợp lệ.");
         }
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Chương không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
         if (chapter.getChapterStatus() != Chapter.ChapterStatus.PENDING) {
-            throw new ApplicationException("REJECT_ERROR", "Chương không ở trạng thái PENDING");
+            throw new IllegalArgumentException("Chương không ở trạng thái PENDING.");
         }
         try {
             chapter.setChapterStatus(Chapter.ChapterStatus.REJECTED);
             chapterRepository.save(chapter);
         } catch (Exception e) {
-            throw new ApplicationException("REJECT_ERROR", "Lỗi khi phê duyệt chương", e);
+            throw new RuntimeException("Lỗi khi từ chối chương.", e);
         }
-
     }
 
     /**
@@ -204,7 +211,7 @@ public class ChapterService {
             int page,
             int size) {
         if (page < 0 || size <= 0) {
-            throw new ValidationException("Thông số phân trang không hợp lệ");
+            throw new IllegalArgumentException("Thông số phân trang không hợp lệ.");
         }
 
         Specification<Chapter> spec = Specification.where(null);
@@ -214,7 +221,6 @@ public class ChapterService {
         if (chapterStatus != null && !chapterStatus.trim().isEmpty()) {
             spec = spec.and(ChapterSpecifications.hasChapterStatus(chapterStatus));
         } else {
-            // Mặc định chỉ lấy PENDING, APPROVED, REJECTED
             spec = spec.and((root, query, cb) -> cb.in(root.get("chapterStatus"))
                     .value(Chapter.ChapterStatus.PENDING)
                     .value(Chapter.ChapterStatus.APPROVED)
@@ -249,22 +255,21 @@ public class ChapterService {
                 .build());
     }
 
-
     /**
      * Cập nhật trạng thái của nhiều chương.
      */
     @Transactional
     public void toggleChaptersStatus(List<Long> chapterIds) {
         if (chapterIds == null || chapterIds.isEmpty()) {
-            throw new ValidationException("Danh sách ID chương không được để trống");
+            throw new IllegalArgumentException("Danh sách ID chương không được để trống.");
         }
         if (chapterIds.stream().anyMatch(id -> id == null || id <= 0)) {
-            throw new ValidationException("ID chương không hợp lệ trong danh sách");
+            throw new IllegalArgumentException("ID chương không hợp lệ trong danh sách.");
         }
 
         List<Chapter> chapters = chapterRepository.findAllById(chapterIds);
         if (chapters.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy chương nào trong danh sách");
+            throw new IllegalArgumentException("Không tìm thấy chương nào trong danh sách.");
         }
 
         try {
@@ -273,7 +278,7 @@ public class ChapterService {
             log.info("Updated status for chapters: {}", chapterIds);
         } catch (Exception e) {
             log.error("Failed to update chapter status: {}", e.getMessage(), e);
-            throw new ApplicationException("UPDATE_ERROR", "Lỗi khi cập nhật trạng thái chương", e);
+            throw new RuntimeException("Lỗi khi cập nhật trạng thái chương.", e);
         }
     }
 
@@ -282,10 +287,10 @@ public class ChapterService {
      */
     public List<ChapterResponseDTO> findChaptersBySubjectId(Long subjectId, String chapterName, Boolean status) {
         if (subjectId == null || subjectId <= 0) {
-            throw new ValidationException("ID môn học không hợp lệ");
+            throw new IllegalArgumentException("ID môn học không hợp lệ.");
         }
         if (!subjectRepository.existsById(subjectId)) {
-            throw new NotFoundException("Môn học không tồn tại");
+            throw new IllegalArgumentException("Môn học không tồn tại.");
         }
 
         Specification<Chapter> spec = Specification.where(ChapterSpecifications.hasSubjectId(subjectId));
@@ -322,7 +327,7 @@ public class ChapterService {
                     .toList();
         } catch (Exception e) {
             log.error("Failed to fetch chapters: {}", e.getMessage(), e);
-            throw new ApplicationException("FETCH_ERROR", "Lỗi khi lấy danh sách chương", e);
+            throw new RuntimeException("Lỗi khi lấy danh sách chương.", e);
         }
     }
 
@@ -331,22 +336,21 @@ public class ChapterService {
      */
     public Optional<Chapter> getChapterById(Long chapterId) {
         if (chapterId == null || chapterId <= 0) {
-            throw new ValidationException("ID chương không hợp lệ");
+            throw new IllegalArgumentException("ID chương không hợp lệ.");
         }
         return chapterRepository.findById(chapterId);
     }
-
 
     /**
      * Lấy thông tin chương dưới dạng DTO đầy đủ theo ID.
      */
     public ChapterResponseDTO getChapterResponseByChapterId(Long chapterId) {
         if (chapterId == null || chapterId <= 0) {
-            throw new ValidationException("ID chương không hợp lệ");
+            throw new IllegalArgumentException("ID chương không hợp lệ.");
         }
 
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Chương không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
 
         return ChapterResponseDTO.builder()
                 .chapterId(chapter.getChapterId())
@@ -369,16 +373,16 @@ public class ChapterService {
      */
     public ChapterResponseDTO getChapterResponseById(Long chapterId, Long subjectId) {
         if (chapterId == null || chapterId <= 0) {
-            throw new ValidationException("ID chương không hợp lệ");
+            throw new IllegalArgumentException("ID chương không hợp lệ.");
         }
         if (subjectId == null || subjectId <= 0) {
-            throw new ValidationException("ID môn học không hợp lệ");
+            throw new IllegalArgumentException("ID môn học không hợp lệ.");
         }
 
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Chương không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
         if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
-            throw new RelationshipException("Chương không thuộc môn học này");
+            throw new IllegalArgumentException("Chương không thuộc môn học này.");
         }
         return ChapterResponseDTO.builder()
                 .chapterId(chapter.getChapterId())
@@ -392,6 +396,4 @@ public class ChapterService {
                 .listLesson(new ArrayList<>())
                 .build();
     }
-
-
 }

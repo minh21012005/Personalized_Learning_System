@@ -221,13 +221,20 @@
                                             </td>
                                             <td class="text-center col-2">
                                                 <a href="/staff/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/${lesson.lessonId}/edit"
-                                                   class="btn btn-warning btn-sm" title="Cập nhật">
-                                                    Cập nhật
+                                                   class="btn ${lesson.lessonStatus.statusCode == 'DRAFT' ? 'btn-warning' : 'btn-info'} btn-sm"
+                                                   title="${lesson.lessonStatus.statusCode == 'DRAFT' ? 'Cập nhật' : 'Xem'}">
+                                                        ${lesson.lessonStatus.statusCode == 'DRAFT' ? 'Cập nhật' : 'Xem'}
                                                 </a>
                                                 <c:if test="${lesson.lessonStatus.statusCode == 'DRAFT'}">
                                                     <form action="/staff/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/${lesson.lessonId}/submit" method="post" style="display: inline;">
                                                         <input type="hidden" name="_csrf" value="${_csrf.token}"/>
                                                         <button type="submit" class="btn btn-primary btn-sm" title="Nộp">Nộp</button>
+                                                    </form>
+                                                </c:if>
+                                                <c:if test="${lesson.lessonStatus.statusCode == 'PENDING'}">
+                                                    <form action="/staff/subject/${subject.subjectId}/chapters/${chapter.chapterId}/lessons/${lesson.lessonId}/cancel" method="post" style="display: inline;">
+                                                        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                                                        <button type="submit" class="btn btn-warning btn-sm" title="Hủy">Hủy</button>
                                                     </form>
                                                 </c:if>
                                             </td>
@@ -236,7 +243,7 @@
                                 </c:if>
                                 <c:if test="${empty lessons}">
                                     <tr>
-                                        <td colspan="6" class="text-center">Chưa có bài học nào.</td>
+                                        <td colspan="7" class="text-center">Chưa có bài học nào.</td>
                                     </tr>
                                 </c:if>
                                 </tbody>
@@ -322,3 +329,4 @@
 </script>
 </body>
 </html>
+```

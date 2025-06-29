@@ -15,7 +15,7 @@ public class LessonSpecifications {
             if (chapterId == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("chapter").get("id"), chapterId);
+            return cb.equal(root.get("chapter").get("chapterId"), chapterId); //
         };
     }
     public static Specification<Lesson> hasName(String lessonName) {
@@ -68,7 +68,7 @@ public class LessonSpecifications {
             if (userCreated == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("chapter").get("userCreated"), userCreated);
+            return cb.equal(root.get("lesson").get("userCreated"), userCreated);
         };
     }
 

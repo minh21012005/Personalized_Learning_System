@@ -172,12 +172,12 @@
 </head>
 <body>
     <header>
-        <jsp:include page="../layout/header.jsp" />
+        <jsp:include page="../layout_staff/header.jsp" />
     </header>
 
     <div class="main-container">
         <div class="sidebar">
-            <jsp:include page="../layout/sidebar.jsp" />
+            <jsp:include page="../layout_staff/sidebar.jsp" />
         </div>
 
         <div class="content">
@@ -206,9 +206,9 @@
                         <c:when test="${not empty viewName}">
                             <jsp:include page="${viewName}.jsp" />
                         </c:when>
-                        <c:otherwise>
-                            <p class="mt-3"><spring:message code="admin.welcomeMessage" text="Welcome to the Admin!"/></p>
-                        </c:otherwise>
+<%--                        <c:otherwise>--%>
+<%--                            <p class="mt-3"><spring:message code="admin.welcomeMessage" text="Welcome to the Admin!"/></p>--%>
+<%--                        </c:otherwise>--%>
                     </c:choose>
                 </div>
             </main>
@@ -216,7 +216,7 @@
     </div>
 
     <footer>
-        <jsp:include page="../layout/footer.jsp" />
+        <jsp:include page="../layout_staff/footer.jsp" />
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
