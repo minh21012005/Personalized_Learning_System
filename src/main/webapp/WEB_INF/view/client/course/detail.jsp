@@ -126,51 +126,56 @@
                                 </div>
                             </div>
 
-                            <!-- Footer Section -->
-                            <footer class="footer">
-                                <div class="container">
-                                    <div class="footer-content">
-                                        <div class="company-info">
-                                            <img src="https://c.animaapp.com/mbgkuigrW2kpeU/img/image-4.png"
-                                                alt="Byway Logo" class="footer-logo">
-                                            <p>Empowering learners through accessible and engaging online education.
-                                                Byway
-                                                is a
-                                                leading online learning platform dedicated to providing high-quality,
-                                                flexible,
-                                                and affordable educational experiences.</p>
+                            <div id="review-content">
+                                <!-- Thêm tham số render=true để render trực tiếp -->
+                                <jsp:include page="/package/${pkg.packageId}/reviews?render=true" />
+                            </div>
+                        </div>
+                        <!-- Footer Section -->
+                        <footer class="footer">
+                            <div class="container">
+                                <div class="footer-content">
+                                    <div class="company-info">
+                                        <img src="https://c.animaapp.com/mbgkuigrW2kpeU/img/image-4.png"
+                                            alt="Byway Logo" class="footer-logo">
+                                        <p>Empowering learners through accessible and engaging online education.
+                                            Byway
+                                            is a
+                                            leading online learning platform dedicated to providing high-quality,
+                                            flexible,
+                                            and affordable educational experiences.</p>
+                                    </div>
+                                    <div class="footer-links">
+                                        <div class="link-column">
+                                            <h3>Get Help</h3>
+                                            <ul>
+                                                <li><a href="#">Contact Us</a></li>
+                                                <li><a href="#">Latest Articles</a></li>
+                                                <li><a href="#">FAQ</a></li>
+                                            </ul>
                                         </div>
-                                        <div class="footer-links">
-                                            <div class="link-column">
-                                                <h3>Get Help</h3>
-                                                <ul>
-                                                    <li><a href="#">Contact Us</a></li>
-                                                    <li><a href="#">Latest Articles</a></li>
-                                                    <li><a href="#">FAQ</a></li>
-                                                </ul>
-                                            </div>
-                                            <div class="link-column">
-                                                <h3>Programs</h3>
-                                                <ul>
-                                                    <li><a href="#">Art & Design</a></li>
-                                                    <li><a href="#">Business</a></li>
-                                                    <li><a href="#">IT & Software</a></li>
-                                                    <li><a href="#">Languages</a></li>
-                                                    <li><a href="#">Programming</a></li>
-                                                </ul>
-                                            </div>
-                                            <div class="link-column">
-                                                <h3>Contact Us</h3>
-                                                <p>Address: 123 Main Street, Anytown, CA 12345</p>
-                                                <p>Tel: +(123) 456-7890</p>
-                                                <p>Mail: bywayedu@webkul.in</p>
-                                                <img src="https://c.animaapp.com/mbgkuigrW2kpeU/img/image-3.png"
-                                                    alt="Social Media Icons" class="social-icons">
-                                            </div>
+                                        <div class="link-column">
+                                            <h3>Programs</h3>
+                                            <ul>
+                                                <li><a href="#">Art & Design</a></li>
+                                                <li><a href="#">Business</a></li>
+                                                <li><a href="#">IT & Software</a></li>
+                                                <li><a href="#">Languages</a></li>
+                                                <li><a href="#">Programming</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="link-column">
+                                            <h3>Contact Us</h3>
+                                            <p>Address: 123 Main Street, Anytown, CA 12345</p>
+                                            <p>Tel: +(123) 456-7890</p>
+                                            <p>Mail: bywayedu@webkul.in</p>
+                                            <img src="https://c.animaapp.com/mbgkuigrW2kpeU/img/image-3.png"
+                                                alt="Social Media Icons" class="social-icons">
                                         </div>
                                     </div>
                                 </div>
-                            </footer>
+                            </div>
+                        </footer>
                         </div>
                     </body>
                     <script>

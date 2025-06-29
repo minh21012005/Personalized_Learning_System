@@ -164,7 +164,7 @@
                 <input type="hidden" name="correctCount" value="${correctCount}">
                 <button type="submit" class="btn-continue">Tiếp tục</button>
             </form>
-            <a href="/practices" class="btn-end">Kết thúc</a>
+            <a href="/practices/history/${testId}" class="btn-end">Kết thúc</a>
         </div>
     </c:if>
     <c:if test="${empty results}">

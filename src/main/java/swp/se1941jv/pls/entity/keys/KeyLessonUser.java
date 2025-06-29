@@ -16,8 +16,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class KeyLessonUser implements Serializable {
     @Column(name = "user_id", nullable = false)
-    Long userId;
+    private Long userId;
 
     @Column(name = "lesson_id", nullable = false)
-    Long lessonId;
+    private Long lessonId;
 }

@@ -1,12 +1,8 @@
 package swp.se1941jv.pls.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,18 +10,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.response.*;
 import swp.se1941jv.pls.entity.*;
+import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 import swp.se1941jv.pls.exception.ApplicationException;
 import swp.se1941jv.pls.exception.NotFoundException;
 import swp.se1941jv.pls.exception.ValidationException;
 import swp.se1941jv.pls.exception.subject.SubjectNotFoundException;
-import swp.se1941jv.pls.repository.PackageSubjectRepository;
-import swp.se1941jv.pls.repository.SubjectRepository;
-import swp.se1941jv.pls.repository.UserPackageRepository;
+import swp.se1941jv.pls.repository.*;
 
 @Service
 public class SubjectService {
@@ -34,13 +28,19 @@ public class SubjectService {
     private final UserPackageRepository userPackageRepository;
     private final PackageSubjectRepository packageSubjectRepository;
     private final ObjectMapper objectMapper;
+    private final LessonProgressRepository lessonProgressRepository;
+    private final UserRepository userRepository;
+    private final PackageRepository packageRepository;
 
-    public SubjectService(SubjectRepository subjectRepository, ChapterService chapterService, UserPackageRepository userPackageRepository, PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper) {
+    public SubjectService(SubjectRepository subjectRepository, ChapterService chapterService, UserPackageRepository userPackageRepository, PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper, LessonProgressRepository lessonProgressRepository, UserRepository userRepository, PackageRepository packageRepository) {
         this.subjectRepository = subjectRepository;
         this.chapterService = chapterService;
         this.userPackageRepository = userPackageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
         this.objectMapper = objectMapper;
+        this.lessonProgressRepository = lessonProgressRepository;
+        this.userRepository = userRepository;
+        this.packageRepository = packageRepository;
     }
 
     public List<Subject> getSubjectsByGradeId(Long gradeId, boolean isActive) {
@@ -168,16 +168,16 @@ public class SubjectService {
         return false;
     }
 
-    public SubjectResponseDTO getSubjectResponseDTOById(Long subjectId) {
+    public SubjectResponseDTO getSubjectResponseDTOById(Long subjectId, Long packageId, Long userId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
-        return mapToSubjectResponseDTO(subject);
+        return mapToSubjectResponseDTO(subject,packageId,userId);
     }
 
-    private SubjectResponseDTO mapToSubjectResponseDTO(Subject subject) {
+    private SubjectResponseDTO mapToSubjectResponseDTO(Subject subject, Long packageId, Long userId) {
         List<ChapterResponseDTO> chapters = subject.getChapters().stream()
                 .filter(chapter -> chapter.getStatus() && chapter.getChapterStatus() == Chapter.ChapterStatus.APPROVED)
-                .map(this::mapToChapterResponseDTO)
+                .map(chapter ->mapToChapterResponseDTO(chapter, subject.getSubjectId(), packageId, userId))
                 .toList();
 
         return SubjectResponseDTO.builder()
@@ -187,10 +187,10 @@ public class SubjectService {
                 .build();
     }
 
-    private ChapterResponseDTO mapToChapterResponseDTO(Chapter chapter) {
+    private ChapterResponseDTO mapToChapterResponseDTO(Chapter chapter, Long subjectId, Long packageId, Long userId) {
         List<LessonResponseDTO> lessons = chapter.getLessons().stream()
                 .filter(lesson -> lesson.getStatus() && lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED)
-                .map(this::mapToLessonResponseDTO)
+                .map(lesson -> mapToLessonResponseDTO(lesson,  subjectId,  packageId,  userId))
                 .toList();
 
         return ChapterResponseDTO.builder()
@@ -201,13 +201,25 @@ public class SubjectService {
                 .build();
     }
 
-    private LessonResponseDTO mapToLessonResponseDTO(Lesson lesson) {
+    private LessonResponseDTO mapToLessonResponseDTO(Lesson lesson, Long subjectId, Long packageId, Long userId) {
         List<String> materials;
         try {
             materials = objectMapper.readValue(lesson.getMaterialsJson(), new TypeReference<List<String>>() {});
         } catch (Exception e) {
             materials = Collections.emptyList();
         }
+
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new NotFoundException("Môn học không tồn tại"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Người dùng không tồn tại"));
+        Package packageEntity = packageRepository.findById(packageId)
+                .orElseThrow(() -> new NotFoundException("Gói học không tồn tại"));
+
+        boolean isCompleted = lessonProgressRepository
+                .findByUserAndLessonAndSubjectAndPackageEntity(user, lesson, subject, packageEntity)
+                .map(LessonProgress::getIsCompleted)
+                .orElse(false);
 
         return LessonResponseDTO.builder()
                 .lessonId(lesson.getLessonId())
@@ -221,6 +233,7 @@ public class SubjectService {
                         .description(lesson.getLessonStatus().getDescription())
                         .build())
                 .materials(materials)
+                .isCompleted(isCompleted)
                 .build();
     }
 }

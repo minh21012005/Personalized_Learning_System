@@ -94,6 +94,21 @@
             background-color: #343a40;
         }
 
+        .btn-history {
+            background-color: #007bff!important;
+            color: #ffffff!important;
+            border: none!important;
+            border-radius: 6px!important;
+            padding: 10px 20px!important;
+            font-size: 1rem!important;
+            font-weight: 500!important;
+            transition: background-color 0.3s!important;
+            margin-bottom: 20px!important;
+        }
+        .btn-history:hover {
+            background-color: #0056b3!important;
+        }
+
     </style>
 </head>
 <body>
@@ -102,7 +117,10 @@
 </header>
 <div class="main-container">
     <div class="content">
-        <h2>Các gói luyên tập của bạn</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Các gói luyện tập của bạn</h2>
+            <a href="/practices/history" class="btn btn-history">Xem lịch sử luyện tập</a>
+        </div>
         <c:if test="${empty packagePractices}">
             <p>Không có gói luyện tập nào.</p>
         </c:if>

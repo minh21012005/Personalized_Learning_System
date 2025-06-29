@@ -164,7 +164,7 @@ public class LessonController {
      * Xử lý cập nhật bài học.
      */
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
-    @PutMapping("/{lessonId}")
+    @PostMapping("/{lessonId}")
     public String updateLesson(
             @PathVariable Long subjectId,
             @PathVariable Long chapterId,

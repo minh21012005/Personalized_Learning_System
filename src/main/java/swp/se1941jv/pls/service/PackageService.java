@@ -19,10 +19,7 @@ import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.keys.KeyPackageSubject;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
-import swp.se1941jv.pls.repository.PackageRepository;
-import swp.se1941jv.pls.repository.PackageSubjectRepository;
-import swp.se1941jv.pls.repository.SubjectRepository;
-import swp.se1941jv.pls.repository.UserPackageRepository;
+import swp.se1941jv.pls.repository.*;
 import swp.se1941jv.pls.service.specification.PackageSpecification;
 
 @Service
@@ -32,14 +29,18 @@ public class PackageService {
     private final PackageSubjectRepository packageSubjectRepository;
     private final SubjectRepository subjectRepository;
     private final UserPackageRepository userPackageRepository;
+    private final LessonProgressRepository lessonProgressRepository;
 
     public PackageService(PackageRepository packageRepository,
-            PackageSubjectRepository packageSubjectRepository,
-            SubjectRepository subjectRepository, UserPackageRepository userPackageRepository) {
+                          PackageSubjectRepository packageSubjectRepository,
+                          SubjectRepository subjectRepository,
+                          UserPackageRepository userPackageRepository,
+                          LessonProgressRepository lessonProgressRepository) {
         this.packageRepository = packageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
         this.subjectRepository = subjectRepository;
         this.userPackageRepository = userPackageRepository;
+        this.lessonProgressRepository = lessonProgressRepository;
     }
 
     public List<Package> getListPackages() {
@@ -179,6 +180,7 @@ public class PackageService {
         if (userId == null) {
             return null;
         }
+        User user = User.builder().userId(userId).build();
         KeyUserPackage keyUserPackage = KeyUserPackage.builder()
                 .userId(userId)
                 .packageId(packageId)
@@ -190,12 +192,29 @@ public class PackageService {
 
 //        get subjects from userPackage
         if (userPackage != null) {
-            userPackage.getPkg().getPackageSubjects().stream().forEach(packageSubject -> {
+            userPackage.getPkg().getPackageSubjects().forEach(packageSubject -> {
+                List<LessonProgress> lessonProgress = lessonProgressRepository
+                        .findByUserAndSubjectAndPackageEntity(user, packageSubject.getSubject(), packageSubject.getPkg());
+
+                long countCompletedLesson = 0;
+                if (!lessonProgress.isEmpty()) {
+                     countCompletedLesson = lessonProgress.stream()
+                            .filter(LessonProgress::getIsCompleted)
+                            .count();
+                }
+
+                long countLesson = packageSubject.getSubject().getChapters().stream()
+                        .flatMap(chapter -> chapter.getLessons().stream()
+                                .filter(lesson -> lesson.getStatus() && lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED))
+                        .count();
+
                 SubjectResponseDTO subjectResponseDTO = SubjectResponseDTO.builder()
                         .subjectId(packageSubject.getSubject().getSubjectId())
                         .subjectName(packageSubject.getSubject().getSubjectName())
                         .subjectDescription(packageSubject.getSubject().getSubjectDescription())
                         .subjectImage(packageSubject.getSubject().getSubjectImage())
+                        .numberOfCompletedLessons(countCompletedLesson)
+                        .numberOfLessons(countLesson)
                         .build();
                 subjectResponseDTOS.add(subjectResponseDTO);
             });

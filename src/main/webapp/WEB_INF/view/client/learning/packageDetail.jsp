@@ -85,7 +85,7 @@
         }
 
         .subject-card .progress {
-            height: 5px;
+            height: 10px;
             margin-bottom: 10px;
         }
 
@@ -132,8 +132,20 @@
                         <img src="/img/subjectImg/${subject.subjectImage != null ? subject.subjectImage : '/img/default-subject.jpg'}" alt="${subject.subjectName}">
                         <div class="card-body">
                             <h5 class="card-title">${subject.subjectName}</h5>
-                            <div class="progress">
-                                <div class="progress-bar bg-primary" style="width: 100%"></div> <!-- Placeholder progress -->
+
+                            <c:set var="progressPercentage" value="${subject.numberOfLessons > 0 ? (subject.numberOfCompletedLessons * 100.0 / subject.numberOfLessons) : 0}" />
+                            <div class="progress" >
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: ${progressPercentage}%" aria-valuenow="${progressPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="progress-text">
+                                <c:choose>
+                                    <c:when test="${progressPercentage == 100}">
+                                        <span class="text-success">Bạn đã hoàn thành môn học này</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <fmt:formatNumber value="${progressPercentage}" type="number" maxFractionDigits="0"/>% (${subject.numberOfCompletedLessons}/${subject.numberOfLessons})
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                             <a href="/packages/detail/subject?subjectId=${subject.subjectId}&packageId=${packageSubject.packageId}" class="btn btn-primary">Bắt đầu học</a>
                         </div>
