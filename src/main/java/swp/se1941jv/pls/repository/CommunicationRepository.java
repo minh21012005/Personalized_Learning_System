@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface CommunicationRepository extends JpaRepository<Communication, Long> {
 
-    // Đây là phương thức dành cho trang Communication HUB
+    // Đây là dành cho trang Communication HUB
     @Query("SELECT c FROM Communication c " +
            "LEFT JOIN FETCH c.user u " +
            "LEFT JOIN FETCH c.lesson l " +
