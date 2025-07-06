@@ -10,6 +10,7 @@ import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.repository.CommunicationRepository;
 import swp.se1941jv.pls.repository.LessonRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -46,20 +47,28 @@ public class CommunicationService {
                     .orElseThrow(() -> new NoSuchElementException("Parent communication not found with id: " + parentId));
             newComm.setParentComment(parentComm);
         }
+
         Communication savedComm = communicationRepository.save(newComm);
         Long currentUserId = SecurityUtils.getCurrentUserId();
+
         return communicationRepository.findByIdWithDetails(savedComm.getId())
                 .map(fullCommunication -> CommunicationResponseDto.fromEntity(fullCommunication, currentUserId))
                 .orElseThrow(() -> new IllegalStateException("Could not find and map newly created communication"));
     }
 
-    @Transactional(readOnly = true)
+     @Transactional(readOnly = true)
     public List<CommunicationResponseDto> getAllRootCommunications() {
-        List<Communication> allRootCommunications = communicationRepository.findAllRootCommunicationsOrderByCreatedAtDesc();
+        List<Long> rootIds = communicationRepository.findAllRootCommunicationIds();
+
+        if (rootIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Communication> allRootCommunications = communicationRepository.findAllByIdsWithDetails(rootIds);
         Long currentUserId = SecurityUtils.getCurrentUserId();
 
         return allRootCommunications.stream()
                 .map(comm -> CommunicationResponseDto.fromEntity(comm, currentUserId))
                 .collect(Collectors.toList());
-    }
+}
 }

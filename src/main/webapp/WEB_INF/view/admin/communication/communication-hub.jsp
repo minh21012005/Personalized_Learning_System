@@ -88,30 +88,47 @@ document.addEventListener('DOMContentLoaded', function() {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'comment-card';
 
-        const avatar = comment.author.avatarUrl || 'https://via.placeholder.com/40';
-        const lessonIdForReply = comment.lessonId;
-        const createdAt = new Date(comment.createdAt).toLocaleString();
+        const commentTreeHtml = createCommentRecursive(comment);
+
         cardDiv.innerHTML =
             '<div class="comment-header">' +
                 'Subject: ' + comment.subjectName + ' | Lesson: ' + comment.lessonName +
             '</div>' +
             '<div class="comment-body">' +
-                '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + lessonIdForReply + '">' +
-                     '<div class="author-info">' +
-                        '<img src="' + avatar + '" alt="' + comment.author.name + '" class="author-avatar">' +
-                        '<div>' +
-                            '<span class="author-name">' + comment.author.name + '</span>' +
-                            '<div class="comment-meta">' +
-                                '<span>' + createdAt + '</span>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<p class="comment-content">' + comment.content + '</p>' +
-                    '<span class="btn-reply">Reply</span>' +
-                '</div>' +
+                commentTreeHtml +
             '</div>';
         return cardDiv;
     }
+
+    function createCommentRecursive(comment) {
+        const avatar = comment.author.avatarUrl || 'https://via.placeholder.com/40';
+        const createdAt = new Date(comment.createdAt).toLocaleString();
+        let repliesHtml = '';
+        if (comment.replies && comment.replies.length > 0) {
+            repliesHtml += '<div class="replies">';
+            comment.replies.forEach(reply => {
+                repliesHtml += createCommentRecursive(reply);
+            });
+            repliesHtml += '</div>';
+        }
+        return (
+            '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
+                 '<div class="author-info">' +
+                    '<img src="' + avatar + '" alt="' + comment.author.name + '" class="author-avatar">' +
+                    '<div>' +
+                        '<span class="author-name">' + comment.author.name + '</span>' +
+                        '<div class="comment-meta">' +
+                            '<span>' + createdAt + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<p class="comment-content">' + comment.content + '</p>' +
+                '<span class="btn-reply">Reply</span>' +
+                repliesHtml +
+            '</div>'
+        );
+    }
+
     async function postComment(content, parentId, lessonId) {
         try {
             const apiUrl = '<c:url value="/api/communications/lesson/"/>' + lessonId;
@@ -120,7 +137,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: content, parentId: parentId })
             });
-            return response.ok;
+            if(response.ok){
+                return await response.json();
+            } else {
+                return null;
+            }
         } catch (error) {
             console.error('Error posting comment:', error);
             return false;
@@ -137,21 +158,38 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const replyForm = document.createElement('form');
             replyForm.className = 'reply-form';
-            replyForm.innerHTML =
+            replyForm.innerHTML = 
                 '<div class="form-group">' +
                     '<textarea class="form-control" rows="2" placeholder="Write a reply..." required></textarea>' +
                 '</div>' +
                 '<button type="submit" class="btn btn-sm btn-primary mt-1">Submit Reply</button>' +
                 '<button type="button" class="btn btn-sm btn-secondary mt-1 cancel-reply">Cancel</button>';
-            e.target.insertAdjacentElement('afterend', replyForm);
-            replyForm.querySelector('textarea').focus();
+            
+            commentElement.appendChild(replyForm);
+            const textArea = replyForm.querySelector('textarea');
+            textArea.focus();
+
             replyForm.addEventListener('submit', async function(submitEvent) {
                 submitEvent.preventDefault();
-                const replyContent = replyForm.querySelector('textarea').value.trim();
+                const replyContent = textArea.value.trim();
+
                 if (replyContent) {
-                    const success = await postComment(replyContent, parentId, lessonId);
-                    if (success) {
-                        await fetchAndRenderHub();
+
+                    const newReplyData = await postComment(replyContent, parentId, lessonId);
+
+                    if (newReplyData) {
+
+                        const newReplyElementHtml = createCommentRecursive(newReplyData);
+                        let repliesContainer = commentElement.querySelector('.replies');
+                        if (!repliesContainer) {
+                            repliesContainer = document.createElement('div');
+                            repliesContainer.className = 'replies';
+                            commentElement.appendChild(repliesContainer);
+                        }
+
+                        repliesContainer.insertAdjacentHTML('beforeend', newReplyElementHtml);
+                        replyForm.remove();
+
                     } else {
                         alert('Failed to post reply.');
                     }
