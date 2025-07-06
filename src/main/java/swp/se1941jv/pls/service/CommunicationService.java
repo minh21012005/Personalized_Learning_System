@@ -22,7 +22,6 @@ public class CommunicationService {
     private final CommunicationRepository communicationRepository;
     private final LessonRepository lessonRepository;
 
-
     @Transactional(readOnly = true)
     public List<CommunicationResponseDto> getCommunicationsForLesson(Long lessonId) {
         List<Communication> rootCommunications = communicationRepository.findRootCommunicationsByLessonId(lessonId);
@@ -31,7 +30,6 @@ public class CommunicationService {
                 .map(communication -> CommunicationResponseDto.fromEntity(communication, currentUserId))
                 .collect(Collectors.toList());
     }
-
 
     @Transactional
     public CommunicationResponseDto createCommunication(Long lessonId, String content, Long parentId) {
@@ -44,7 +42,8 @@ public class CommunicationService {
 
         if (parentId != null) {
             Communication parentComm = communicationRepository.findById(parentId)
-                    .orElseThrow(() -> new NoSuchElementException("Parent communication not found with id: " + parentId));
+                    .orElseThrow(
+                            () -> new NoSuchElementException("Parent communication not found with id: " + parentId));
             newComm.setParentComment(parentComm);
         }
 
@@ -56,7 +55,7 @@ public class CommunicationService {
                 .orElseThrow(() -> new IllegalStateException("Could not find and map newly created communication"));
     }
 
-     @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<CommunicationResponseDto> getAllRootCommunications() {
         List<Long> rootIds = communicationRepository.findAllRootCommunicationIds();
 
@@ -70,5 +69,22 @@ public class CommunicationService {
         return allRootCommunications.stream()
                 .map(comm -> CommunicationResponseDto.fromEntity(comm, currentUserId))
                 .collect(Collectors.toList());
-}
+    }
+
+    @Transactional
+    public void deleteCommunicationByAdmin(long communicationId) {
+        Communication comm = communicationRepository.findById(communicationId)
+                .orElseThrow(() -> new NoSuchElementException("Communication not found"));
+        deleteRecursively(comm);
+    }
+
+    private void deleteRecursively(Communication comm) {
+        if (comm.getReplies() != null) {
+            for (Communication reply : comm.getReplies()) {
+                deleteRecursively(reply);
+            }
+        }
+        communicationRepository.delete(comm);
+    }
+
 }

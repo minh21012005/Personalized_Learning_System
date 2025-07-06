@@ -46,6 +46,7 @@ public class CommunicationApiController {
 
     @DeleteMapping("/{communicationId}")
     public ResponseEntity<Void> deleteCommunication(@PathVariable Long communicationId) {
+        communicationService.deleteCommunicationByAdmin(communicationId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -32,36 +32,36 @@
     </style>
 </head>
 <body>
-    <header>
-        <jsp:include page="../layout/header.jsp" />
-    </header>
+<header>
+    <jsp:include page="../layout/header.jsp" />
+</header>
 
-    <div class="main-container">
-        <div class="sidebar">
-            <jsp:include page="../layout/sidebar.jsp" />
-        </div>
-
-        <div class="content">
-            <main>
-                <div class="container-fluid px-4">
-                    <h3>Communication Hub</h3>
-                    <p class="text-muted">All questions from users across all subjects and lessons.</p>
-                    <hr>
-                    <div id="hub-container">
-                        <p>Loading communications...</p>
-                    </div>
-                </div>
-            </main>
-        </div>
+<div class="main-container">
+    <div class="sidebar">
+        <jsp:include page="../layout/sidebar.jsp" />
     </div>
 
-    <footer>
-        <jsp:include page="../layout/footer.jsp" />
-    </footer>
+    <div class="content">
+        <main>
+            <div class="container-fluid px-4">
+                <h3>Communication Hub</h3>
+                <p class="text-muted">All questions from users across all subjects and lessons.</p>
+                <hr>
+                <div id="hub-container">
+                    <p>Loading communications...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
+<footer>
+    <jsp:include page="../layout/footer.jsp" />
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
     const hubContainer = document.getElementById('hub-container');
 
     async function fetchAndRenderHub() {
@@ -87,9 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function createHubEntryElement(comment) {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'comment-card';
-
         const commentTreeHtml = createCommentRecursive(comment);
-
         cardDiv.innerHTML =
             '<div class="comment-header">' +
                 'Subject: ' + comment.subjectName + ' | Lesson: ' + comment.lessonName +
@@ -111,6 +109,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             repliesHtml += '</div>';
         }
+
+        const deleteButtonHtml = '<span class="btn-delete ms-2" style="cursor:pointer; color: #dc3545; font-size: 0.9em;">Delete</span>';
+
         return (
             '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
                  '<div class="author-info">' +
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '</div>' +
                 '</div>' +
                 '<p class="comment-content">' + comment.content + '</p>' +
-                '<span class="btn-reply">Reply</span>' +
+                '<span class="btn-reply">Reply</span>' + deleteButtonHtml +
                 repliesHtml +
             '</div>'
         );
@@ -148,14 +149,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    hubContainer.addEventListener('click', function(e) {
+    async function deleteComment(commentId) {
+        try {
+            const apiUrl = `<c:url value="/api/communications/"/>` + commentId;
+            const response = await fetch(apiUrl, {
+                method: 'DELETE'
+            });
+            return response.ok;
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            return false;
+        }
+    }
+
+    hubContainer.addEventListener('click', async function(e) {
         if (e.target.classList.contains('btn-reply')) {
             const commentElement = e.target.closest('.comment');
             const parentId = commentElement.dataset.id;
             const lessonId = commentElement.dataset.lessonId;
 
             document.querySelectorAll('.reply-form').forEach(form => form.remove());
-            
+
             const replyForm = document.createElement('form');
             replyForm.className = 'reply-form';
             replyForm.innerHTML = 
@@ -164,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 '</div>' +
                 '<button type="submit" class="btn btn-sm btn-primary mt-1">Submit Reply</button>' +
                 '<button type="button" class="btn btn-sm btn-secondary mt-1 cancel-reply">Cancel</button>';
-            
+
             commentElement.appendChild(replyForm);
             const textArea = replyForm.querySelector('textarea');
             textArea.focus();
@@ -174,11 +188,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const replyContent = textArea.value.trim();
 
                 if (replyContent) {
+                    replyForm.querySelector('button[type="submit"]').disabled = true;
 
                     const newReplyData = await postComment(replyContent, parentId, lessonId);
 
                     if (newReplyData) {
-
                         const newReplyElementHtml = createCommentRecursive(newReplyData);
                         let repliesContainer = commentElement.querySelector('.replies');
                         if (!repliesContainer) {
@@ -186,12 +200,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             repliesContainer.className = 'replies';
                             commentElement.appendChild(repliesContainer);
                         }
-
                         repliesContainer.insertAdjacentHTML('beforeend', newReplyElementHtml);
                         replyForm.remove();
-
                     } else {
                         alert('Failed to post reply.');
+                        replyForm.querySelector('button[type="submit"]').disabled = false;
                     }
                 }
             });
@@ -200,7 +213,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 replyForm.remove();
             });
         }
+
+        if (e.target.classList.contains('btn-delete')) {
+            if (!confirm('Are you sure you want to delete this comment and all its replies?')) return;
+            const commentElement = e.target.closest('.comment');
+            const commentId = commentElement.dataset.id;
+            const success = await deleteComment(commentId);
+
+            if (success) {
+                commentElement.style.transition = 'opacity 0.5s';
+                commentElement.style.opacity = '0';
+                setTimeout(() => commentElement.remove(), 500);
+            } else {
+                alert('Failed to delete the comment.');
+            }
+        }
     });
+
     fetchAndRenderHub();
 });
 </script>
