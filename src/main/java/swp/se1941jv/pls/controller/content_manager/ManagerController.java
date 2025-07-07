@@ -34,7 +34,7 @@ public class ManagerController {
     }
 
     // Danh sách gói học
-    @GetMapping("/manager/package")
+    @GetMapping("/admin/package")
     public String getPackagePage(Model model,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) String keyword,
@@ -62,7 +62,7 @@ public class ManagerController {
     }
 
     // Xem chi tiết gói học
-    @GetMapping("/manager/package/view/{id}")
+    @GetMapping("/admin/package/view/{id}")
     public String viewPackage(Model model,
             @PathVariable("id") Long packageId,
             @RequestParam(required = false) String keyword) {
@@ -94,7 +94,7 @@ public class ManagerController {
     }
 
     // Duyệt gói học
-    @PostMapping("/manager/package/approve/{id}")
+    @PostMapping("/admin/package/approve/{id}")
     public String approvePackage(@PathVariable("id") Long packageId) {
         Package pkg = this.packageService.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói học"));
@@ -104,12 +104,12 @@ public class ManagerController {
         pkg.setStatus(PackageStatus.APPROVED);
         pkg.setActive(true);
         this.packageService.savePackage(pkg);
-        return "redirect:/manager/package";
+        return "redirect:/admin/package";
 
     }
 
     // Từ chối gói học
-    @PostMapping("/manager/package/reject/{id}")
+    @PostMapping("/admin/package/reject/{id}")
     public String rejectPackage(@PathVariable("id") Long packageId) {
         Package pkg = this.packageService.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói học"));
@@ -119,12 +119,12 @@ public class ManagerController {
         pkg.setStatus(PackageStatus.REJECTED);
         pkg.setActive(false);
         this.packageService.savePackage(pkg);
-        return "redirect:/manager/package";
+        return "redirect:/admin/package";
 
     }
 
     // Toggle trạng thái active
-    @PostMapping("/manager/package/edit/{id}")
+    @PostMapping("/admin/package/edit/{id}")
     public String toggleActive(@PathVariable("id") Long packageId) {
         Package pkg = this.packageService.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói học"));
@@ -134,7 +134,7 @@ public class ManagerController {
         pkg.setActive(!pkg.isActive());
 
         this.packageService.savePackage(pkg);
-        return "redirect:/manager/package";
+        return "redirect:/admin/package";
 
     }
 }
