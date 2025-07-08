@@ -9,8 +9,11 @@ import swp.se1941jv.pls.entity.Communication;
 import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.repository.CommunicationRepository;
 import swp.se1941jv.pls.repository.LessonRepository;
+import swp.se1941jv.pls.repository.UserRepository;
+import swp.se1941jv.pls.entity.User;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -21,6 +24,7 @@ public class CommunicationService {
 
     private final CommunicationRepository communicationRepository;
     private final LessonRepository lessonRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<CommunicationResponseDto> getCommunicationsForLesson(Long lessonId) {
@@ -50,9 +54,14 @@ public class CommunicationService {
         Communication savedComm = communicationRepository.save(newComm);
         Long currentUserId = SecurityUtils.getCurrentUserId();
 
-        return communicationRepository.findByIdWithDetails(savedComm.getId())
-                .map(fullCommunication -> CommunicationResponseDto.fromEntity(fullCommunication, currentUserId))
-                .orElseThrow(() -> new IllegalStateException("Could not find and map newly created communication"));
+       Communication fullCommunication = communicationRepository.findByIdWithDetails(savedComm.getId())
+                .orElseThrow(() -> new IllegalStateException("Could not find newly created communication with details"));
+
+       if(fullCommunication.getUser() == null && fullCommunication.getUserCreated() != null){
+        User author = userRepository.findById(fullCommunication.getUserCreated()).orElse(null);
+        fullCommunication.setUser(author);
+       }
+       return CommunicationResponseDto.fromEntity(fullCommunication, currentUserId);
     }
 
     @Transactional(readOnly = true)
