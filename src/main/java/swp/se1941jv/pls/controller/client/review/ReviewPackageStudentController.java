@@ -175,7 +175,7 @@ public class ReviewPackageStudentController {
             currentUser = userService.getUserByEmail(username);
         }
         if (currentUser == null) {
-            return "redirect:/packages/detail?packageId=" + packageId + "?fail=Please log in to review.";
+            return "redirect:/packages/detail?packageId=" + packageId + "&fail=Please log in to review.";
         }
 
 
@@ -190,7 +190,7 @@ public class ReviewPackageStudentController {
 
         if (reviewExists) {
             return "redirect:/packages/detail?packageId=" + packageId
-                    + "?fail=You have already submitted a review for this package.";
+                    + "&fail=You have already submitted a review for this package.";
         }
 
 
@@ -198,12 +198,12 @@ public class ReviewPackageStudentController {
             try {
                 reviewService.saveReview(review, currentUser, subject == null ? pkg : null, subject);
                 return "redirect:/packages/detail?packageId=" + packageId
-                        + "?success=Your review has been submitted and is pending approval.";
+                        + "&success=Your review has been submitted and is pending approval.";
             } catch (Exception e) {
-                return "redirect:/packages/detail?packageId=" + packageId + "?fail=An error occurred while saving the review.";
+                return "redirect:/packages/detail?packageId=" + packageId + "&fail=An error occurred while saving the review.";
             }
         } else {
-            return "redirect:/packages/detail?packageId=" + packageId + "?fail=You must purchase the package to review.";
+            return "redirect:/packages/detail?packageId=" + packageId + "&fail=You must purchase the package to review.";
         }
     }
 
