@@ -219,4 +219,12 @@ public class ReviewService {
 
         return reviewRepository.findAll(spec, pageable);
     }
+
+    public int getRate(int value) {
+        List<Review> list = this.reviewRepository.findAll().stream()
+                .filter(r -> r.getStatus().equals(ReviewStatus.APPROVED))
+                .toList();
+        List<Review> reviews = list.stream().filter(r -> r.getRating().intValue() == value).toList();
+        return reviews.size();
+    }
 }
