@@ -10,7 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
+import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.Review;
 import swp.se1941jv.pls.entity.Subject;
@@ -75,22 +75,13 @@ public class ReviewPackageStudentController {
             }
 
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = null;
-            if (authentication != null && authentication.isAuthenticated()
-                    && authentication.getPrincipal() instanceof UserDetails) {
-                String username = authentication.getName();
-                currentUser = userService.getUserByEmail(username);
-            }
-            Long currentUserId = (currentUser != null) ? currentUser.getUserId() : null;
-            logger.debug("Người dùng hiện tại trong phiên: userId={}", currentUserId);
+              Long userId = SecurityUtils.getCurrentUserId();
 
-
-            boolean canReview = currentUser != null && currentUser.getUserId() != null &&
-                    reviewService.canUserReviewPackage(currentUser.getUserId(), packageId);
+            boolean canReview = userId != null &&
+                    reviewService.canUserReviewPackage(userId, packageId);
             logger.debug("canReview: {}", canReview);
             model.addAttribute("canReview", canReview);
-            model.addAttribute("currentUserId", currentUserId);
+            model.addAttribute("userId", userId);
 
 
             List<Review> packageReviews = reviewService.getReviewsByPackageAndFilters(packageId, comment, rating);
@@ -119,16 +110,16 @@ public class ReviewPackageStudentController {
 
 
             String reviewStatusMessage = null;
-            if (currentUser != null && canReview) {
+            if (userId != null && canReview) {
                 ReviewStatus latestStatus = reviewService
-                        .getLatestReviewStatusForUser(currentUser.getUserId(), packageId);
+                        .getLatestReviewStatusForUser(userId, packageId);
                 if (latestStatus != null) {
                     if (latestStatus == ReviewStatus.APPROVED) {
-                        reviewStatusMessage = "Bạn đã bình luận thành công!";
+                        reviewStatusMessage = "Bạn đã đánh giá thành công!";
                     } else if (latestStatus == ReviewStatus.PENDING) {
-                        reviewStatusMessage = "Bình luận của bạn đang chờ duyệt, vui lòng đợi một chút!";
+                        reviewStatusMessage = "Đánh giá của bạn đang chờ duyệt, vui lòng đợi một chút!";
                     } else if (latestStatus == ReviewStatus.REJECTED) {
-                        reviewStatusMessage = "Bình luận của bạn vi phạm nguyên tắc chung! Bạn không thể bình luận ở mục này ";
+                        reviewStatusMessage = "Đánh giá của bạn vi phạm nguyên tắc chung! Bạn không thể đánh giá ở mục này ";
                     }
                 }
             }
@@ -167,14 +158,10 @@ public class ReviewPackageStudentController {
             @ModelAttribute("newReview") Review review,
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = null;
-        if (authentication != null && authentication.isAuthenticated()
-                && authentication.getPrincipal() instanceof UserDetails) {
-            String username = authentication.getName();
-            currentUser = userService.getUserByEmail(username);
-        }
-        if (currentUser == null) {
+     
+              Long userId = SecurityUtils.getCurrentUserId();
+
+        if (userId == null) {
             return "redirect:/packages/detail?packageId=" + packageId + "&fail=Please log in to review.";
         }
 
@@ -185,7 +172,7 @@ public class ReviewPackageStudentController {
                 .orElseThrow(() -> new RuntimeException("Subject not found")) : null;
 
 
-        boolean reviewExists = reviewService.hasUserReviewedPackage(currentUser.getUserId(), packageId);
+        boolean reviewExists = reviewService.hasUserReviewedPackage(userId, packageId);
 
 
         if (reviewExists) {
@@ -194,8 +181,9 @@ public class ReviewPackageStudentController {
         }
 
 
-        if (reviewService.canUserReviewPackage(currentUser.getUserId(), packageId)) {
+        if (reviewService.canUserReviewPackage(userId, packageId)) {
             try {
+                User currentUser = userService.getUserById(userId);
                 reviewService.saveReview(review, currentUser, subject == null ? pkg : null, subject);
                 return "redirect:/packages/detail?packageId=" + packageId
                         + "&success=Your review has been submitted and is pending approval.";

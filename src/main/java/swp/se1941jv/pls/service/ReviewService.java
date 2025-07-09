@@ -3,12 +3,14 @@ package swp.se1941jv.pls.service;
 import swp.se1941jv.pls.entity.Review;
 import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.entity.UserPackage;
+
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.entity.ReviewStatus;
 import swp.se1941jv.pls.entity.TransactionStatus;
 import swp.se1941jv.pls.repository.ReviewRepository;
 import swp.se1941jv.pls.repository.UserPackageRepository;
+import swp.se1941jv.pls.repository.UserRepository;
 import swp.se1941jv.pls.repository.PackageSubjectRepository;
 import swp.se1941jv.pls.repository.TransactionRepository;
 
@@ -34,15 +36,18 @@ public class ReviewService {
     private final UserPackageRepository userPackageRepository;
     private final PackageSubjectRepository packageSubjectRepository;
     private final TransactionRepository transactionRepository;
+        private final UserRepository userRepository;
+    
     @Autowired
     private UserService userService;
 
     public ReviewService(ReviewRepository reviewRepository, UserPackageRepository userPackageRepository,
-            PackageSubjectRepository packageSubjectRepository, TransactionRepository transactionRepository) {
+            PackageSubjectRepository packageSubjectRepository, TransactionRepository transactionRepository,UserRepository userRepository) {
         this.reviewRepository = reviewRepository;
         this.userPackageRepository = userPackageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
         this.transactionRepository = transactionRepository;
+        this.userRepository =userRepository;
     }
 
     public List<Review> getReviewsByPackage(Long packageId) {
@@ -110,6 +115,22 @@ public class ReviewService {
         review.setStatus(ReviewStatus.PENDING);
         return reviewRepository.save(review);
     }
+// public Review saveReview(Review review, Long userId, Package pkg, Subject subject) {
+//         if (userId == null || (pkg == null && subject == null) || (pkg != null && subject != null)) {
+//             throw new IllegalArgumentException("Invalid review data");
+//         }
+
+//         UserDTO userDTO = userRepository.findUserDTOById(userId)
+//                 .orElseThrow(() -> new RuntimeException("User not found"));
+//         // Tạo User entity từ DTO (chỉ cần userId để set vào Review)
+//         User user = new User();
+//         user.setUserId(userDTO.getUserId()); // Chỉ set userId, các trường khác không cần
+//         review.setUser(user);
+//         review.setPkg(pkg);
+//         review.setSubject(subject);
+//         review.setStatus(ReviewStatus.PENDING);
+//         return reviewRepository.save(review);
+//     }
 
     @Transactional
     public void toggleUsefulCount(Long reviewId) {

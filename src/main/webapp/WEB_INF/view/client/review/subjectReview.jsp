@@ -215,7 +215,7 @@
                                     <input type="hidden" name="rating" id="selectedRating" value="${selectedRating}" />
                                 </div>
                                 <div class="col-12 mt-3">
-                                    <label for="commentInput">Nội dung bình luận:</label>
+                                    <label for="commentInput">Nội dung đánh giá:</label>
                                     <div class="d-flex align-items-center">
                                         <input type="text" id="commentInput" name="comment" value="${selectedComment}"
                                             class="form-control me-2" placeholder="Nhập nội dung..." />
@@ -262,7 +262,7 @@
                                                     <span class="star">☆</span>
                                                 </c:forEach>
                                             </div>
-                                            <p>${not empty review.comment ? review.comment : 'Chưa có bình luận'}</p>
+                                            <p>${not empty review.comment ? review.comment : 'Chưa có đánh giá'}</p>
                                             <small>Đăng ngày:
                                                 <c:choose>
                                                     <c:when test="${review.createdAt != null}">
@@ -279,80 +279,13 @@
                                 </c:forEach>
                             </div>
 
-                            <c:if test="${canReview}">
-                                <c:choose>
-                                    <c:when test="${not empty reviewStatusMessage}">
-                                        <p style="color: orange;">${reviewStatusMessage}</p>
-                                        <c:if test="${latestReviewStatus == 'REJECTED'}">
-                                            <div class="review-form">
-                                                <h3>Gửi lại đánh giá của bạn</h3>
-                                                <form action="/subject/${subject.subjectId}/review" method="post"
-                                                    modelAttribute="newReview" commandName="newReview">
-                                                    <input type="hidden" name="${_csrf.parameterName}"
-                                                        value="${_csrf.token}" />
-                                                    <div class="form-group">
-                                                        <label for="rating">Số sao:</label>
-                                                        <select name="rating" id="rating" class="form-control" required>
-                                                            <option value="1">1</option>
-                                                            <option value="2">2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
-                                                            <option value="5">5</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="comment">Bình luận:</label>
-                                                        <textarea name="comment" id="comment" class="form-control"
-                                                            rows="4" maxlength="500"
-                                                            placeholder="Nhập bình luận của bạn..." required></textarea>
-                                                    </div>
-                                                    <button type="submit" class="submit-review-btn">Gửi lại đánh
-                                                        giá</button>
-                                                </form>
-                                            </div>
-                                        </c:if>
-                                        <c:if
-                                            test="${latestReviewStatus == 'APPROVED' || latestReviewStatus == 'PENDING'}">
-                                            <!-- Không hiển thị form, chỉ hiển thị thông báo -->
-                                        </c:if>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="review-form">
-                                            <h3>Viết đánh giá của bạn</h3>
-                                            <form action="/subject/${subject.subjectId}/review" method="post"
-                                                modelAttribute="newReview" commandName="newReview">
-                                                <input type="hidden" name="${_csrf.parameterName}"
-                                                    value="${_csrf.token}" />
-                                                <div class="form-group">
-                                                    <label for="rating">Số sao:</label>
-                                                    <select name="rating" id="rating" class="form-control" required>
-                                                        <option value="1">1</option>
-                                                        <option value="2">2</option>
-                                                        <option value="3">3</option>
-                                                        <option value="4">4</option>
-                                                        <option value="5">5</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="comment">Bình luận:</label>
-                                                    <textarea name="comment" id="comment" class="form-control" rows="4"
-                                                        maxlength="500" placeholder="Nhập bình luận của bạn..."
-                                                        required></textarea>
-                                                </div>
-                                                <button type="submit" class="submit-review-btn">Gửi đánh giá</button>
-                                            </form>
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:if>
+                     
                         </div>
                     </div>
                 </div>
 
                 <!-- Thêm Bootstrap JS và các CDN khác -->
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-                    crossorigin="anonymous"></script>
+              
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
                 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
                 <link rel="stylesheet"
