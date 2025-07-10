@@ -41,7 +41,7 @@ public class ManagerController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long gradeId) {
         // Sắp xếp theo createdAt tăng dần
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.ASC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (keyword != null) {
             keyword = keyword.trim();
             if (keyword.isEmpty()) {

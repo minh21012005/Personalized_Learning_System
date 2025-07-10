@@ -262,7 +262,7 @@
                                             class="form-control me-2" placeholder="Nhập nội dung..." />
                                         <button type="submit" class="btn btn-outline-secondary px-3 py-2"
                                             style="background-color: white;">
-                                            🔍
+                                            <i class="fas fa-magnifying-glass"></i>
                                         </button>
                                     </div>
                                 </div>

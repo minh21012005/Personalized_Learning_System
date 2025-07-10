@@ -61,7 +61,7 @@ public class ReviewController {
 
             // Giải mã comment để xử lý ký tự Unicode
             if (comment != null && !comment.isEmpty()) {
-                comment = URLDecoder.decode(comment, StandardCharsets.UTF_8);
+                comment = URLDecoder.decode(comment.trim(), StandardCharsets.UTF_8);
                 logger.debug("Decoded comment: {}", comment);
             }
 
