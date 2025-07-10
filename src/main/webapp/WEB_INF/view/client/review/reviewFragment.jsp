@@ -10,6 +10,37 @@
 
 
                 <style>
+                    .reviews-section{
+                        margin-bottom: 50px;
+                    }
+                    .star-rating {
+        direction: rtl;
+        display: inline-flex;
+        font-size: 1rem;
+        unicode-bidi: bidi-override;
+    }
+
+    .star-rating input[type="radio"] {
+        display: none;
+    }
+
+    .star-rating label {
+        color: #ccc;
+        cursor: pointer;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: gold;
+    }
+
+    .star-rating input[type="radio"]:checked ~ label {
+        color: gold;
+    }
+                    
+
+
+    
     .review-card {
         display: flex;
         align-items: flex-start;
@@ -37,7 +68,8 @@
 
     .review-content {
         flex: 1;
-        margin-left: 50px;
+        margin-left: 10px;
+    
     }
 
     .review-content h4 {
@@ -341,13 +373,18 @@
                                                 </c:if>
                                                 <div class="form-group">
                                                     <label for="rating">Số sao:</label>
-                                                    <select name="rating" id="rating" class="form-control" required>
-                                                        <option value="1">1</option>
-                                                        <option value="2">2</option>
-                                                        <option value="3">3</option>
-                                                        <option value="4">4</option>
-                                                        <option value="5">5</option>
-                                                    </select>
+                                                    <div class="star-rating">
+        <input type="radio" id="star5" name="rating" value="5" required>
+        <label for="star5">&#9733;</label>
+        <input type="radio" id="star4" name="rating" value="4">
+        <label for="star4">&#9733;</label>
+        <input type="radio" id="star3" name="rating" value="3">
+        <label for="star3">&#9733;</label>
+        <input type="radio" id="star2" name="rating" value="2">
+        <label for="star2">&#9733;</label>
+        <input type="radio" id="star1" name="rating" value="1">
+        <label for="star1">&#9733;</label>
+    </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="comment">Đánh giá:</label>

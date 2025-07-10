@@ -11,6 +11,31 @@
 
 
                 <style>
+                     .star-rating {
+        direction: rtl;
+        display: inline-flex;
+        font-size: 1rem;
+        unicode-bidi: bidi-override;
+    }
+
+    .star-rating input[type="radio"] {
+        display: none;
+    }
+
+    .star-rating label {
+        color: #ccc;
+        cursor: pointer;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: gold;
+    }
+
+    .star-rating input[type="radio"]:checked ~ label {
+        color: gold;
+    }
+                    
             /* Phần review-content */
 #review-content {
     max-width: 650px;
@@ -19,6 +44,7 @@
     background-color: #f9f9f9;
     border-radius: 5px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+     margin-left: 10px;
 }
 
 
@@ -115,7 +141,7 @@
 
 .average-rating p {
     font-size: 1rem;
-    margin-bottom: 0;
+    margin-bottom: 10px;
     color: #7f8c8d;
 }
 
@@ -314,7 +340,9 @@
         padding: 5px 8px;
         font-size: 0.8rem;
     }
-
+  .reviews-section{
+                        margin-bottom: 50px;
+                    }
 
 }
                 </style>
@@ -376,7 +404,7 @@
                                         <input type="text" id="commentInput" name="comment" value="${selectedComment}"
                                             class="form-control me-2" placeholder="Nhập nội dung..." />
                                         <button type="submit" class="btn btn-outline-secondary px-3 py-2"
-                                            style="background-color: white;">
+                                            style="background-color: white; border-color: white; color: gray;">
                                             <i class="fas fa-magnifying-glass"></i>
                                         </button>
                                     </div>
@@ -460,16 +488,21 @@
                                                 <c:if test="${not empty subjectId}">
                                                     <input type="hidden" name="subjectId" value="${subjectId}" />
                                                 </c:if>
-                                                <div class="form-group">
-                                                    <label for="rating">Số sao:</label>
-                                                    <select name="rating" id="rating" class="form-control" required>
-                                                        <option value="1">1</option>
-                                                        <option value="2">2</option>
-                                                        <option value="3">3</option>
-                                                        <option value="4">4</option>
-                                                        <option value="5">5</option>
-                                                    </select>
-                                                </div>
+                                             <div class="form-group">
+    <label for="rating">Số sao:</label>
+    <div class="star-rating">
+        <input type="radio" id="star5" name="rating" value="5" required>
+        <label for="star5">&#9733;</label>
+        <input type="radio" id="star4" name="rating" value="4">
+        <label for="star4">&#9733;</label>
+        <input type="radio" id="star3" name="rating" value="3">
+        <label for="star3">&#9733;</label>
+        <input type="radio" id="star2" name="rating" value="2">
+        <label for="star2">&#9733;</label>
+        <input type="radio" id="star1" name="rating" value="1">
+        <label for="star1">&#9733;</label>
+    </div>
+</div>
                                                 <div class="form-group">
                                                     <label for="comment">Đánh giá:</label>
                                                     <textarea name="comment" id="comment" class="form-control" rows="4"

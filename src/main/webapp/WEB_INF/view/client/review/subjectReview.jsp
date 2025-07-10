@@ -9,6 +9,9 @@
                     crossorigin="anonymous">
 
                 <style>
+                      .reviews-section{
+                        margin-bottom: 50px;
+                    }
                     /* Ghi đè style của btn-outline-success */
 .btn-outline-success {
     border-color: white !important; /* Viền trắng */
@@ -47,6 +50,7 @@
 }
 .review-content {
     flex: 1;
+     margin-left: 10px;
 }
 .review-content h4 {
     font-size: 0.95rem;
