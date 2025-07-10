@@ -79,8 +79,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/student/**")
                         .hasAnyRole("STUDENT", "ADMIN")
 
-                        // .requestMatchers("/parent/**")
-                        // .hasAnyRole("PARENT", "ADMIN")
+                        .requestMatchers("/parent/**")
+                        .hasAnyRole("PARENT")
 
                         // .requestMatchers("/admin/**")
                         // .hasAnyRole("CONTENT_MANAGER", "ADMIN")
