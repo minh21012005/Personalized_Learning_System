@@ -26,62 +26,134 @@
         .comment .author-name { font-weight: bold; }
         .comment .comment-meta { color: #888; font-size: 0.9em; }
         .comment-content { margin-top: 5px; }
-        .replies { margin-left: 20px; }
+        .replies { margin-left: 20px; border-left: 2px solid #f0f0f0; }
         .reply-form { margin-top: 10px; }
-        .btn-reply { cursor: pointer; color: #007bff; font-size: 0.9em; user-select: none; }
+        .btn-reply, .btn-delete { cursor: pointer; font-size: 0.9em; user-select: none; font-weight: 500;}
+        .btn-reply { color: #007bff; }
+        .btn-delete { color: #dc3545; }
     </style>
 </head>
 <body>
-<header>
-    <jsp:include page="../layout/header.jsp" />
-</header>
+    <header>
+        <jsp:include page="../layout/header.jsp" />
+    </header>
 
-<div class="main-container">
-    <div class="sidebar">
-        <jsp:include page="../layout/sidebar.jsp" />
-    </div>
+    <div class="main-container">
+        <div class="sidebar">
+            <jsp:include page="../layout/sidebar.jsp" />
+        </div>
 
-    <div class="content">
-        <main>
-            <div class="container-fluid px-4">
-                <h3>Communication Hub</h3>
-                <p class="text-muted">All questions from users across all subjects and lessons.</p>
-                <hr>
-                <div id="hub-container">
-                    <p>Loading communications...</p>
+        <div class="content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h3>Communication Hub</h3>
+                    <p class="text-muted">All questions from users across all subjects and lessons.</p>
+                    <hr>
+                    <div id="hub-container">
+                        <p>Loading communications...</p>
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center" id="pagination-container">
+                        </ul>
+                    </nav>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
-</div>
 
-<footer>
-    <jsp:include page="../layout/footer.jsp" />
-</footer>
+    <footer>
+        <jsp:include page="../layout/footer.jsp" />
+    </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', async function() {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded and parsed.');
+
     const hubContainer = document.getElementById('hub-container');
+    const paginationContainer = document.getElementById('pagination-container');
+    
+    let currentPage = 0; 
+    const pageSize = 5;
 
-    async function fetchAndRenderHub() {
+    async function fetchAndRenderHub(pageNumber) {
+        // DEBUG: Sửa lại cú pháp console.log để không bị lỗi JSP
+        console.log('[fetchAndRenderHub] Function called with pageNumber:', pageNumber, '(type: ' + (typeof pageNumber) + ')');
+
+        const pageToFetch = (typeof pageNumber === 'number' && pageNumber >= 0) ? pageNumber : 0;
+        
+        console.log('[fetchAndRenderHub] Will fetch for page: ' + pageToFetch + ', size: ' + pageSize);
+
         try {
-            const response = await fetch('<c:url value="/api/communications/hub"/>');
-            if (!response.ok) throw new Error('Failed to fetch API');
-            const comments = await response.json();
+            hubContainer.innerHTML = '<p>Loading communications...</p>';
+            
+            const params = new URLSearchParams({
+                page: pageToFetch,
+                size: pageSize
+            });
+            const apiUrl = '<c:url value="/api/communications/hub"/>?' + params.toString();
+            console.log('[fetchAndRenderHub] Request URL:', apiUrl);
+
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error('API Error: ' + response.status + ' - ' + response.statusText);
+            }
+            
+            const pagedData = await response.json();
+            console.log('[fetchAndRenderHub] Received pagedData:', pagedData);
+
+            const comments = pagedData.content;
+            
             hubContainer.innerHTML = '';
-            if (comments.length === 0) {
-                hubContainer.innerHTML = '<p>No communications yet.</p>';
+            if (!comments || comments.length === 0) {
+                hubContainer.innerHTML = pagedData.number > 0 ? '<p>No comments on this page.</p>' : '<p>No communications yet.</p>';
             } else {
                 comments.forEach(comment => {
-                    const commentElement = createHubEntryElement(comment);
-                    hubContainer.appendChild(commentElement);
+                    hubContainer.appendChild(createHubEntryElement(comment));
                 });
             }
+            
+            currentPage = pagedData.number; 
+            console.log('[fetchAndRenderHub] currentPage state updated to: ' + currentPage);
+            renderPagination(pagedData);
+
         } catch (error) {
-            hubContainer.innerHTML = '<p style="color: red;">Failed to load communications.</p>';
-            console.error('JAVASCRIPT ERROR:', error);
+            hubContainer.innerHTML = '<p style="color: red;">Failed to load communications: ' + error.message + '</p>';
+            console.error('[JAVASCRIPT ERROR]', error);
         }
+    }
+
+    function renderPagination(pagedData) {
+        paginationContainer.innerHTML = '';
+        const totalPages = pagedData.totalPages;
+        const currentActivePage = pagedData.number;
+
+        if (totalPages <= 1) return;
+
+        const createPageItem = (pageIndex, text, isDisabled, isActive) => {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (isDisabled ? ' disabled' : '') + (isActive ? ' active' : '');
+            
+            const button = document.createElement('button');
+            button.className = 'page-link';
+            button.dataset.page = pageIndex;
+            button.textContent = text;
+            if (isDisabled) {
+                button.setAttribute('disabled', 'disabled');
+            }
+            if (text === 'Previous' || text === 'Next') {
+                 button.setAttribute('aria-label', text);
+            }
+
+            li.appendChild(button);
+            return li;
+        };
+        
+        paginationContainer.appendChild(createPageItem(currentActivePage - 1, 'Previous', pagedData.first));
+        for (let i = 0; i < totalPages; i++) {
+            paginationContainer.appendChild(createPageItem(i, i + 1, false, i === currentActivePage));
+        }
+        paginationContainer.appendChild(createPageItem(currentActivePage + 1, 'Next', pagedData.last));
     }
 
     function createHubEntryElement(comment) {
@@ -89,72 +161,73 @@ document.addEventListener('DOMContentLoaded', async function() {
         cardDiv.className = 'comment-card';
         const commentTreeHtml = createCommentRecursive(comment);
         cardDiv.innerHTML =
-            '<div class="comment-header">' +
-                'Subject: ' + comment.subjectName + ' | Lesson: ' + comment.lessonName +
-            '</div>' +
-            '<div class="comment-body">' +
-                commentTreeHtml +
-            '</div>';
+            '<div class="comment-header">Subject: ' + (comment.subjectName || 'N/A') + ' | Lesson: ' + (comment.lessonName || 'N/A') + '</div>' +
+            '<div class="comment-body">' + commentTreeHtml + '</div>';
         return cardDiv;
     }
 
     function createCommentRecursive(comment) {
-        const avatar = comment.author.avatarUrl || 'https://via.placeholder.com/40';
-        const createdAt = new Date(comment.createdAt).toLocaleString();
+        const author = comment.author || {};
+        const authorName = author.name || 'Anonymous User';
+        // IMPORTANT: Sửa lại cách nối chuỗi cho avatar
+        const avatarUrlBase = '<c:url value="/images/"/>';
+        const avatar = author.avatarUrl ? avatarUrlBase + author.avatarUrl : 'https://via.placeholder.com/40';
+        let createdAt = 'Invalid Date';
+        if (comment.createdAt) {
+            try { createdAt = new Date(comment.createdAt).toLocaleString('vi-VN'); } catch (e) {}
+        }
         let repliesHtml = '';
         if (comment.replies && comment.replies.length > 0) {
             repliesHtml += '<div class="replies">';
-            comment.replies.forEach(reply => {
-                repliesHtml += createCommentRecursive(reply);
-            });
+            comment.replies.forEach(reply => { repliesHtml += createCommentRecursive(reply); });
             repliesHtml += '</div>';
         }
-
-        const deleteButtonHtml = '<span class="btn-delete ms-2" style="cursor:pointer; color: #dc3545; font-size: 0.9em;">Delete</span>';
-
+        const deleteButtonHtml = '<span class="btn-delete ms-2" style="cursor: pointer;">Delete</span>';
+        
         return (
-            '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
-                 '<div class="author-info">' +
-                    '<img src="' + avatar + '" alt="' + comment.author.name + '" class="author-avatar">' +
-                    '<div>' +
-                        '<span class="author-name">' + comment.author.name + '</span>' +
-                        '<div class="comment-meta">' +
-                            '<span>' + createdAt + '</span>' +
-                        '</div>' +
-                    '</div>' +
+        '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
+            '<div class="author-info">' +
+                '<img src="' + avatar + '" alt="' + authorName + '" class="author-avatar">' +
+                '<div>' +
+                    '<span class="author-name">' + authorName + '</span>' +
+                    '<div class="comment-meta"><span>' + createdAt + '</span></div>' +
                 '</div>' +
-                '<p class="comment-content">' + comment.content + '</p>' +
-                '<span class="btn-reply">Reply</span>' + deleteButtonHtml +
-                repliesHtml +
-            '</div>'
-        );
+            '</div>' +
+            '<p class="comment-content">' + (comment.content || '') + '</p>' +
+            '<span class="btn-reply">Reply</span>' +
+            deleteButtonHtml +
+            repliesHtml +
+        '</div>'
+    );
     }
-
+    
     async function postComment(content, parentId, lessonId) {
+         if (!lessonId) {
+            console.error('postComment failed: lessonId is missing.');
+            return null;
+        }
         try {
-            const apiUrl = '<c:url value="/api/communications/lesson/"/>' + lessonId;
+            const apiUrl = '<c:url value="/api/communications/lesson"/>/' + lessonId;
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: content, parentId: parentId })
+                body: JSON.stringify({ content, parentId })
             });
-            if(response.ok){
-                return await response.json();
-            } else {
-                return null;
-            }
+            return response.ok ? await response.json() : null;
         } catch (error) {
             console.error('Error posting comment:', error);
-            return false;
+            return null;
         }
     }
 
     async function deleteComment(commentId) {
+        if (!commentId) {
+            console.error('deleteComment failed: commentId is missing.');
+            return false;
+        }
         try {
-            const apiUrl = `<c:url value="/api/communications/"/>` + commentId;
-            const response = await fetch(apiUrl, {
-                method: 'DELETE'
-            });
+            const apiUrl = '<c:url value="/api/communications"/>/' + commentId;
+            const response = await fetch(apiUrl, { method: 'DELETE' });
             return response.ok;
         } catch (error) {
             console.error('Error deleting comment:', error);
@@ -162,75 +235,87 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    hubContainer.addEventListener('click', async function(e) {
-        if (e.target.classList.contains('btn-reply')) {
-            const commentElement = e.target.closest('.comment');
-            const parentId = commentElement.dataset.id;
-            const lessonId = commentElement.dataset.lessonId;
+    paginationContainer.addEventListener('click', function(e) {
+        console.log('[Pagination Click] Event triggered.');
+        e.preventDefault();
 
-            document.querySelectorAll('.reply-form').forEach(form => form.remove());
+        const button = e.target.closest('button.page-link');
+        console.log('[Pagination Click] Clicked element:', e.target);
+        console.log('[Pagination Click] Closest button.page-link:', button);
 
-            const replyForm = document.createElement('form');
-            replyForm.className = 'reply-form';
-            replyForm.innerHTML = 
-                '<div class="form-group">' +
-                    '<textarea class="form-control" rows="2" placeholder="Write a reply..." required></textarea>' +
-                '</div>' +
-                '<button type="submit" class="btn btn-sm btn-primary mt-1">Submit Reply</button>' +
-                '<button type="button" class="btn btn-sm btn-secondary mt-1 cancel-reply">Cancel</button>';
+        if (button && !button.disabled) {
+            const pageValueFromDataset = button.dataset.page;
+            console.log('[Pagination Click] Button is valid. data-page attribute value:', pageValueFromDataset, '(type: ' + (typeof pageValueFromDataset) + ')');
+            
+            const pageToFetch = parseInt(pageValueFromDataset, 10);
+            console.log('[Pagination Click] Parsed page number:', pageToFetch, '(type: ' + (typeof pageToFetch) + ')');
 
-            commentElement.appendChild(replyForm);
-            const textArea = replyForm.querySelector('textarea');
-            textArea.focus();
-
-            replyForm.addEventListener('submit', async function(submitEvent) {
-                submitEvent.preventDefault();
-                const replyContent = textArea.value.trim();
-
-                if (replyContent) {
-                    replyForm.querySelector('button[type="submit"]').disabled = true;
-
-                    const newReplyData = await postComment(replyContent, parentId, lessonId);
-
-                    if (newReplyData) {
-                        const newReplyElementHtml = createCommentRecursive(newReplyData);
-                        let repliesContainer = commentElement.querySelector('.replies');
-                        if (!repliesContainer) {
-                            repliesContainer = document.createElement('div');
-                            repliesContainer.className = 'replies';
-                            commentElement.appendChild(repliesContainer);
-                        }
-                        repliesContainer.insertAdjacentHTML('beforeend', newReplyElementHtml);
-                        replyForm.remove();
-                    } else {
-                        alert('Failed to post reply.');
-                        replyForm.querySelector('button[type="submit"]').disabled = false;
-                    }
-                }
-            });
-
-            replyForm.querySelector('.cancel-reply').addEventListener('click', () => {
-                replyForm.remove();
-            });
-        }
-
-        if (e.target.classList.contains('btn-delete')) {
-            if (!confirm('Are you sure you want to delete this comment and all its replies?')) return;
-            const commentElement = e.target.closest('.comment');
-            const commentId = commentElement.dataset.id;
-            const success = await deleteComment(commentId);
-
-            if (success) {
-                commentElement.style.transition = 'opacity 0.5s';
-                commentElement.style.opacity = '0';
-                setTimeout(() => commentElement.remove(), 500);
+            if (!isNaN(pageToFetch) && pageToFetch !== currentPage) {
+                 console.log('[Pagination Click] Page is different from current (' + currentPage + '). Calling fetchAndRenderHub.');
+                 fetchAndRenderHub(pageToFetch);
             } else {
-                alert('Failed to delete the comment.');
+                 console.log('[Pagination Click] Page is same as current or NaN. Not fetching. isNaN: ' + isNaN(pageToFetch) + ', pageToFetch: ' + pageToFetch + ', currentPage: ' + currentPage);
             }
+        } else {
+            console.log('[Pagination Click] Click was not on a valid, enabled page-link button.');
         }
     });
 
-    fetchAndRenderHub();
+    hubContainer.addEventListener('click', async function(e) {
+        const target = e.target;
+        if (target.classList.contains('btn-reply')) {
+                const commentElement = target.closest('.comment');
+                const parentId = parseInt(commentElement.dataset.id, 10);
+                const lessonId = parseInt(commentElement.dataset.lessonId, 10);
+                 if (isNaN(parentId) || isNaN(lessonId)) {
+                alert('Error: Cannot reply to this comment. Missing required data.');
+                return;
+            }
+                document.querySelectorAll('.reply-form').forEach(form => form.remove());
+
+                const replyForm = document.createElement('form');
+                replyForm.className = 'reply-form';
+                replyForm.innerHTML =
+                    '<div class="form-group"><textarea class="form-control" rows="2" placeholder="Write a reply..." required></textarea></div>' +
+                    '<button type="submit" class="btn btn-sm btn-primary mt-1">Submit Reply</button>' +
+                    '<button type="button" class="btn btn-sm btn-secondary mt-1 cancel-reply">Cancel</button>';
+
+                commentElement.appendChild(replyForm);
+                const textArea = replyForm.querySelector('textarea');
+                textArea.focus();
+                replyForm.addEventListener('submit', async function(submitEvent) {
+                    submitEvent.preventDefault();
+                    const replyContent = textArea.value.trim();
+                    if (replyContent) {
+                        const newReplyData = await postComment(replyContent, parentId, lessonId);
+                        if (newReplyData) {
+                            fetchAndRenderHub(currentPage);
+                        } else {
+                            alert('Failed to post reply.');
+                        }
+                    }
+                });
+                replyForm.querySelector('.cancel-reply').addEventListener('click', () => { replyForm.remove(); });
+            }
+        if (target.classList.contains('btn-delete')) {
+            if (!confirm('Are you sure to delete this comment?')) return;
+            const commentElement = target.closest('.comment');
+            const commentId = parseInt(commentElement.dataset.id, 10);
+             if (isNaN(commentId)) {
+                alert('Error: Cannot delete this comment. Missing required data.');
+                return;
+            }
+            const success = await deleteComment(commentId);
+            if (success) {
+                fetchAndRenderHub(currentPage);
+            } else {
+                alert('Failed to delete comment.');
+            }
+        }
+    });
+    
+    console.log('Initial load: calling fetchAndRenderHub(0)');
+    fetchAndRenderHub(0);
 });
 </script>
 </body>

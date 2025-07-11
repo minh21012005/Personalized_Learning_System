@@ -2,15 +2,15 @@ package swp.se1941jv.pls.controller.admin;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+
 import swp.se1941jv.pls.dto.request.CreateCommunicationRequest;
 import swp.se1941jv.pls.dto.response.CommunicationResponseDto;
-import swp.se1941jv.pls.entity.Communication;
 import swp.se1941jv.pls.service.CommunicationService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/communications")
@@ -19,10 +19,13 @@ public class CommunicationApiController {
 
     private final CommunicationService communicationService;
 
-    @GetMapping("/lesson/{lessonId}")
-    public ResponseEntity<List<CommunicationResponseDto>> getCommunicationsByLesson(@PathVariable Long lessonId) {
-        List<CommunicationResponseDto> communications = communicationService.getCommunicationsForLesson(lessonId);
-        return ResponseEntity.ok(communications);
+    @GetMapping("/hub")
+    public ResponseEntity<Page<CommunicationResponseDto>> getHubCommunications(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size) {
+        
+        Page<CommunicationResponseDto> pagedResponse = communicationService.getAllRootCommunications(page, size);
+        return ResponseEntity.ok(pagedResponse);
     }
 
     @PostMapping("/lesson/{lessonId}")
@@ -36,12 +39,6 @@ public class CommunicationApiController {
                 request.getParentId()
         );
         return new ResponseEntity<>(newCommunication, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/hub")
-    public ResponseEntity<List<CommunicationResponseDto>> getHubCommunications() {
-        List<CommunicationResponseDto> communications = communicationService.getAllRootCommunications();
-        return ResponseEntity.ok(communications);
     }
 
     @DeleteMapping("/{communicationId}")

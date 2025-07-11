@@ -56,8 +56,14 @@ public class Communication extends BaseEntity{
      )
      private User user;
 
-    @NotNull(message = "Trạng thái bình luận không được null")
     @Enumerated(EnumType.STRING)
     @Column(name = "comment_status", columnDefinition = "VARCHAR(20) DEFAULT 'PENDING' NOT NULL")
     CommentStatus commentStatus;
+
+    @PrePersist
+    public void prePersistStatus() {
+        if (this.commentStatus == null) {
+            this.commentStatus = CommentStatus.PENDING;
+        }
+    }
 }

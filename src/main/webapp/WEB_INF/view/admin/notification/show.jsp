@@ -8,14 +8,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <%-- Tiêu đề trang sẽ được truyền từ NotificationController --%>
+
     <title><c:out value="${pageTitle}" default="Quản lý Thông báo"/></title> 
-    
-    <%-- Sử dụng các link CSS giống như grade/show.jsp để đồng bộ --%>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/lib/bootstrap/css/bootstrap.css"> <%-- Giả sử đây là Bootstrap cũ hơn, giữ lại nếu cần --%>
+
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/lib/bootstrap/css/bootstrap.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <%-- Thêm FontAwesome nếu bạn muốn dùng icon từ đó (đã có trong các ví dụ trước) --%>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 
@@ -70,13 +69,12 @@
             /* left: 0; */
             /* right: 0; */
             z-index: 1020;
-            width: 100%; /* Đảm bảo footer chiếm toàn bộ chiều ngang */
-            margin-top: auto; /* Đẩy footer xuống đáy nếu content ngắn */
+            width: 100%;
+            margin-top: auto;
         }
 
-        /* Các style khác từ grade/show.jsp nếu cần cho form, table */
+
         .form-control, .form-select {
-            /* width: auto; */ /* Để Bootstrap tự quản lý width tốt hơn, hoặc set cụ thể */
             max-width: 100%; /* Đảm bảo không tràn */
         }
         .table th,
@@ -97,20 +95,20 @@
 </head>
 
 <body>
-    <!-- Header -->
+
     <header>
         <%-- Đường dẫn đến header.jsp trong /WEB-INF/view/admin/layout/ --%>
         <jsp:include page="../layout/header.jsp" />
     </header>
 
     <div style="display: flex; flex-grow: 1;"> <%-- Wrapper cho sidebar và content --%>
-        <!-- Sidebar -->
+
         <div class="sidebar">
             <%-- Đường dẫn đến sidebar.jsp trong /WEB-INF/view/admin/layout/ --%>
             <jsp:include page="../layout/sidebar.jsp" />
         </div>
 
-        <!-- Main Content Area -->
+
         <div class="content-wrapper">
             <%-- Hiển thị Success Message --%>
             <c:if test="${not empty successMessage}">
@@ -152,28 +150,24 @@
         </div>
     </div>
 
-     <!-- Footer -->
+
             <footer>
                 <jsp:include page="../layout/footer.jsp" />
             </footer>
 
-    <!-- Bootstrap JS (phiên bản phù hợp với CSS) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <%-- Các script JS khác nếu cần --%>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Tự động ẩn success/error messages sau một khoảng thời gian
             const alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach(function(alert) {
-                // Không tự động đóng alert-warning (có thể là lỗi tải form quan trọng)
-                // và alert-danger (để người dùng đọc kỹ lỗi)
                 if (!alert.classList.contains('alert-warning') && !alert.classList.contains('alert-danger')) { 
                     setTimeout(function() {
                         const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
                         if (bsAlert) {
                            try { bsAlert.close(); } catch(e){}
                         }
-                    }, 7000); // 7 giây
+                    }, 7000);
                 }
             });
         });
