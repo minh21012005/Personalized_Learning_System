@@ -405,6 +405,7 @@ const statusFilter = document.getElementById('status-filter');
                         }
 
 
+
 function createCommentRecursive(comment) {
     const author = comment.author || {};
     const authorName = author.name || 'Anonymous User';
@@ -414,6 +415,7 @@ function createCommentRecursive(comment) {
     if (comment.createdAt) {
         try { createdAt = new Date(comment.createdAt).toLocaleString('vi-VN'); } catch (e) { }
     }
+
     let repliesHtml = '';
     if (comment.replies && comment.replies.length > 0) {
         repliesHtml += '<div class="replies">';
@@ -430,23 +432,28 @@ function createCommentRecursive(comment) {
         statusBadgeHtml = '<span class="status-badge status-' + status + '">' + formattedStatus + '</span>';
     }
 
+
     switch (status) {
         case 'PENDING':
             actionsHtml += '<span class="action-link action-approve" data-action="approve" data-status="APPROVED">Approve</span>';
             actionsHtml += '<span class="action-link action-reject" data-action="reject" data-status="REJECTED">Reject</span>';
             break;
+
         case 'APPROVED':
             actionsHtml += '<span class="action-link action-reject" data-action="hide" data-status="HIDDEN">Hide</span>';
+            // CHỈ THÊM NÚT REPLY KHI TRẠNG THÁI LÀ APPROVED
+            actionsHtml += '<span class="action-link action-reply btn-reply">Reply</span>';
             break;
+
         case 'REJECTED':
             actionsHtml += '<span class="action-link action-approve" data-action="approve" data-status="APPROVED">Approve</span>';
             break;
+
         case 'HIDDEN':
             actionsHtml += '<span class="action-link action-show" data-action="show" data-status="APPROVED">Show</span>';
             break;
     }
 
-    actionsHtml += '<span class="action-link action-reply btn-reply">Reply</span>';
     actionsHtml += '<span class="action-link action-delete btn-delete">Delete</span>';
 
     return (

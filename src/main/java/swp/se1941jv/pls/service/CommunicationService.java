@@ -23,6 +23,7 @@ import swp.se1941jv.pls.repository.LessonRepository;
 import swp.se1941jv.pls.repository.UserRepository;
 
 import java.util.NoSuchElementException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
@@ -64,7 +65,10 @@ public class CommunicationService {
     public Page<CommunicationResponseDto> getAllRootCommunications(CommentStatus status, int page, int size) {
         System.out.println("SERVICE: Processing getAllRootCommunications for page = " + page);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Sort sort = Sort.by(Sort.Direction.DESC, "lastActivityAt")
+                    .and(Sort.by(Sort.Direction.DESC, "id"));
+
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Long> rootIdsPage = communicationRepository.findRootCommunicationIds(status,pageable);
         List<Long> rootIdsOnCurrentPage = rootIdsPage.getContent();
@@ -80,8 +84,13 @@ public class CommunicationService {
 
         rootCommunications.forEach(this::initializeAllReplies);
 
+        Comparator<Communication> stableComparator = Comparator
+            .comparing(Communication::getLastActivityAt, Comparator.reverseOrder())
+            .thenComparing(Communication::getId, Comparator.reverseOrder());
+    rootCommunications.sort(stableComparator);
 
-        rootCommunications.sort(Comparator.comparing(Communication::getCreatedAt).reversed());
+
+        //rootCommunications.sort(Comparator.comparing(Communication::getCreatedAt).reversed());
 
 
         Long currentUserId = SecurityUtils.getCurrentUserId();
@@ -118,6 +127,8 @@ public class CommunicationService {
             Communication parentComm = communicationRepository.findById(parentId)
                     .orElseThrow(() -> new NoSuchElementException("Parent communication not found with id: " + parentId));
             newComm.setParentComment(parentComm);
+            Communication rootComm = findRootComment(parentComm);
+            rootComm.setLastActivityAt(LocalDateTime.now());
         }
         Communication savedComm = communicationRepository.save(newComm);
         Long currentUserId = SecurityUtils.getCurrentUserId();
@@ -145,4 +156,12 @@ public class CommunicationService {
         .orElseThrow(() -> new NoSuchElementException("Communication not found with id: " + communicationId));
         com.setCommentStatus(newStatus);
     }
+
+    private Communication findRootComment(Communication comment) {
+    Communication current = comment;
+    while (current.getParentComment() != null) {
+        current = current.getParentComment();
+    }
+    return current;
+   }
 }

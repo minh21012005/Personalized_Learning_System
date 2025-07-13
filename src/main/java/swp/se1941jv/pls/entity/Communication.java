@@ -3,6 +3,8 @@ package swp.se1941jv.pls.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
@@ -61,10 +63,16 @@ public class Communication extends BaseEntity{
     @Column(name = "comment_status", columnDefinition = "VARCHAR(20) DEFAULT 'PENDING' NOT NULL")
     CommentStatus commentStatus;
 
+    @Column(name = "last_activity_at")
+    private LocalDateTime lastActivityAt;
+
     @PrePersist
-    public void prePersistStatus() {
+    public void prePersistDefaultValues() {
         if (this.commentStatus == null) {
             this.commentStatus = CommentStatus.PENDING;
+        }
+        if (this.lastActivityAt == null) {
+        this.lastActivityAt = LocalDateTime.now();
         }
     }
 }
