@@ -105,7 +105,7 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Danh sách bài học trong Môn học ID: <c:out value="${subjectId}"/> - Chương: <c:out value="${lessons[0].chapterName != null ? lessons[0].chapterName : ''}"/></h5>
-                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}'/>" class="btn btn-secondary btn-sm">
+                            <a href="<c:url value='/staff/subject/${subjectId}/chapters'/>" class="btn btn-secondary btn-sm">
                                 <i class="fas fa-arrow-left"></i> Quay lại
                             </a>
                         </div>
@@ -225,27 +225,27 @@
                                         <td><c:out value="${lesson.userFullName != null ? lesson.userFullName : 'Không có thông tin'}"/></td>
                                         <td><c:out value="${lesson.createdAt != null ? lesson.createdAt : ''}"/></td>
                                         <td class="text-center">
-                                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId != null ? lesson.lessonId : ""}'/>"
+                                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}'/>"
                                                class="btn btn-sm btn-primary me-1" title="Xem">
                                                 <i class="fas fa-eye"></i> Xem
                                             </a>
-                                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId != null ? lesson.lessonId : ""}/edit'/>"
+                                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}/edit'/>"
                                                class="btn btn-sm btn-warning me-1" title="Sửa">
                                                 <i class="fas fa-edit"></i> Sửa
                                             </a>
                                             <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteLessonModal<c:out value="${lesson.lessonId != null ? lesson.lessonId : ''}"/>"
+                                                    data-bs-target="#deleteLessonModal<c:out value="${lesson.lessonId}"/>"
                                                     title="Xóa">
                                                 <i class="fas fa-trash"></i> Xóa
                                             </button>
                                             <!-- Delete Confirmation Modal -->
-                                            <div class="modal fade" id="deleteLessonModal<c:out value="${lesson.lessonId != null ? lesson.lessonId : ''}"/>" tabindex="-1"
-                                                 aria-labelledby="deleteLessonModalLabel<c:out value="${lesson.lessonId != null ? lesson.lessonId : ''}"/>"
+                                            <div class="modal fade" id="deleteLessonModal<c:out value="${lesson.lessonId}"/>"
+                                                 tabindex="-1" aria-labelledby="deleteLessonModalLabel<c:out value="${lesson.lessonId}"/>"
                                                  aria-hidden="true">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="deleteLessonModalLabel<c:out value="${lesson.lessonId != null ? lesson.lessonId : ''}"/>">
+                                                            <h5 class="modal-title" id="deleteLessonModalLabel<c:out value="${lesson.lessonId}"/>">
                                                                 Xác nhận xóa
                                                             </h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -255,8 +255,8 @@
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                            <form action="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/<c:out value="${lesson.lessonId != null ? lesson.lessonId : ""}"/>/delete'/>" method="post">
-                                                            <button type="submit" class="btn btn-danger">Xóa</button>
+                                                            <form action="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}/delete'/>" method="post">
+                                                                <button type="submit" class="btn btn-danger">Xóa</button>
                                                             </form>
                                                         </div>
                                                     </div>

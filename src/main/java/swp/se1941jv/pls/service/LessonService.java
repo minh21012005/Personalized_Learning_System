@@ -54,10 +54,9 @@ public class LessonService {
         lesson.setCreatedAt(LocalDateTime.now());
         lesson = lessonRepository.save(lesson);
 
-        if (dto.getLessonMaterials() != null) {
+        if (dto.getLessonMaterials() != null && !dto.getLessonMaterials().isEmpty()) {
             saveLessonMaterials(lesson, dto.getLessonMaterials());
         }
-
     }
 
     @Transactional
@@ -156,7 +155,13 @@ public class LessonService {
     }
 
     public Page<LessonListDTO> findLessonsByChapterId(Long chapterId, String lessonName, Boolean status, Long userId, Pageable pageable) {
-        validateStaffAccess(chapterId, userId);
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại!"));
+        Long subjectId = chapter.getSubject().getSubjectId();
+        Optional<SubjectAssignment> assignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
+        if (assignment.isEmpty() || !assignment.get().getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Chỉ có STAFF được giao môn học này mới có thể thao tác!");
+        }
         Specification<Lesson> spec = Specification.where(LessonSpecifications.hasChapterId(chapterId));
         if (lessonName != null && !lessonName.trim().isEmpty()) {
             spec = spec.and(LessonSpecifications.hasName(lessonName));
@@ -358,7 +363,7 @@ public class LessonService {
                 .build();
     }
 
-    private LessonListDTO toLessonListDTO(Lesson lesson) {
+    public LessonListDTO toLessonListDTO(Lesson lesson) {
         return LessonListDTO.builder()
                 .lessonId(lesson.getLessonId())
                 .lessonName(lesson.getLessonName())
@@ -394,17 +399,17 @@ public class LessonService {
         }
     }
 
-    private void validateStaffAccess(Long chapterId, Long userId) {
+    public void validateStaffAccess(Long chapterId, Long userId) {
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new IllegalArgumentException("chapter.message.notFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại!"));
         Long subjectId = chapter.getSubject().getSubjectId();
         Optional<SubjectAssignment> assignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
         if (assignment.isEmpty() || !assignment.get().getUser().getUserId().equals(userId)) {
-            throw new IllegalArgumentException("subject.message.notDraftForEdit");
+            throw new IllegalArgumentException("Chỉ có STAFF được giao môn học này mới có thể thao tác!");
         }
-        Optional<SubjectStatusHistory> status = statusHistoryRepository.findTopBySubjectSubjectIdOrderByChangedAtDesc(subjectId);
+        Optional<SubjectStatusHistory> status = statusHistoryRepository.findBySubjectSubjectId(subjectId);
         if (status.isEmpty() || status.get().getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
-            throw new IllegalArgumentException("subject.message.notDraftForEdit");
+            throw new IllegalArgumentException("Chỉ có thể thao tác trên môn học ở trạng thái DRAFT!");
         }
     }
 }

@@ -9,5 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface SubjectStatusHistoryRepository extends JpaRepository<SubjectStatusHistory, Long> {
-    Optional<SubjectStatusHistory> findTopBySubjectSubjectIdOrderByChangedAtDesc(Long subjectId);
+
+    Optional<SubjectStatusHistory> findBySubjectSubjectId(Long subjectId);
 }

@@ -13,4 +13,7 @@ public interface QuestionTestRepository extends JpaRepository<QuestionTest, Long
     @Query("SELECT qt FROM QuestionTest qt WHERE qt.test.testId = ?1")
     List<QuestionTest> findByTestId(Long testId);
 
+    @Query("SELECT COUNT(qt) FROM QuestionTest qt WHERE qt.test.testId = ?1")
+    long countByTestId(Long testId);
+
 }

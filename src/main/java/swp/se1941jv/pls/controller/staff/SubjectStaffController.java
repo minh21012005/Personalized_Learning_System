@@ -109,7 +109,10 @@ public class SubjectStaffController {
 
 
     @PostMapping("/submit/{id}")
-    public String submitSubjectForReview(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String submitSubjectForReview(@PathVariable("id") Long id,
+                                         @RequestParam(value = "submissionFeedback", required = false) String submissionFeedback,
+                                         HttpSession session,
+                                         RedirectAttributes redirectAttributes) {
         try {
             Long userId = (Long) session.getAttribute("id");
             if (userId == null) {
@@ -117,7 +120,7 @@ public class SubjectStaffController {
                 return "redirect:/staff/subject";
             }
 
-            subjectService.submitForReview(id, userId);
+            subjectService.submitForReview(id, userId, submissionFeedback);
             redirectAttributes.addFlashAttribute("successMessage", "subject.message.submitted.success");
             return "redirect:/staff/subject";
         } catch (IllegalArgumentException e) {

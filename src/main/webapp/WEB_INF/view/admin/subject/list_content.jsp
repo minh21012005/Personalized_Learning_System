@@ -153,8 +153,8 @@
                 <td><c:out value="${subject.createdAt}" default=""/></td>
                 <td><c:out value="${subject.updatedAt}" default=""/></td>
                 <td>
-                    <a href="<c:url value='/admin/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1">
-                        <i class="fas fa-eye"></i> <spring:message code="button.view"/>
+                    <a href="<c:url value='/admin/subject/${subject.subjectId}/detail'/>" class="btn btn-sm btn-info me-1" title="<spring:message code="button.detail"/>">
+                        <i class="fas fa-info-circle"></i> <spring:message code="button.detail"/>
                     </a>
                     <a href="<c:url value='/admin/subject/edit/${subject.subjectId}'/>" class="btn btn-sm btn-warning me-1" title="<spring:message code="button.edit"/>">
                         <i class="fas fa-edit"></i> <spring:message code="button.edit"/>
@@ -174,11 +174,11 @@
                             <i class="fas fa-upload"></i> <spring:message code="button.publish"/>
                         </a>
                     </c:if>
-                    <c:if test="${subject.status == 'APPROVED' or subject.status == 'PUBLISHED'}">
-                        <a href="<c:url value='/admin/subject/revert/${subject.subjectId}'/>" class="btn btn-sm btn-secondary me-1" title="<spring:message code="button.revert"/>">
-                            <i class="fas fa-undo"></i> <spring:message code="button.revert"/>
-                        </a>
-                    </c:if>
+<%--                    <c:if test="${subject.status == 'APPROVED' or subject.status == 'PUBLISHED'}">--%>
+<%--                        <a href="<c:url value='/admin/subject/revert/${subject.subjectId}'/>" class="btn btn-sm btn-secondary me-1" title="<spring:message code="button.revert"/>">--%>
+<%--                            <i class="fas fa-undo"></i> <spring:message code="button.revert"/>--%>
+<%--                        </a>--%>
+<%--                    </c:if>--%>
                     <a href="<c:url value='/admin/subject/delete/${subject.subjectId}'/>"
                        class="btn btn-sm btn-danger" title="<spring:message code="button.delete"/>"
                        onclick="return confirm('<spring:message code="confirm.delete.subject.message" arguments="${subject.subjectName}" text="Bạn có chắc chắn muốn xóa môn học {0}? Hành động này không thể hoàn tác."/>');">

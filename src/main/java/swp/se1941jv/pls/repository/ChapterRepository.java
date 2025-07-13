@@ -27,4 +27,7 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long>, JpaSpec
     List<Chapter> findBySubjectIdAndIsActive(@Param("subjectId") Long subjectId, @Param("isActive") boolean isActive);
 
     boolean existsByChapterNameAndSubject_SubjectId(String chapterName,Long subjectId);
+
+    @Query("SELECT c FROM Chapter c LEFT JOIN FETCH c.lessons WHERE c.chapterId = :chapterId")
+    Optional<Chapter> findByIdWithLessons(@Param("chapterId") Long chapterId);
 }

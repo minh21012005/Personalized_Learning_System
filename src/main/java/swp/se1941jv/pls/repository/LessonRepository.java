@@ -31,4 +31,7 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
     List<Lesson> findBySubjectId(@Param("subjectId") Long subjectId, @Param("status") Boolean status);
 
     boolean existsByLessonNameAndChapter_ChapterIdAndLessonIdNot( String lessonName, Long chapterId, Long lessonId);
+
+    @Query("SELECT l FROM Lesson l LEFT JOIN FETCH l.lessonMaterials WHERE l.lessonId = :lessonId")
+    Optional<Lesson> findByIdWithMaterials(@Param("lessonId") Long lessonId);
 }

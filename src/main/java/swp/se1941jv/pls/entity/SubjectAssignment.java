@@ -27,6 +27,10 @@ public class SubjectAssignment {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
+    @ManyToOne
+    @JoinColumn(name = "assigned_by")
+    User assignedBy; // Người giao
+
     @Column(name = "assigned_at")
     LocalDateTime assignedAt;
 }

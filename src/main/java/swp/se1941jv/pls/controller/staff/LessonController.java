@@ -77,11 +77,11 @@ public class LessonController {
             return "staff/lesson/show";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+            return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
             log.error("Error fetching lessons: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tải danh sách bài học!");
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+            return "redirect:/staff/subject/" + subjectId + "/chapters";
         }
     }
 
@@ -133,6 +133,8 @@ public class LessonController {
                 redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
                 return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
+
+            lessonService.validateStaffAccess(chapterId,userId);
 
             Lesson lesson = lessonService.getLessonById(lessonId)
                     .orElseThrow(() -> new IllegalArgumentException("lesson.message.notFound"));
@@ -211,6 +213,12 @@ public class LessonController {
                 return "staff/lesson/save";
             }
 
+            // Xử lý materialFiles và gán vào lessonForm.lessonMaterials
+            if (materialFiles != null && materialFiles.length > 0) {
+                List<LessonFormDTO.LessonMaterialDTO> materialDTOs = fileUploadService.handleSaveUploadFiles(materialFiles, "materials");
+                lessonForm.setLessonMaterials(materialDTOs);
+            }
+
             // Validate YouTube embed URL and get additional details
             String videoId = youTubeApiClient.extractVideoId(lessonForm.getVideoSrc());
             if (videoId == null) {
@@ -225,7 +233,6 @@ public class LessonController {
                 lessonForm.setVideoTitle(youTubeApiClient.getVideoTitle(videoId));
                 lessonForm.setThumbnailUrl(youTubeApiClient.getThumbnailUrl(videoId));
             } catch (Exception e) {
-                log.warn("YouTube API failed for videoId {}: {}", videoId, e.getMessage());
                 lessonForm.setVideoTime("N/A");
                 lessonForm.setVideoTitle("Unknown");
                 lessonForm.setThumbnailUrl("");
@@ -356,4 +363,40 @@ public class LessonController {
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
     }
+
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @GetMapping("/{lessonId}")
+    public String showLessonDetail(
+            @PathVariable Long subjectId,
+            @PathVariable Long chapterId,
+            @PathVariable Long lessonId,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để tiếp tục!");
+                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+            }
+
+            Lesson lesson = lessonService.getLessonById(lessonId)
+                    .orElseThrow(() -> new IllegalArgumentException("Bài học không tồn tại!"));
+
+            LessonListDTO lessonDTO = lessonService.toLessonListDTO(lesson);
+
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("lesson", lessonDTO);
+            return "staff/lesson/detail";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        } catch (Exception e) {
+            log.error("Error showing lesson detail for lessonId={}: {}", lessonId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị chi tiết bài học!");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        }
+    }
+
 }

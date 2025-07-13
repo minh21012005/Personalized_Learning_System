@@ -297,11 +297,12 @@ public class SubjectController {
     @PostMapping("/assign")
     public String assignSubject(@RequestParam("subjectId") Long subjectId,
                                 @RequestParam("userId") Long userId,
+                                @RequestParam(value = "assignmentFeedback", required = false) String assignmentFeedback,
                                 RedirectAttributes redirectAttributes,
                                 HttpSession session) {
         try {
             Long contentManagerId = (Long) session.getAttribute("id");
-            subjectService.assignSubject(subjectId, userId, contentManagerId);
+            subjectService.assignSubject(subjectId, userId, contentManagerId, assignmentFeedback);
             redirectAttributes.addFlashAttribute("successMessage", "subject.message.assigned.success");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -316,13 +317,13 @@ public class SubjectController {
     public String showReviewSubjectForm(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<SubjectReviewDTO> subjectOptional = subjectService.getSubjectReviewDTOById(id);
         if (!subjectOptional.isPresent()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
+            redirectAttributes.addFlashAttribute("errorMessage", "Môn học không tồn tại!");
             return "redirect:/admin/subject";
         }
 
         SubjectReviewDTO subject = subjectOptional.get();
         if (!"PENDING".equals(subject.getStatus())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notPending");
+            redirectAttributes.addFlashAttribute("errorMessage", "Môn học không ở trạng thái PENDING!");
             return "redirect:/admin/subject";
         }
 
@@ -343,27 +344,80 @@ public class SubjectController {
         try {
             Long reviewerId = (Long) session.getAttribute("id");
             subjectService.reviewSubject(subjectId, status, feedback, reviewerId);
-            redirectAttributes.addFlashAttribute("successMessage", "subject.message.reviewed.success");
+            redirectAttributes.addFlashAttribute("successMessage", "Duyệt môn học thành công!");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
             logger.error("Lỗi khi duyệt môn học ID {}: {}", subjectId, e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.review");
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi duyệt môn học!");
         }
         return "redirect:/admin/subject";
     }
 
-    @GetMapping("/publish/{id}")
-    public String publishSubject(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+    @GetMapping("/{subjectId}/detail")
+    public String showSubjectDetail(@PathVariable("subjectId") Long subjectId, Model model, RedirectAttributes redirectAttributes) {
         try {
-            subjectService.publishSubject(id);
-            redirectAttributes.addFlashAttribute("successMessage", "subject.message.published.success");
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            Optional<SubjectDetailDTO> subjectDetailOpt = subjectService.getSubjectDetailDTOById(subjectId);
+            if (subjectDetailOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
+                return "redirect:/admin/subject";
+            }
+
+            model.addAttribute("subjectDetail", subjectDetailOpt.get());
+            model.addAttribute("viewName", "subject_detail");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+            model.addAttribute("customDateFormatter", formatter);
+            model.addAttribute("subjectImageFolder", SUBJECT_IMAGE_TARGET_FOLDER);
+            return ADMIN_LAYOUT_VIEW;
         } catch (Exception e) {
-            logger.error("Lỗi khi xuất bản môn học ID {}: {}", id, e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.publish");
+            logger.error("Lỗi khi lấy chi tiết môn học ID {}: {}", subjectId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.detail");
+            return "redirect:/admin/subject";
         }
-        return "redirect:/admin/subject";
+    }
+
+    @GetMapping("/{subjectId}/chapters/{chapterId}/detail")
+    public String showChapterDetail(@PathVariable("subjectId") Long subjectId, @PathVariable("chapterId") Long chapterId, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Optional<ChapterDetailDTO> chapterDetailOpt = subjectService.getChapterDetailDTOById(chapterId, subjectId);
+            if (chapterDetailOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.notFound");
+                return "redirect:/admin/subject/" + subjectId + "/detail";
+            }
+
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterDetail", chapterDetailOpt.get());
+            model.addAttribute("viewName", "chapter_detail");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+            model.addAttribute("customDateFormatter", formatter);
+            return ADMIN_LAYOUT_VIEW;
+        } catch (Exception e) {
+            logger.error("Lỗi khi lấy chi tiết chương ID {}: {}", chapterId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.detail");
+            return "redirect:/admin/subject/" + subjectId + "/detail";
+        }
+    }
+
+    @GetMapping("/{subjectId}/chapters/{chapterId}/lessons/{lessonId}/detail")
+    public String showLessonDetail(@PathVariable("subjectId") Long subjectId, @PathVariable("chapterId") Long chapterId, @PathVariable("lessonId") Long lessonId, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Optional<LessonDetailDTO> lessonDetailOpt = subjectService.getLessonDetailDTOById(lessonId, chapterId, subjectId);
+            if (lessonDetailOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.notFound");
+                return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";
+            }
+
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("lessonDetail", lessonDetailOpt.get());
+            model.addAttribute("viewName", "lesson_detail");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+            model.addAttribute("customDateFormatter", formatter);
+            return ADMIN_LAYOUT_VIEW;
+        } catch (Exception e) {
+            logger.error("Lỗi khi lấy chi tiết bài học ID {}: {}", lessonId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.detail");
+            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";
+        }
     }
 }

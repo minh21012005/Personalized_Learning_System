@@ -303,7 +303,10 @@ public class ChapterService {
 //    }
 
     public Page<ChapterListDTO> findChaptersBySubjectId(Long subjectId, String chapterName, Boolean status, Long userId, Pageable pageable) {
-        validateStaffAccess(subjectId, userId);
+        Optional<SubjectAssignment> assignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
+        if (assignment.isEmpty() || !assignment.get().getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("subject.message.notAssigned");
+        }
         Specification<Chapter> spec = Specification.where(ChapterSpecifications.hasSubjectId(subjectId));
         if (chapterName != null && !chapterName.trim().isEmpty()) {
             spec = spec.and(ChapterSpecifications.hasName(chapterName));
@@ -320,7 +323,7 @@ public class ChapterService {
         if (assignment.isEmpty() || !assignment.get().getUser().getUserId().equals(userId)) {
             throw new IllegalArgumentException("subject.message.notAssigned");
         }
-        Optional<SubjectStatusHistory> status = statusHistoryRepository.findTopBySubjectSubjectIdOrderByChangedAtDesc(subjectId);
+        Optional<SubjectStatusHistory> status = statusHistoryRepository.findBySubjectSubjectId(subjectId);
         if (status.isEmpty() || status.get().getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
             throw new IllegalArgumentException("subject.message.notDraftForEdit");
         }
