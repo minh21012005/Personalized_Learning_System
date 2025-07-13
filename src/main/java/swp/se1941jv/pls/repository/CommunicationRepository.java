@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import swp.se1941jv.pls.entity.Communication;
 import swp.se1941jv.pls.entity.Communication.CommentStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,17 +19,25 @@ public interface CommunicationRepository extends JpaRepository<Communication, Lo
        @Query(value = "SELECT c.id FROM Communication c " +
                "WHERE c.parentComment IS NULL " +
                "AND (:status IS NULL OR c.commentStatus = :status) " +
-               "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-        Page<Long> findRootCommunicationIds(@Param("status") CommentStatus status,
+               "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+               "AND (CAST(:startDate AS timestamp) IS NULL OR c.createdAt >= :startDate) " +
+               "AND (CAST(:endDate AS timestamp) IS NULL OR c.createdAt <= :endDate)")
+       Page<Long> findRootCommunicationIds(@Param("status") CommentStatus status,
                                     @Param("keyword") String keyword,
+                                    @Param("startDate") LocalDateTime startDate,
+                                    @Param("endDate") LocalDateTime endDate,
                                     Pageable pageable);
 
         @Query(value = "SELECT count(c.id) FROM Communication c " +
                "WHERE c.parentComment IS NULL " +
                "AND (:status IS NULL OR c.commentStatus = :status) " +
-               "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+               "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+               "AND (CAST(:startDate AS timestamp) IS NULL OR c.createdAt >= :startDate) " +
+               "AND (CAST(:endDate AS timestamp) IS NULL OR c.createdAt <= :endDate)")
         long countRootCommunications(@Param("status") CommentStatus status,
-                             @Param("keyword") String keyword);
+                             @Param("keyword") String keyword,
+                             @Param("startDate") LocalDateTime startDate,
+                             @Param("endDate") LocalDateTime endDate);
 
        @Query("SELECT DISTINCT c FROM Communication c " +
            "LEFT JOIN FETCH c.user u " +

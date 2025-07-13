@@ -49,11 +49,11 @@ public class CommunicationService {
 
     @Transactional(readOnly = true)
     public HubStatistics getHubStatistics() {
-        long total = communicationRepository.countRootCommunications(null, null);
-        long pending = communicationRepository.countRootCommunications(CommentStatus.PENDING, null);
-        long approved = communicationRepository.countRootCommunications(CommentStatus.APPROVED, null);
-        long rejected = communicationRepository.countRootCommunications(CommentStatus.REJECTED, null);
-        long hidden = communicationRepository.countRootCommunications(CommentStatus.HIDDEN, null);
+        long total = communicationRepository.countRootCommunications(null, null,null, null);
+        long pending = communicationRepository.countRootCommunications(CommentStatus.PENDING, null, null, null);
+        long approved = communicationRepository.countRootCommunications(CommentStatus.APPROVED, null, null, null);
+        long rejected = communicationRepository.countRootCommunications(CommentStatus.REJECTED, null, null, null);
+        long hidden = communicationRepository.countRootCommunications(CommentStatus.HIDDEN, null, null, null);
         return new HubStatistics(total, pending, approved, rejected, hidden);
     }
 
@@ -62,7 +62,7 @@ public class CommunicationService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<CommunicationResponseDto> getAllRootCommunications(CommentStatus status,String keyword, int page, int size) {
+    public Page<CommunicationResponseDto> getAllRootCommunications(CommentStatus status,String keyword,LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         System.out.println("SERVICE: Processing getAllRootCommunications for page = " + page);
 
         Sort sort = Sort.by(Sort.Direction.DESC, "lastActivityAt")
@@ -70,7 +70,7 @@ public class CommunicationService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Long> rootIdsPage = communicationRepository.findRootCommunicationIds(status,keyword,pageable);
+        Page<Long> rootIdsPage = communicationRepository.findRootCommunicationIds(status,keyword,startDate, endDate,pageable);
         List<Long> rootIdsOnCurrentPage = rootIdsPage.getContent();
 
         System.out.println("SERVICE: Found " + rootIdsOnCurrentPage.size() + " IDs for page " + page + ". Total elements in DB: " + rootIdsPage.getTotalElements());

@@ -2,7 +2,11 @@ package swp.se1941jv.pls.controller.admin;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +30,11 @@ public class CommunicationApiController {
     public ResponseEntity<Page<CommunicationResponseDto>> getHubCommunications(
             @RequestParam(name = "status", required = false) CommentStatus status,
             @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size) {
-        Page<CommunicationResponseDto> pagedResponse = communicationService.getAllRootCommunications(status, keyword, page, size);
+        Page<CommunicationResponseDto> pagedResponse = communicationService.getAllRootCommunications(status, keyword, startDate, endDate, page, size);
         return ResponseEntity.ok(pagedResponse);
     }
 
