@@ -20,7 +20,8 @@ public class Communication extends BaseEntity{
     public enum CommentStatus {
         PENDING("Chờ xử lý"),
         APPROVED("Chấp nhận"),
-        REJECTED("Từ chối");
+        REJECTED("Từ chối"),
+        HIDDEN("Đã ẩn");
 
         private final String description;
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import swp.se1941jv.pls.entity.Communication;
+import swp.se1941jv.pls.entity.Communication.CommentStatus;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -29,6 +30,8 @@ public class CommunicationResponseDto {
     private boolean isOwner;
     private Long lessonId;
 
+    private CommentStatus commentStatus;
+
     public static CommunicationResponseDto fromEntity(Communication communication, Long currentUserId) {
         if (communication == null) {
             return null;
@@ -51,6 +54,7 @@ public class CommunicationResponseDto {
                 .author(AuthorResponseDTO.fromEntity(communication.getUser()))
                 .createdAt(communication.getCreatedAt())
                 .replies(replyDtos)
+                .commentStatus(communication.getCommentStatus())
                 .isOwner(isOwner)
                 .build();
     }

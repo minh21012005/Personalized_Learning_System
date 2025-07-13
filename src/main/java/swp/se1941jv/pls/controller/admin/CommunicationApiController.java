@@ -8,9 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import swp.se1941jv.pls.dto.request.UpdateStatusRequest;
 import swp.se1941jv.pls.dto.request.CreateCommunicationRequest;
 import swp.se1941jv.pls.dto.response.CommunicationResponseDto;
+import swp.se1941jv.pls.entity.Communication.CommentStatus;
 import swp.se1941jv.pls.service.CommunicationService;
+import swp.se1941jv.pls.service.CommunicationService.HubStatistics;
 
 @RestController
 @RequestMapping("/api/communications")
@@ -21,10 +24,11 @@ public class CommunicationApiController {
 
     @GetMapping("/hub")
     public ResponseEntity<Page<CommunicationResponseDto>> getHubCommunications(
+            @RequestParam(name = "status", required = false) CommentStatus status,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size) {
         
-        Page<CommunicationResponseDto> pagedResponse = communicationService.getAllRootCommunications(page, size);
+        Page<CommunicationResponseDto> pagedResponse = communicationService.getAllRootCommunications(status,page, size);
         return ResponseEntity.ok(pagedResponse);
     }
 
@@ -45,5 +49,19 @@ public class CommunicationApiController {
     public ResponseEntity<Void> deleteCommunication(@PathVariable Long communicationId) {
         communicationService.deleteCommunicationByAdmin(communicationId);
         return ResponseEntity.noContent().build();
+    }
+
+     @PutMapping("/{communicationId}/status")
+     public ResponseEntity<Void> updateStatus(
+        @PathVariable Long communicationId,
+        @RequestBody UpdateStatusRequest request){
+            communicationService.updateCommentStatus(communicationId, request.getCommentStatus());
+            return ResponseEntity.ok().build();
+     }
+
+     @GetMapping("/hub/statistics")
+     public ResponseEntity<HubStatistics> getStatistics() {
+        HubStatistics stats = communicationService.getHubStatistics();
+        return ResponseEntity.ok(stats);
     }
 }
