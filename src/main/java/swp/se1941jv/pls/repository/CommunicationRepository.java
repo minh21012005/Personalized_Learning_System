@@ -16,15 +16,19 @@ import java.util.Optional;
 public interface CommunicationRepository extends JpaRepository<Communication, Long> {
 
        @Query(value = "SELECT c.id FROM Communication c " +
-                   "WHERE c.parentComment IS NULL " +
-                   "AND (:status IS NULL OR c.commentStatus = :status)")
-        Page<Long> findRootCommunicationIds(@Param("status") CommentStatus status, Pageable pageable);
+               "WHERE c.parentComment IS NULL " +
+               "AND (:status IS NULL OR c.commentStatus = :status) " +
+               "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Long> findRootCommunicationIds(@Param("status") CommentStatus status,
+                                    @Param("keyword") String keyword,
+                                    Pageable pageable);
 
         @Query(value = "SELECT count(c.id) FROM Communication c " +
-                   "WHERE c.parentComment IS NULL " +
-                   "AND (:status IS NULL OR c.commentStatus = :status)")
-        long countRootCommunications(@Param("status") CommentStatus status);
-
+               "WHERE c.parentComment IS NULL " +
+               "AND (:status IS NULL OR c.commentStatus = :status) " +
+               "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        long countRootCommunications(@Param("status") CommentStatus status,
+                             @Param("keyword") String keyword);
 
        @Query("SELECT DISTINCT c FROM Communication c " +
            "LEFT JOIN FETCH c.user u " +

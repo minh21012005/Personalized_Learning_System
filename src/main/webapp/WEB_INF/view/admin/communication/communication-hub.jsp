@@ -204,25 +204,29 @@
                         color: #6c757d;
                     }
 
-                    .action-show { color: #0dcaf0; }
+                    .action-show {
+                        color: #0dcaf0;
+                    }
 
                     .filter-bar {
-    background-color: #fff;
-    padding: 15px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-.stats-summary span {
-    margin-right: 15px;
-    font-size: 0.9em;
-}
-.stats-summary strong {
-    font-size: 1.1em;
-}
+                        background-color: #fff;
+                        padding: 15px;
+                        border: 1px solid #dee2e6;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                        display: flex;
+                        gap: 20px;
+                        align-items: center;
+                    }
+
+                    .stats-summary span {
+                        margin-right: 15px;
+                        font-size: 0.9em;
+                    }
+
+                    .stats-summary strong {
+                        font-size: 1.1em;
+                    }
                 </style>
             </head>
 
@@ -243,22 +247,31 @@
                                 <p class="text-muted">All questions from users across all subjects and lessons.</p>
                                 <hr>
                                 <div class="filter-bar">
-    <!-- Khu vực thống kê -->
-    <div id="stats-container" class="stats-summary">
-        <span>Loading stats...</span>
-    </div>
-    
-    <!-- Dropdown bộ lọc -->
-    <div class="ms-auto"> <!-- Đẩy sang phải -->
-        <select class="form-select" id="status-filter">
-            <option value="">All Statuses</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="HIDDEN">Hidden</option>
-        </select>
-    </div>
-</div>
+                                    <!-- Khu vực thống kê -->
+                                    <div id="stats-container" class="stats-summary">
+                                        <span>Loading stats...</span>
+                                    </div>
+
+                                    <div class="input-group" style="max-width: 300px;">
+                                        <input type="text" class="form-control" placeholder="Search by keyword..."
+                                            id="keyword-search-input">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            id="keyword-search-button">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Dropdown bộ lọc -->
+                                    <div class="ms-auto"> <!-- Đẩy sang phải -->
+                                        <select class="form-select" id="status-filter">
+                                            <option value="">All Statuses</option>
+                                            <option value="PENDING">Pending</option>
+                                            <option value="APPROVED">Approved</option>
+                                            <option value="REJECTED">Rejected</option>
+                                            <option value="HIDDEN">Hidden</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div id="hub-container">
                                     <p>Loading communications...</p>
                                 </div>
@@ -283,35 +296,39 @@
                         const hubContainer = document.getElementById('hub-container');
                         const paginationContainer = document.getElementById('pagination-container');
                         const statsContainer = document.getElementById('stats-container');
-const statusFilter = document.getElementById('status-filter');
+                        const statusFilter = document.getElementById('status-filter');
+                        const keywordSearchInput = document.getElementById('keyword-search-input');
+                        const keywordSearchButton = document.getElementById('keyword-search-button');
+                        let currentKeyword = "";
 
                         let currentPage = 0;
                         const pageSize = 5;
                         let currentStatusFilter = "";
 
                         async function fetchAndRenderStatistics() {
-    try {
-        const apiUrl = '<c:url value="/api/communications/hub/statistics"/>';
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            statsContainer.innerHTML = '<span>Could not load stats.</span>';
-            return;}
+                            try {
+                                const apiUrl = '<c:url value="/api/communications/hub/statistics"/>';
+                                const response = await fetch(apiUrl);
+                                if (!response.ok) {
+                                    statsContainer.innerHTML = '<span>Could not load stats.</span>';
+                                    return;
+                                }
 
-        const stats = await response.json();
-        statsContainer.innerHTML =
-            '<span>Total: <strong>' + stats.total + '</strong></span>' +
-            '<span class="text-warning">Pending: <strong>' + stats.pending + '</strong></span>' +
-            '<span class="text-success">Approved: <strong>' + stats.approved + '</strong></span>' +
-            '<span class="text-danger">Rejected: <strong>' + stats.rejected + '</strong></span>' +
-            '<span class="text-muted">Hidden: <strong>' + stats.hidden + '</strong></span>';
-    } catch (error) {
-        console.error("Failed to load statistics:", error);
-        statsContainer.innerHTML = '<span>Could not load stats.</span>';
-    }
-}
+                                const stats = await response.json();
+                                statsContainer.innerHTML =
+                                    '<span>Total: <strong>' + stats.total + '</strong></span>' +
+                                    '<span class="text-warning">Pending: <strong>' + stats.pending + '</strong></span>' +
+                                    '<span class="text-success">Approved: <strong>' + stats.approved + '</strong></span>' +
+                                    '<span class="text-danger">Rejected: <strong>' + stats.rejected + '</strong></span>' +
+                                    '<span class="text-muted">Hidden: <strong>' + stats.hidden + '</strong></span>';
+                            } catch (error) {
+                                console.error("Failed to load statistics:", error);
+                                statsContainer.innerHTML = '<span>Could not load stats.</span>';
+                            }
+                        }
 
-                        async function fetchAndRenderHub(pageNumber, status) {
-                            // DEBUG: Sửa lại cú pháp console.log để không bị lỗi JSP
+                        async function fetchAndRenderHub(pageNumber, status, keyword) {
+
                             console.log('[fetchAndRenderHub] Function called with pageNumber:', pageNumber, '(type: ' + (typeof pageNumber) + ')');
 
                             const pageToFetch = (typeof pageNumber === 'number' && pageNumber >= 0) ? pageNumber : 0;
@@ -326,9 +343,13 @@ const statusFilter = document.getElementById('status-filter');
                                     size: pageSize
                                 });
 
+                                if (keyword) {
+                                    params.append('keyword', keyword);
+                                }
+
                                 if (status) {
-            params.append('status', status);
-        }
+                                    params.append('status', status);
+                                }
                                 const apiUrl = '<c:url value="/api/communications/hub"/>?' + params.toString();
                                 console.log('[fetchAndRenderHub] Request URL:', apiUrl);
 
@@ -360,6 +381,21 @@ const statusFilter = document.getElementById('status-filter');
                                 console.error('[JAVASCRIPT ERROR]', error);
                             }
                         }
+
+                        function handleSearch() {
+                            currentKeyword = keywordSearchInput.value.trim();
+                            // Khi tìm kiếm, luôn về trang 0
+                            fetchAndRenderHub(0, currentStatusFilter, currentKeyword);
+                        }
+
+                        keywordSearchButton.addEventListener('click', handleSearch);
+
+                        // Cho phép nhấn Enter để tìm kiếm
+                        keywordSearchInput.addEventListener('keypress', function (e) {
+                            if (e.key === 'Enter') {
+                                handleSearch();
+                            }
+                        });
 
                         function renderPagination(pagedData) {
                             paginationContainer.innerHTML = '';
@@ -406,72 +442,72 @@ const statusFilter = document.getElementById('status-filter');
 
 
 
-function createCommentRecursive(comment) {
-    const author = comment.author || {};
-    const authorName = author.name || 'Anonymous User';
-    const avatarUrlBase = '<c:url value="/images/"/>';
-    const avatar = author.avatarUrl ? avatarUrlBase + author.avatarUrl : 'https://via.placeholder.com/40';
-    let createdAt = 'Invalid Date';
-    if (comment.createdAt) {
-        try { createdAt = new Date(comment.createdAt).toLocaleString('vi-VN'); } catch (e) { }
-    }
+                        function createCommentRecursive(comment) {
+                            const author = comment.author || {};
+                            const authorName = author.name || 'Anonymous User';
+                            const avatarUrlBase = '<c:url value="/images/"/>';
+                            const avatar = author.avatarUrl ? avatarUrlBase + author.avatarUrl : 'https://via.placeholder.com/40';
+                            let createdAt = 'Invalid Date';
+                            if (comment.createdAt) {
+                                try { createdAt = new Date(comment.createdAt).toLocaleString('vi-VN'); } catch (e) { }
+                            }
 
-    let repliesHtml = '';
-    if (comment.replies && comment.replies.length > 0) {
-        repliesHtml += '<div class="replies">';
-        comment.replies.forEach(reply => { repliesHtml += createCommentRecursive(reply); });
-        repliesHtml += '</div>';
-    }
+                            let repliesHtml = '';
+                            if (comment.replies && comment.replies.length > 0) {
+                                repliesHtml += '<div class="replies">';
+                                comment.replies.forEach(reply => { repliesHtml += createCommentRecursive(reply); });
+                                repliesHtml += '</div>';
+                            }
 
-    let statusBadgeHtml = '';
-    let actionsHtml = '';
-    const status = comment.commentStatus;
+                            let statusBadgeHtml = '';
+                            let actionsHtml = '';
+                            const status = comment.commentStatus;
 
-    if (status) {
-        const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-        statusBadgeHtml = '<span class="status-badge status-' + status + '">' + formattedStatus + '</span>';
-    }
+                            if (status) {
+                                const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+                                statusBadgeHtml = '<span class="status-badge status-' + status + '">' + formattedStatus + '</span>';
+                            }
 
 
-    switch (status) {
-        case 'PENDING':
-            actionsHtml += '<span class="action-link action-approve" data-action="approve" data-status="APPROVED">Approve</span>';
-            actionsHtml += '<span class="action-link action-reject" data-action="reject" data-status="REJECTED">Reject</span>';
-            break;
+                            switch (status) {
+                                case 'PENDING':
+                                    actionsHtml += '<span class="action-link action-approve" data-action="approve" data-status="APPROVED">Approve</span>';
+                                    actionsHtml += '<span class="action-link action-reject" data-action="reject" data-status="REJECTED">Reject</span>';
+                                    break;
 
-        case 'APPROVED':
-            actionsHtml += '<span class="action-link action-reject" data-action="hide" data-status="HIDDEN">Hide</span>';
-            // CHỈ THÊM NÚT REPLY KHI TRẠNG THÁI LÀ APPROVED
-            actionsHtml += '<span class="action-link action-reply btn-reply">Reply</span>';
-            break;
+                                case 'APPROVED':
+                                    actionsHtml += '<span class="action-link action-reject" data-action="hide" data-status="HIDDEN">Hide</span>';
+                                    // CHỈ THÊM NÚT REPLY KHI TRẠNG THÁI LÀ APPROVED
+                                    actionsHtml += '<span class="action-link action-reply btn-reply">Reply</span>';
+                                    break;
 
-        case 'REJECTED':
-            actionsHtml += '<span class="action-link action-approve" data-action="approve" data-status="APPROVED">Approve</span>';
-            break;
+                                case 'REJECTED':
+                                    actionsHtml += '<span class="action-link action-approve" data-action="approve" data-status="APPROVED">Approve</span>';
+                                    break;
 
-        case 'HIDDEN':
-            actionsHtml += '<span class="action-link action-show" data-action="show" data-status="APPROVED">Show</span>';
-            break;
-    }
+                                case 'HIDDEN':
+                                    actionsHtml += '<span class="action-link action-show" data-action="show" data-status="APPROVED">Show</span>';
+                                    break;
+                            }
 
-    actionsHtml += '<span class="action-link action-delete btn-delete">Delete</span>';
+                            actionsHtml += '<span class="action-link action-delete btn-delete">Delete</span>';
 
-    return (
-        '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
-            '<div class="author-info">' +
-                '<img src="' + avatar + '" alt="' + authorName + '" class="author-avatar">' +
-                '<div>' +
-                    '<span class="author-name">' + authorName + '</span>' +
-                    statusBadgeHtml +
-                    '<div class="comment-meta"><span>' + createdAt + '</span></div>' +
-                '</div>' +
-            '</div>' +
-            '<p class="comment-content">' + (comment.content || '') + '</p>' +
-            '<div class="comment-actions">' + actionsHtml + '</div>' +
-            repliesHtml +
-        '</div>'
-    );
-}
+                            return (
+                                '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
+                                '<div class="author-info">' +
+                                '<img src="' + avatar + '" alt="' + authorName + '" class="author-avatar">' +
+                                '<div>' +
+                                '<span class="author-name">' + authorName + '</span>' +
+                                statusBadgeHtml +
+                                '<div class="comment-meta"><span>' + createdAt + '</span></div>' +
+                                '</div>' +
+                                '</div>' +
+                                '<p class="comment-content">' + (comment.content || '') + '</p>' +
+                                '<div class="comment-actions">' + actionsHtml + '</div>' +
+                                repliesHtml +
+                                '</div>'
+                            );
+                        }
 
                         async function postComment(content, parentId, lessonId) {
                             if (!lessonId) {
@@ -520,7 +556,7 @@ function createCommentRecursive(comment) {
 
                                 if (response.ok) {
                                     // Tải lại trang hiện tại để cập nhật giao diện
-                                    fetchAndRenderHub(currentPage,currentStatusFilter);
+                                    fetchAndRenderHub(currentPage, currentStatusFilter, currentKeyword);
                                     fetchAndRenderStatistics();
                                 } else {
                                     const errorData = await response.text();
@@ -549,7 +585,7 @@ function createCommentRecursive(comment) {
 
                                 if (!isNaN(pageToFetch) && pageToFetch !== currentPage) {
                                     console.log('[Pagination Click] Page is different from current (' + currentPage + '). Calling fetchAndRenderHub.');
-                                    fetchAndRenderHub(pageToFetch,currentStatusFilter);
+                                    fetchAndRenderHub(pageToFetch, currentStatusFilter, currentKeyword);
                                 } else {
                                     console.log('[Pagination Click] Page is same as current or NaN. Not fetching. isNaN: ' + isNaN(pageToFetch) + ', pageToFetch: ' + pageToFetch + ', currentPage: ' + currentPage);
                                 }
@@ -558,12 +594,10 @@ function createCommentRecursive(comment) {
                             }
                         });
 
-                        statusFilter.addEventListener('change', function() {
-    // Cập nhật trạng thái filter toàn cục
-    currentStatusFilter = this.value; 
-    // Khi thay đổi bộ lọc, luôn fetch lại từ trang đầu tiên (trang 0)
-    fetchAndRenderHub(0, currentStatusFilter);
-});
+                        statusFilter.addEventListener('change', function () {
+                            currentStatusFilter = this.value;
+                            fetchAndRenderHub(0, currentStatusFilter, currentKeyword);
+                        });
 
 
 
@@ -615,7 +649,7 @@ function createCommentRecursive(comment) {
                                     if (replyContent) {
                                         const newReplyData = await postComment(replyContent, commentId, lessonId);
                                         if (newReplyData) {
-                                            fetchAndRenderHub(currentPage,currentStatusFilter);
+                                            fetchAndRenderHub(currentPage, currentStatusFilter, currentKeyword);
                                             fetchAndRenderStatistics();
                                         } else {
                                             alert('Failed to post reply.');
@@ -627,7 +661,7 @@ function createCommentRecursive(comment) {
                             if (target.classList.contains('btn-delete')) {
                                 const success = await deleteComment(commentId);
                                 if (success) {
-                                    fetchAndRenderHub(currentPage,currentStatusFilter);
+                                    fetchAndRenderHub(currentPage, currentStatusFilter, currentKeyword);
                                     fetchAndRenderStatistics();
                                 } else {
                                     alert('Failed to delete comment.');
@@ -637,7 +671,7 @@ function createCommentRecursive(comment) {
 
                         console.log('Initial load: calling fetchAndRenderHub(0)');
                         fetchAndRenderStatistics();
-                        fetchAndRenderHub(0,currentStatusFilter);
+                        fetchAndRenderHub(0, currentStatusFilter, currentKeyword);
                     });
                 </script>
             </body>

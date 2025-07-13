@@ -25,10 +25,10 @@ public class CommunicationApiController {
     @GetMapping("/hub")
     public ResponseEntity<Page<CommunicationResponseDto>> getHubCommunications(
             @RequestParam(name = "status", required = false) CommentStatus status,
+            @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size) {
-        
-        Page<CommunicationResponseDto> pagedResponse = communicationService.getAllRootCommunications(status,page, size);
+        Page<CommunicationResponseDto> pagedResponse = communicationService.getAllRootCommunications(status, keyword, page, size);
         return ResponseEntity.ok(pagedResponse);
     }
 
