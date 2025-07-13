@@ -1,5 +1,8 @@
 package swp.se1941jv.pls.repository;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,9 +22,12 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long>, JpaSpec
     List<Chapter> findBySubjectSubjectIdAndStatusTrue(Long subjectId);
     Optional<Chapter> findByChapterIdAndStatusTrue(Long chapterId);
     boolean existsByChapterNameAndSubject(String chapterName, Subject subject);
-    Page<Chapter> findByChapterStatus(Chapter.ChapterStatus status, Pageable pageable);
 
     @Query("SELECT c FROM Chapter c WHERE c.subject.subjectId = :subjectId AND c.status = :isActive")
     List<Chapter> findBySubjectIdAndIsActive(@Param("subjectId") Long subjectId, @Param("isActive") boolean isActive);
 
+    boolean existsByChapterNameAndSubject_SubjectId(String chapterName,Long subjectId);
+
+    @Query("SELECT c FROM Chapter c LEFT JOIN FETCH c.lessons WHERE c.chapterId = :chapterId")
+    Optional<Chapter> findByIdWithLessons(@Param("chapterId") Long chapterId);
 }

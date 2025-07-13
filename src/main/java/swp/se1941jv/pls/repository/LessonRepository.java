@@ -1,5 +1,8 @@
 package swp.se1941jv.pls.repository;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -27,4 +30,8 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
     @Query("SELECT l FROM Lesson l WHERE l.chapter.subject.subjectId = :subjectId AND l.status = :status ")
     List<Lesson> findBySubjectId(@Param("subjectId") Long subjectId, @Param("status") Boolean status);
 
+    boolean existsByLessonNameAndChapter_ChapterIdAndLessonIdNot( String lessonName, Long chapterId, Long lessonId);
+
+    @Query("SELECT l FROM Lesson l LEFT JOIN FETCH l.lessonMaterials WHERE l.lessonId = :lessonId")
+    Optional<Lesson> findByIdWithMaterials(@Param("lessonId") Long lessonId);
 }

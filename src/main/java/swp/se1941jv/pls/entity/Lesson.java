@@ -17,23 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ToString(exclude = {"questions", "subjectTests", "test", "chapter"})
+@ToString(exclude = {"questions", "subjectTests", "test", "chapter", "lessonMaterials"})
 public class Lesson extends BaseEntity {
-
-    @Getter
-    public enum LessonStatus {
-        DRAFT("Bản nháp"),
-        PENDING("Chờ xử lí "),
-        APPROVED("Chấp nhận"),
-        REJECTED("Từ chối");
-
-        private final String description;
-
-        LessonStatus(String description) {
-            this.description = description;
-        }
-
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,39 +26,41 @@ public class Lesson extends BaseEntity {
     Long lessonId;
 
     @NotBlank(message = "Tên bài học không được để trống")
-    @Size(min = 3, max = 255, message = "Tên bài học phải có độ dài từ 3 đến 255 ký tự")
+    @Size(min = 3, max = 255, message = "Tên bài học phải từ 3 đến 255 ký tự")
     @Column(name = "lesson_name", columnDefinition = "NVARCHAR(255)")
     String lessonName;
 
     @NotBlank(message = "Mô tả bài học không được để trống")
-    @Size(min = 10, max = 1000, message = "Mô tả bài học phải có độ dài từ 10 đến 1000 ký tự")
+    @Size(min = 10, max = 1000, message = "Mô tả bài học phải từ 10 đến 1000 ký tự")
     @Column(name = "lesson_description", columnDefinition = "TEXT")
     String lessonDescription;
 
-    @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT FALSE")
     Boolean status;
 
-    @NotBlank(message = "Đường dẫn video không được để trống")
+    @NotBlank(message = "Link video không được để trống")
     @Column(name = "video_src")
     String videoSrc;
 
     @Column(name = "video_time")
     String videoTime;
 
-    @Column(name = "materials_json", columnDefinition = "TEXT")
-    private String materialsJson;
+    @Column(name = "video_title")
+    String videoTitle;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "lesson_status", columnDefinition = "VARCHAR(20) DEFAULT 'DRAFT'")
-    LessonStatus lessonStatus;
+    @Column(name = "thumbnail_url")
+    String thumbnailUrl;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     Chapter chapter;
 
-    @ManyToOne
-    @JoinColumn(name = "test_id")
-    Test test;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "test_id", unique = true)
+    private Test test;
+
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LessonMaterial> lessonMaterials;
 
     @OneToMany(mappedBy = "lesson")
     List<QuestionBank> questions;

@@ -37,19 +37,7 @@ public class ChapterSpecifications {
         };
     }
 
-    public static Specification<Chapter> hasChapterStatus(String chapterStatus) {
-        return (Root<Chapter> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
-            if (chapterStatus == null || chapterStatus.trim().isEmpty()) {
-                return cb.conjunction();
-            }
-            try {
-                Chapter.ChapterStatus status = Chapter.ChapterStatus.valueOf(chapterStatus.toUpperCase());
-                return cb.equal(root.get("chapterStatus"), status);
-            } catch (IllegalArgumentException e) {
-                return cb.conjunction(); // Bỏ qua nếu trạng thái không hợp lệ
-            }
-        };
-    }
+
 
     public static Specification<Chapter> hasUpdatedAtBetween(LocalDateTime startDate, LocalDateTime endDate) {
         return (Root<Chapter> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.request.AnswerOptionDto;
 import swp.se1941jv.pls.dto.response.tests.QuestionCreateTestDisplayDto;
@@ -41,6 +42,7 @@ public class TestStaffService {
     SubjectTestRepository subjectTestRepository;
     QuestionTestRepository questionTestRepository;
     ObjectMapper objectMapper;
+    LessonRepository lessonRepository;
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     public List<Subject> getAllSubjects() {
@@ -65,7 +67,7 @@ public class TestStaffService {
         return subject.getChapters();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     public List<QuestionCreateTestDisplayDto> getQuestionsBySubjectAndChapter(Long subjectId, Long chapterId) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) {
@@ -270,6 +272,87 @@ public class TestStaffService {
                 .subjectName(test.getSubject() != null ? test.getSubject().getSubjectName() : null)
                 .build());
     }
+
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public Test createTestForLesson(String testName, Long testStatusId, Long testCategoryId, Long subjectId, Long chapterId, List<Long> questionIds) {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new IllegalStateException("Không thể xác định người dùng hiện tại.");
+        }
+
+        // Validate mandatory fields
+        if (testName == null || testName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên bài kiểm tra là bắt buộc.");
+        }
+        if (testStatusId == null) {
+            throw new IllegalArgumentException("Trạng thái là bắt buộc.");
+        }
+        if (testCategoryId == null) {
+            throw new IllegalArgumentException("Danh mục là bắt buộc.");
+        }
+        if (subjectId == null && chapterId == null) {
+            throw new IllegalArgumentException("Phải chọn ít nhất một môn học hoặc chương.");
+        }
+
+        // Validate entities
+        TestStatus testStatus = testStatusRepository.findById(testStatusId)
+                .orElseThrow(() -> new IllegalArgumentException("Trạng thái không tìm thấy: " + testStatusId));
+        TestCategory testCategory = testCategoryRepository.findById(testCategoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Danh mục không tìm thấy: " + testCategoryId));
+
+        Chapter chapter = null;
+        if (chapterId != null) {
+            chapter = chapterRepository.findById(chapterId)
+                    .orElseThrow(() -> new IllegalArgumentException("Chương không tìm thấy: " + chapterId));
+            if (chapter.getSubject() == null) {
+                throw new IllegalArgumentException("Chương không thuộc về môn học nào.");
+            }
+        }
+        Subject subject = null;
+        if (subjectId != null) {
+            subject = subjectRepository.findById(subjectId)
+                    .orElseThrow(() -> new IllegalArgumentException("Môn học không tìm thấy: " + subjectId));
+        }
+
+        // Create Test
+        Test test = Test.builder()
+                .testName(testName)
+                .durationTime(null)
+                .startAt(null)
+                .endAt(null)
+                .testStatus(testStatus)
+                .testCategory(testCategory)
+                .chapter(chapter)
+                .subject(subject)
+                .build();
+        test = testRepository.save(test);
+
+        // Link to Subject
+        if (subjectId != null) {
+            SubjectTest subjectTest = SubjectTest.builder()
+                    .test(test)
+                    .subject(subject)
+                    .build();
+            subjectTestRepository.save(subjectTest);
+        }
+
+        // Link to Questions
+        if (questionIds != null && !questionIds.isEmpty()) {
+            for (Long questionId : questionIds) {
+                QuestionBank question = questionBankRepository.findById(questionId)
+                        .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy: " + questionId));
+                QuestionTest questionTest = QuestionTest.builder()
+                        .test(test)
+                        .question(question)
+                        .build();
+                questionTestRepository.save(questionTest);
+            }
+        }
+
+        return test;
+    }
+
+
 
 
 }
