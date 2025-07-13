@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Lesson;
 
 import java.util.Optional;
@@ -34,4 +35,6 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
 
     @Query("SELECT l FROM Lesson l LEFT JOIN FETCH l.lessonMaterials WHERE l.lessonId = :lessonId")
     Optional<Lesson> findByIdWithMaterials(@Param("lessonId") Long lessonId);
+
+    List<Lesson> findByChapter(Chapter chapter);
 }

@@ -34,6 +34,9 @@ public class Test extends BaseEntity {
     @Column(name = "end_at")
     LocalDateTime endAt;
 
+    @Column(name = "is_open")
+    Boolean isOpen; // New field to track open/closed status
+
     @OneToOne
     @JoinColumn(name = "lesson_id")
     @JsonIgnoreProperties("test")
