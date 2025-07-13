@@ -352,36 +352,7 @@ public class TestStaffService {
         return test;
     }
 
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
-    @Transactional
-    public void updateTest(Long testId, String testName, List<Long> questionIds) {
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            throw new IllegalStateException("Không thể xác định người dùng hiện tại.");
-        }
 
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
-
-        // Update test name
-        test.setTestName(testName);
-
-        // Update questions
-        questionTestRepository.deleteByTestTestId(testId); // Remove old question links
-        if (questionIds != null && !questionIds.isEmpty()) {
-            for (Long questionId : questionIds) {
-                QuestionBank question = questionBankRepository.findById(questionId)
-                        .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy: " + questionId));
-                QuestionTest questionTest = QuestionTest.builder()
-                        .test(test)
-                        .question(question)
-                        .build();
-                questionTestRepository.save(questionTest);
-            }
-        }
-
-        testRepository.save(test);
-    }
 
 
 }
