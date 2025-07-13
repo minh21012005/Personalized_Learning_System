@@ -1,22 +1,24 @@
 package swp.se1941jv.pls.controller.staff;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
-import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
+import swp.se1941jv.pls.dto.response.chapter.ChapterFormDTO;
+import swp.se1941jv.pls.dto.response.chapter.ChapterListDTO;
 import swp.se1941jv.pls.entity.Chapter;
 import swp.se1941jv.pls.entity.Subject;
 import swp.se1941jv.pls.service.ChapterService;
 import swp.se1941jv.pls.service.SubjectService;
-
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -27,260 +29,233 @@ public class ChapterController {
     private final SubjectService subjectService;
     private final ChapterService chapterService;
 
-    /**
-     * Hiển thị danh sách chương của một môn học.
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping
     public String showChapters(
             @PathVariable Long subjectId,
             @RequestParam(required = false) String chapterName,
             @RequestParam(required = false) Boolean status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "desc") String sortDir,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            HttpSession session) {
         try {
-            Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-            if (subject == null) {
-                log.warn("Subject not found: subjectId={}", subjectId);
-                return "error/404";
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                model.addAttribute("errorMessage", "subject.message.loginRequired");
+                return "staff/chapter/show";
             }
 
-            List<ChapterResponseDTO> chapters = chapterService.findChaptersBySubjectId(subjectId, chapterName, status);
-            model.addAttribute("subject", subject);
-            model.addAttribute("chapters", chapters);
+            String adjustedSortField = sortField;
+            if ("chapterId".equals(sortField)) {
+                adjustedSortField = "chapterId";
+            } else if ("chapterName".equals(sortField)) {
+                adjustedSortField = "chapterName";
+            } else {
+                adjustedSortField = "createdAt";
+            }
+
+            Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            Page<ChapterListDTO> chapterPage = chapterService.findChaptersBySubjectId(
+                    subjectId, chapterName, status, userId, PageRequest.of(page, size, Sort.by(direction, adjustedSortField)));
+
+            model.addAttribute("subject", subjectService.getSubjectById(subjectId).orElse(null));
+            model.addAttribute("chapterPage", chapterPage);
+            model.addAttribute("chapters", chapterPage.getContent());
             model.addAttribute("chapterName", chapterName);
             model.addAttribute("status", status);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("sortField", sortField);
+            model.addAttribute("sortDir", sortDir);
+            model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
             return "staff/chapter/show";
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject";
+            model.addAttribute("errorMessage", e.getMessage());
+            return "staff/chapter/show";
         } catch (Exception e) {
             log.error("Error fetching chapters: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lấy danh sách chương");
-            return "redirect:/staff/subject";
+            model.addAttribute("errorMessage", "chapter.list.error");
+            return "staff/chapter/show";
         }
     }
 
-    /**
-     * Hiển thị form tạo chương mới.
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping("/new")
     public String showCreateChapterForm(
             @PathVariable Long subjectId,
             Model model,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
-            Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-            if (subject == null) {
-                log.warn("Subject not found: subjectId={}", subjectId);
-                return "error/404";
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/{subjectId}/chapters";
             }
 
+            Subject subject = subjectService.getSubjectById(subjectId)
+                    .orElseThrow(() -> new IllegalArgumentException("subject.message.notFound"));
+            ChapterFormDTO chapterForm = new ChapterFormDTO();
+            chapterForm.setSubjectId(subjectId);
+
             model.addAttribute("subject", subject);
-            model.addAttribute("chapter", new Chapter());
+            model.addAttribute("chapter", chapterForm);
             model.addAttribute("isEdit", false);
             return "staff/chapter/save";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
+            return "redirect:/staff/subject/{subjectId}/chapters";
         } catch (Exception e) {
             log.error("Error showing chapter form: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị form chương");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
+            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.form");
+            return "redirect:/staff/subject/{subjectId}/chapters";
         }
     }
 
-    /**
-     * Hiển thị form chỉnh sửa chương.
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping("/{chapterId}/edit")
     public String showEditChapterForm(
             @PathVariable Long subjectId,
             @PathVariable Long chapterId,
             Model model,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
-            Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-            if (subject == null) {
-                log.warn("Subject not found: subjectId={}", subjectId);
-                return "error/404";
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/{subjectId}/chapters";
             }
 
-            Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
-            if (chapter == null) {
-                log.warn("Chapter not found: chapterId={}", chapterId);
-                redirectAttributes.addFlashAttribute("errorMessage", "Chương không tồn tại");
-                return "redirect:/staff/subject/" + subjectId + "/chapters";
-            }
+            Subject subject = subjectService.getSubjectById(subjectId)
+                    .orElseThrow(() -> new IllegalArgumentException("subject.message.notFound"));
+            Chapter chapter = chapterService.getChapterById(chapterId)
+                    .orElseThrow(() -> new IllegalArgumentException("chapter.message.notFound"));
+
+            ChapterFormDTO chapterForm = new ChapterFormDTO();
+            chapterForm.setChapterId(chapterId);
+            chapterForm.setChapterName(chapter.getChapterName());
+            chapterForm.setChapterDescription(chapter.getChapterDescription());
+            chapterForm.setSubjectId(subjectId);
 
             model.addAttribute("subject", subject);
-            model.addAttribute("chapter", chapter);
+            model.addAttribute("chapter", chapterForm);
             model.addAttribute("isEdit", true);
             return "staff/chapter/save";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
+            return "redirect:/staff/subject/{subjectId}/chapters";
         } catch (Exception e) {
             log.error("Error showing chapter form: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị form chương");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
+            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.form");
+            return "redirect:/staff/subject/{subjectId}/chapters";
         }
     }
 
-    /**
-     * Xử lý tạo chương mới.
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @PostMapping
     public String createChapter(
             @PathVariable Long subjectId,
-            @Valid @ModelAttribute("chapter") Chapter chapter,
+            @Valid @ModelAttribute("chapter") ChapterFormDTO chapterForm,
             BindingResult bindingResult,
+            HttpSession session,
             RedirectAttributes redirectAttributes,
             Model model) {
-        return handleChapterSave(subjectId, chapter, bindingResult, redirectAttributes, model, false);
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/{subjectId}/chapters";
+            }
+
+            if (bindingResult.hasErrors()) {
+                model.addAttribute("subject", subjectService.getSubjectById(subjectId).orElse(null));
+                model.addAttribute("isEdit", false);
+                return "staff/chapter/save";
+            }
+
+            chapterForm.setSubjectId(subjectId);
+            chapterService.createChapter(chapterForm, userId);
+            redirectAttributes.addFlashAttribute("message", "chapter.message.created.success");
+            return "redirect:/staff/subject/{subjectId}/chapters";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("subject", subjectService.getSubjectById(subjectId).orElse(null));
+            model.addAttribute("isEdit", false);
+            return "staff/chapter/save";
+        } catch (Exception e) {
+            log.error("Error creating chapter: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.create");
+            return "redirect:/staff/subject/{subjectId}/chapters";
+        }
     }
 
-    /**
-     * Xử lý cập nhật chương.
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @PostMapping("/{chapterId}")
     public String updateChapter(
             @PathVariable Long subjectId,
             @PathVariable Long chapterId,
-            @Valid @ModelAttribute("chapter") Chapter chapter,
+            @Valid @ModelAttribute("chapter") ChapterFormDTO chapterForm,
             BindingResult bindingResult,
+            HttpSession session,
             RedirectAttributes redirectAttributes,
             Model model) {
-        chapter.setChapterId(chapterId);
-        return handleChapterSave(subjectId, chapter, bindingResult, redirectAttributes, model, true);
-    }
-
-    /**
-     * Xử lý nộp chương (chuyển trạng thái từ DRAFT sang PENDING).
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
-    @PostMapping("/{chapterId}/submit")
-    public String submitChapter(
-            @PathVariable Long subjectId,
-            @PathVariable Long chapterId,
-            RedirectAttributes redirectAttributes) {
         try {
-            Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-            if (subject == null) {
-                log.warn("Subject not found: subjectId={}", subjectId);
-                return "error/404";
-            }
-            chapterService.submitChapter(chapterId);
-            redirectAttributes.addFlashAttribute("message", "Nộp chương thành công");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi nộp chương");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        }
-    }
-
-    /**
-     * Xử lý hủy chương (chuyển trạng thái từ PENDING về DRAFT).
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
-    @PostMapping("/{chapterId}/cancel")
-    public String cancelChapter(
-            @PathVariable Long subjectId,
-            @PathVariable Long chapterId,
-            RedirectAttributes redirectAttributes) {
-        try {
-            Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-            if (subject == null) {
-                log.warn("Subject not found: subjectId={}", subjectId);
-                return "error/404";
-            }
-            chapterService.cancelChapter(chapterId);
-            redirectAttributes.addFlashAttribute("message", "Hủy chương thành công");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hủy chương");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        }
-    }
-
-    /**
-     * Cập nhật trạng thái của các chương.
-     */
-    @PreAuthorize("hasAnyRole('STAFF')")
-    @PostMapping("/update-status")
-    public String updateChapterStatus(
-            @PathVariable Long subjectId,
-            @RequestParam List<Long> chapterIds,
-            RedirectAttributes redirectAttributes) {
-        try {
-            SubjectResponseDTO subject = subjectService.getSubjectResponseById(subjectId);
-            if (subject == null) {
-                return "error/404";
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/{subjectId}/chapters";
             }
 
-            chapterService.toggleChaptersStatus(chapterIds);
-            redirectAttributes.addFlashAttribute("message", "Cập nhật trạng thái thành công");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
-        }
-    }
-
-    /**
-     * Xử lý logic lưu chương (tạo mới hoặc cập nhật).
-     */
-    private String handleChapterSave(
-            Long subjectId,
-            Chapter chapter,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes,
-            Model model,
-            boolean isEdit) {
-        Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-        if (subject == null) {
-            return "error/404";
-        }
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("subject", subject);
-            model.addAttribute("chapter", chapter);
-            model.addAttribute("isEdit", isEdit);
-            return "staff/chapter/save";
-        }
-
-        try {
-            chapter.setSubject(subject);
-            if (isEdit) {
-                chapterService.updateChapter(chapter);
-            } else {
-                chapterService.createChapter(chapter);
+            if (bindingResult.hasErrors()) {
+                model.addAttribute("subject", subjectService.getSubjectById(subjectId).orElse(null));
+                model.addAttribute("isEdit", true);
+                return "staff/chapter/save";
             }
-            redirectAttributes.addFlashAttribute("message", isEdit ? "Cập nhật chương thành công" : "Tạo chương thành công");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
+
+            chapterForm.setSubjectId(subjectId);
+            chapterForm.setChapterId(chapterId);
+            chapterService.updateChapter(chapterForm, userId);
+            redirectAttributes.addFlashAttribute("message", "chapter.message.updated.success");
+            return "redirect:/staff/subject/{subjectId}/chapters";
         } catch (IllegalArgumentException e) {
-            String field = e.getMessage().contains("Tên chương đã tồn tại") ? "chapterName" : null;
-            bindingResult.rejectValue(field, "error.chapter", e.getMessage());
-            model.addAttribute("subject", subject);
-            model.addAttribute("chapter", chapter);
-            model.addAttribute("isEdit", isEdit);
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("subject", subjectService.getSubjectById(subjectId).orElse(null));
+            model.addAttribute("isEdit", true);
             return "staff/chapter/save";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu chương");
-            return "redirect:/staff/subject/" + subjectId + "/chapters";
+            log.error("Error updating chapter: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.update");
+            return "redirect:/staff/subject/{subjectId}/chapters";
+        }
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PostMapping("/{chapterId}/delete")
+    public String deleteChapter(
+            @PathVariable Long subjectId,
+            @PathVariable Long chapterId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/{subjectId}/chapters";
+            }
+            chapterService.deleteChapter(chapterId, userId);
+            redirectAttributes.addFlashAttribute("message", "chapter.message.deleted.success");
+            return "redirect:/staff/subject/{subjectId}/chapters";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/staff/subject/{subjectId}/chapters";
+        } catch (Exception e) {
+            log.error("Error deleting chapter: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.delete");
+            return "redirect:/staff/subject/{subjectId}/chapters";
         }
     }
 }

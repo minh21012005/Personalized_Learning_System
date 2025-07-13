@@ -24,4 +24,6 @@ public interface PackageSubjectRepository extends JpaRepository<PackageSubject, 
         void deleteByPkg_PackageId(Long packageId);
 
         Optional<PackageSubject> findByPkg_PackageIdAndSubject_SubjectId(Long packageId, Long subjectId);
+
+    boolean existsBySubjectSubjectId(Long subjectId);
 }

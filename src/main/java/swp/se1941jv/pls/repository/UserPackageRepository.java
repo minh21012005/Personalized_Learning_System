@@ -25,4 +25,6 @@ public interface UserPackageRepository extends JpaRepository<UserPackage, KeyUse
     List<UserPackage> findByIdUserId(Long idUserId);
 
     Boolean existsByUser_UserIdAndPkg_PackageIdAndPkg_PackageSubjects_Subject_SubjectIdAndEndDateAfter(Long userId, Long packageId, Long subjectId, LocalDateTime now);
+
+    boolean existsByPkg_PackageSubjects_Subject_SubjectId(Long subjectId);
 }

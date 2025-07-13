@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.controller.admin;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +15,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import swp.se1941jv.pls.entity.Grade;
-import swp.se1941jv.pls.entity.Subject;
+import swp.se1941jv.pls.dto.response.subject.*;
+import swp.se1941jv.pls.entity.*;
+import swp.se1941jv.pls.repository.UserRepository;
 import swp.se1941jv.pls.service.GradeService;
 import swp.se1941jv.pls.service.SubjectService;
 import swp.se1941jv.pls.service.UploadService;
@@ -32,14 +34,15 @@ public class SubjectController {
     private final SubjectService subjectService;
     private final GradeService gradeService;
     private final UploadService uploadService;
-
+    private final UserRepository userRepository;
     private static final String ADMIN_LAYOUT_VIEW = "admin/subject/show";
     private static final String SUBJECT_IMAGE_TARGET_FOLDER = "subjectImg";
 
-    public SubjectController(SubjectService subjectService, GradeService gradeService, UploadService uploadService) {
+    public SubjectController(SubjectService subjectService, GradeService gradeService, UploadService uploadService, UserRepository userRepository) {
         this.subjectService = subjectService;
         this.gradeService = gradeService;
         this.uploadService = uploadService;
+        this.userRepository = userRepository;
     }
 
     private void addGradesToModelForFilter(Model model) {
@@ -52,42 +55,41 @@ public class SubjectController {
         model.addAttribute("grades", activeGrades);
     }
 
-    private void populateFormModel(Model model, String pageTitle, Subject subject) {
+    private void populateFormModel(Model model, String pageTitle, SubjectFormDTO subject) {
         addActiveGradesToModelForForm(model);
         model.addAttribute("subject", subject);
         model.addAttribute("pageTitle", pageTitle);
         model.addAttribute("viewName", "form_content");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
         model.addAttribute("customDateFormatter", formatter);
         model.addAttribute("subjectImageFolder", SUBJECT_IMAGE_TARGET_FOLDER);
     }
-
     @GetMapping
     public String listSubjects(Model model,
-            @RequestParam(name = "filterName", required = false) String filterName,
-            @RequestParam(name = "filterGradeId", required = false) Long filterGradeId,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "sortField", defaultValue = "createdAt") String sortField,
-            @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
+                               @RequestParam(name = "filterName", required = false) String filterName,
+                               @RequestParam(name = "filterGradeId", required = false) Long filterGradeId,
+                               @RequestParam(name = "page", defaultValue = "0") int page,
+                               @RequestParam(name = "size", defaultValue = "10") int size,
+                               @RequestParam(name = "sortField", defaultValue = "createdAt") String sortField,
+                               @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
         Sort.Direction direction = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.Direction.ASC
                 : Sort.Direction.DESC;
         Sort sortOrder = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page, size, sortOrder);
-        Page<Subject> subjectPage = subjectService.getAllSubjects(filterName, filterGradeId, pageable);
+        Page<SubjectListDTO> subjectPage = subjectService.getAllSubjectsWithDTO(filterName, filterGradeId, pageable);
 
         model.addAttribute("subjectPage", subjectPage);
         model.addAttribute("subjects", subjectPage.getContent());
         model.addAttribute("viewName", "list_content");
         model.addAttribute("filterName", filterName);
         model.addAttribute("filterGradeId", filterGradeId);
-        addGradesToModelForFilter(model); // Grades cho filter dropdown
+        addGradesToModelForFilter(model);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
         model.addAttribute("customDateFormatter", formatter);
         model.addAttribute("subjectImageFolder", SUBJECT_IMAGE_TARGET_FOLDER);
         return ADMIN_LAYOUT_VIEW;
@@ -95,34 +97,35 @@ public class SubjectController {
 
     @GetMapping("/new")
     public String showCreateSubjectForm(Model model) {
-        populateFormModel(model, "Create New Subject", new Subject());
+        populateFormModel(model, "Tạo môn học mới", new SubjectFormDTO());
         return ADMIN_LAYOUT_VIEW;
     }
 
     @PostMapping("/save")
-    public String saveOrUpdateSubject(@Valid @ModelAttribute("subject") Subject subject,
+    public String saveOrUpdateSubject(@Valid @ModelAttribute("subject") SubjectFormDTO subject,
             BindingResult result,
             @RequestParam("imageFile") MultipartFile imageFile,
             RedirectAttributes redirectAttributes,
+                                      HttpSession session,
             Model model) {
         String pageTitle = subject.getSubjectId() == null ? "Create New Subject" : "Edit Subject";
 
-        if (subject.getGrade() != null && subject.getGrade().getGradeId() != null) {
-            Optional<Grade> selectedGradeOpt = gradeService.getGradeById(subject.getGrade().getGradeId());
+        if (subject.getGradeId() != null) {
+            Optional<Grade> selectedGradeOpt = gradeService.getGradeById(subject.getGradeId());
             if (selectedGradeOpt.isPresent()) {
                 if (!selectedGradeOpt.get().isActive()) {
-                    result.addError(new FieldError("subject", "grade",
-                            subject.getGrade().getGradeId(),
+                    result.addError(new FieldError("subject", "gradeId",
+                            subject.getGradeId(),
                             false,
                             new String[] { "NotActive.subject.grade" },
                             null,
-                            "Selected Grade is not active. Please choose an active Grade."));
+                            "Khối lớp được chọn không hoạt động. Vui lòng chọn khối lớp hoạt động."));
                 }
             } else {
-                result.addError(new FieldError("subject", "grade",
-                        subject.getGrade().getGradeId(),
+                result.addError(new FieldError("subject", "gradeId",
+                        subject.getGradeId(),
                         false, new String[] { "NonExistent.subject.grade" }, null,
-                        "Selected Grade does not exist."));
+                        "Khối lớp được chọn không tồn tại."));
             }
         }
 
@@ -166,7 +169,8 @@ public class SubjectController {
         }
 
         try {
-            subjectService.saveSubject(subject);
+            Long userId = (Long) session.getAttribute("id");
+            subjectService.saveSubjectWithDTO(subject, userId);
             redirectAttributes.addFlashAttribute("successMessage", "subject.message.saved.success");
             return "redirect:/admin/subject";
         } catch (Exception e) {
@@ -181,41 +185,185 @@ public class SubjectController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showEditSubjectForm(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Subject> subjectOptional = subjectService.getSubjectById(id);
-        if (subjectOptional.isPresent()) {
-            Subject subjectToEdit = subjectOptional.get();
-            populateFormModel(model, "Edit Subject", subjectToEdit);
-            return ADMIN_LAYOUT_VIEW;
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
+    public String showEditSubjectForm(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes, HttpSession session) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại!"));
+            if (!"CONTENT_MANAGER".equals(user.getRole().getRoleName())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có Content Manager mới có thể chỉnh sửa môn học!");
+                return "redirect:/admin/subject";
+            }
+
+            Optional<SubjectFormDTO> subjectOptional = subjectService.getSubjectFormDTOById(id);
+            if (subjectOptional.isPresent()) {
+                SubjectFormDTO subjectToEdit = subjectOptional.get();
+                populateFormModel(model, "Sửa môn học", subjectToEdit);
+                model.addAttribute("currentSubjectImage", subjectToEdit.getSubjectImage());
+                // Thêm thông tin về SubjectAssignment nếu có
+                Optional<SubjectAssignment> assignmentOpt = subjectService.getAssignmentBySubjectId(id);
+                assignmentOpt.ifPresent(assignment -> model.addAttribute("assignedTo", assignment.getUser().getFullName()));
+                return ADMIN_LAYOUT_VIEW;
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
+                return "redirect:/admin/subject";
+            }
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/subject";
+        }
+    }
+
+    @GetMapping("/revert/{id}")
+    public String revertToDraft(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            subjectService.revertToDraftByContentManager(id, userId);
+            redirectAttributes.addFlashAttribute("successMessage", "subject.message.reverted.success");
+            return "redirect:/admin/subject/edit/" + id;
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/subject";
+        } catch (Exception e) {
+            logger.error("Lỗi khi chuyển trạng thái môn học ID {} về DRAFT: {}", id, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.revert");
             return "redirect:/admin/subject";
         }
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteSubject(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        Optional<Subject> subjectOpt = subjectService.getSubjectById(id);
-        if (subjectOpt.isPresent()) {
-            String imageName = subjectOpt.get().getSubjectImage();
-            if (imageName != null && !imageName.isEmpty()) {
-                boolean deleted = uploadService.deleteUploadedFile(imageName, SUBJECT_IMAGE_TARGET_FOLDER);
-                if (!deleted) {
-                    logger.warn("Could not delete image file {} for subject ID {} during delete operation.", imageName,
-                            id);
-                    redirectAttributes.addFlashAttribute("warningMessage", "subject.message.warn.imageNotDeleted");
+    public String deleteSubject(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            Optional<Subject> subjectOpt = subjectService.getSubjectById(id);
+            if (subjectOpt.isPresent()) {
+                String imageName = subjectOpt.get().getSubjectImage();
+                if (imageName != null && !imageName.isEmpty()) {
+                    boolean deleted = uploadService.deleteUploadedFile(imageName, SUBJECT_IMAGE_TARGET_FOLDER);
+                    if (!deleted) {
+                        logger.warn("Không thể xóa file hình ảnh {} cho môn học ID {}.", imageName, id);
+                        redirectAttributes.addFlashAttribute("warningMessage", "subject.message.warn.imageNotDeleted");
+                    }
                 }
             }
-        }
 
-        try {
-            subjectService.deleteSubjectById(id);
+            subjectService.deleteSubjectByIdWithChecks(id, userId);
             redirectAttributes.addFlashAttribute("successMessage", "subject.message.deleted.success");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            logger.error("Error deleting subject ID {}: {}", id, e.getMessage(), e);
+            logger.error("Lỗi khi xóa môn học ID {}: {}", id, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.delete");
         }
         return "redirect:/admin/subject";
     }
 
+    @GetMapping("/assign/{id}")
+    public String showAssignSubjectForm(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
+        Optional<SubjectAssignDTO> subjectOptional = subjectService.getSubjectAssignDTOById(id);
+        if (!subjectOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
+            return "redirect:/admin/subject";
+        }
+
+        SubjectAssignDTO subject = subjectOptional.get();
+        Optional<SubjectStatusHistory> latestStatus = subjectService.getLatestSubjectStatus(id);
+        if (latestStatus.isEmpty() || latestStatus.get().getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notDraft");
+            return "redirect:/admin/subject";
+        }
+
+        if (subjectService.getAssignmentBySubjectId(id).isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.alreadyAssigned");
+            return "redirect:/admin/subject";
+        }
+
+        List<UserAssignDTO> staffs = subjectService.getStaffWithDTO();
+        if (staffs.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.noContentCreators");
+            return "redirect:/admin/subject";
+        }
+
+        model.addAttribute("subject", subject);
+        model.addAttribute("contentCreators", staffs);
+        model.addAttribute("assignment", new SubjectAssignment());
+        model.addAttribute("pageTitle", "Giao môn học");
+        model.addAttribute("viewName", "assign_content");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+        model.addAttribute("customDateFormatter", formatter);
+        return ADMIN_LAYOUT_VIEW;
+    }
+
+    @PostMapping("/assign")
+    public String assignSubject(@RequestParam("subjectId") Long subjectId,
+                                @RequestParam("userId") Long userId,
+                                RedirectAttributes redirectAttributes,
+                                HttpSession session) {
+        try {
+            Long contentManagerId = (Long) session.getAttribute("id");
+            subjectService.assignSubject(subjectId, userId, contentManagerId);
+            redirectAttributes.addFlashAttribute("successMessage", "subject.message.assigned.success");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Lỗi khi giao môn học ID {} cho user ID {}: {}", subjectId, userId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.assign");
+        }
+        return "redirect:/admin/subject";
+    }
+
+    @GetMapping("/review/{id}")
+    public String showReviewSubjectForm(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
+        Optional<SubjectReviewDTO> subjectOptional = subjectService.getSubjectReviewDTOById(id);
+        if (!subjectOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
+            return "redirect:/admin/subject";
+        }
+
+        SubjectReviewDTO subject = subjectOptional.get();
+        if (!"PENDING".equals(subject.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notPending");
+            return "redirect:/admin/subject";
+        }
+
+        model.addAttribute("subject", subject);
+        model.addAttribute("pageTitle", "Duyệt môn học");
+        model.addAttribute("viewName", "review_content");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+        model.addAttribute("customDateFormatter", formatter);
+        return ADMIN_LAYOUT_VIEW;
+    }
+
+    @PostMapping("/review")
+    public String reviewSubject(@RequestParam("subjectId") Long subjectId,
+                                @RequestParam("status") String status,
+                                @RequestParam(value = "feedback", required = false) String feedback,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            Long reviewerId = (Long) session.getAttribute("id");
+            subjectService.reviewSubject(subjectId, status, feedback, reviewerId);
+            redirectAttributes.addFlashAttribute("successMessage", "subject.message.reviewed.success");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Lỗi khi duyệt môn học ID {}: {}", subjectId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.review");
+        }
+        return "redirect:/admin/subject";
+    }
+
+    @GetMapping("/publish/{id}")
+    public String publishSubject(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            subjectService.publishSubject(id);
+            redirectAttributes.addFlashAttribute("successMessage", "subject.message.published.success");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Lỗi khi xuất bản môn học ID {}: {}", id, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.publish");
+        }
+        return "redirect:/admin/subject";
+    }
 }

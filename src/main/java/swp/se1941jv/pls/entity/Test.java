@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -33,6 +34,11 @@ public class Test extends BaseEntity {
     @Column(name = "end_at")
     LocalDateTime endAt;
 
+    @OneToOne
+    @JoinColumn(name = "lesson_id")
+    @JsonIgnoreProperties("test")
+    private Lesson lesson;
+
     @ManyToOne
     @JoinColumn(name = "test_status_id")
     TestStatus testStatus;
@@ -53,7 +59,6 @@ public class Test extends BaseEntity {
 
     @Transient
     private List<QuestionBank> randomQuestions;
-
 
     @ManyToOne
     @JoinColumn(name = "test_category_id")
