@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const dateFilterButton = document.getElementById('date-filter-button');
     const dateClearButton = document.getElementById('date-clear-button');
 
- 
+
     let currentPage = 0;
     const pageSize = 5;
     let currentStatusFilter = "";
@@ -36,15 +36,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const stats = await response.json();
             statsContainer.innerHTML =
                 '<span><strong>Tổng:</strong> ' + stats.total + '</span>' +
-    // Thêm một khoảng trắng và ký tự | để ngăn cách cho đẹp
-    '<span class="mx-2">|</span>' + 
-    '<span class="text-warning"><strong>Chờ duyệt:</strong> ' + stats.pending + '</span>' +
-    '<span class="mx-2">|</span>' +
-    '<span class="text-success"><strong>Đã duyệt:</strong> ' + stats.approved + '</span>' +
-    '<span class="mx-2">|</span>' +
-    '<span class="text-danger"><strong>Đã từ chối:</strong> ' + stats.rejected + '</span>' +
-    '<span class="mx-2">|</span>' +
-    '<span class="text-muted"><strong>Đã ẩn:</strong> ' + stats.hidden + '</span>';
+                '<span class="mx-2">|</span>' +
+                '<span class="text-warning"><strong>Chờ duyệt:</strong> ' + stats.pending + '</span>' +
+                '<span class="mx-2">|</span>' +
+                '<span class="text-success"><strong>Đã duyệt:</strong> ' + stats.approved + '</span>' +
+                '<span class="mx-2">|</span>' +
+                '<span class="text-danger"><strong>Đã từ chối:</strong> ' + stats.rejected + '</span>' +
+                '<span class="mx-2">|</span>' +
+                '<span class="text-muted"><strong>Đã ẩn:</strong> ' + stats.hidden + '</span>';
         } catch (error) {
             console.error("Lỗi tải thống kê:", error);
             statsContainer.innerHTML = '<span>Không thể tải thống kê.</span>';
@@ -211,29 +210,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         actionsHtml += '<span class="action-link action-delete btn-delete">Xóa</span>';
 
-        // Sửa lại câu lệnh return trong hàm createCommentRecursive
 
-return (
-    '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
-        '<div class="author-info">' +
+        return (
+            '<div class="comment" data-id="' + comment.id + '" data-lesson-id="' + comment.lessonId + '">' +
+            '<div class="author-info">' +
             '<img src="' + avatar + '" alt="' + authorName + '" class="author-avatar">' +
-            // BẮT ĐẦU SỬA ĐỔI
-            '<div>' + 
-                // Hàng trên: Tên tác giả và badge trạng thái
-                '<div class="d-flex align-items-center">' +
-                    '<span class="author-name">' + authorName + '</span>' +
-                    statusBadgeHtml +
-                '</div>' +
-                // Hàng dưới: Ngày tháng
-                '<div class="comment-meta"><span>' + createdAt + '</span></div>' +
+
+            '<div>' +
+            '<div class="d-flex align-items-center">' +
+            '<span class="author-name">' + authorName + '</span>' +
+            statusBadgeHtml +
             '</div>' +
-            // KẾT THÚC SỬA ĐỔI
-        '</div>' +
-        '<p class="comment-content">' + (comment.content || '') + '</p>' +
-        '<div class="comment-actions">' + actionsHtml + '</div>' +
-        repliesHtml +
-    '</div>'
-);
+            '<div class="comment-meta"><span>' + createdAt + '</span></div>' +
+            '</div>' +
+            '</div>' +
+            '<p class="comment-content">' + (comment.content || '') + '</p>' +
+            '<div class="comment-actions">' + actionsHtml + '</div>' +
+            repliesHtml +
+            '</div>'
+        );
     }
 
 
