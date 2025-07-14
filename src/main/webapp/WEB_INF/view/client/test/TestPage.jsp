@@ -18,11 +18,13 @@
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
         }
+
         .main-container {
             margin-top: 70px;
             padding: 20px;
             flex: 1;
         }
+
         .question-card {
             background: #ffffff;
             padding: 20px;
@@ -31,21 +33,25 @@
             margin-bottom: 30px;
             transition: transform 0.2s;
         }
+
         .question-card:hover {
             transform: translateY(-2px);
         }
+
         .question-card h4 {
             color: #212529;
             font-size: 1.5rem;
             margin-bottom: 15px;
             font-weight: bold;
         }
+
         .question-card p {
             color: #6c757d;
             font-size: 1.1rem;
             margin-bottom: 20px;
             line-height: 1.6;
         }
+
         .question-card img {
             width: 100%;
             max-height: 300px;
@@ -53,9 +59,11 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .answer-options {
             margin-top: 10px;
         }
+
         .answer-options label {
             display: flex;
             align-items: center;
@@ -69,10 +77,12 @@
             color: #212529;
             border: 1px solid #dee2e6;
         }
+
         .answer-options input[type="checkbox"] {
             margin-right: 10px;
             cursor: pointer;
         }
+
         .navigation {
             display: flex;
             justify-content: space-between;
@@ -80,6 +90,7 @@
             margin-top: 20px;
             flex-wrap: wrap;
         }
+
         .btn-submit, .btn-save, .btn-back {
             background-color: #007bff;
             color: #fff;
@@ -92,21 +103,26 @@
             display: inline-block;
             transition: background-color 0.3s;
         }
+
         .btn-save {
             background-color: #28a745;
         }
+
         .btn-submit:hover, .btn-back:hover {
             background-color: #0056b3;
         }
+
         .btn-save:hover {
             background-color: #218838;
         }
+
         .timer {
             color: #dc3545;
             font-weight: bold;
             font-size: 1.2rem;
             margin-left: 20px;
         }
+
         .history-summary {
             background-color: #e9ecef;
             padding: 15px;
@@ -116,18 +132,22 @@
             font-size: 1.2rem;
             color: #212529;
         }
+
         @media (max-width: 768px) {
             .question-card {
                 margin-bottom: 20px;
             }
+
             .navigation {
                 flex-direction: column;
                 gap: 10px;
             }
+
             .timer {
                 margin-left: 0;
                 margin-top: 10px;
             }
+
             .btn-submit, .btn-save, .btn-back {
                 width: 100%;
                 margin-bottom: 10px;
@@ -167,6 +187,7 @@
             </c:forEach>
             <div class="navigation">
                 <input type="hidden" id="testId" value="${testId}">
+                <input type="hidden" id="userTestId" value="${userTestId}">
                 <button type="button" onclick="saveAnswers()" class="btn-save">Lưu đáp án</button>
                 <button type="submit" class="btn-submit">Nộp bài</button>
                 <a href="/tests" class="btn-back">Quay lại</a>
@@ -188,6 +209,7 @@
 <script>
     let remainingTime = ${remainingTime};
     const testId = ${testId};
+    const userTestId = ${userTestId};
 
     function updateTimer() {
         let minutes = Math.floor(remainingTime / 60);
@@ -199,15 +221,16 @@
             remainingTime--;
         }
     }
+
     setInterval(updateTimer, 1000);
     updateTimer();
 
     function getAnswers() {
         let answers = [];
-        $('.question-card').each(function() {
+        $('.question-card').each(function () {
             let questionId = $(this).find('.question-id').val();
             let selected = [];
-            $(this).find('.answer-option:checked').each(function() {
+            $(this).find('.answer-option:checked').each(function () {
                 selected.push($(this).val());
             });
             answers.push({questionId: parseInt(questionId), selectedAnswers: selected});
@@ -217,26 +240,29 @@
 
     function saveAnswers() {
         $.ajax({
-            url: '/tests/save-answers/' + testId,
+            url: '/tests/save-answers/' + userTestId,
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({testId: testId, answers: getAnswers()}),
-            success: function() {
+            data: JSON.stringify({testId: testId, userTestId: userTestId, answers: getAnswers()}),
+            success: function () {
                 // alert('Đã lưu đáp án.');
-                window.location.reload();
+                // window.location.reload();
             },
-            error: function() {
+            error: function () {
                 alert('Lỗi khi lưu đáp án.');
             }
         });
     }
+
+    // Lưu đáp án ngay khi vào làm bài
+    saveAnswers();
 
     // Tự động lưu mỗi 5 phút
     setInterval(saveAnswers, 300000); // 300000 ms = 5 phút
 
     function prepareSubmit(auto = false) {
         let hasSelection = false;
-        $('.answer-option').each(function() {
+        $('.answer-option').each(function () {
             if ($(this).is(':checked')) {
                 hasSelection = true;
                 return false;
@@ -249,17 +275,18 @@
 
         let submission = {
             testId: testId,
+            userTestId: userTestId,
             answers: getAnswers()
         };
         $.ajax({
-            url: '/tests/submit/' + testId,
+            url: '/tests/submit/' + userTestId,
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(submission),
-            success: function() {
-                window.location.href = '/tests/history/' + testId;
+            success: function () {
+                window.location.href = '/tests/history/' + userTestId;
             },
-            error: function() {
+            error: function () {
                 alert('Lỗi khi nộp bài.');
             }
         });
