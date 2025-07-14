@@ -37,7 +37,7 @@ public class TestContentController {
     private final TestContentService testContentService;
 
     @GetMapping("/chapters")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
     @ResponseBody
     public List<ChapterResponseDTO> getChaptersBySubject(@RequestParam("subjectId") Long subjectId) {
         try {
@@ -54,7 +54,7 @@ public class TestContentController {
     }
 
     @GetMapping("/lessons")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
     @ResponseBody
     public List<LessonResponseDTO> getLessonsByChapter(@RequestParam("chapterId") Long chapterId) {
         try {
@@ -66,7 +66,7 @@ public class TestContentController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
     public String listTests(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "subjectId", required = false) Long subjectId,
@@ -116,7 +116,7 @@ public class TestContentController {
     }
 
     @GetMapping("/details/{testId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
     public String viewTestDetails(@PathVariable("testId") Long testId, Model model) {
         try {
             // Assuming you have a method to fetch test details
@@ -132,28 +132,44 @@ public class TestContentController {
 
 
     @PostMapping("/approve/{testId}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public String approveTest(@PathVariable("testId") Long testId, Model model) {
+    @PreAuthorize("hasAnyRole('ADMIN','CONTENT_MANAGER')")
+    public String approveTest(@PathVariable("testId") Long testId, @RequestParam("reason") String reason, Model model) {
         try {
-            testContentService.approveTest(testId);
+            if (reason == null || reason.trim().isEmpty()) {
+                model.addAttribute("error", "Lý do phê duyệt là bắt buộc.");
+                TestDetailDto testDetail = testContentService.getTestDetails(testId);
+                model.addAttribute("test", testDetail);
+                return "content-manager/tests/TestDetail";
+            }
+            testContentService.approveTest(testId, reason);
             return "redirect:/admin/tests";
         } catch (Exception e) {
             logger.error("Error approving test {}: {}", testId, e.getMessage(), e);
             model.addAttribute("error", "Lỗi khi phê duyệt bài kiểm tra: " + e.getMessage());
-            return "error";
+            TestDetailDto testDetail = testContentService.getTestDetails(testId);
+            model.addAttribute("test", testDetail);
+            return "content-manager/tests/TestDetail";
         }
     }
 
     @PostMapping("/reject/{testId}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public String rejectTest(@PathVariable("testId") Long testId, Model model) {
+    @PreAuthorize("hasAnyRole('ADMIN','CONTENT_MANAGER')")
+    public String rejectTest(@PathVariable("testId") Long testId, @RequestParam("reason") String reason, Model model) {
         try {
-            testContentService.rejectTest(testId);
+            if (reason == null || reason.trim().isEmpty()) {
+                model.addAttribute("error", "Lý do từ chối là bắt buộc.");
+                TestDetailDto testDetail = testContentService.getTestDetails(testId);
+                model.addAttribute("test", testDetail);
+                return "content-manager/tests/TestDetail";
+            }
+            testContentService.rejectTest(testId, reason);
             return "redirect:/admin/tests";
         } catch (Exception e) {
             logger.error("Error rejecting test {}: {}", testId, e.getMessage(), e);
             model.addAttribute("error", "Lỗi khi từ chối bài kiểm tra: " + e.getMessage());
-            return "error";
+            TestDetailDto testDetail = testContentService.getTestDetails(testId);
+            model.addAttribute("test", testDetail);
+            return "content-manager/tests/TestDetail";
         }
     }
 }

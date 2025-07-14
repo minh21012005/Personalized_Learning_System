@@ -129,6 +129,7 @@ public class TestStaffController {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             @RequestParam(value = "chapterId", required = false) Long chapterId,
+            @RequestParam(value = "testStatusId", required = false) Long statusId,
             @RequestParam(value = "startAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
             @RequestParam(value = "endAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
             Model model) {
@@ -143,7 +144,7 @@ public class TestStaffController {
             }
 
             Page<TestListDto> testPage = testStaffService.findTestsByCreatorAndFilters(
-                    creatorUserId, subjectId, chapterId, startAt, endAt, pageable);
+                    creatorUserId, subjectId, chapterId,statusId, startAt, endAt, pageable);
 
             List<TestListDto> tests = testPage.getContent();
             int totalPages = testPage.getTotalPages();
@@ -152,6 +153,7 @@ public class TestStaffController {
             List<Subject> subjects = testStaffService.getAllSubjects();
             List<Chapter> chapters = subjectId != null ? testStaffService.getChaptersBySubject(subjectId) : new ArrayList<>();
 
+            List<TestStatus> statuses = testStaffService.getAllTestStatuses();
             model.addAttribute("tests", tests);
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("currentPage", currentPage);
@@ -159,6 +161,7 @@ public class TestStaffController {
             model.addAttribute("chapters", chapters);
             model.addAttribute("subjectId", subjectId);
             model.addAttribute("chapterId", chapterId);
+            model.addAttribute("statuses", statuses);
             model.addAttribute("startAt", startAt != null ? startAt.toString() : null);
             model.addAttribute("endAt", endAt != null ? endAt.toString() : null);
 
@@ -239,6 +242,19 @@ public class TestStaffController {
             logger.error("Error updating test {}: {}", testId, e.getMessage(), e);
             model.addAttribute("error", "Lỗi khi cập nhật bài kiểm tra: " + e.getMessage());
             return "error";
+        }
+    }
+
+    @PostMapping("/delete/{testId}")
+    @PreAuthorize("hasAnyRole('STAFF')")
+    public String deleteTest(@PathVariable("testId") Long testId, Model model) {
+        try {
+            testStaffService.deleteTest(testId);
+            return "redirect:/staff/tests";
+        } catch (Exception e) {
+            logger.error("Error deleting test {}: {}", testId, e.getMessage(), e);
+            model.addAttribute("error", "Lỗi khi xóa bài kiểm tra: " + e.getMessage());
+            return "staff/tests/ListTest";
         }
     }
 }

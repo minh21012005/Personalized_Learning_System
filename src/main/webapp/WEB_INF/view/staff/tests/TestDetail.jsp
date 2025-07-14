@@ -109,6 +109,9 @@
                         <p><strong>Trạng thái:</strong> ${fn:escapeXml(test.statusName)}</p>
                         <p><strong>Mở/Đóng:</strong> ${test.isOpen ? 'Mở' : 'Đóng'}</p>
                         <p><strong>Danh mục:</strong> ${fn:escapeXml(test.categoryName)}</p>
+                        <c:if test="${not empty test.reason}">
+                            <p><strong>Lý do phê duyệt/từ chối:</strong> ${fn:escapeXml(test.reason)}</p>
+                        </c:if>
                     </div>
                 </div>
                 <h5>Câu hỏi</h5>

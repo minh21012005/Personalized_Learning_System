@@ -206,6 +206,7 @@ public class TestStaffService {
                 .categoryId(test.getTestCategory() != null ? test.getTestCategory().getTestCategoryId() : null)
                 .categoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "Chưa xác định")
                 .questions(questions)
+                .reason(test.getReason())
                 .build();
     }
 
@@ -350,7 +351,7 @@ public class TestStaffService {
         Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
 
-        if(test.getTestStatus().getTestStatusName().equals("Đang Xử Lý") || test.getTestStatus().getTestStatusName().equals("Chấp Nhận")) {
+        if (test.getTestStatus().getTestStatusName().equals("Đang Xử Lý") || test.getTestStatus().getTestStatusName().equals("Chấp Nhận")) {
             throw new IllegalArgumentException("Không thể sửa bài kiểm tra đang xử lý hoặc đã được chấp nhận.");
         }
 
@@ -383,7 +384,6 @@ public class TestStaffService {
                 throw new IllegalArgumentException("Bài học không thuộc về chương nào.");
             }
         }
-
 
 
         // Update test fields
@@ -424,7 +424,7 @@ public class TestStaffService {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
-    public Page<TestListDto> findTestsByCreatorAndFilters(Long creatorUserId, Long subjectId, Long chapterId,
+    public Page<TestListDto> findTestsByCreatorAndFilters(Long creatorUserId, Long subjectId, Long chapterId, Long testStatusId,
                                                           LocalDateTime startAt, LocalDateTime endAt, Pageable pageable) {
         Specification<Test> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -441,6 +441,11 @@ public class TestStaffService {
             // Filter by chapterId
             if (chapterId != null) {
                 predicates.add(cb.equal(root.get("chapter").get("chapterId"), chapterId));
+            }
+
+            // Filter by statusId
+            if (testStatusId != null) {
+                predicates.add(cb.equal(root.get("testStatus").get("testStatusId"), testStatusId));
             }
 
             // Filter by startAt
@@ -475,10 +480,35 @@ public class TestStaffService {
                 .chapterName(test.getChapter() != null ? test.getChapter().getChapterName() : null)
                 .subjectName(test.getSubject() != null ? test.getSubject().getSubjectName() : null)
                 .isOpen(test.getIsOpen() != null ? test.getIsOpen() : false)
+                .reason(test.getReason())
                 .build());
     }
 
+    @PreAuthorize("hasAnyRole( 'STAFF')")
+    @Transactional
+    public void deleteTest(Long testId) {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new IllegalStateException("Không thể xác định người dùng hiện tại.");
+        }
 
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
+
+        if(!test.getUserCreated().equals(currentUserId)) {
+            throw new IllegalStateException("Chỉ người tạo bài kiểm tra mới có thể xóa nó.");
+        }
+
+        if (!test.getTestStatus().getTestStatusName().equals("Nháp")) {
+            throw new IllegalStateException("Chỉ có thể xóa bài kiểm tra ở trạng thái Nháp.");
+        }
+
+        // Delete associated questions
+        questionTestRepository.deleteByTestTestId(testId);
+
+        // Delete the test
+        testRepository.delete(test);
+    }
 
 
 }

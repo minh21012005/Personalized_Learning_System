@@ -17,5 +17,6 @@ public class TestListDto {
     private String endAt;
     private String statusName;
     private String categoryName;
-    private Boolean isOpen; // New field to track open/closed status
+    private Boolean isOpen;
+    private String reason;
 }

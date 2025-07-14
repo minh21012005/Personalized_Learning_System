@@ -248,6 +248,14 @@
                                         <option value="${chapter.chapterId}" ${chapter.chapterId == param.chapterId ? 'selected' : ''}>${fn:escapeXml(chapter.chapterName)}</option>
                                     </c:forEach>
                                 </select>
+                                <label for="testStatusId" class="mb-0 fw-bold me-2">Trạng Thái:</label>
+                                <select name="testStatusId" id="filterChapter"
+                                        class="form-select form-select-sm w-auto">
+                                    <option value="">Tất cả</option>
+                                    <c:forEach var="status" items="${statuses}">
+                                        <option value="${status.testStatusId}" ${status.testStatusId == param.testStatusId ? 'selected' : ''}>${fn:escapeXml(status.testStatusName)}</option>
+                                    </c:forEach>
+                                </select>
                                 <label for="filterStartAt" class="mb-0 fw-bold me-2">Thời gian bắt đầu:</label>
                                 <input type="datetime-local" name="startAt" id="filterStartAt"
                                        class="form-control form-control-sm w-auto" value="${param.startAt}">
@@ -273,6 +281,7 @@
                                     <th scope="col" class="text-center col-status">Trạng thái</th>
                                     <th scope="col" class="text-center col-is-open">Mở/Đóng</th>
                                     <th scope="col" class="text-center col-category">Danh mục</th>
+                                    <th scope="col" class="text-center col-reason">Lý do</th>
                                     <th scope="col" class="text-center col-action">Thao tác</th>
                                 </tr>
                                 </thead>
@@ -297,17 +306,19 @@
                                                 <td class="text-center col-status">${fn:escapeXml(test.statusName)}</td>
                                                 <td class="text-center col-is-open">${test.isOpen ? "Mở":"Đóng"}</td>
                                                 <td class="text-center col-category">${fn:escapeXml(test.categoryName)}</td>
+                                                <td class="text-center col-reason">${fn:escapeXml(test.reason != null ? test.reason : 'Chưa có')}</td>
                                                 <td class="text-center col-action">
                                                     <div class="d-flex gap-2 justify-content-center">
                                                         <a href="/staff/tests/details/${test.testId}"
                                                            class="btn btn-success btn-sm btn-action">Chi tiết</a>
 
-                                                        <c:if test="${test.statusName == 'Nháp'}">
+                                                        <c:if test="${test.statusName == 'Nháp' || test.statusName == 'Từ Chối'}">
                                                             <a href="/staff/tests/edit/${test.testId}"
                                                                class="btn btn-warning btn-sm btn-action">Cập nhật</a>
 
-                                                            <a href="/staff/tests/delete/${test.testId}"
-                                                               class="btn btn-danger btn-sm btn-action delete-btn">Xóa</a>
+                                                            <form action="/staff/tests/delete/${test.testId}" method="post" style="display:inline;">
+                                                                <button type="submit" class="btn btn-danger btn-sm btn-action delete-btn">Xóa</button>
+                                                            </form>
                                                         </c:if>
 
                                                     </div>

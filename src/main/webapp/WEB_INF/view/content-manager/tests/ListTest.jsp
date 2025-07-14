@@ -279,6 +279,7 @@
                                     <th scope="col" class="text-center col-status">Trạng thái</th>
                                     <th scope="col" class="text-center col-is-open">Mở/Đóng</th>
                                     <th scope="col" class="text-center col-category">Danh mục</th>
+                                    <th scope="col" class="text-center col-reason">Lý do</th>
                                     <th scope="col" class="text-center col-action">Thao tác</th>
                                 </tr>
                                 </thead>
@@ -303,6 +304,7 @@
                                                 <td class="text-center col-status">${fn:escapeXml(test.statusName)}</td>
                                                 <td class="text-center col-is-open">${test.isOpen ? "Mở":"Đóng"}</td>
                                                 <td class="text-center col-category">${fn:escapeXml(test.categoryName)}</td>
+                                                <td class="text-center col-reason">${fn:escapeXml(test.reason != null ? test.reason : 'Chưa có')}</td>
                                                 <td class="text-center col-action">
                                                     <div class="d-flex gap-2 justify-content-center">
                                                         <a href="/admin/tests/details/${test.testId}"

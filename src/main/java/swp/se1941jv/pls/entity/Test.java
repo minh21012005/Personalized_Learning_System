@@ -67,4 +67,7 @@ public class Test extends BaseEntity {
     @Column(name = "max_attempts")
     Long maxAttempts;
 
+    @Column(name = "reason")
+    private String reason;
+
 }

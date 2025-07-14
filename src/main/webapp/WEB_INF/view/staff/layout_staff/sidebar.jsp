@@ -19,10 +19,24 @@
             </a>
         </li>
         <li class="nav-item mb-2">
-            <a class="nav-link text-white ${activePage == 'questions' ? 'bg-primary rounded' : ''}"
+            <a class="nav-link text-white ${activePage == 'tests' ? 'bg-primary rounded' : ''}"
+               href="/staff/tests" style="padding: 8px 15px;">
+                <i class="bi bi-question-square me-2"></i> Bài kiểm tra
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white ${activePage == 'subjects' ? 'bg-primary rounded' : ''}"
                href="/staff/subject" style="padding: 8px 15px;">
                 <i class="bi bi-question-square me-2"></i> Môn học
             </a>
         </li>
+
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white ${activePage == 'packages' ? 'bg-primary rounded' : ''}"
+               href="/staff/package" style="padding: 8px 15px;">
+                <i class="bi bi-question-square me-2"></i> Gói học
+            </a>
+        </li>
+
     </ul>
 </div>

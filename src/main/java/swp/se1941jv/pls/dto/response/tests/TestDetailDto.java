@@ -26,5 +26,6 @@ public class TestDetailDto {
     private Long categoryId;
     private String categoryName;
     private List<QuestionCreateTestDisplayDto> questions;
+    private String reason;
 
 }
