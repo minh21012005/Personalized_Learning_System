@@ -108,6 +108,7 @@ const LearningApp = (function () {
         $('#lessonTitle').text(lesson.lessonName || 'Không tìm thấy bài học');
         $('#lessonDescription').text(lesson.lessonDescription || 'Không có mô tả.');
 
+        // Cập nhật tài liệu
         const materialsList = $('#materialsList');
         materialsList.empty();
         if (lesson.materials && lesson.materials.length > 0) {
@@ -123,6 +124,30 @@ const LearningApp = (function () {
             materialsList.append('<li class="list-group-item text-muted">Không có tài liệu.</li>');
         }
 
+        // Cập nhật bài kiểm tra cuối bài
+        const testSection = $('#test-section');
+        testSection.empty();
+        if (lesson.lessonTest) {
+            const test = lesson.lessonTest;
+            testSection.append(`
+                <h3 class="h5 fw-semibold">${test.testName}</h3>
+                <p><strong>Loại: </strong>${test.testCategoryName}</p>
+                <p><strong>Thời gian: </strong>${test.durationTime} phút</p>
+                ${test.isCompleted ? `
+                    <span class="test-completed">Hoàn thành</span>
+                    <a href="/tests/history/${test.testId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                        Chi tiết
+                    </a>
+                ` : `
+                    <a href="/tests/${test.testId}" class="btn btn-primary btn-test" target="_blank">
+                        Làm bài kiểm tra
+                    </a>
+                `}
+            `);
+        } else {
+            testSection.append('<p class="text-muted">Không có bài kiểm tra cuối bài.</p>');
+        }
+
         $('.list-group-item-action').removeClass('active');
         $(`.list-group-item-action[data-lesson-id="${lesson.lessonId}"]`).addClass('active');
     }
@@ -135,6 +160,7 @@ const LearningApp = (function () {
         $('#lessonTitle').text('Không tìm thấy bài học');
         $('#lessonDescription').text('Không có mô tả.');
         $('#materialsList').html('<li class="list-group-item text-muted">Không có tài liệu.</li>');
+        $('#test-section').html('<p class="text-muted">Không có bài kiểm tra cuối bài.</p>');
         $('#videoContainer').hide();
     }
 
@@ -190,7 +216,7 @@ const LearningApp = (function () {
                 'iv_load_policy': 3,    // Ẩn chú thích (annotations)
                 'modestbranding': 1,    // Giảm độ nổi bật của logo YouTube
                 'rel': 0,               // Ẩn video liên quan khi kết thúc
-                'autoplay': 0,           // Tắt autoplay để tránh xung đột
+                'autoplay': 0,          // Tắt autoplay để tránh xung đột
                 'playlist': videoId
             },
             events: {
