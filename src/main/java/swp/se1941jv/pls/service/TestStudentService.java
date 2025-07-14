@@ -341,7 +341,7 @@ public class TestStudentService {
         LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
 
-        Page<UserTest> userTestPage = userTestRepository.findByUserIdAndDateRange(userId, startDateTime, endDateTime, pageable);
+        Page<UserTest> userTestPage = userTestRepository.findTestByUserIdAndDateRange(userId,1L, startDateTime, endDateTime, pageable);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         List<TestHistoryListDTO> list = userTestPage.getContent().stream()
