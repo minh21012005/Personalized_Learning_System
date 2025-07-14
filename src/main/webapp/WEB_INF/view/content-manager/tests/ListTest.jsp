@@ -177,7 +177,7 @@
                 var chapterSelect = $("#filterChapter");
                 chapterSelect.empty().append('<option value="">-- Chọn --</option>');
                 if (subjectId) {
-                    $.get("/staff/tests/chapters?subjectId=" + subjectId)
+                    $.get("/admin/tests/chapters?subjectId=" + subjectId)
                         .done(function (data) {
                             data.forEach(function (chapter) {
                                 chapterSelect.append('<option value="' + chapter.chapterId + '">' + chapter.chapterName + '</option>');
@@ -212,14 +212,14 @@
 <body>
 <!-- Header -->
 <header>
-    <jsp:include page="../layout_staff/header.jsp"/>
+    <jsp:include page="../layout/header.jsp"/>
 </header>
 
 <!-- Main Container for Sidebar and Content -->
 <div class="main-container">
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
-        <jsp:include page="../layout_staff/sidebar.jsp"/>
+        <jsp:include page="../layout/sidebar.jsp"/>
     </div>
 
     <!-- Main Content Area -->
@@ -227,13 +227,12 @@
         <main>
             <div class="container-fluid">
                 <div class="mt-4">
-                    <div>
-                        <a href="/staff/tests/create" class="btn btn-primary">Tạo bài kiểm tra</a>
-                    </div>
+
+                    <h2>Phê Duyệt Bài Kiểm Tra</h2>
                     <div class="row col-12 mx-auto mt-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <!-- Filters -->
-                            <form action="/staff/tests" method="get" class="d-flex align-items-center gap-2 flex-wrap">
+                            <form action="/admin/tests" method="get" class="d-flex align-items-center gap-2 flex-wrap">
                                 <label for="filterSubject" class="mb-0 fw-bold me-2">Môn học:</label>
                                 <select name="subjectId" id="filterSubject" class="form-select form-select-sm w-auto">
                                     <option value="">Tất cả</option>
@@ -249,8 +248,7 @@
                                     </c:forEach>
                                 </select>
                                 <label for="testStatusId" class="mb-0 fw-bold me-2">Trạng Thái:</label>
-                                <select name="testStatusId" id="filterChapter"
-                                        class="form-select form-select-sm w-auto">
+                                <select name="testStatusId" id="filterChapter" class="form-select form-select-sm w-auto">
                                     <option value="">Tất cả</option>
                                     <c:forEach var="status" items="${statuses}">
                                         <option value="${status.testStatusId}" ${status.testStatusId == param.testStatusId ? 'selected' : ''}>${fn:escapeXml(status.testStatusName)}</option>
@@ -309,17 +307,8 @@
                                                 <td class="text-center col-reason">${fn:escapeXml(test.reason != null ? test.reason : 'Chưa có')}</td>
                                                 <td class="text-center col-action">
                                                     <div class="d-flex gap-2 justify-content-center">
-                                                        <a href="/staff/tests/details/${test.testId}"
+                                                        <a href="/admin/tests/details/${test.testId}"
                                                            class="btn btn-success btn-sm btn-action">Chi tiết</a>
-
-                                                        <c:if test="${test.statusName == 'Nháp' || test.statusName == 'Từ Chối'}">
-                                                            <a href="/staff/tests/edit/${test.testId}"
-                                                               class="btn btn-warning btn-sm btn-action">Cập nhật</a>
-
-                                                            <form action="/staff/tests/delete/${test.testId}" method="post" style="display:inline;">
-                                                                <button type="submit" class="btn btn-danger btn-sm btn-action delete-btn">Xóa</button>
-                                                            </form>
-                                                        </c:if>
 
                                                     </div>
                                                 </td>
@@ -348,14 +337,14 @@
                                 <nav aria-label="Test pagination">
                                     <ul class="pagination justify-content-center mb-0">
                                         <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                            <a class="page-link" href="/staff/tests?page=1${queryString}"
+                                            <a class="page-link" href="/admin/tests?page=1${queryString}"
                                                aria-label="First">
                                                 <span aria-hidden="true">««</span>
                                             </a>
                                         </li>
                                         <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/staff/tests?page=${currentPage - 1}${queryString}"
+                                               href="/admin/tests?page=${currentPage - 1}${queryString}"
                                                aria-label="Previous">
                                                 <span aria-hidden="true">«</span>
                                             </a>
@@ -373,18 +362,18 @@
                                         <c:forEach begin="${startPage}" end="${endPage}" varStatus="loop">
                                             <li class="page-item ${loop.index == currentPage ? 'active' : ''}">
                                                 <a class="page-link"
-                                                   href="/staff/tests?page=${loop.index}${queryString}">${loop.index}</a>
+                                                   href="/admin/tests?page=${loop.index}${queryString}">${loop.index}</a>
                                             </li>
                                         </c:forEach>
                                         <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
                                             <a class="page-link"
-                                               href="/staff/tests?page=${currentPage + 1}${queryString}"
+                                               href="/admin/tests?page=${currentPage + 1}${queryString}"
                                                aria-label="Next">
                                                 <span aria-hidden="true">»</span>
                                             </a>
                                         </li>
                                         <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                            <a class="page-link" href="/staff/tests?page=${totalPages}${queryString}"
+                                            <a class="page-link" href="/admin/tests?page=${totalPages}${queryString}"
                                                aria-label="Last">
                                                 <span aria-hidden="true">»»</span>
                                             </a>
@@ -402,7 +391,7 @@
 
 <!-- Footer -->
 <footer>
-    <jsp:include page="../layout_staff/footer.jsp"/>
+    <jsp:include page="../layout/footer.jsp"/>
 </footer>
 </body>
 </html>
