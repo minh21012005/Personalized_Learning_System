@@ -32,10 +32,10 @@ public class PackageService {
     private final LessonProgressRepository lessonProgressRepository;
 
     public PackageService(PackageRepository packageRepository,
-                          PackageSubjectRepository packageSubjectRepository,
-                          SubjectRepository subjectRepository,
-                          UserPackageRepository userPackageRepository,
-                          LessonProgressRepository lessonProgressRepository) {
+            PackageSubjectRepository packageSubjectRepository,
+            SubjectRepository subjectRepository,
+            UserPackageRepository userPackageRepository,
+            LessonProgressRepository lessonProgressRepository) {
         this.packageRepository = packageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
         this.subjectRepository = subjectRepository;
@@ -143,7 +143,6 @@ public class PackageService {
             return new ArrayList<>();
         }
 
-
         List<UserPackage> userPackages = userPackageRepository.findByIdUserId(userId);
 
         if (userPackages.isEmpty()) {
@@ -165,12 +164,13 @@ public class PackageService {
                             .name(userPackage.getPkg().getName())
                             .description(userPackage.getPkg().getDescription())
                             .imageUrl(userPackage.getPkg().getImage())
-                            .startDate(userPackage.getStartDate() != null ? userPackage.getStartDate().format(formatter) : null)
-                            .endDate(userPackage.getEndDate() != null ? userPackage.getEndDate().format(formatter) : null)
+                            .startDate(userPackage.getStartDate() != null ? userPackage.getStartDate().format(formatter)
+                                    : null)
+                            .endDate(userPackage.getEndDate() != null ? userPackage.getEndDate().format(formatter)
+                                    : null)
                             .build();
                     packageSubjects.add(packageSubject);
                 });
-
 
         return packageSubjects;
     }
@@ -191,15 +191,16 @@ public class PackageService {
 
         List<SubjectResponseDTO> subjectResponseDTOS = new ArrayList<>();
 
-//        get subjects from userPackage
+        // get subjects from userPackage
         if (userPackage != null) {
             userPackage.getPkg().getPackageSubjects().forEach(packageSubject -> {
                 List<LessonProgress> lessonProgress = lessonProgressRepository
-                        .findByUserAndSubjectAndPackageEntity(user, packageSubject.getSubject(), packageSubject.getPkg());
+                        .findByUserAndSubjectAndPackageEntity(user, packageSubject.getSubject(),
+                                packageSubject.getPkg());
 
                 long countCompletedLesson = 0;
                 if (!lessonProgress.isEmpty()) {
-                     countCompletedLesson = lessonProgress.stream()
+                    countCompletedLesson = lessonProgress.stream()
                             .filter(LessonProgress::getIsCompleted)
                             .count();
                 }
@@ -221,14 +222,17 @@ public class PackageService {
             });
         }
 
-
         return userPackage != null ? PackageSubjectDTO.builder()
                 .packageId(userPackage.getPkg().getPackageId())
                 .name(userPackage.getPkg().getName())
                 .description(userPackage.getPkg().getDescription())
                 .imageUrl(userPackage.getPkg().getImage())
-                .startDate(userPackage.getStartDate() != null ? userPackage.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
-                .endDate(userPackage.getEndDate() != null ? userPackage.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
+                .startDate(userPackage.getStartDate() != null
+                        ? userPackage.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                        : null)
+                .endDate(userPackage.getEndDate() != null
+                        ? userPackage.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                        : null)
                 .listSubject(subjectResponseDTOS)
 
                 .build() : null;

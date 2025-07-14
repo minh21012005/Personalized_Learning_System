@@ -64,6 +64,9 @@ public class Package extends BaseEntity {
     @ManyToMany(mappedBy = "packages")
     private List<Transaction> transactions;
 
+    @OneToMany(mappedBy = "pkg")
+    List<Review> reviews;
+
     @ManyToOne()
     @JoinColumn(name = "grade_id")
     Grade grade;
