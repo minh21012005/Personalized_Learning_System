@@ -10,6 +10,7 @@ import swp.se1941jv.pls.entity.UserPackage;
 import swp.se1941jv.pls.entity.keys.KeyUserPackage;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserPackageRepository extends JpaRepository<UserPackage, KeyUserPackage> {
 
@@ -27,4 +28,5 @@ public interface UserPackageRepository extends JpaRepository<UserPackage, KeyUse
     Boolean existsByUser_UserIdAndPkg_PackageIdAndPkg_PackageSubjects_Subject_SubjectIdAndEndDateAfter(Long userId, Long packageId, Long subjectId, LocalDateTime now);
 
     boolean existsByPkg_PackageSubjects_Subject_SubjectId(Long subjectId);
+
 }

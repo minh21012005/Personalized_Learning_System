@@ -770,6 +770,103 @@ public class SubjectService {
                 .build());
     }
 
+    public Boolean hasAccessSubjectInPackage(Long packageId, Long userId, Long subjectId) {
+        // Kiểm tra user có gói học, gói chưa hết hạn, và môn học thuộc gói
+        if (!userPackageRepository.existsByUser_UserIdAndPkg_PackageIdAndPkg_PackageSubjects_Subject_SubjectIdAndEndDateAfter(userId, packageId, subjectId, LocalDateTime.now())) {
+            return false;
+        }
+
+        // Kiểm tra môn học có trong gói
+        if (!packageSubjectRepository.existsBySubjectSubjectId(subjectId)) {
+            return false;
+        }
+
+        // Kiểm tra môn học có ở trạng thái APPROVED và isActive
+        Optional<Subject> subjectOpt = subjectRepository.findById(subjectId);
+        if (subjectOpt.isEmpty() || !subjectOpt.get().getIsActive()) {
+            return false;
+        }
+
+        Optional<SubjectStatusHistory> statusOpt = statusHistoryRepository.findBySubjectSubjectId(subjectId);
+        return statusOpt.isPresent() && SubjectStatusHistory.SubjectStatus.APPROVED.equals(statusOpt.get().getStatus());
+    }
+
+    public LearningPageDataDTO getLearningPageData(Long subjectId, Long packageId, Long userId) {
+        // Kiểm tra quyền truy cập
+        if (!hasAccessSubjectInPackage(packageId, userId, subjectId)) {
+            throw new IllegalArgumentException("Bạn không có quyền truy cập môn học này trong gói học!");
+        }
+
+        // Lấy thông tin môn học
+        Optional<Subject> subjectOpt = subjectRepository.findById(subjectId);
+        if (subjectOpt.isEmpty()) {
+            throw new IllegalArgumentException("Môn học không tồn tại!");
+        }
+        Subject subject = subjectOpt.get();
+
+        // Lấy danh sách chương và bài học
+        List<Chapter> chapters = chapterRepository.findBySubjectSubjectId(subjectId);
+        List<LearningChapterDTO> chapterDTOs = chapters.stream()
+                .filter(chapter -> chapter.getStatus()) // Chỉ lấy chương active
+                .map(chapter -> {
+                    List<LearningLessonDTO> lessonDTOs = chapter.getLessons().stream()
+                            .filter(lesson -> lesson.getStatus()) // Chỉ lấy bài học active
+                            .map(lesson -> {
+                                Optional<LessonProgress> progressOpt = lessonProgressRepository.findByUserUserIdAndLessonLessonId(userId, lesson.getLessonId());
+                                List<String> materials = lesson.getLessonMaterials().stream()
+                                        .map(LessonMaterial::getFilePath)
+                                        .collect(Collectors.toList());
+                                return LearningLessonDTO.builder()
+                                        .lessonId(lesson.getLessonId())
+                                        .lessonName(lesson.getLessonName())
+                                        .lessonDescription(lesson.getLessonDescription())
+                                        .videoSrc(lesson.getVideoSrc())
+                                        .videoTime(lesson.getVideoTime())
+                                        .materials(materials)
+                                        .isCompleted(progressOpt.isPresent() && progressOpt.get().getIsCompleted())
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
+                    return LearningChapterDTO.builder()
+                            .chapterId(chapter.getChapterId())
+                            .chapterName(chapter.getChapterName())
+                            .chapterDescription(chapter.getChapterDescription())
+                            .listLesson(lessonDTOs)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // Tìm bài học và chương mặc định
+        LearningLessonDTO defaultLesson = null;
+        LearningChapterDTO defaultChapter = null;
+        for (LearningChapterDTO chapterDTO : chapterDTOs) {
+            for (LearningLessonDTO lessonDTO : chapterDTO.getListLesson()) {
+                if (!lessonDTO.getIsCompleted()) {
+                    defaultLesson = lessonDTO;
+                    defaultChapter = chapterDTO;
+                    break;
+                }
+            }
+            if (defaultLesson != null) {
+                break;
+            }
+        }
+        // Nếu không có bài học chưa hoàn thành, lấy bài học đầu tiên của chương đầu tiên
+        if (defaultLesson == null && !chapterDTOs.isEmpty() && !chapterDTOs.get(0).getListLesson().isEmpty()) {
+            defaultChapter = chapterDTOs.get(0);
+            defaultLesson = defaultChapter.getListLesson().get(0);
+        }
+
+        return LearningPageDataDTO.builder()
+                .subjectId(subject.getSubjectId())
+                .subjectName(subject.getSubjectName())
+                .userId(userId)
+                .packageId(packageId)
+                .chapters(chapterDTOs)
+                .defaultLesson(defaultLesson)
+                .defaultChapter(defaultChapter)
+                .build();
+    }
 
 
     // --- Hàm ánh xạ DTO ---

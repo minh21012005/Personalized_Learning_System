@@ -26,4 +26,6 @@ public interface PackageSubjectRepository extends JpaRepository<PackageSubject, 
         Optional<PackageSubject> findByPkg_PackageIdAndSubject_SubjectId(Long packageId, Long subjectId);
 
     boolean existsBySubjectSubjectId(Long subjectId);
+
+
 }

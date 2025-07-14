@@ -175,61 +175,62 @@ public class PackageService {
         return packageSubjects;
     }
 
-//    public PackageSubjectDTO getPackageDetail(Long packageId) {
-//        Long userId = SecurityUtils.getCurrentUserId();
-//        if (userId == null) {
-//            return null;
-//        }
-//        User user = User.builder().userId(userId).build();
-//        KeyUserPackage keyUserPackage = KeyUserPackage.builder()
-//                .userId(userId)
-//                .packageId(packageId)
-//                .build();
-//
-//        UserPackage userPackage = userPackageRepository.findById(keyUserPackage).orElse(null);
-//
-//        List<SubjectResponseDTO> subjectResponseDTOS = new ArrayList<>();
-//
-////        get subjects from userPackage
-//        if (userPackage != null) {
-//            userPackage.getPkg().getPackageSubjects().forEach(packageSubject -> {
-//                List<LessonProgress> lessonProgress = lessonProgressRepository
-//                        .findByUserAndSubjectAndPackageEntity(user, packageSubject.getSubject(), packageSubject.getPkg());
-//
-//                long countCompletedLesson = 0;
-//                if (!lessonProgress.isEmpty()) {
-//                     countCompletedLesson = lessonProgress.stream()
-//                            .filter(LessonProgress::getIsCompleted)
-//                            .count();
-//                }
-//
-//                long countLesson = packageSubject.getSubject().getChapters().stream()
-//                        .flatMap(chapter -> chapter.getLessons().stream()
-//                                .filter(lesson -> lesson.getStatus() && lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED))
-//                        .count();
-//
-//                SubjectResponseDTO subjectResponseDTO = SubjectResponseDTO.builder()
-//                        .subjectId(packageSubject.getSubject().getSubjectId())
-//                        .subjectName(packageSubject.getSubject().getSubjectName())
-//                        .subjectDescription(packageSubject.getSubject().getSubjectDescription())
-//                        .subjectImage(packageSubject.getSubject().getSubjectImage())
-//                        .numberOfCompletedLessons(countCompletedLesson)
-//                        .numberOfLessons(countLesson)
-//                        .build();
-//                subjectResponseDTOS.add(subjectResponseDTO);
-//            });
-//        }
-//
-//
-//        return userPackage != null ? PackageSubjectDTO.builder()
-//                .packageId(userPackage.getPkg().getPackageId())
-//                .name(userPackage.getPkg().getName())
-//                .description(userPackage.getPkg().getDescription())
-//                .imageUrl(userPackage.getPkg().getImage())
-//                .startDate(userPackage.getStartDate() != null ? userPackage.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
-//                .endDate(userPackage.getEndDate() != null ? userPackage.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
-//                .listSubject(subjectResponseDTOS)
-//
-//                .build() : null;
-//    }
+
+    public PackageSubjectDTO getPackageDetail(Long packageId) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return null;
+        }
+        User user = User.builder().userId(userId).build();
+        KeyUserPackage keyUserPackage = KeyUserPackage.builder()
+                .userId(userId)
+                .packageId(packageId)
+                .build();
+
+        UserPackage userPackage = userPackageRepository.findById(keyUserPackage).orElse(null);
+
+        List<SubjectResponseDTO> subjectResponseDTOS = new ArrayList<>();
+
+//        get subjects from userPackage
+        if (userPackage != null) {
+            userPackage.getPkg().getPackageSubjects().forEach(packageSubject -> {
+                List<LessonProgress> lessonProgress = lessonProgressRepository
+                        .findByUserAndSubjectAndPackageEntity(user, packageSubject.getSubject(), packageSubject.getPkg());
+
+                long countCompletedLesson = 0;
+                if (!lessonProgress.isEmpty()) {
+                     countCompletedLesson = lessonProgress.stream()
+                            .filter(LessonProgress::getIsCompleted)
+                            .count();
+                }
+
+                long countLesson = packageSubject.getSubject().getChapters().stream()
+                        .flatMap(chapter -> chapter.getLessons().stream()
+                                .filter(Lesson::getStatus))
+                        .count();
+
+                SubjectResponseDTO subjectResponseDTO = SubjectResponseDTO.builder()
+                        .subjectId(packageSubject.getSubject().getSubjectId())
+                        .subjectName(packageSubject.getSubject().getSubjectName())
+                        .subjectDescription(packageSubject.getSubject().getSubjectDescription())
+                        .subjectImage(packageSubject.getSubject().getSubjectImage())
+                        .numberOfCompletedLessons(countCompletedLesson)
+                        .numberOfLessons(countLesson)
+                        .build();
+                subjectResponseDTOS.add(subjectResponseDTO);
+            });
+        }
+
+
+        return userPackage != null ? PackageSubjectDTO.builder()
+                .packageId(userPackage.getPkg().getPackageId())
+                .name(userPackage.getPkg().getName())
+                .description(userPackage.getPkg().getDescription())
+                .imageUrl(userPackage.getPkg().getImage())
+                .startDate(userPackage.getStartDate() != null ? userPackage.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
+                .endDate(userPackage.getEndDate() != null ? userPackage.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null)
+                .listSubject(subjectResponseDTOS)
+
+                .build() : null;
+    }
 }
