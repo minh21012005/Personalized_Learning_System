@@ -76,14 +76,14 @@
 <body>
 <!-- Header -->
 <header>
-    <jsp:include page="../layout_staff/header.jsp"/>
+    <jsp:include page="../layout/header.jsp"/>
 </header>
 
 <!-- Main Container for Sidebar and Content -->
 <div class="main-container">
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
-        <jsp:include page="../layout_staff/sidebar.jsp"/>
+        <jsp:include page="../layout/sidebar.jsp"/>
     </div>
 
     <!-- Main Content Area -->
@@ -126,12 +126,12 @@
                     </c:forEach>
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="/staff/tests" class="btn btn-secondary">Quay lại</a>
-                    <c:if test="${test.statusName == 'Đang xử lý' && pageContext.request.isUserInRole('ADMIN')}">
-                        <form action="/staff/tests/approve/${test.testId}" method="post" style="display:inline;">
+                    <a href="/admin/tests" class="btn btn-secondary">Quay lại</a>
+                    <c:if test="${test.statusName == 'Đang Xử Lý'}">
+                        <form action="/admin/tests/approve/${test.testId}" method="post" style="display:inline;">
                             <button type="submit" class="btn btn-primary">Phê duyệt</button>
                         </form>
-                        <form action="/staff/tests/reject/${test.testId}" method="post" style="display:inline;">
+                        <form action="/admin/tests/reject/${test.testId}" method="post" style="display:inline;">
                             <button type="submit" class="btn btn-danger">Từ chối</button>
                         </form>
                     </c:if>
@@ -143,7 +143,7 @@
 
 <!-- Footer -->
 <footer>
-    <jsp:include page="../layout_staff/footer.jsp"/>
+    <jsp:include page="../layout/footer.jsp"/>
 </footer>
 </body>
 </html>

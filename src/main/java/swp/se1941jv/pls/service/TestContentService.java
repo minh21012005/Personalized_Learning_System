@@ -2,8 +2,7 @@ package swp.se1941jv.pls.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,12 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.persistence.criteria.Predicate;
-
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class TestStaffService {
+public class TestContentService {
 
     SubjectRepository subjectRepository;
     QuestionBankRepository questionBankRepository;
@@ -88,7 +85,7 @@ public class TestStaffService {
         }).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public List<QuestionCreateTestDisplayDto> getQuestionsBySubjectAndChapter(Long subjectId, Long chapterId, Long lessonId) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) {
@@ -139,7 +136,7 @@ public class TestStaffService {
         }).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public List<TestStatus> getAllTestStatuses() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) {
@@ -148,7 +145,7 @@ public class TestStaffService {
         return testStatusRepository.findAll();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public List<TestCategory> getAllTestCategories() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) {
@@ -157,7 +154,7 @@ public class TestStaffService {
         return testCategoryRepository.findAll();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public TestDetailDto getTestDetails(Long testId) {
         Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
@@ -209,7 +206,7 @@ public class TestStaffService {
                 .build();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Transactional
     public Test createTest(String testName, Integer durationTime, Long maxAttempts, LocalDateTime startAt, LocalDateTime endAt,
                            Long testCategoryId, Long subjectId, Long chapterId, Long lessonId,
@@ -311,7 +308,7 @@ public class TestStaffService {
         return test;
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Transactional
     public void updateTest(Long testId, String testName, Integer durationTime, Long maxAttempts, LocalDateTime startAt, LocalDateTime endAt,
                            Long testStatusId, Long testCategoryId, Long subjectId, Long chapterId, Long lessonId,
@@ -416,22 +413,42 @@ public class TestStaffService {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Transactional
+    public void approveTest(Long testId) {
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
+        TestStatus approvedStatus = testStatusRepository.findByTestStatusName("Chấp nhận")
+                .orElseThrow(() -> new IllegalArgumentException("Trạng thái 'Chấp nhận' không tồn tại."));
+        test.setTestStatus(approvedStatus);
+        test.setIsOpen(true); // Automatically open the test upon approval
+        testRepository.save(test);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Transactional
+    public void rejectTest(Long testId) {
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
+        TestStatus rejectedStatus = testStatusRepository.findByTestStatusName("Từ chối")
+                .orElseThrow(() -> new IllegalArgumentException("Trạng thái 'Từ chối' không tồn tại."));
+        test.setTestStatus(rejectedStatus);
+        test.setIsOpen(false); // Automatically close the test upon rejection
+        testRepository.save(test);
+    }
+
     // Add method to find TestStatus by name
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public TestStatus findTestStatusByName(String statusName) {
         return testStatusRepository.findByTestStatusName(statusName)
                 .orElseThrow(() -> new IllegalArgumentException("Trạng thái '" + statusName + "' không tồn tại."));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
-    public Page<TestListDto> findTestsByCreatorAndFilters(Long creatorUserId, Long subjectId, Long chapterId,
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public Page<TestListDto> findTestsFilters( Long subjectId, Long chapterId, Long testStatusId,
                                                           LocalDateTime startAt, LocalDateTime endAt, Pageable pageable) {
         Specification<Test> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
-            if (creatorUserId != null) {
-                predicates.add(cb.equal(root.get("userCreated"), creatorUserId));
-            }
 
             // Filter by subjectId
             if (subjectId != null) {
@@ -441,6 +458,11 @@ public class TestStaffService {
             // Filter by chapterId
             if (chapterId != null) {
                 predicates.add(cb.equal(root.get("chapter").get("chapterId"), chapterId));
+            }
+
+            // Filter by statusId
+            if (testStatusId != null) {
+                predicates.add(cb.equal(root.get("testStatus").get("testStatusId"), testStatusId));
             }
 
             // Filter by startAt
@@ -454,6 +476,7 @@ public class TestStaffService {
             }
 
             predicates.add(cb.notEqual(root.get("testCategory").get("testCategoryId"), 1L));
+            predicates.add(cb.notEqual(root.get("testStatus").get("testStatusId"), 1L));
 
             // Sort by testId descending
             query.orderBy(cb.desc(root.get("testId")));
