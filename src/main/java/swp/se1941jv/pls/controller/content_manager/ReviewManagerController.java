@@ -19,10 +19,10 @@ import swp.se1941jv.pls.service.ReviewService;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
+ @PreAuthorize("hasRole('CONTENT_MANAGER')")
 @Controller
 @RequestMapping("/admin/reviews")
- @PreAuthorize("hasRole('ROLE_ADMIN')")
+
 public class ReviewManagerController {
 
     @Autowired
