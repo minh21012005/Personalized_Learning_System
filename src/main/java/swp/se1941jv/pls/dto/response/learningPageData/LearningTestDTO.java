@@ -6,19 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LearningPageDataDTO {
-    Long subjectId;
-    String subjectName;
-    Long userId;
-    Long packageId;
-    List<LearningChapterDTO> chapters;
-    LearningLessonDTO defaultLesson;
-    LearningChapterDTO defaultChapter;
-    List<LearningTestDTO> subjectTests;
+public class LearningTestDTO {
+    Long testId;
+    String testName;
+    Integer durationTime;
+    String testCategoryName;
+    Boolean isCompleted;
+    LocalDateTime startAt;
+    LocalDateTime endAt;
 }

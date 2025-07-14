@@ -19,6 +19,7 @@ import swp.se1941jv.pls.dto.response.*;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningChapterDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningLessonDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningPageDataDTO;
+import swp.se1941jv.pls.dto.response.learningPageData.LearningTestDTO;
 import swp.se1941jv.pls.dto.response.subject.*;
 import swp.se1941jv.pls.entity.*;
 import swp.se1941jv.pls.entity.Package;
@@ -39,14 +40,16 @@ public class SubjectService {
     private final LessonProgressRepository lessonProgressRepository;
     private final PackageRepository packageRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
-
+    private final UserTestRepository userTestRepository;
+    private final TestRepository testRepository;
     public SubjectService(SubjectRepository subjectRepository,
                           SubjectAssignmentRepository subjectAssignmentRepository,
                           SubjectStatusHistoryRepository statusHistoryRepository, UserRepository userRepository,
                           ChapterService chapterService,ChapterRepository chapterRepository,LessonRepository lessonRepository,
                           UserPackageRepository userPackageRepository,
                           PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper,
-                          LessonProgressRepository lessonProgressRepository, PackageRepository packageRepository) {
+                          LessonProgressRepository lessonProgressRepository, PackageRepository packageRepository,
+                          UserTestRepository userTestRepository,TestRepository testRepository) {
         this.subjectRepository = subjectRepository;
         this.subjectAssignmentRepository = subjectAssignmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
@@ -59,6 +62,8 @@ public class SubjectService {
         this.objectMapper = objectMapper;
         this.lessonProgressRepository = lessonProgressRepository;
         this.packageRepository = packageRepository;
+        this.userTestRepository = userTestRepository;
+        this.testRepository = testRepository;
     }
 
     public List<Subject> getSubjectsByGradeId(Long gradeId, boolean isActive) {
@@ -816,6 +821,27 @@ public class SubjectService {
                                 List<String> materials = lesson.getLessonMaterials().stream()
                                         .map(LessonMaterial::getFilePath)
                                         .collect(Collectors.toList());
+                                // Lấy bài kiểm tra bài học (test_category_id = 4)
+                                LearningTestDTO lessonTest = null;
+                                List<Test> lessonTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndLessonLessonId(4L, true, lesson.getLessonId());
+                                if (!lessonTests.isEmpty()) {
+                                    Test test = lessonTests.get(0); // Lấy bài kiểm tra đầu tiên (giả định chỉ có một)
+                                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId);
+                                    lessonTest = LearningTestDTO.builder()
+                                            .testId(test.getTestId())
+                                            .testName(test.getTestName())
+                                            .durationTime(test.getDurationTime())
+                                            .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
+                                            .isCompleted(userTestOpt.isPresent() && userTestOpt.get().getTimeEnd() != null)
+                                            .startAt(test.getStartAt())
+                                            .endAt(test.getEndAt())
+                                            .build();
+                                }
+                                // Kiểm tra isCompleted: nếu có bài kiểm tra thì cần hoàn thành cả bài kiểm tra và video
+                                boolean isCompleted = progressOpt.isPresent() && progressOpt.get().getIsCompleted();
+                                if (lessonTest != null) {
+                                    isCompleted = isCompleted && lessonTest.getIsCompleted();
+                                }
                                 return LearningLessonDTO.builder()
                                         .lessonId(lesson.getLessonId())
                                         .lessonName(lesson.getLessonName())
@@ -823,7 +849,24 @@ public class SubjectService {
                                         .videoSrc(lesson.getVideoSrc())
                                         .videoTime(lesson.getVideoTime())
                                         .materials(materials)
-                                        .isCompleted(progressOpt.isPresent() && progressOpt.get().getIsCompleted())
+                                        .isCompleted(isCompleted)
+                                        .lessonTest(lessonTest)
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
+                    // Lấy bài kiểm tra chương (test_category_id = 2)
+                    List<Test> chapterTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndChapterChapterId(2L, true, chapter.getChapterId());
+                    List<LearningTestDTO> chapterTestDTOs = chapterTests.stream()
+                            .map(test -> {
+                                Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId);
+                                return LearningTestDTO.builder()
+                                        .testId(test.getTestId())
+                                        .testName(test.getTestName())
+                                        .durationTime(test.getDurationTime())
+                                        .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
+                                        .isCompleted(userTestOpt.isPresent() && userTestOpt.get().getTimeEnd() != null)
+                                        .startAt(test.getStartAt())
+                                        .endAt(test.getEndAt())
                                         .build();
                             })
                             .collect(Collectors.toList());
@@ -832,6 +875,24 @@ public class SubjectService {
                             .chapterName(chapter.getChapterName())
                             .chapterDescription(chapter.getChapterDescription())
                             .listLesson(lessonDTOs)
+                            .chapterTests(chapterTestDTOs)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // Lấy bài kiểm tra môn học (test_category_id = 3)
+        List<Test> subjectTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndSubjectSubjectId(3L, true, subjectId);
+        List<LearningTestDTO> subjectTestDTOs = subjectTests.stream()
+                .map(test -> {
+                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId);
+                    return LearningTestDTO.builder()
+                            .testId(test.getTestId())
+                            .testName(test.getTestName())
+                            .durationTime(test.getDurationTime())
+                            .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
+                            .isCompleted(userTestOpt.isPresent() && userTestOpt.get().getTimeEnd() != null)
+                            .startAt(test.getStartAt())
+                            .endAt(test.getEndAt())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -865,9 +926,9 @@ public class SubjectService {
                 .chapters(chapterDTOs)
                 .defaultLesson(defaultLesson)
                 .defaultChapter(defaultChapter)
+                .subjectTests(subjectTestDTOs)
                 .build();
     }
-
 
     // --- Hàm ánh xạ DTO ---
 

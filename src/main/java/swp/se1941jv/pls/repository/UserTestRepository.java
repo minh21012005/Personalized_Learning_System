@@ -1,5 +1,7 @@
 package swp.se1941jv.pls.repository;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +31,9 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long> {
 
     @Transactional
     void deleteUserTestByUserTestId(Long userTestId);
+
+
+    Page<UserTest> findByUserUserIdOrderByTimeEndDesc(Long userId, Pageable pageable);
+
+    long countByUserUserId(Long userId);
 }
