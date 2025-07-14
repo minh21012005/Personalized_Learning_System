@@ -25,9 +25,9 @@ public class TestStudentController {
     private final TestStudentService testStudentService;
     private final ObjectMapper objectMapper;
 
-    @GetMapping("/{testId}")
+    @GetMapping("/{testId}/{packageId}")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String startTest(@PathVariable Long testId, Model model) {
+    public String startTest(@PathVariable Long testId, @PathVariable Long packageId, Model model) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
             model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
@@ -35,7 +35,7 @@ public class TestStudentController {
         }
 
         try {
-            Map<String, Object> testData = testStudentService.startOrResumeTest(testId, userId);
+            Map<String, Object> testData = testStudentService.startOrResumeTest(testId, packageId, userId);
             Long userTestId = (Long) testData.get("userTestId");
             return "redirect:/tests/userTest/" + userTestId; // Redirect to new endpoint
         } catch (Exception e) {
