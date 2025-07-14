@@ -30,4 +30,6 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long>, JpaSpec
 
     @Query("SELECT c FROM Chapter c LEFT JOIN FETCH c.lessons WHERE c.chapterId = :chapterId")
     Optional<Chapter> findByIdWithLessons(@Param("chapterId") Long chapterId);
+
+    List<Chapter> findBySubjectSubjectId(Long subjectId);
 }

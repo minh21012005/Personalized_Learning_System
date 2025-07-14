@@ -17,4 +17,6 @@ public interface LessonProgressRepository extends JpaRepository<LessonProgress, 
     Optional<LessonProgress> findByUserAndLessonAndSubjectAndPackageEntity(User user, Lesson lesson, Subject subject, Package packageEntity);
 
     List<LessonProgress> findByUserAndSubjectAndPackageEntity(User user, Subject subject, Package packageEntity);
+
+    Optional<LessonProgress> findByUserUserIdAndLessonLessonId(Long userId, Long lessonId);
 }
