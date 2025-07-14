@@ -21,6 +21,10 @@ import swp.se1941jv.pls.entity.User;
 import swp.se1941jv.pls.repository.CommunicationRepository;
 import swp.se1941jv.pls.repository.LessonRepository;
 import swp.se1941jv.pls.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
+
 
 import java.util.NoSuchElementException;
 import java.time.LocalDateTime;
@@ -31,6 +35,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -115,7 +120,22 @@ public class CommunicationService {
         Communication newComm = new Communication();
         newComm.setLesson(lesson);
         newComm.setContent(content);
-        newComm.setCommentStatus(CommentStatus.PENDING);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isPrivilegedUser = false;
+
+        if(authentication != null && authentication.isAuthenticated()){
+            List<String> privilegedRoles = Arrays.asList("ROLE_ADMIN","ROLE_CONTENT_MANAGER");
+        isPrivilegedUser = authentication.getAuthorities().stream()
+        .map(GrantedAuthority::getAuthority)
+        .anyMatch(privilegedRoles::contains);
+        }
+
+        if(isPrivilegedUser){
+            newComm.setCommentStatus(CommentStatus.APPROVED);
+        } else {
+            newComm.setCommentStatus(CommentStatus.PENDING);
+        }
 
         if (parentId != null) {
             Communication parentComm = communicationRepository.findById(parentId)
