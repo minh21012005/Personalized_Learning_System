@@ -9,159 +9,160 @@
                     crossorigin="anonymous">
 
                 <style>
-                    .review-card {
-                        display: flex;
-                        align-items: flex-start;
-                        gap: 16px;
-                        margin-bottom: 20px;
-                        padding: 16px;
-                        border: 1px solid #e0e0e0;
-                        border-radius: 12px;
-                        background-color: #ffffff;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                        transition: transform 0.2s ease;
+                      .reviews-section{
+                        margin-bottom: 50px;
                     }
-
-                    .review-card:hover {
-                        transform: translateY(-5px);
-                    }
-
-                    .review-avatar img {
-                        width: 64px;
-                        height: 64px;
-                        border-radius: 50%;
-                        object-fit: cover;
-                        border: 2px solid #ddd;
-                    }
-
-                    .review-content {
-                        flex: 1;
-                    }
-
-                    .useful-btn {
-                        background-color: #4CAF50;
-                        color: white;
-                        border: none;
-                        padding: 6px 12px;
-                        cursor: pointer;
-                        border-radius: 5px;
-                        transition: background-color 0.3s ease;
-                        font-size: 0.9rem;
-                    }
-
-                    .useful-btn.liked {
-                        background-color: #ff4444;
-                    }
-
-                    .useful-btn:hover {
-                        opacity: 0.9;
-                    }
-
-                    .toastify-custom {
-                        position: relative;
-                        top: -10px;
-                        margin-bottom: 10px;
-                    }
-
-                    .section-title {
-                        font-size: 1.5rem;
-                        font-weight: 600;
-                        margin-bottom: 15px;
-                        color: #2c3e50;
-                    }
-
-                    .average-rating p {
-                        font-size: 1.1rem;
-                        margin-bottom: 0;
-                        color: #7f8c8d;
-                    }
-
-                    .star {
-                        font-size: 1.3rem;
-                    }
-
-                    .star.filled {
-                        color: #f1c40f;
-                    }
-
-                    .form-control {
-                        border-radius: 5px;
-                        border-color: #ddd;
-                        transition: border-color 0.3s ease;
-                    }
-
-                    .form-control:focus {
-                        border-color: #007bff;
-                        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
-                    }
-
-                    .submit-review-btn {
-                        background: linear-gradient(90deg, rgba(0, 0, 0, 0.669), rgba(0, 0, 0, 0.669));
-                        color: white;
-                        border: none;
-                        padding: 8px 15px;
-                        border-radius: 5px;
-                        transition: opacity 0.3s ease;
-                        margin-top: 20px;
-                    }
-
-                    .submit-review-btn:hover {
-                        opacity: 0.9;
-                    }
-
-                    .review-form h3 {
-                        font-size: 1.3rem;
-                        margin-bottom: 15px;
-                        color: #2c3e50;
-                    }
-
-                    .filter-sidebar {
-                        padding: 20px;
-                        background: linear-gradient(135deg, #ffffff, #f9fbfd);
-                        border-right: 1px solid #e0e0e0;
-                        border-radius: 8px;
-                        height: auto;
-                        min-height: 100%;
-                        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-                    }
-
-                    .btn-filter {
-                        display: block;
-                        width: 100%;
-                        text-align: left;
-                        padding: 10px 15px;
-                        margin-bottom: 10px;
-                        border: 1px solid #e0e0e0;
-                        border-radius: 5px;
-                        background: #ffffff;
-                        transition: all 0.3s ease;
-                        font-size: 1.1rem;
-                        color: #34495e;
-                    }
-
-                    .btn-filter:hover {
-                        background: #f1f1f1;
-                        border-color: #007bff;
-                        transform: translateX(5px);
-                    }
-
-                    .btn-filter.active {
-                        background: linear-gradient(90deg, rgb(233, 234, 236), rgb(233, 234, 236));
-                        color: black;
-                        border-color: rgb(233, 234, 236);
-                        box-shadow: 0 2px 6px rgb(233, 234, 236);
-                    }
-
-                    .btn-filter .star {
-                        margin-right: 10px;
-                    }
-
-                    .filter-label {
-                        font-weight: 500;
-                        color: #2c3e50;
-                        margin-bottom: 10px;
-                        display: block;
-                    }
+                    /* Ghi đè style của btn-outline-success */
+.btn-outline-success {
+    border-color: white !important; /* Viền trắng */
+    color: #6c757d !important; /* Màu biểu tượng kính lúp (xám để nổi trên nền trắng) */
+    background-color: white !important; /* Nền trắng, thay thế inline style */
+}
+.btn-outline-success:hover {
+    background-color: #f8f9fa !important; /* Nền xám nhạt khi hover */
+    border-color: white !important; /* Giữ viền trắng khi hover */
+    color: #6c757d !important;
+}
+.btn-outline-success:focus, .btn-outline-success.focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5) !important; /* Hiệu ứng focus trắng nhẹ */
+}
+                   .review-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+}
+.review-card:hover {
+    transform: translateY(-2px);
+}
+.review-avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+.review-content {
+    flex: 1;
+     margin-left: 10px;
+}
+.review-content h4 {
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+    color: #2c3e50;
+}
+.useful-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+    font-size: 0.8rem;
+}
+.useful-btn.liked {
+    background-color: #ff4444;
+}
+.useful-btn:hover {
+    opacity: 0.9;
+}
+.toastify-custom {
+    position: relative;
+    top: -8px;
+    margin-bottom: 8px;
+}
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+.average-rating p {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    color: #7f8c8d;
+}
+.star {
+    font-size: 1.1rem;
+}
+.star.filled {
+    color: #f1c40f;
+}
+.form-control {
+    border-radius: 3px;
+    border-color: #ddd;
+    transition: border-color 0.3s ease;
+}
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+.submit-review-btn {
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.669), rgba(0, 0, 0, 0.669));
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: opacity 0.3s ease;
+    margin-top: 12px;
+}
+.submit-review-btn:hover {
+    opacity: 0.9;
+}
+.review-form h3 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+.filter-sidebar {
+    padding: 12px;
+    background: linear-gradient(135deg, #ffffff, #f9fbfd);
+    border-right: 1px solid #e0e0e0;
+    border-radius: 5px;
+    height: auto;
+    min-height: 100%;
+    box-shadow: 1px 0 6px rgba(0, 0, 0, 0.05);
+}
+.btn-filter {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px 10px;
+    margin-bottom: 5px;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    color: #34495e;
+}
+.btn-filter:hover {
+    background: #f1f1f1;
+    border-color: #007bff;
+    transform: translateX(2px);
+}
+.btn-filter.active {
+    background: linear-gradient(90deg, rgb(233, 234, 236), rgb(233, 234, 236));
+    color: black;
+    border-color: rgb(233, 234, 236);
+    box-shadow: 0 1px 3px rgb(233, 234, 236);
+}
+.btn-filter .star {
+    margin-right: 6px;
+}
+.filter-label {
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    display: block;
+}
                 </style>
 
                 <div class="reviews-section container mt-4">
@@ -215,13 +216,13 @@
                                     <input type="hidden" name="rating" id="selectedRating" value="${selectedRating}" />
                                 </div>
                                 <div class="col-12 mt-3">
-                                    <label for="commentInput">Nội dung bình luận:</label>
+                                    <label for="commentInput">Nội dung đánh giá:</label>
                                     <div class="d-flex align-items-center">
                                         <input type="text" id="commentInput" name="comment" value="${selectedComment}"
                                             class="form-control me-2" placeholder="Nhập nội dung..." />
                                         <button type="submit" class="btn btn-outline-success px-3 py-2"
                                             style="background-color: white;">
-                                            🔍
+                                            <i class="fas fa-magnifying-glass"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -262,7 +263,7 @@
                                                     <span class="star">☆</span>
                                                 </c:forEach>
                                             </div>
-                                            <p>${not empty review.comment ? review.comment : 'Chưa có bình luận'}</p>
+                                            <p>${not empty review.comment ? review.comment : 'Chưa có đánh giá'}</p>
                                             <small>Đăng ngày:
                                                 <c:choose>
                                                     <c:when test="${review.createdAt != null}">
@@ -279,80 +280,13 @@
                                 </c:forEach>
                             </div>
 
-                            <c:if test="${canReview}">
-                                <c:choose>
-                                    <c:when test="${not empty reviewStatusMessage}">
-                                        <p style="color: orange;">${reviewStatusMessage}</p>
-                                        <c:if test="${latestReviewStatus == 'REJECTED'}">
-                                            <div class="review-form">
-                                                <h3>Gửi lại đánh giá của bạn</h3>
-                                                <form action="/subject/${subject.subjectId}/review" method="post"
-                                                    modelAttribute="newReview" commandName="newReview">
-                                                    <input type="hidden" name="${_csrf.parameterName}"
-                                                        value="${_csrf.token}" />
-                                                    <div class="form-group">
-                                                        <label for="rating">Số sao:</label>
-                                                        <select name="rating" id="rating" class="form-control" required>
-                                                            <option value="1">1</option>
-                                                            <option value="2">2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
-                                                            <option value="5">5</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="comment">Bình luận:</label>
-                                                        <textarea name="comment" id="comment" class="form-control"
-                                                            rows="4" maxlength="500"
-                                                            placeholder="Nhập bình luận của bạn..." required></textarea>
-                                                    </div>
-                                                    <button type="submit" class="submit-review-btn">Gửi lại đánh
-                                                        giá</button>
-                                                </form>
-                                            </div>
-                                        </c:if>
-                                        <c:if
-                                            test="${latestReviewStatus == 'APPROVED' || latestReviewStatus == 'PENDING'}">
-                                            <!-- Không hiển thị form, chỉ hiển thị thông báo -->
-                                        </c:if>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="review-form">
-                                            <h3>Viết đánh giá của bạn</h3>
-                                            <form action="/subject/${subject.subjectId}/review" method="post"
-                                                modelAttribute="newReview" commandName="newReview">
-                                                <input type="hidden" name="${_csrf.parameterName}"
-                                                    value="${_csrf.token}" />
-                                                <div class="form-group">
-                                                    <label for="rating">Số sao:</label>
-                                                    <select name="rating" id="rating" class="form-control" required>
-                                                        <option value="1">1</option>
-                                                        <option value="2">2</option>
-                                                        <option value="3">3</option>
-                                                        <option value="4">4</option>
-                                                        <option value="5">5</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="comment">Bình luận:</label>
-                                                    <textarea name="comment" id="comment" class="form-control" rows="4"
-                                                        maxlength="500" placeholder="Nhập bình luận của bạn..."
-                                                        required></textarea>
-                                                </div>
-                                                <button type="submit" class="submit-review-btn">Gửi đánh giá</button>
-                                            </form>
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:if>
+                     
                         </div>
                     </div>
                 </div>
 
                 <!-- Thêm Bootstrap JS và các CDN khác -->
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-                    crossorigin="anonymous"></script>
+              
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
                 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
                 <link rel="stylesheet"

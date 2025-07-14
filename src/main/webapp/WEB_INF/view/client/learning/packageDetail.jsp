@@ -154,7 +154,9 @@
             </div>
         </c:if>
     </div>
+
 </div>
+ <div ><jsp:include page="/student/package/${packageSubject.packageId}/reviews?render=true" />  </div>
 <footer>
     <jsp:include page="../layout/footer.jsp"/>
 </footer>

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/reviews")
-// @PreAuthorize("hasRole('ROLE_ADMIN')")
+ @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class ReviewManagerController {
 
     @Autowired
@@ -74,10 +75,10 @@ public class ReviewManagerController {
                 ratingInt = Integer.parseInt(rating);
             }
 
-            // Call filterReviews from ReviewService
-            Pageable pageable = PageRequest.of(page, size);
+            String cmt = comment == null ? "" : comment.trim();
+            Pageable pageable = PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "createdAt"));
             Page<Review> reviewPage = reviewService.filterReviews(type, packageIdLong, subjectIdLong, statusEnum,
-                    ratingInt, comment, pageable);
+                    ratingInt, cmt, pageable);
 
             // Add attributes to model
             model.addAttribute("reviews", reviewPage.getContent());
@@ -90,7 +91,7 @@ public class ReviewManagerController {
             model.addAttribute("subjectId", subjectId);
             model.addAttribute("status", status);
             model.addAttribute("rating", rating);
-            model.addAttribute("comment", comment);
+            model.addAttribute("comment", cmt);
 
             return "content-manager/review/view";
         } catch (Exception e) {
