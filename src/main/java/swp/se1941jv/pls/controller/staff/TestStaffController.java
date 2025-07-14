@@ -41,7 +41,7 @@ public class TestStaffController {
     public String showCreateTestForm(Model model) {
         try {
             model.addAttribute("subjects", testStaffService.getAllSubjects());
-            model.addAttribute("testStatuses", testStaffService.getAllTestStatuses());
+//            model.addAttribute("testStatuses", testStaffService.getAllTestStatuses());
             model.addAttribute("testCategories", testStaffService.getAllTestCategories());
             model.addAttribute("questions", new ArrayList<>());
             return "staff/tests/CreateTest";
@@ -86,9 +86,10 @@ public class TestStaffController {
     @ResponseBody
     public List<QuestionCreateTestDisplayDto> getQuestionsBySubjectAndChapter(
             @RequestParam(value = "subjectId", required = false) Long subjectId,
-            @RequestParam(value = "chapterId", required = false) Long chapterId) {
+            @RequestParam(value = "chapterId", required = false) Long chapterId,
+            @RequestParam(value = "lessonId", required = false) Long lessonId) {
         try {
-            return testStaffService.getQuestionsBySubjectAndChapter(subjectId, chapterId);
+            return testStaffService.getQuestionsBySubjectAndChapter(subjectId, chapterId,lessonId);
         } catch (Exception e) {
             logger.error("Error fetching questions for subjectId {} and chapterId {}: {}", subjectId, chapterId, e.getMessage(), e);
             throw new RuntimeException("Lỗi khi tải danh sách câu hỏi: " + e.getMessage());
@@ -102,7 +103,7 @@ public class TestStaffController {
             @RequestParam("durationTime") Integer durationTime,
             @RequestParam("startAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
             @RequestParam("endAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
-            @RequestParam("testStatusId") Long testStatusId,
+//            @RequestParam("testStatusId") Long testStatusId,
             @RequestParam("testCategoryId") Long testCategoryId,
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             @RequestParam(value = "chapterId", required = false) Long chapterId,
@@ -112,16 +113,16 @@ public class TestStaffController {
             @RequestParam("action") String action,
             Model model) {
         try {
-            Long statusId = testStatusId;
-            if ("requestApproval".equals(action)) {
-                TestStatus processingStatus = testStaffService.findTestStatusByName("Đang xử lý");
-                statusId = processingStatus.getTestStatusId();
-            } else if ("saveDraft".equals(action)) {
-                TestStatus draftStatus = testStaffService.findTestStatusByName("Nháp");
-                statusId = draftStatus.getTestStatusId();
-            }
+//            Long statusId = testStatusId;
+//            if ("requestApproval".equals(action)) {
+//                TestStatus processingStatus = testStaffService.findTestStatusByName("Đang xử lý");
+//                statusId = processingStatus.getTestStatusId();
+//            } else if ("saveDraft".equals(action)) {
+//                TestStatus draftStatus = testStaffService.findTestStatusByName("Nháp");
+//                statusId = draftStatus.getTestStatusId();
+//            }
 
-            testStaffService.createTest(testName, durationTime, startAt, endAt, statusId, testCategoryId,
+            testStaffService.createTest(testName, durationTime, startAt, endAt, testCategoryId,
                     subjectId, chapterId, lessonId, questionIds, isOpen, "saveDraft".equals(action));
             return "redirect:/staff/tests";
         } catch (Exception e) {
@@ -210,6 +211,37 @@ public class TestStaffController {
         } catch (Exception e) {
             logger.error("Error loading edit test form for testId {}: {}", testId, e.getMessage(), e);
             model.addAttribute("error", "Lỗi khi tải form chỉnh sửa bài kiểm tra: " + e.getMessage());
+            return "error";
+        }
+    }
+
+    @PostMapping("/edit")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    public String editTest(
+            @RequestParam("testId") Long testId,
+            @RequestParam("testName") String testName,
+            @RequestParam("durationTime") Integer durationTime,
+            @RequestParam("startAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
+            @RequestParam("endAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
+            @RequestParam("testCategoryId") Long testCategoryId,
+            @RequestParam(value = "subjectId", required = false) Long subjectId,
+            @RequestParam(value = "chapterId", required = false) Long chapterId,
+            @RequestParam(value = "lessonId", required = false) Long lessonId,
+            @RequestParam(value = "questionIds", required = false) List<Long> questionIds,
+            @RequestParam(value = "isOpen", defaultValue = "false") Boolean isOpen,
+            @RequestParam("action") String action,
+            Model model) {
+        try {
+            Long statusId = "requestApproval".equals(action) ?
+                    testStaffService.findTestStatusByName("Đang xử lý").getTestStatusId() :
+                    testStaffService.findTestStatusByName("Nháp").getTestStatusId();
+
+            testStaffService.updateTest(testId, testName, durationTime, startAt, endAt, statusId, testCategoryId,
+                    subjectId, chapterId, lessonId, questionIds, isOpen);
+            return "redirect:/staff/tests";
+        } catch (Exception e) {
+            logger.error("Error updating test {}: {}", testId, e.getMessage(), e);
+            model.addAttribute("error", "Lỗi khi cập nhật bài kiểm tra: " + e.getMessage());
             return "error";
         }
     }

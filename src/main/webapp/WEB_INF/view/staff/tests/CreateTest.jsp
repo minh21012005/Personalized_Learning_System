@@ -276,16 +276,16 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="mb-3 col-6">
-                                    <label for="testStatus" class="form-label mandatory">Trạng thái</label>
-                                    <select class="form-select" id="testStatus" name="testStatusId" required>
-                                        <option value="">Chọn trạng thái</option>
-                                        <c:forEach var="status" items="${testStatuses}">
-                                            <option value="${status.testStatusId}">${fn:escapeXml(status.testStatusName)}</option>
-                                        </c:forEach>
-                                    </select>
-                                    <div id="testStatusError" class="error-message"></div>
-                                </div>
+<%--                                <div class="mb-3 col-6">--%>
+<%--                                    <label for="testStatus" class="form-label mandatory">Trạng thái</label>--%>
+<%--                                    <select class="form-select" id="testStatus" name="testStatusId" required>--%>
+<%--                                        <option value="">Chọn trạng thái</option>--%>
+<%--                                        <c:forEach var="status" items="${testStatuses}">--%>
+<%--                                            <option value="${status.testStatusId}">${fn:escapeXml(status.testStatusName)}</option>--%>
+<%--                                        </c:forEach>--%>
+<%--                                    </select>--%>
+<%--                                    <div id="testStatusError" class="error-message"></div>--%>
+<%--                                </div>--%>
                                 <div class="mb-3 col-6">
                                     <label for="testCategory" class="form-label mandatory">Danh mục</label>
                                     <select class="form-select" id="testCategory" name="testCategoryId" required>
@@ -438,7 +438,8 @@
     function loadQuestions() {
         var subjectId = $('#subject').val();
         var chapterId = $('#chapter').val();
-        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '');
+        var lessonId = $('#lesson').val();
+        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '')+ '&lessonId=' + (lessonId || '');
         $.ajax({
             url: url,
             method: 'GET',
@@ -523,11 +524,11 @@
             isValid = false;
         }
 
-        var testStatus = $('#testStatus').val();
-        if (!testStatus) {
-            $('#testStatusError').text('Trạng thái là bắt buộc.');
-            isValid = false;
-        }
+        // var testStatus = $('#testStatus').val();
+        // if (!testStatus) {
+        //     $('#testStatusError').text('Trạng thái là bắt buộc.');
+        //     isValid = false;
+        // }
 
         var testCategory = $('#testCategory').val();
         if (!testCategory) {
