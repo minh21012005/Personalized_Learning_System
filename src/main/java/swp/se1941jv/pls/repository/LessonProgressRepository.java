@@ -23,7 +23,7 @@ public interface LessonProgressRepository extends JpaRepository<LessonProgress, 
 
     List<LessonProgress> findByUserAndSubjectAndPackageEntity(User user, Subject subject, Package packageEntity);
 
-    Optional<LessonProgress> findByUserUserIdAndLessonLessonId(Long userId, Long lessonId);
+    Optional<LessonProgress> findByUserUserIdAndLessonLessonIdAndPackageEntityPackageId(Long userId, Long lessonId, Long packageId);
 
     Page<LessonProgress> findByUserUserIdOrderByUpdatedAtDesc(Long userId, Pageable pageable);
 

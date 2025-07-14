@@ -817,9 +817,12 @@ public class SubjectService {
                     List<LearningLessonDTO> lessonDTOs = chapter.getLessons().stream()
                             .filter(lesson -> lesson.getStatus()) // Chỉ lấy bài học active
                             .map(lesson -> {
-                                Optional<LessonProgress> progressOpt = lessonProgressRepository.findByUserUserIdAndLessonLessonId(userId, lesson.getLessonId());
-                                List<String> materials = lesson.getLessonMaterials().stream()
-                                        .map(LessonMaterial::getFilePath)
+                                Optional<LessonProgress> progressOpt = lessonProgressRepository.findByUserUserIdAndLessonLessonIdAndPackageEntityPackageId(userId, lesson.getLessonId(), packageId);
+                                List<LearningLessonDTO.LessonMaterialDTO> materials = lesson.getLessonMaterials().stream()
+                                        .map(material -> LearningLessonDTO.LessonMaterialDTO.builder()
+                                                .filePath(material.getFilePath())
+                                                .fileName(material.getFileName()) // Nếu không có fileName, trích xuất từ filePath
+                                                .build())
                                         .collect(Collectors.toList());
                                 // Lấy bài kiểm tra bài học (test_category_id = 4)
                                 LearningTestDTO lessonTest = null;

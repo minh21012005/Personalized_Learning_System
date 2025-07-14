@@ -108,15 +108,15 @@ const LearningApp = (function () {
         $('#lessonTitle').text(lesson.lessonName || 'Không tìm thấy bài học');
         $('#lessonDescription').text(lesson.lessonDescription || 'Không có mô tả.');
 
-        // Cập nhật tài liệu
+        // Cập nhật tài liệu với filePath và fileName
         const materialsList = $('#materialsList');
         materialsList.empty();
         if (lesson.materials && lesson.materials.length > 0) {
             lesson.materials.forEach(material => {
                 materialsList.append(`
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="/files/taiLieu/${material}" target="_blank">${material}</a>
-                        <a href="/files/taiLieu/${material}" download="${material}"><i class="bi bi-download"></i></a>
+                        <a href="/files/materials/${material.filePath}" target="_blank">${material.fileName}</a>
+                        <a href="/files/materials/${material.filePath}" download="${material.fileName}"><i class="bi bi-download"></i></a>
                     </li>
                 `);
             });

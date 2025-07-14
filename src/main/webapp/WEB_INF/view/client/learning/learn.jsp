@@ -252,7 +252,10 @@
         lessonDescription: "${fn:escapeXml(lessonItem.lessonDescription != null ? lessonItem.lessonDescription : '')}",
         materials: [
             <c:forEach var="material" items="${lessonItem.materials}" varStatus="materialStatus">
-            "${fn:escapeXml(material)}"${materialStatus.last ? '' : ','}
+            {
+                "fileName": "${fn:escapeXml(material.fileName)}",
+                "filePath": "${fn:escapeXml(material.filePath)}"
+            }${materialStatus.last ? '' : ','}
             </c:forEach>
         ],
         videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}",
@@ -336,8 +339,8 @@
                                     <c:when test="${not empty learningData.defaultLesson.materials}">
                                         <c:forEach var="material" items="${learningData.defaultLesson.materials}">
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" target="_blank">${fn:escapeXml(material)}</a>
-                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" download="${fn:escapeXml(material)}" class="text-primary">
+                                                <a href="/files/materials/${fn:escapeXml(material.filePath)}" target="_blank">${fn:escapeXml(material.fileName)}</a>
+                                                <a href="/files/materials/${fn:escapeXml(material.filePath)}" download="${fn:escapeXml(material.fileName)}" class="text-primary">
                                                     <i class="bi bi-download"></i>
                                                 </a>
                                             </li>
