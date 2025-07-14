@@ -52,32 +52,28 @@ public class TestStudentService {
 
         // Kiểm tra thời gian hợp lệ
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(test.getStartAt()) || now.isAfter(test.getEndAt())) {
+        if (test.getStartAt() != null && test.getEndAt() != null && (now.isBefore(test.getStartAt()) || now.isAfter(test.getEndAt()))) {
             throw new IllegalStateException("Bài kiểm tra không thể thực hiện vào thời điểm này.");
         }
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId).orElse(null);
+        List<UserTest> userTests = userTestRepository.findByTestIdUserId(testId, userId);
 
-        // Nếu bài kiểm tra đã nộp (timeEnd != null), xóa dữ liệu cũ và tạo mới
-        if (userTest != null && userTest.getTimeEnd() != null) {
-            answerHistoryTestRepository.deleteByUserTestId(userTest.getUserTestId());
-            userTestRepository.deleteUserTestByUserTestId(userTest.getUserTestId());
-            userTest = null;
+        if (test.getMaxAttempts() != null && userTests.size() >= test.getMaxAttempts()) {
+            throw new IllegalStateException("Bạn đã vượt quá số lần làm bài kiểm tra tối đa cho bài kiểm tra này.");
         }
 
-        // Nếu chưa có UserTest hoặc vừa xóa, tạo mới
-        if (userTest == null) {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Người dùng không tìm thấy: " + userId));
-            UserTest newUserTest = UserTest.builder()
-                    .test(test)
-                    .user(user)
-                    .timeStart(LocalDateTime.now()) // Reset thời gian bắt đầu
-                    .totalQuestions((int) questionTestRepository.countByTestId(testId))
-                    .correctAnswers(0)
-                    .build();
-            userTest = userTestRepository.save(newUserTest);
-        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tìm thấy: " + userId));
+        UserTest newUserTest = UserTest.builder()
+                .test(test)
+                .user(user)
+                .timeStart(LocalDateTime.now()) // Reset thời gian bắt đầu
+                .totalQuestions((int) questionTestRepository.countByTestId(testId))
+                .correctAnswers(0)
+                .build();
+        UserTest userTest = userTestRepository.save(newUserTest);
+
 
         // Kiểm tra thời gian còn lại
         LocalDateTime endTime = userTest.getTimeStart().plusMinutes(test.getDurationTime());
@@ -115,7 +111,8 @@ public class TestStudentService {
                         ta -> ta.getQuestion().getQuestionId(),
                         ta -> {
                             try {
-                                return objectMapper.readValue(ta.getAnswer(), new TypeReference<List<String>>() {});
+                                return objectMapper.readValue(ta.getAnswer(), new TypeReference<List<String>>() {
+                                });
                             } catch (Exception e) {
                                 return new ArrayList<>();
                             }
@@ -132,8 +129,80 @@ public class TestStudentService {
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public void saveTemporaryAnswers(Long testId, Long userId, List<TestSubmissionDto.QuestionAnswer> answers) {
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId)
+    public Map<String, Object> getTestData(Long userTestId, Long userId) {
+        UserTest userTest = userTestRepository.findById(userTestId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dữ liệu bài kiểm tra: " + userTestId));
+        if (!userTest.getUser().getUserId().equals(userId)) {
+            throw new IllegalStateException("Bạn không có quyền truy cập bài kiểm tra này.");
+        }
+        if (userTest.getTimeEnd() != null) {
+            throw new IllegalStateException("Bài kiểm tra đã được nộp.");
+        }
+
+        Test test = userTest.getTest();
+        if (!test.getIsOpen()) {
+            throw new IllegalStateException("Bài kiểm tra đã đóng.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (test.getStartAt() != null && test.getEndAt() != null && (now.isBefore(test.getStartAt()) || now.isAfter(test.getEndAt()))) {
+            throw new IllegalStateException("Bài kiểm tra không thể thực hiện vào thời điểm này.");
+        }
+
+        LocalDateTime endTime = userTest.getTimeStart().plusMinutes(test.getDurationTime());
+        if (LocalDateTime.now().isAfter(endTime)) {
+            submitTestAutomatically(userTest);
+            throw new IllegalStateException("Thời gian làm bài đã hết.");
+        }
+
+        long remainingTime = java.time.Duration.between(LocalDateTime.now(), endTime).getSeconds();
+
+        List<QuestionTest> questionTests = questionTestRepository.findByTestId(test.getTestId());
+        List<QuestionDisplayDto> questions = questionTests.stream()
+                .map(qt -> {
+                    QuestionBank q = qt.getQuestion();
+                    try {
+                        List<AnswerOptionDto> options = questionService.getQuestionOptions(q);
+                        return QuestionDisplayDto.builder()
+                                .questionId(q.getQuestionId())
+                                .content(q.getContent())
+                                .image(q.getImage())
+                                .options(options.stream().map(AnswerOptionDto::getText).collect(Collectors.toList()))
+                                .build();
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        List<AnswerHistoryTest> tempAnswers = answerHistoryTestRepository.findByUserTestId(userTestId);
+        Map<Long, List<String>> savedAnswers = tempAnswers.stream()
+                .collect(Collectors.toMap(
+                        ta -> ta.getQuestion().getQuestionId(),
+                        ta -> {
+                            try {
+                                return objectMapper.readValue(ta.getAnswer(), new TypeReference<List<String>>() {
+                                });
+                            } catch (Exception e) {
+                                return new ArrayList<>();
+                            }
+                        }
+                ));
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("testId", test.getTestId());
+        data.put("questions", questions);
+        data.put("remainingTime", remainingTime);
+        data.put("userTestId", userTestId);
+        data.put("testName", test.getTestName());
+        data.put("savedAnswers", savedAnswers);
+        return data;
+    }
+
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public void saveTemporaryAnswers(Long userTestId, List<TestSubmissionDto.QuestionAnswer> answers) {
+        UserTest userTest = userTestRepository.findById(userTestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dữ liệu bài kiểm tra."));
 
         // Xóa các đáp án cũ trong AnswerHistoryTest
@@ -143,31 +212,31 @@ public class TestStudentService {
         AtomicInteger correctCount = new AtomicInteger(0);
         answers.forEach(answer -> {
             try {
-                if (answer.getSelectedAnswers() != null && !answer.getSelectedAnswers().isEmpty()) {
-                    QuestionBank question = questionBankRepository.findById(answer.getQuestionId())
-                            .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy: " + answer.getQuestionId()));
-                    List<AnswerOptionDto> options;
-                    try {
-                        options = questionService.getQuestionOptions(question);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Lỗi khi lấy đáp án.");
-                    }
-                    List<String> correctAnswers = options.stream()
-                            .filter(AnswerOptionDto::isCorrect)
-                            .map(AnswerOptionDto::getText)
-                            .collect(Collectors.toList());
-                    boolean isCorrect = answer.getSelectedAnswers().size() == correctAnswers.size() &&
-                            answer.getSelectedAnswers().containsAll(correctAnswers) &&
-                            correctAnswers.containsAll(answer.getSelectedAnswers());
-                    if (isCorrect) correctCount.incrementAndGet();
 
-                    // Lưu đáp án vào AnswerHistoryTest
-                    answerHistoryTestRepository.save(AnswerHistoryTest.builder()
-                            .userTest(userTest)
-                            .question(question)
-                            .answer(objectMapper.writeValueAsString(answer.getSelectedAnswers()))
-                            .build());
+                QuestionBank question = questionBankRepository.findById(answer.getQuestionId())
+                        .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy: " + answer.getQuestionId()));
+                List<AnswerOptionDto> options;
+                try {
+                    options = questionService.getQuestionOptions(question);
+                } catch (Exception e) {
+                    throw new RuntimeException("Lỗi khi lấy đáp án.");
                 }
+                List<String> correctAnswers = options.stream()
+                        .filter(AnswerOptionDto::isCorrect)
+                        .map(AnswerOptionDto::getText)
+                        .collect(Collectors.toList());
+                boolean isCorrect = answer.getSelectedAnswers().size() == correctAnswers.size() &&
+                        answer.getSelectedAnswers().containsAll(correctAnswers) &&
+                        correctAnswers.containsAll(answer.getSelectedAnswers());
+                if (isCorrect) correctCount.incrementAndGet();
+
+                // Lưu đáp án vào AnswerHistoryTest
+                answerHistoryTestRepository.save(AnswerHistoryTest.builder()
+                        .userTest(userTest)
+                        .question(question)
+                        .answer(objectMapper.writeValueAsString(answer.getSelectedAnswers()))
+                        .build());
+
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Lỗi khi lưu đáp án tạm thời: " + e.getMessage());
             }
@@ -179,8 +248,8 @@ public class TestStudentService {
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public Map<String, Object> submitTest(Long testId, Long userId, TestSubmissionDto submission) {
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId)
+    public Map<String, Object> submitTest(Long userTestId, TestSubmissionDto submission) {
+        UserTest userTest = userTestRepository.findById(userTestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dữ liệu bài kiểm tra."));
 
         if (userTest.getTimeEnd() != null) {
@@ -263,7 +332,7 @@ public class TestStudentService {
         TestSubmissionDto submission = new TestSubmissionDto();
         submission.setTestId(testId);
         submission.setAnswers(answers);
-        submitTest(testId, userId, submission);
+        submitTest(userTest.getUserTestId(), submission);
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
@@ -283,6 +352,7 @@ public class TestStudentService {
                         .correctAnswers(ut.getCorrectAnswers())
                         .startTime(ut.getTimeStart() != null ? ut.getTimeStart().format(formatter) : "")
                         .endTime(ut.getTimeEnd() != null ? ut.getTimeEnd().format(formatter) : "")
+                        .userTestId(ut.getUserTestId())
                         .build())
                 .collect(Collectors.toList());
 
@@ -290,8 +360,8 @@ public class TestStudentService {
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public TestHistoryDTO getTestHistory(Long testId, Long userId) {
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId)
+    public TestHistoryDTO getTestHistory(Long userTestId) {
+        UserTest userTest = userTestRepository.findById(userTestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lịch sử bài kiểm tra."));
 
         List<AnswerHistoryTest> answers = answerHistoryTestRepository.findByUserTestId(userTest.getUserTestId());

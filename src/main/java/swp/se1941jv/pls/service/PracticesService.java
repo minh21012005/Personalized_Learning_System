@@ -243,7 +243,8 @@ public class PracticesService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId).orElseThrow(() -> new RuntimeException("User test not found: " + testId));
+        List<UserTest> userTests = userTestRepository.findByTestIdUserId(testId, userId);
+        UserTest userTest = userTests.get(0);
 
         AtomicInteger correctAnswersCount = new AtomicInteger();
 
@@ -463,7 +464,11 @@ public class PracticesService {
             return null;
         }
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId).orElseThrow(() -> new RuntimeException("User test not found: " + testId));
+        List<UserTest> userTests = userTestRepository.findByTestIdUserId(testId, userId);
+        if (userTests.isEmpty()) {
+            throw new RuntimeException("No user test found for testId: " + testId + " and userId: " + userId);
+        }
+        UserTest userTest = userTests.get(0);
         userTest.setTimeEnd(LocalDateTime.now());
         userTest.setTotalQuestions(userTest.getTotalQuestions() + QUESTIONS_PER_SET);
         userTestRepository.save(userTest);
@@ -499,7 +504,11 @@ public class PracticesService {
             throw new RuntimeException("Không thể xác định người dùng hiện tại.");
         }
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId).orElseThrow(() -> new RuntimeException("Không tìm thấy lịch sử bài kiểm tra."));
+        List<UserTest> userTests = userTestRepository.findByTestIdUserId(testId, userId);
+        if (userTests.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy lịch sử bài kiểm tra cho người dùng hiện tại.");
+        }
+        UserTest userTest = userTests.get(0);
         if (userTest == null) {
             throw new RuntimeException("Không tìm thấy lịch sử bài kiểm tra.");
         }

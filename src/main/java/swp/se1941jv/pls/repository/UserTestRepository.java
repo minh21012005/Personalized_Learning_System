@@ -12,12 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UserTestRepository extends JpaRepository<UserTest, Long> {
     @Query("SELECT ut FROM UserTest ut WHERE ut.test.testId = ?1 and ut.user.userId = ?2")
-    Optional<UserTest> findByTestIdUserId(Long testId, Long userId);
+    List<UserTest> findByTestIdUserId(Long testId, Long userId);
 
     @Query("SELECT ut FROM UserTest ut WHERE ut.user.userId = :userId " +
             "AND (:startDate IS NULL OR ut.timeStart >= :startDate) " +
