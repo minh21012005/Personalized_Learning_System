@@ -35,6 +35,7 @@ public class PracticesService {
     UserPackageRepository userPackageRepository;
     SubjectRepository subjectRepository;
     QuestionBankRepository questionBankRepository;
+    TestCategoryRepository testCategoryRepository;
     QuestionService questionService;
     TestRepository testRepository;
     UserTestRepository userTestRepository;
@@ -219,6 +220,7 @@ public class PracticesService {
                                 .options(questionService.getQuestionOptions(question).stream()
                                         .map(AnswerOptionDto::getText)
                                         .collect(Collectors.toList()))
+                                .levelQuestionName(question.getLevelQuestion().getLevelQuestionName())
                                 .build();
                     } catch (Exception e) {
                         // Log the error and return a default DTO or handle appropriately
@@ -326,6 +328,7 @@ public class PracticesService {
                 .startAt(LocalDateTime.now())
                 .endAt(LocalDateTime.now())
                 .testName("Practice Test - " + user.getFullName() + " - " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")))
+                .testCategory(testCategoryRepository.findById(1L).orElseThrow(() -> new RuntimeException("Test category not found: Practice")))
                 .build();
         test = testRepository.save(test);
 
@@ -412,6 +415,7 @@ public class PracticesService {
                                 .options(questionService.getQuestionOptions(question).stream()
                                         .map(AnswerOptionDto::getText)
                                         .collect(Collectors.toList()))
+                                .levelQuestionName(question.getLevelQuestion().getLevelQuestionName())
                                 .build();
                     } catch (Exception e) {
                         return QuestionDisplayDto.builder()
@@ -571,7 +575,8 @@ public class PracticesService {
         LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
 
-        Page<UserTest> userTestPage = userTestRepository.findByUserIdAndDateRange(userId, startDateTime, endDateTime, pageable);
+        Page<UserTest> userTestPage = userTestRepository.findByUserIdAndDateRange(
+                userId, 1L, startDateTime, endDateTime, pageable);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         List<TestHistoryListDTO> testHistoryList = userTestPage.getContent().stream()

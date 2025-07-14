@@ -21,14 +21,29 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long> {
     List<UserTest> findByTestIdUserId(Long testId, Long userId);
 
     @Query("SELECT ut FROM UserTest ut WHERE ut.user.userId = :userId " +
+            "AND (:categoryId IS NULL OR ut.test.testCategory.testCategoryId = :categoryId) " +
             "AND (:startDate IS NULL OR ut.timeStart >= :startDate) " +
             "AND (:endDate IS NULL OR ut.timeStart <= :endDate) " +
             "ORDER BY ut.timeStart DESC")
     Page<UserTest> findByUserIdAndDateRange(
             @Param("userId") Long userId,
+            @Param("categoryId") Long categoryId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
+
+    @Query("SELECT ut FROM UserTest ut WHERE ut.user.userId = :userId " +
+            "AND (:categoryId IS NULL OR ut.test.testCategory.testCategoryId != :categoryId) " +
+            "AND (:startDate IS NULL OR ut.timeStart >= :startDate) " +
+            "AND (:endDate IS NULL OR ut.timeStart <= :endDate) " +
+            "ORDER BY ut.timeStart DESC")
+    Page<UserTest> findTestByUserIdAndDateRange(
+            @Param("userId") Long userId,
+            @Param("categoryId") Long categoryId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
 
     @Transactional
     void deleteUserTestByUserTestId(Long userTestId);
