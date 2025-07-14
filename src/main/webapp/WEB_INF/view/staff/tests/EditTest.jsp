@@ -208,7 +208,7 @@
                     <div class="col-md-8 col-12 mx-auto">
                         <h1>Chỉnh Sửa Bài Kiểm Tra</h1>
                         <hr/>
-                        <form id="editTestForm" action="/staff/tests/save" method="post"
+                        <form id="editTestForm" action="/staff/tests/edit" method="post"
                               onsubmit="return validateForm()">
                             <input type="hidden" name="testId" value="${test.testId}">
                             <c:if test="${not empty success}">
@@ -246,19 +246,6 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="mb-3 col-6">
-                                    <label for="testStatus" class="form-label mandatory">Trạng thái</label>
-                                    <select class="form-select" id="testStatus" name="testStatusId" required>
-                                        <option value="">Chọn trạng thái</option>
-                                        <c:forEach var="status" items="${testStatuses}">
-                                            <option value="${status.testStatusId}"
-                                                    <c:if test="${status.testStatusId == test.statusId}">selected</c:if>>
-                                                    ${fn:escapeXml(status.testStatusName)}
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                    <div id="testStatusError" class="error-message"></div>
-                                </div>
                                 <div class="mb-3 col-6">
                                     <label for="testCategory" class="form-label mandatory">Danh mục</label>
                                     <select class="form-select" id="testCategory" name="testCategoryId" required>
@@ -442,7 +429,8 @@
     function loadQuestions() {
         var subjectId = $('#subject').val();
         var chapterId = $('#chapter').val();
-        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '');
+        var lessonId = $('#lesson').val();
+        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '')+ '&lessonId=' + (lessonId || '');
         $.ajax({
             url: url,
             method: 'GET',
@@ -498,7 +486,7 @@
 
     function validateForm() {
         var isValid = true;
-        $('#testNameError, #durationTimeError, #startAtError, #endAtError, #testStatusError, #testCategoryError, #subjectError, #questionsError').text('');
+        $('#testNameError, #durationTimeError, #startAtError, #endAtError, #testCategoryError, #subjectError, #questionsError').text('');
 
         var testName = $('#testName').val().trim();
         if (!testName) {
@@ -527,12 +515,6 @@
             isValid = false;
         }
 
-        var testStatus = $('#testStatus').val();
-        if (!testStatus) {
-            $('#testStatusError').text('Trạng thái là bắt buộc.');
-            isValid = false;
-        }
-
         var testCategory = $('#testCategory').val();
         if (!testCategory) {
             $('#testCategoryError').text('Danh mục là bắt buộc.');
@@ -551,6 +533,13 @@
             $('#questionsError').text('Phải chọn ít nhất một câu hỏi.');
             isValid = false;
         }
+
+        // Ensure questionIds are included in the form submission
+        var form = $('#editTestForm');
+        form.find('input[name="questionIds"]').remove();
+        selectedQuestionIds.forEach(function (id) {
+            form.append('<input type="hidden" name="questionIds" value="' + id + '">');
+        });
 
         return isValid;
     }

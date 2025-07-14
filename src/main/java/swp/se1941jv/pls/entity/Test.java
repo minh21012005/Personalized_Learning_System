@@ -55,9 +55,6 @@ public class Test extends BaseEntity {
     Subject subject;
 
     @OneToMany(mappedBy = "test")
-    List<SubjectTest> subjectTests;
-
-    @OneToMany(mappedBy = "test")
     List<UserTest> userTests;
 
     @Transient
