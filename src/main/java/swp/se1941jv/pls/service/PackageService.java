@@ -175,6 +175,7 @@ public class PackageService {
         return packageSubjects;
     }
 
+
     public PackageSubjectDTO getPackageDetail(Long packageId) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -206,8 +207,7 @@ public class PackageService {
 
                 long countLesson = packageSubject.getSubject().getChapters().stream()
                         .flatMap(chapter -> chapter.getLessons().stream()
-                                .filter(lesson -> lesson.getStatus()
-                                        && lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED))
+                                .filter(Lesson::getStatus))
                         .count();
 
                 SubjectResponseDTO subjectResponseDTO = SubjectResponseDTO.builder()

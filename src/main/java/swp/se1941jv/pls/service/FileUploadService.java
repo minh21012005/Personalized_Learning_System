@@ -6,13 +6,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import swp.se1941jv.pls.dto.response.lesson.LessonFormDTO;
 
 import jakarta.servlet.ServletContext;
 
@@ -26,33 +25,33 @@ public class FileUploadService {
         this.servletContext = servletContext;
     }
 
-    public String handleSaveUploadFile(MultipartFile file, String targetFolder) {
+    private LessonFormDTO.LessonMaterialDTO handleSaveUploadFile(MultipartFile file, String targetFolder) {
         if (file == null || file.isEmpty()) {
             logger.warn("Attempted to save an empty or null file for target folder: {}", targetFolder);
-            return "";
+            return null;
         }
 
         String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
         if (originalFilename.contains("..")) {
             logger.error("Cannot store file with relative path outside current directory (Path Traversal attempt): {}", originalFilename);
-            return "";
+            return null;
         }
 
-        String finalName = "";
+        LessonFormDTO.LessonMaterialDTO material = new LessonFormDTO.LessonMaterialDTO();
         try {
             byte[] bytes = file.getBytes();
 
             String rootResourcesPath = this.servletContext.getRealPath("/resources/files");
             if (rootResourcesPath == null) {
-                logger.error("Could not get real path for /resources/uploads. Ensure webapp structure is correct.");
-                return "";
+                logger.error("Could not get real path for /resources/files. Ensure webapp structure is correct.");
+                return null;
             }
 
             File targetDir = new File(rootResourcesPath + File.separator + targetFolder);
             if (!targetDir.exists()) {
                 if (!targetDir.mkdirs()) {
                     logger.error("Failed to create directory: {}", targetDir.getAbsolutePath());
-                    return "";
+                    return null;
                 }
                 logger.info("Created directory: {}", targetDir.getAbsolutePath());
             }
@@ -64,43 +63,45 @@ public class FileUploadService {
             }
             if (!fileExtension.matches("\\.(?i)(pdf|doc|docx)$")) {
                 logger.warn("Invalid file extension uploaded: {} for original file: {}", fileExtension, originalFilename);
-                return "";
+                return null;
             }
 
-            finalName = System.currentTimeMillis()+ '-' +file.getOriginalFilename();
-            File serverFile = new File(targetDir.getAbsolutePath() + File.separator + finalName);
+            String fileNameWithTimestamp = System.currentTimeMillis() + "-" + originalFilename;
+            File serverFile = new File(targetDir.getAbsolutePath() + File.separator + fileNameWithTimestamp);
 
             try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile))) {
                 stream.write(bytes);
             }
             logger.info("File saved successfully: {}", serverFile.getAbsolutePath());
 
+            material.setFilePath(fileNameWithTimestamp);
+            material.setFileName(originalFilename);
+            return material;
         } catch (IOException e) {
             logger.error("Error saving file {}: {}", originalFilename, e.getMessage(), e);
-            return "";
+            return null;
         } catch (Exception e) {
             logger.error("Unexpected error saving file {}: {}", originalFilename, e.getMessage(), e);
-            return "";
+            return null;
         }
-        return finalName;
     }
 
-    public List<String> handleSaveUploadFiles(MultipartFile[] files, String targetFolder) {
-        List<String> savedFileNames = new ArrayList<>();
+    public List<LessonFormDTO.LessonMaterialDTO> handleSaveUploadFiles(MultipartFile[] files, String targetFolder) {
+        List<LessonFormDTO.LessonMaterialDTO> savedMaterials = new ArrayList<>();
         if (files == null || files.length == 0) {
             logger.warn("No files provided for upload to target folder: {}", targetFolder);
-            return savedFileNames;
+            return savedMaterials;
         }
 
         for (MultipartFile file : files) {
-            String fileName = handleSaveUploadFile(file, targetFolder);
-            if (!fileName.isEmpty()) {
-                savedFileNames.add(fileName);
+            LessonFormDTO.LessonMaterialDTO material = handleSaveUploadFile(file, targetFolder);
+            if (material != null) {
+                savedMaterials.add(material);
             }
         }
 
-        logger.info("Successfully saved {} out of {} files to folder: {}", savedFileNames.size(), files.length, targetFolder);
-        return savedFileNames;
+        logger.info("Successfully saved {} out of {} files to folder: {}", savedMaterials.size(), files.length, targetFolder);
+        return savedMaterials;
     }
 
     public boolean deleteUploadedFile(String fileName, String targetFolder) {
@@ -109,9 +110,9 @@ public class FileUploadService {
             return false;
         }
         try {
-            String rootResourcesPath = this.servletContext.getRealPath("/resources/uploads");
+            String rootResourcesPath = this.servletContext.getRealPath("/resources/files");
             if (rootResourcesPath == null) {
-                logger.error("Could not get real path for /resources/uploads during delete. FileName: {}, TargetFolder: {}", fileName, targetFolder);
+                logger.error("Could not get real path for /resources/files during delete. FileName: {}, TargetFolder: {}", fileName, targetFolder);
                 return false;
             }
             File fileToDelete = new File(rootResourcesPath + File.separator + targetFolder + File.separator + fileName);

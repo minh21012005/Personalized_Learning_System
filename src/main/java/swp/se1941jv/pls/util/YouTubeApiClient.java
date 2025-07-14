@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class YouTubeApiClient {
 
     private static final String YOUTUBE_API_KEY = "AIzaSyAa9qz9xeYVePrsXLVIJJuA3qAhW4YXwqY";
-    private static final String YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={videoId}&key={apiKey}";
+    private static final String YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id={videoId}&key={apiKey}";
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -40,7 +40,7 @@ public class YouTubeApiClient {
      * Lấy thời lượng video từ YouTube API.
      *
      * @param videoId ID của video
-     * @return Thời lượng video định dạng " phút Z giâX tiếng Yy" hoặc null nếu lỗi
+     * @return Thời lượng video định dạng "X tiếng Y phút Z giây" hoặc null nếu lỗi
      */
     public String getVideoDuration(String videoId) {
         try {
@@ -57,7 +57,57 @@ public class YouTubeApiClient {
             String duration = items.get(0).get("contentDetails").get("duration").asText();
             return formatDuration(duration);
         } catch (Exception e) {
-            System.out.printf("Error fetching video duration for ID %s: %s%n", e.getMessage());
+            System.out.printf("Error fetching video duration for ID %s: %s%n", videoId, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Lấy tiêu đề video từ YouTube API.
+     *
+     * @param videoId ID của video
+     * @return Tiêu đề video hoặc null nếu lỗi
+     */
+    public String getVideoTitle(String videoId) {
+        try {
+            String url = YOUTUBE_API_URL.replace("{videoId}", videoId).replace("{apiKey}", YOUTUBE_API_KEY);
+            String response = restTemplate.getForObject(url, String.class);
+
+            JsonNode jsonNode = objectMapper.readTree(response);
+            JsonNode items = jsonNode.get("items");
+
+            if (items == null || items.size() == 0) {
+                return null;
+            }
+
+            return items.get(0).get("snippet").get("title").asText();
+        } catch (Exception e) {
+            System.out.printf("Error fetching video title for ID %s: %s%n", videoId, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Lấy URL thumbnail của video từ YouTube API.
+     *
+     * @param videoId ID của video
+     * @return URL thumbnail (maxresdefault) hoặc null nếu lỗi
+     */
+    public String getThumbnailUrl(String videoId) {
+        try {
+            String url = YOUTUBE_API_URL.replace("{videoId}", videoId).replace("{apiKey}", YOUTUBE_API_KEY);
+            String response = restTemplate.getForObject(url, String.class);
+
+            JsonNode jsonNode = objectMapper.readTree(response);
+            JsonNode items = jsonNode.get("items");
+
+            if (items == null || items.size() == 0) {
+                return null;
+            }
+
+            return items.get(0).get("snippet").get("thumbnails").get("maxres").get("url").asText();
+        } catch (Exception e) {
+            System.out.printf("Error fetching thumbnail URL for ID %s: %s%n", videoId, e.getMessage());
             return null;
         }
     }

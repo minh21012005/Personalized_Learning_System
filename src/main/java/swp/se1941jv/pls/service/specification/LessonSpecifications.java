@@ -15,7 +15,7 @@ public class LessonSpecifications {
             if (chapterId == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("chapter").get("id"), chapterId);
+            return cb.equal(root.get("chapter").get("chapterId"), chapterId); //
         };
     }
     public static Specification<Lesson> hasName(String lessonName) {
@@ -36,17 +36,7 @@ public class LessonSpecifications {
         };
     }
 
-    /**
-     * Thêm specification cho lessonStatus.
-     */
-    public static Specification<Lesson> hasLessonStatus(String lessonStatus) {
-        return (Root<Lesson> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
-            if (lessonStatus == null || lessonStatus.isEmpty()) {
-                return cb.conjunction();
-            }
-            return cb.equal(root.get("lessonStatus"), Lesson.LessonStatus.valueOf(lessonStatus));
-        };
-    }
+
 
     /**
      * Thêm specification cho subjectId thông qua chapter.
@@ -68,7 +58,7 @@ public class LessonSpecifications {
             if (userCreated == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("chapter").get("userCreated"), userCreated);
+            return cb.equal(root.get("lesson").get("userCreated"), userCreated);
         };
     }
 

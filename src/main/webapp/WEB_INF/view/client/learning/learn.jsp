@@ -7,491 +7,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${subject != null ? subject.subjectName : 'Không tìm thấy môn học'}</title>
+    <title>${fn:escapeXml(learningData.subjectName != null ? learningData.subjectName : 'Không tìm thấy môn học')}</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Font và màu sắc chính */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --gradient: linear-gradient(135deg, #0d6efd, #6610f2);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+
         .content {
             width: 96%;
+            max-width: 1400px;
             margin: 0 auto;
             flex: 1;
-            padding: 20px;
-            background-color: #f8f9fa;
+            padding: 24px;
         }
+
+        /* Sidebar cải tiến */
         .sidebar {
-            border-radius: 6px;
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-            height: 100%;
-            padding: 20px;
-            max-height: 728px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            max-height: 80vh;
             overflow-y: auto;
             position: sticky;
-            top: 60px;
+            top: 80px;
+            transition: transform 0.3s ease;
         }
-        .list-group-item {
-            border: none;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.2s, color 0.2s, border-left-color 0.2s;
-        }
-        .list-group-item:hover {
-            background-color: #f0f0f0;
-            color: #0056b3;
-        }
-        .list-group-item-action.active {
-            background-color: #e7f1ff !important;
-            color: #0056b3 !important;
-            font-weight: bold;
-            border-left: 3px solid #007bff !important;
-            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
-        }
-        .video-container {
+
+        .sidebar h4 {
+            font-weight: 600;
+            color: #1a252f;
             margin-bottom: 20px;
         }
-        .video-time {
-            font-size: 0.85em;
-            color: #6c757d;
-            padding: 0 20px 8px;
+
+        /* List group item */
+        .list-group-item {
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
         }
+
+        .list-group-item:hover {
+            background-color: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .list-group-item-action.active {
+            background: var(--gradient) !important;
+            color: white !important;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+        }
+
+        /* Badge cho lesson hoàn thành */
+        .lesson-completed {
+            background-color: #28a745;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        /* Video container */
+        .video-container {
+            background-color: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+
+
+        .video-time {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            padding: 0 16px 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Card cải tiến */
         .card {
             border: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease;
         }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Tabs cải tiến */
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 24px;
+        }
+
         .nav-tabs .nav-link {
-            color: #495057;
+            color: var(--secondary-color);
+            padding: 12px 24px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
         }
+
+        .nav-tabs .nav-link:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
         .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            font-weight: bold;
+            color: var(--primary-color);
+            font-weight: 600;
+            background-color: var(--card-bg);
+            border-bottom: 3px solid var(--primary-color);
         }
-        header, footer {
-            background-color: #1a252f;
-            color: white;
-            width: 100%;
-        }
+
+        /* Toggle chapter button */
         .toggle-chapter-btn {
             background: none;
             border: none;
-            padding: 12px 20px;
+            padding: 16px 20px;
             cursor: pointer;
-            color: #212529;
+            color: #1a252f;
             font-weight: 600;
             width: 100%;
             text-align: left;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: color 0.2s;
-            border-bottom: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #e9ecef;
         }
+
         .toggle-chapter-btn:hover {
-            color: #0056b3;
+            color: var(--primary-color);
             background-color: #f8f9fa;
         }
+
         .toggle-chapter-btn .bi {
-            font-size: 1em;
-            transition: transform 0.2s;
+            font-size: 1rem;
+            transition: transform 0.3s ease;
         }
+
         .toggle-chapter-btn[aria-expanded="true"] .bi-chevron-down {
             transform: rotate(180deg);
         }
+
+        /* Animation cho collapse */
+        .chapter-container .collapse {
+            transition: height 0.3s ease;
+        }
+
         .chapter-container {
-            margin-bottom: 5px;
-            border: 1px solid #e9ecef;
-            border-radius: .25rem;
-            margin-top: 10px;
-            background-color: #ffffff;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            overflow: hidden;
         }
-        .chapter-container .list-group {
-            margin-top: 5px;
+
+        /* Nút quay lại */
+        .btn-back {
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
         }
+
+        .btn-back:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(-4px);
+        }
+
+        /* Responsive */
         @media (max-width: 991.98px) {
             .sidebar {
                 display: none;
             }
-            .tab-content .chapter-container {
-                padding: 0;
+
+            .nav-tabs .nav-link {
+                padding: 10px 16px;
+                font-size: 0.95rem;
+            }
+
+            .content {
+                padding: 16px;
             }
         }
     </style>
 </head>
 <body>
+<!-- Thư viện JavaScript -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+<script src="/js/learn.js"></script>
+
+<!-- Khởi tạo YouTube IFrame API -->
 <script>
-    // Tải YouTube API nếu chưa có
     if (!window.YT) {
-        var tag = document.createElement('script');
+        const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
-        tag.onerror = () => console.error('Failed to load YouTube API');
-        var firstScriptTag = document.getElementsByTagName('script')[0];
+        const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     }
 </script>
+
+<!-- Dữ liệu lessons từ server -->
 <script>
-    // Dữ liệu lessons được truyền từ server
-    const lessonsData = {
-        <c:forEach var="chapterItem" items="${chapters}" varStatus="chapterStatus">
-        <c:forEach var="lessonItem" items="${chapterItem.listLesson}" varStatus="lessonStatus">
-        "${lessonItem.lessonId}": {
-            lessonId: ${lessonItem.lessonId},
-            lessonName: "${fn:escapeXml(lessonItem.lessonName)}",
-            videoSrc: "${fn:escapeXml(lessonItem.videoSrc != null ? lessonItem.videoSrc : '')}",
-            lessonDescription: "${fn:escapeXml(lessonItem.lessonDescription != null ? lessonItem.lessonDescription : '')}",
-            materials: [
-                <c:forEach var="material" items="${lessonItem.materials}" varStatus="materialStatus">
-                "${fn:escapeXml(material)}"${materialStatus.last ? '' : ','}
-                </c:forEach>
-            ],
-            videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}",
-            isCompleted: ${lessonItem.isCompleted}
-        }${lessonStatus.last && chapterStatus.last ? '' : ','}
-        </c:forEach>
-        </c:forEach>
+    const lessonsData = {};
+    <c:forEach var="chapterItem" items="${learningData.chapters}">
+    <c:forEach var="lessonItem" items="${chapterItem.listLesson}">
+    lessonsData["${lessonItem.lessonId}"] = {
+        lessonId: ${lessonItem.lessonId},
+        lessonName: "${fn:escapeXml(lessonItem.lessonName)}",
+        videoSrc: "${fn:escapeXml(lessonItem.videoSrc != null ? lessonItem.videoSrc : '')}",
+        lessonDescription: "${fn:escapeXml(lessonItem.lessonDescription != null ? lessonItem.lessonDescription : '')}",
+        materials: [
+            <c:forEach var="material" items="${lessonItem.materials}" varStatus="materialStatus">
+            "${fn:escapeXml(material)}"${materialStatus.last ? '' : ','}
+            </c:forEach>
+        ],
+        videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}",
+        isCompleted: ${lessonItem.isCompleted}
+    };
+    </c:forEach>
+    </c:forEach>
+
+    const learningConfig = {
+        userId: ${learningData.userId != null ? learningData.userId : 'null'},
+        subjectId: ${learningData.subjectId != null ? learningData.subjectId : 'null'},
+        packageId: ${learningData.packageId != null ? learningData.packageId : 'null'},
+        defaultLessonId: ${learningData.defaultLesson != null ? learningData.defaultLesson.lessonId : 'null'}
     };
 
-    // Lấy userId, subjectId, packageId từ server
-    const userId = ${sessionScope.id != null ? sessionScope.id : 'null'};
-    const subjectId = ${subject != null ? subject.subjectId : 'null'};
-    const packageId = ${param.packageId != null ? param.packageId : 'null'};
-    if (!userId || !subjectId || !packageId) {
-        console.error('Thiếu userId, subjectId hoặc packageId.', { userId, subjectId, packageId });
-    }
-
-    let player = null;
-    let currentLessonId = null;
-    let lastWatchedTime = 0;
-    let isYouTubeAPIReady = false;
-    let pendingLessonId = null;
-
-    // Hàm được gọi khi YouTube API sẵn sàng
-    window.onYouTubeIframeAPIReady = function() {
-        console.log('YouTube API is ready');
-        isYouTubeAPIReady = true;
-        if (pendingLessonId) {
-            console.log('Initializing player for pending lesson:', pendingLessonId);
-            initializeYouTubePlayer(pendingLessonId);
-            pendingLessonId = null;
-        }
-    };
-
-    // Lưu tiến trình vào localStorage
-    function saveToLocalStorage(lessonId, watchedTime, isCompleted) {
-        if (!userId || !lessonId || !subjectId || !packageId) return;
-        const storageKey = `lesson_progress_`+userId+`_`+lessonId;
-        const progress = {
-            watchedTime: Math.floor(watchedTime),
-            isCompleted,
-            timestamp: Date.now(),
-            subjectId,
-            packageId
-        };
-        localStorage.setItem(storageKey, JSON.stringify(progress));
-    }
-
-    // Đồng bộ tiến trình với backend
-    async function syncProgressToBackend(lessonId) {
-        if (!userId || !lessonId || !subjectId || !packageId) {
-            console.error('Thiếu userId, lessonId, subjectId hoặc packageId');
-            return;
-        }
-        const storageKey = `lesson_progress_`+userId+`_`+lessonId;
-        const progress = JSON.parse(localStorage.getItem(storageKey));
-        if (progress) {
-            const data = {
-                userId: userId,
-                lessonId: parseInt(lessonId),
-                subjectId: subjectId,
-                packageId: packageId,
-                watchedTime: progress.watchedTime || 0,
-                isCompleted: progress.isCompleted || false
-            };
-            try {
-                const response = await fetch('/api/lesson-progress/save', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
-                    },
-                    body: JSON.stringify(data)
-                });
-                if (response.ok) {
-                    localStorage.removeItem(storageKey);
-                } else {
-                    console.error('Lỗi khi lưu tiến trình:', response.statusText);
-                }
-            } catch (error) {
-                console.error('Lỗi đồng bộ tiến trình:', error);
-            }
-        }
-    }
-
-    // Tải tiến trình khi chuyển bài học
-    async function loadProgress(lessonId) {
-        if (!userId || !lessonId || !subjectId || !packageId) return;
-        const storageKey = `lesson_progress_`+userId+`_`+lessonId;
-        const localProgress = JSON.parse(localStorage.getItem(storageKey));
-        if (localProgress && localProgress.watchedTime) {
-            lastWatchedTime = localProgress.watchedTime;
-            if (player && player.seekTo && isYouTubeAPIReady) {
-                player.seekTo(lastWatchedTime, true);
-            }
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/lesson-progress?userId=`+userId+`&lessonId=`+lessonId+`&subjectId=`+subjectId+`&packageId=`+packageId, {
-                headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
-                }
-            });
-            if (response.ok) {
-                const progress = await response.json();
-                if (progress && progress.watchedTime) {
-                    lastWatchedTime = progress.watchedTime;
-                    console.log('Loaded progress from API:', lastWatchedTime);
-                    if (player && player.seekTo && isYouTubeAPIReady) {
-                        player.seekTo(lastWatchedTime, true);
-                    }
-                    saveToLocalStorage(lessonId, progress.watchedTime, progress.isCompleted);
-                } else {
-                    lastWatchedTime = 0; // Reset nếu không có tiến trình
-                    console.log('No progress found, resetting lastWatchedTime to 0');
-                }
-            } else {
-                lastWatchedTime = 0; // Reset nếu API trả về lỗi
-                console.error('API error, resetting lastWatchedTime to 0:', response.statusText);
-            }
-        } catch (error) {
-            lastWatchedTime = 0; // Reset nếu có lỗi
-            console.error('Lỗi khi tải tiến trình:', error);
-        }
-    }
-
-    // Hàm chuyển đổi videoTime (HH:MM:SS) sang giây
-    function parseVideoTime(timeStr) {
-        if (!timeStr) return 0;
-        // Xử lý định dạng "1 tiếng 0 phút 32 giây"
-        const timeMatch = timeStr.match(/(\d+)\s*tiếng\s*(\d+)\s*phút\s*(\d+)\s*giây/);
-        if (timeMatch) {
-            const hours = parseInt(timeMatch[1]) || 0;
-            const minutes = parseInt(timeMatch[2]) || 0;
-            const seconds = parseInt(timeMatch[3]) || 0;
-            return hours * 3600 + minutes * 60 + seconds;
-        }
-        // Fallback cho định dạng "HH:MM:SS"
-        const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-        return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
-    }
-
-    // Trích xuất YouTube video ID từ URL nhúng
-    function extractYouTubeVideoId(url) {
-        console.log('Extracting video ID from URL:', url);
-        const regex = /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([^?&\s]+)/;
-        const match = url.match(regex);
-        const videoId = match ? match[1] : null;
-        console.log('Extracted video ID:', videoId);
-        return videoId;
-    }
-
-    // Khởi tạo YouTube Player
-    function initializeYouTubePlayer(lessonId) {
-        console.log('Initializing YouTube Player for lesson:', lessonId);
-        if (!isYouTubeAPIReady) {
-            console.log('YouTube API not ready, storing pending lesson:', lessonId);
-            pendingLessonId = lessonId;
-            return;
-        }
-        const lesson = lessonsData[lessonId];
-        if (!lesson || !lesson.videoSrc) {
-            console.log('No lesson or video source found for lesson:', lessonId);
-            $('#videoContainer').hide();
-            return;
-        }
-
-        const videoId = extractYouTubeVideoId(lesson.videoSrc);
-        if (!videoId) {
-            console.error('Invalid YouTube URL:', lesson.videoSrc);
-            $('#videoContainer').hide();
-            return;
-        }
-
-        // Hủy player cũ
-        if (player) {
-            console.log('Destroying old player');
-            player.destroy();
-            player = null;
-        }
-
-        // Xóa và tạo lại iframe
-        $('#videoContainer').empty().append(`
-            <iframe id="lessonVideo" frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
-        `);
-
-        // Cập nhật iframe src
-        const videoSrc = lesson.videoSrc + (lesson.videoSrc.includes('?') ? '&' : '?') + 'enablejsapi=1';
-        console.log('Setting iframe src:', videoSrc);
-        $('#lessonVideo').attr('src', videoSrc);
-        $('#videoContainer').show();
-
-        // Tạo player mới
-        console.log('Creating new YouTube Player with videoId:', videoId);
-        player = new YT.Player('lessonVideo', {
-            height: '100%',
-            width: '100%',
-            videoId: videoId,
-            playerVars: {
-                'playsinline': 1,
-                'enablejsapi': 1
-            },
-            events: {
-                'onReady': (event) => {
-                    console.log('Player is ready for lesson:', lessonId);
-                    loadProgress(lessonId);
-                },
-                'onStateChange': (event) => {
-                    console.log('Player state changed:', event.data);
-                    if (event.data === YT.PlayerState.PLAYING) {
-                        const timeUpdateInterval = setInterval(() => {
-                            if (player && player.getCurrentTime) {
-                                lastWatchedTime = player.getCurrentTime();
-                                saveToLocalStorage(lessonId, lastWatchedTime, false);
-                            }
-                        }, 5000);
-                        player.timeUpdateInterval = timeUpdateInterval;
-                    } else if (event.data === YT.PlayerState.PAUSED) {
-                        clearInterval(player.timeUpdateInterval);
-                        saveToLocalStorage(lessonId, lastWatchedTime, false);
-                        syncProgressToBackend(lessonId);
-                    } else if (event.data === YT.PlayerState.ENDED) {
-                        clearInterval(player.timeUpdateInterval);
-                        const lesson = lessonsData[lessonId];
-                        const totalTime = lesson.videoTime ? parseVideoTime(lesson.videoTime) : player.getDuration();
-                        lessonsData[lessonId].isCompleted = true; // Cập nhật trạng thái hoàn thành trong lessonsData
-                        saveToLocalStorage(lessonId, totalTime, true);
-                        syncProgressToBackend(lessonId);
-
-                        // Cập nhật giao diện: thêm biểu tượng check
-                        const lessonElement = $(`.list-group-item-action[data-lesson-id="`+lessonId+`"]`);
-                        if (!lessonElement.find('.bi-check-circle-fill').length) {
-                            lessonElement.append('<i class="bi bi-check-circle-fill text-success ms-2"></i>');
-                        }
-                        console.log('Updated UI with completed icon for lesson:', lessonId);
-                    }
-                }
-            }
-        });
-    }
-
+    // Khởi động ứng dụng
     $(document).ready(function() {
-        lastWatchedTime = 0;
-        // Gắn sự kiện click cho tất cả lesson
-        $('.list-group-item-action').on('click', function(e) {
-            e.preventDefault();
-            const lessonId = $(this).data('lesson-id');
-            console.log('Clicked lessonId:', lessonId);
-            loadLessonDetails(lessonId);
-        });
-
-        function loadLessonDetails(lessonId) {
-            console.log('Loading lesson details for lessonId:', lessonId);
-            const lesson = lessonsData[lessonId];
-            console.log('Lesson data:', lesson);
-
-            if (currentLessonId && currentLessonId != lessonId) {
-                console.log('Syncing progress for previous lesson:', currentLessonId);
-                syncProgressToBackend(currentLessonId);
-            }
-
-            currentLessonId = lessonId;
-
-            $('.list-group-item-action').removeClass('active');
-            $(`.list-group-item-action[data-lesson-id="`+lessonId+`"]`).addClass('active');
-
-            if (lesson) {
-                $('#lessonTitle').text(lesson.lessonName || 'Không tìm thấy bài học');
-                console.log('Materials for lesson:', lesson.materials);
-                $('#lessonDescription').text(lesson.lessonDescription || 'Không có mô tả cho bài học này.');
-                const materialsList = $('#materialsList');
-                materialsList.empty();
-                if (lesson.materials && lesson.materials.length > 0) {
-                    lesson.materials.forEach(material => {
-                        const path ="/files/taiLieu/"+material;
-                        materialsList.append(`
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href=`+path+`   "target=_blank">`+material+`</a>
-                            </li>
-                        `);
-                    });
-                } else {
-                    materialsList.append('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
-                }
-
-                // Cập nhật video
-                if (lesson.videoSrc && extractYouTubeVideoId(lesson.videoSrc)) {
-                    console.log('Valid video source, initializing player for lesson:', lessonId);
-                    initializeYouTubePlayer(lessonId);
-                } else {
-                    console.log('Invalid or missing video source for lesson:', lessonId);
-                    $('#lessonVideo').attr('src', '');
-                    $('#videoContainer').hide();
-                }
-            } else {
-                console.log('Lesson not found for lessonId:', lessonId);
-                $('#lessonVideo').attr('src', '');
-                $('#videoContainer').hide();
-                $('#lessonDescription').text('Không tìm thấy bài học.');
-                $('#materialsList').html('<li class="list-group-item text-muted">Không tìm thấy tài liệu.</li>');
-            }
-
-            new bootstrap.Tab(document.querySelector('#description-tab')).show();
+        if (typeof LearningApp !== 'undefined') {
+            LearningApp.init(learningConfig, lessonsData);
+        } else {
+            console.error('Không thể khởi tạo LearningApp. Vui lòng kiểm tra file learn.js.');
         }
-
-        window.addEventListener('beforeunload', () => {
-            if (currentLessonId) {
-                syncProgressToBackend(currentLessonId);
-            }
-        });
-
-        <c:if test="${lesson != null}">
-        loadLessonDetails(${lesson.lessonId});
-        </c:if>
-
-        $('.toggle-chapter-btn').on('click', function() {
-            $(this).find('.bi-chevron-down').toggleClass('rotate-180');
-        });
     });
 </script>
 
 <div class="content">
-    <h1 id="lessonTitle" class="mb-4">${lesson != null ? lesson.lessonName : subject != null ? subject.subjectName : 'Không tìm thấy môn học'}</h1>
+    <div class="mb-4">
+        <a href="/packages/detail?packageId=${learningData.packageId}" class="btn btn-outline-primary btn-back">
+            <i class="bi bi-arrow-left me-2"></i>Quay lại gói khóa học
+        </a>
+    </div>
+    <h1 id="lessonTitle" class="mb-4 fw-bold">${fn:escapeXml(learningData.defaultLesson != null ? learningData.defaultLesson.lessonName : (learningData.subjectName != null ? learningData.subjectName : 'Không tìm thấy môn học'))}</h1>
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="video-container ratio ratio-16x9" id="videoContainer">
-                <iframe id="lessonVideo" src="${lesson != null && lesson.videoSrc != null ? lesson.videoSrc : ''}"
-                        title="${lesson != null ? lesson.lessonName : ''}" frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+
+
+
+            <div class="video-container ratio ratio-16x9" id="videoContainer" >
+                <iframe id="lessonVideo" frameborder="0"
+                        allow="autoplay"
                         allowfullscreen></iframe>
             </div>
 
-            <ul class="nav nav-tabs mb-4" id="lessonTabs" role="tablist">
+            <ul class="nav nav-tabs" id="lessonTabs" role="tablist">
                 <li class="nav-item d-block d-lg-none" role="presentation">
                     <button class="nav-link" id="chapters-tab" data-bs-toggle="tab" data-bs-target="#chapters"
-                            type="button" role="tab" aria-controls="chapters" aria-selected="false">Nội dung môn học</button>
+                            type="button" role="tab" aria-controls="chapters">Nội dung môn học</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description"
@@ -499,28 +318,31 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials"
-                            type="button" role="tab" aria-controls="materials" aria-selected="false">Tài liệu môn học</button>
+                            type="button" role="tab" aria-controls="materials">Tài liệu môn học</button>
                 </li>
             </ul>
             <div class="tab-content" id="lessonTabsContent">
                 <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
                     <div class="card">
                         <div class="card-body">
-                            <h2 class="card-title">Mô tả bài học</h2>
-                            <p id="lessonDescription">${lesson != null && lesson.lessonDescription != null ? lesson.lessonDescription : 'Không có mô tả cho bài học này.'}</p>
+                            <h2 class="card-title h4 fw-semibold">Mô tả bài học</h2>
+                            <p id="lessonDescription">${fn:escapeXml(learningData.defaultLesson != null && learningData.defaultLesson.lessonDescription != null ? learningData.defaultLesson.lessonDescription : 'Không có mô tả cho bài học này.')}</p>
                         </div>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="materials" role="tabpanel" aria-labelledby="materials-tab">
                     <div class="card">
                         <div class="card-body">
-                            <h2 class="card-title">Tài liệu môn học</h2>
+                            <h2 class="card-title h4 fw-semibold">Tài liệu môn học</h2>
                             <ul class="list-group" id="materialsList">
                                 <c:choose>
-                                    <c:when test="${not empty lesson.materials}">
-                                        <c:forEach var="material" items="${lesson.materials}">
+                                    <c:when test="${not empty learningData.defaultLesson.materials}">
+                                        <c:forEach var="material" items="${learningData.defaultLesson.materials}">
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" target="_blank">12333</a>
+                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" target="_blank">${fn:escapeXml(material)}</a>
+                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" download="${fn:escapeXml(material)}" class="text-primary">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
                                             </li>
                                         </c:forEach>
                                     </c:when>
@@ -535,48 +357,41 @@
                 <div class="tab-pane fade d-block d-lg-none" id="chapters" role="tabpanel" aria-labelledby="chapters-tab">
                     <div class="card">
                         <div class="card-body">
-                            <h2 class="card-title">Nội dung môn học</h2>
-                            <div>
-                                <c:set var="stt" value="0" />
-                                <c:forEach var="chapterItem" items="${chapters}">
-                                    <div class="chapter-container">
-                                        <button class="toggle-chapter-btn ${chapterItem.chapterId == (chapter != null ? chapter.chapterId : 0) ? '' : 'collapsed'}"
-                                                type="button"
-                                                data-bs-toggle="collapse"
-                                                data-bs-target="#chapterCollapseMobile${chapterItem.chapterId}"
-                                                aria-expanded="${chapterItem.chapterId == (chapter != null ? chapter.chapterId : 0) ? 'true' : 'false'}"
-                                                aria-controls="chapterCollapseMobile${chapterItem.chapterId}">
-                                            <span>${chapterItem.chapterName}</span>
-                                            <i class="bi bi-chevron-down"></i>
-                                        </button>
-                                        <div id="chapterCollapseMobile${chapterItem.chapterId}"
-                                             class="collapse ${chapterItem.chapterId == (chapter != null ? chapter.chapterId : 0) ? 'show' : ''}">
-                                            <div class="list-group">
-                                                <c:choose>
-                                                    <c:when test="${not empty chapterItem.listLesson}">
-                                                        <c:forEach var="lessonItem" items="${chapterItem.listLesson}">
-                                                            <c:set var="stt" value="${stt + 1}" />
-                                                            <div class="d-flex flex-column">
-                                                                <a href="#" class="list-group-item list-group-item-action ${lessonItem.lessonId == (lesson != null ? lesson.lessonId : 0) ? 'active' : ''}"
-                                                                   data-lesson-id="${lessonItem.lessonId}">
-                                                                        ${stt}. ${lessonItem.lessonName}
-                                                                    <c:if test="${lessonItem.isCompleted}">
-                                                                        <i class="bi bi-check-circle-fill text-success ms-2"></i>
-                                                                    </c:if>
-                                                                </a>
-                                                                <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A'}</span>
-                                                            </div>
-                                                        </c:forEach>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <p class="text-muted p-3">Chưa có bài học nào.</p>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </div>
+                            <h2 class="card-title h4 fw-semibold">Nội dung môn học</h2>
+                            <c:set var="stt" value="0" />
+                            <c:forEach var="chapterItem" items="${learningData.chapters}">
+                                <div class="chapter-container">
+                                    <button class="toggle-chapter-btn ${chapterItem.chapterId == (learningData.defaultChapter != null ? learningData.defaultChapter.chapterId : 0) ? '' : 'collapsed'}"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#chapterCollapseMobile${chapterItem.chapterId}"
+                                            aria-expanded="${chapterItem.chapterId == (learningData.defaultChapter != null ? learningData.defaultChapter.chapterId : 0) ? 'true' : 'false'}">
+                                        <span>${fn:escapeXml(chapterItem.chapterName)}</span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                    <div id="chapterCollapseMobile${chapterItem.chapterId}"
+                                         class="collapse ${chapterItem.chapterId == (learningData.defaultChapter != null ? learningData.defaultChapter.chapterId : 0) ? 'show' : ''}">
+                                        <div class="list-group">
+                                            <c:forEach var="lessonItem" items="${chapterItem.listLesson}">
+                                                <c:set var="stt" value="${stt + 1}" />
+                                                <div class="d-flex flex-column">
+                                                    <a href="#" class="list-group-item list-group-item-action ${lessonItem.lessonId == (learningData.defaultLesson != null ? learningData.defaultLesson.lessonId : 0) ? 'active' : ''}"
+                                                       data-lesson-id="${lessonItem.lessonId}">
+                                                            ${stt}. ${fn:escapeXml(lessonItem.lessonName)}
+                                                        <c:if test="${lessonItem.isCompleted}">
+                                                            <span class="lesson-completed">Hoàn thành</span>
+                                                        </c:if>
+                                                    </a>
+                                                    <span class="video-time">
+                                                        <i class="bi bi-collection-play"></i>
+                                                        ${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A')}
+                                                    </span>
+                                                </div>
+                                            </c:forEach>
                                         </div>
                                     </div>
-                                </c:forEach>
-                            </div>
+                                </div>
+                            </c:forEach>
                         </div>
                     </div>
                 </div>
@@ -586,51 +401,43 @@
         <div class="col-lg-4 d-none d-lg-block">
             <div class="sidebar">
                 <h4 class="mb-3">Nội dung môn học</h4>
-                <div>
-                    <c:set var="stt" value="0" />
-                    <c:forEach var="chapterItem" items="${chapters}">
-                        <div class="chapter-container">
-                            <button class="toggle-chapter-btn ${chapterItem.chapterId == (chapter != null ? chapter.chapterId : 0) ? '' : 'collapsed'}"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#chapterCollapse${chapterItem.chapterId}"
-                                    aria-expanded="${chapterItem.chapterId == (chapter != null ? chapter.chapterId : 0) ? 'true' : 'false'}"
-                                    aria-controls="chapterCollapse${chapterItem.chapterId}">
-                                <span>${chapterItem.chapterName}</span>
-                                <i class="bi bi-chevron-down"></i>
-                            </button>
-                            <div id="chapterCollapse${chapterItem.chapterId}"
-                                 class="collapse ${chapterItem.chapterId == (chapter != null ? chapter.chapterId : 0) ? 'show' : ''}">
-                                <div class="list-group">
-                                    <c:choose>
-                                        <c:when test="${not empty chapterItem.listLesson}">
-                                            <c:forEach var="lessonItem" items="${chapterItem.listLesson}">
-                                                <c:set var="stt" value="${stt + 1}" />
-                                                <div class="d-flex flex-column">
-                                                    <a href="#" class="list-group-item list-group-item-action ${lessonItem.lessonId == (lesson != null ? lesson.lessonId : 0) ? 'active' : ''}"
-                                                       data-lesson-id="${lessonItem.lessonId}">
-                                                            ${stt}. ${lessonItem.lessonName}
-                                                        <c:if test="${lessonItem.isCompleted}">
-                                                            <i class="bi bi-check-circle-fill text-success ms-2"></i>
-                                                        </c:if>
-                                                    </a>
-                                                    <span class="video-time"><i class="bi bi-collection-play"></i> ${lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A'}</span>
-                                                </div>
-                                            </c:forEach>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <p class="text-muted p-3">Chưa có bài học nào.</p>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
+                <c:set var="stt" value="0" />
+                <c:forEach var="chapterItem" items="${learningData.chapters}">
+                    <div class="chapter-container">
+                        <button class="toggle-chapter-btn ${chapterItem.chapterId == (learningData.defaultChapter != null ? learningData.defaultChapter.chapterId : 0) ? '' : 'collapsed'}"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#chapterCollapse${chapterItem.chapterId}"
+                                aria-expanded="${chapterItem.chapterId == (learningData.defaultChapter != null ? learningData.defaultChapter.chapterId : 0) ? 'true' : 'false'}">
+                            <span>${fn:escapeXml(chapterItem.chapterName)}</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div id="chapterCollapse${chapterItem.chapterId}"
+                             class="collapse ${chapterItem.chapterId == (learningData.defaultChapter != null ? learningData.defaultChapter.chapterId : 0) ? 'show' : ''}">
+                            <div class="list-group">
+                                <c:forEach var="lessonItem" items="${chapterItem.listLesson}">
+                                    <c:set var="stt" value="${stt + 1}" />
+                                    <div class="d-flex flex-column">
+                                        <a href="#" class="list-group-item list-group-item-action ${lessonItem.lessonId == (learningData.defaultLesson != null ? learningData.defaultLesson.lessonId : 0) ? 'active' : ''}"
+                                           data-lesson-id="${lessonItem.lessonId}">
+                                                ${stt}. ${fn:escapeXml(lessonItem.lessonName)}
+                                            <c:if test="${lessonItem.isCompleted}">
+                                                <span class="lesson-completed">Hoàn thành</span>
+                                            </c:if>
+                                        </a>
+                                        <span class="video-time">
+                                            <i class="bi bi-collection-play"></i>
+                                            ${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A')}
+                                        </span>
+                                    </div>
+                                </c:forEach>
                             </div>
                         </div>
-                    </c:forEach>
-                </div>
+                    </div>
+                </c:forEach>
             </div>
         </div>
     </div>
 </div>
-
 </body>
 </html>

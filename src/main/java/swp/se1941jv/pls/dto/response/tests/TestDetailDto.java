@@ -10,12 +10,20 @@ import java.util.List;
 public class TestDetailDto {
     private Long testId;
     private String testName;
+    private Long subjectId;
     private String subjectName;
+    private Long chapterId;
     private String chapterName;
+    private Long lessonId;
+    private String lessonName;
     private Integer durationTime;
     private String startAt;
     private String endAt;
+    private Long statusId;
     private String statusName;
+    private Boolean isOpen;
+    private Long categoryId;
     private String categoryName;
     private List<QuestionCreateTestDisplayDto> questions;
+
 }

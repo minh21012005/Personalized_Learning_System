@@ -226,7 +226,6 @@
 <header>
     <jsp:include page="../layout_staff/header.jsp"/>
 </header>
-
 <!-- Main Container for Sidebar and Content -->
 <div class="main-container">
     <!-- Sidebar -->
@@ -242,7 +241,7 @@
                     <div class="col-md-8 col-12 mx-auto">
                         <h1>Tạo Bài Kiểm Tra</h1>
                         <hr/>
-                        <form id="createTestForm" action="/admin/tests/save" method="post"
+                        <form id="createTestForm" action="/staff/tests/save" method="post"
                               onsubmit="return validateForm()">
                             <c:if test="${not empty success}">
                                 <div class="alert alert-success">${success}</div>
@@ -299,7 +298,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="mb-3 col-6">
+                                <div class="mb-3 col-4">
                                     <label for="subject" class="form-label mandatory">Môn học</label>
                                     <select class="form-select" id="subject" name="subjectId"
                                             onchange="loadChapters(this.value)">
@@ -310,12 +309,26 @@
                                     </select>
                                     <div id="subjectError" class="error-message"></div>
                                 </div>
-                                <div class="mb-3 col-6">
+                                <div class="mb-3 col-4">
                                     <label for="chapter" class="form-label">Chương</label>
-                                    <select class="form-select" id="chapter" name="chapterId">
+                                    <select class="form-select" id="chapter" name="chapterId"
+                                            onchange="loadLessons(this.value)">
                                         <option value="">Chọn chương (tùy chọn)</option>
                                     </select>
                                 </div>
+                                <div class="mb-3 col-4">
+                                    <label for="lesson" class="form-label">Bài học</label>
+                                    <select class="form-select" id="lesson" name="lessonId">
+                                        <option value="">Chọn bài học (tùy chọn)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="isOpen" class="form-label">Trạng thái mở</label>
+                                <select class="form-select" id="isOpen" name="isOpen">
+                                    <option value="true">Mở</option>
+                                    <option value="false" selected>Đóng</option>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label mandatory">Câu hỏi đã chọn</label>
@@ -329,8 +342,9 @@
                                 <div id="questionsError" class="error-message"></div>
                             </div>
                             <div class="d-flex gap-2 mb-3">
-                                <button type="submit" class="btn btn-submit">Tạo</button>
-                                <a href="/admin/tests" class="btn btn-cancel">Hủy</a>
+                                <button type="submit" class="btn btn-submit" name="action" value="saveDraft">Lưu bản nháp</button>
+                                <button type="submit" class="btn btn-primary" name="action" value="requestApproval">Yêu cầu phê duyệt</button>
+                                <a href="/staff/tests" class="btn btn-cancel">Hủy</a>
                             </div>
                         </form>
                     </div>
@@ -375,18 +389,19 @@
 
     function loadChapters(subjectId) {
         $('#chapter').html('<option value="">Chọn chương (tùy chọn)</option>');
+        $('#lesson').html('<option value="">Chọn bài học (tùy chọn)</option>');
         $('#subjectError').text('');
         if (!subjectId) {
             loadQuestions();
             return;
         }
         $.ajax({
-            url: '/admin/tests/chapters?subjectId=' + subjectId,
+            url: '/staff/tests/chapters?subjectId=' + subjectId,
             method: 'GET',
             success: function (data) {
                 var options = '<option value="">Chọn chương (tùy chọn)</option>';
                 data.forEach(function (chapter) {
-                    options = options + '<option value="' + chapter.chapterId + '">' + chapter.chapterName + '</option>';
+                    options += '<option value="' + chapter.chapterId + '">' + chapter.chapterName + '</option>';
                 });
                 $('#chapter').html(options);
                 loadQuestions();
@@ -397,10 +412,33 @@
         });
     }
 
+    function loadLessons(chapterId) {
+        $('#lesson').html('<option value="">Chọn bài học (tùy chọn)</option>');
+        if (!chapterId) {
+            loadQuestions();
+            return;
+        }
+        $.ajax({
+            url: '/staff/tests/lessons?chapterId=' + chapterId,
+            method: 'GET',
+            success: function (data) {
+                var options = '<option value="">Chọn bài học (tùy chọn)</option>';
+                data.forEach(function (lesson) {
+                    options += '<option value="' + lesson.lessonId + '">' + lesson.lessonName + '</option>';
+                });
+                $('#lesson').html(options);
+                loadQuestions();
+            },
+            error: function () {
+                $('#lesson').html('<option value="">Không có bài học</option>');
+            }
+        });
+    }
+
     function loadQuestions() {
         var subjectId = $('#subject').val();
         var chapterId = $('#chapter').val();
-        var url = '/admin/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '');
+        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '');
         $.ajax({
             url: url,
             method: 'GET',
@@ -408,7 +446,7 @@
                 var html = '';
                 data.forEach(function (question) {
                     var isChecked = selectedQuestionIds.includes(question.questionId.toString()) ? 'checked' : '';
-                    html = html + '<div class="question-item">' +
+                    html += '<div class="question-item">' +
                         '<input type="checkbox" name="modalQuestionIds" value="' + question.questionId + '" ' + isChecked + '>' +
                         '<div>' +
                         '<p><strong>Câu hỏi:</strong> ' + question.content + ' (ID: ' + question.questionId + ')</p>' +
@@ -416,9 +454,9 @@
                         '<div class="options">';
                     question.options.forEach(function (option) {
                         var optionClass = option.correct ? 'correct' : 'neutral';
-                        html = html + '<div class="option ' + optionClass + '">' + option.text + '</div>';
+                        html += '<div class="option ' + optionClass + '">' + option.text + '</div>';
                     });
-                    html = html + '</div></div></div>';
+                    html += '</div></div></div>';
                 });
                 $('#questionList').html(html || '<p>Không có câu hỏi nào.</p>');
             },
@@ -439,7 +477,7 @@
         });
         var selectedHtml = '';
         selectedQuestionTexts.forEach(function (text) {
-            selectedHtml = selectedHtml + '<p>' + text + '</p>';
+            selectedHtml += '<p>' + text + '</p>';
         });
         $('#questionCount').html('Đã chọn: ' + selectedQuestionIds.length + ' câu hỏi');
         $('#selectedQuestions').html(selectedHtml || '<p>Chưa có câu hỏi nào được chọn.</p>');
@@ -499,8 +537,9 @@
 
         var subjectId = $('#subject').val();
         var chapterId = $('#chapter').val();
-        if (!subjectId && !chapterId) {
-            $('#subjectError').text('Phải chọn ít nhất một môn học hoặc chương.');
+        var lessonId = $('#lesson').val();
+        if (!subjectId && !chapterId && !lessonId) {
+            $('#subjectError').text('Phải chọn ít nhất một môn học, chương hoặc bài học.');
             isValid = false;
         }
 
