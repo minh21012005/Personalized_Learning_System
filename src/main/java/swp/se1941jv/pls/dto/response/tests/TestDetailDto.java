@@ -17,6 +17,7 @@ public class TestDetailDto {
     private Long lessonId;
     private String lessonName;
     private Integer durationTime;
+    private Long maxAttempts;
     private String startAt;
     private String endAt;
     private Long statusId;
@@ -25,5 +26,6 @@ public class TestDetailDto {
     private Long categoryId;
     private String categoryName;
     private List<QuestionCreateTestDisplayDto> questions;
+    private String reason;
 
 }

@@ -37,7 +37,7 @@ public class TestStaffController {
     private final TestStaffService testStaffService;
 
     @GetMapping("/create")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('STAFF')")
     public String showCreateTestForm(Model model) {
         try {
             model.addAttribute("subjects", testStaffService.getAllSubjects());
@@ -53,7 +53,7 @@ public class TestStaffController {
     }
 
     @GetMapping("/chapters")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('STAFF')")
     @ResponseBody
     public List<ChapterResponseDTO> getChaptersBySubject(@RequestParam("subjectId") Long subjectId) {
         try {
@@ -70,7 +70,7 @@ public class TestStaffController {
     }
 
     @GetMapping("/lessons")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole( 'STAFF')")
     @ResponseBody
     public List<LessonResponseDTO> getLessonsByChapter(@RequestParam("chapterId") Long chapterId) {
         try {
@@ -82,14 +82,14 @@ public class TestStaffController {
     }
 
     @GetMapping("/questions")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole( 'STAFF')")
     @ResponseBody
     public List<QuestionCreateTestDisplayDto> getQuestionsBySubjectAndChapter(
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             @RequestParam(value = "chapterId", required = false) Long chapterId,
             @RequestParam(value = "lessonId", required = false) Long lessonId) {
         try {
-            return testStaffService.getQuestionsBySubjectAndChapter(subjectId, chapterId,lessonId);
+            return testStaffService.getQuestionsBySubjectAndChapter(subjectId, chapterId, lessonId);
         } catch (Exception e) {
             logger.error("Error fetching questions for subjectId {} and chapterId {}: {}", subjectId, chapterId, e.getMessage(), e);
             throw new RuntimeException("Lỗi khi tải danh sách câu hỏi: " + e.getMessage());
@@ -97,13 +97,13 @@ public class TestStaffController {
     }
 
     @PostMapping("/save")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole( 'STAFF')")
     public String saveTest(
             @RequestParam("testName") String testName,
             @RequestParam("durationTime") Integer durationTime,
-            @RequestParam("startAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
-            @RequestParam("endAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
-//            @RequestParam("testStatusId") Long testStatusId,
+            @RequestParam(value = "maxAttempts", required = false) Long maxAttempts,
+            @RequestParam(value = "startAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
+            @RequestParam(value = "endAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
             @RequestParam("testCategoryId") Long testCategoryId,
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             @RequestParam(value = "chapterId", required = false) Long chapterId,
@@ -113,16 +113,7 @@ public class TestStaffController {
             @RequestParam("action") String action,
             Model model) {
         try {
-//            Long statusId = testStatusId;
-//            if ("requestApproval".equals(action)) {
-//                TestStatus processingStatus = testStaffService.findTestStatusByName("Đang xử lý");
-//                statusId = processingStatus.getTestStatusId();
-//            } else if ("saveDraft".equals(action)) {
-//                TestStatus draftStatus = testStaffService.findTestStatusByName("Nháp");
-//                statusId = draftStatus.getTestStatusId();
-//            }
-
-            testStaffService.createTest(testName, durationTime, startAt, endAt, testCategoryId,
+            testStaffService.createTest(testName, durationTime, maxAttempts, startAt, endAt, testCategoryId,
                     subjectId, chapterId, lessonId, questionIds, isOpen, "saveDraft".equals(action));
             return "redirect:/staff/tests";
         } catch (Exception e) {
@@ -133,11 +124,12 @@ public class TestStaffController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole( 'STAFF')")
     public String listTests(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             @RequestParam(value = "chapterId", required = false) Long chapterId,
+            @RequestParam(value = "testStatusId", required = false) Long statusId,
             @RequestParam(value = "startAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
             @RequestParam(value = "endAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
             Model model) {
@@ -152,7 +144,7 @@ public class TestStaffController {
             }
 
             Page<TestListDto> testPage = testStaffService.findTestsByCreatorAndFilters(
-                    creatorUserId, subjectId, chapterId, startAt, endAt, pageable);
+                    creatorUserId, subjectId, chapterId,statusId, startAt, endAt, pageable);
 
             List<TestListDto> tests = testPage.getContent();
             int totalPages = testPage.getTotalPages();
@@ -161,6 +153,7 @@ public class TestStaffController {
             List<Subject> subjects = testStaffService.getAllSubjects();
             List<Chapter> chapters = subjectId != null ? testStaffService.getChaptersBySubject(subjectId) : new ArrayList<>();
 
+            List<TestStatus> statuses = testStaffService.getAllTestStatuses();
             model.addAttribute("tests", tests);
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("currentPage", currentPage);
@@ -168,6 +161,7 @@ public class TestStaffController {
             model.addAttribute("chapters", chapters);
             model.addAttribute("subjectId", subjectId);
             model.addAttribute("chapterId", chapterId);
+            model.addAttribute("statuses", statuses);
             model.addAttribute("startAt", startAt != null ? startAt.toString() : null);
             model.addAttribute("endAt", endAt != null ? endAt.toString() : null);
 
@@ -180,7 +174,7 @@ public class TestStaffController {
     }
 
     @GetMapping("/details/{testId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole( 'STAFF')")
     public String viewTestDetails(@PathVariable("testId") Long testId, Model model) {
         try {
             // Assuming you have a method to fetch test details
@@ -195,10 +189,14 @@ public class TestStaffController {
     }
 
     @GetMapping("/edit/{testId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole( 'STAFF')")
     public String showEditTestForm(@PathVariable("testId") Long testId, Model model) {
         try {
             TestDetailDto test = testStaffService.getTestDetails(testId);
+            if(test.getStatusName().equals("Đang Xử Lý") || test.getStatusName().equals("Chấp Nhận")) {
+                model.addAttribute("error", "Bài kiểm tra đang được phê duyệt không thể chỉnh sửa.");
+                return "error";
+            }
             model.addAttribute("test", test);
             model.addAttribute("subjects", testStaffService.getAllSubjects());
             model.addAttribute("testStatuses", testStaffService.getAllTestStatuses());
@@ -216,13 +214,14 @@ public class TestStaffController {
     }
 
     @PostMapping("/edit")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole( 'STAFF')")
     public String editTest(
             @RequestParam("testId") Long testId,
             @RequestParam("testName") String testName,
             @RequestParam("durationTime") Integer durationTime,
-            @RequestParam("startAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
-            @RequestParam("endAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
+            @RequestParam(value = "maxAttempts", required = false) Long maxAttempts,
+            @RequestParam(value = "startAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
+            @RequestParam(value = "endAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
             @RequestParam("testCategoryId") Long testCategoryId,
             @RequestParam(value = "subjectId", required = false) Long subjectId,
             @RequestParam(value = "chapterId", required = false) Long chapterId,
@@ -236,7 +235,7 @@ public class TestStaffController {
                     testStaffService.findTestStatusByName("Đang xử lý").getTestStatusId() :
                     testStaffService.findTestStatusByName("Nháp").getTestStatusId();
 
-            testStaffService.updateTest(testId, testName, durationTime, startAt, endAt, statusId, testCategoryId,
+            testStaffService.updateTest(testId, testName, durationTime, maxAttempts, startAt, endAt, statusId, testCategoryId,
                     subjectId, chapterId, lessonId, questionIds, isOpen);
             return "redirect:/staff/tests";
         } catch (Exception e) {
@@ -246,29 +245,16 @@ public class TestStaffController {
         }
     }
 
-    @PostMapping("/approve/{testId}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public String approveTest(@PathVariable("testId") Long testId, Model model) {
+    @PostMapping("/delete/{testId}")
+    @PreAuthorize("hasAnyRole('STAFF')")
+    public String deleteTest(@PathVariable("testId") Long testId, Model model) {
         try {
-            testStaffService.approveTest(testId);
-            return "redirect:/admin/tests";
+            testStaffService.deleteTest(testId);
+            return "redirect:/staff/tests";
         } catch (Exception e) {
-            logger.error("Error approving test {}: {}", testId, e.getMessage(), e);
-            model.addAttribute("error", "Lỗi khi phê duyệt bài kiểm tra: " + e.getMessage());
-            return "error";
-        }
-    }
-
-    @PostMapping("/reject/{testId}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public String rejectTest(@PathVariable("testId") Long testId, Model model) {
-        try {
-            testStaffService.rejectTest(testId);
-            return "redirect:/admin/tests";
-        } catch (Exception e) {
-            logger.error("Error rejecting test {}: {}", testId, e.getMessage(), e);
-            model.addAttribute("error", "Lỗi khi từ chối bài kiểm tra: " + e.getMessage());
-            return "error";
+            logger.error("Error deleting test {}: {}", testId, e.getMessage(), e);
+            model.addAttribute("error", "Lỗi khi xóa bài kiểm tra: " + e.getMessage());
+            return "staff/tests/ListTest";
         }
     }
 }

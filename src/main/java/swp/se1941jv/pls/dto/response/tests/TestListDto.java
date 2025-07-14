@@ -12,8 +12,11 @@ public class TestListDto {
     private String subjectName;
     private String chapterName;
     private Integer durationTime;
+    private Long maxAttempts;
     private String startAt;
     private String endAt;
     private String statusName;
     private String categoryName;
+    private Boolean isOpen;
+    private String reason;
 }

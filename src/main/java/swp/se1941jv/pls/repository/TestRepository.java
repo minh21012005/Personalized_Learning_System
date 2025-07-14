@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.entity.Test;
 
 import java.time.LocalDateTime;
@@ -19,5 +20,6 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
     List<Test> findByTestCategoryTestCategoryIdAndIsOpenAndLessonLessonId(Long testCategoryId, Boolean isOpen, Long lessonId);
     List<Test> findByTestCategoryTestCategoryIdAndIsOpenAndChapterChapterId(Long testCategoryId, Boolean isOpen, Long chapterId);
     List<Test> findByTestCategoryTestCategoryIdAndIsOpenAndSubjectSubjectId(Long testCategoryId, Boolean isOpen, Long subjectId);
+    Test findByLesson(Lesson lesson);
 }
 
