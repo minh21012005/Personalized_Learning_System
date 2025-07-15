@@ -221,6 +221,89 @@
                 padding: 16px;
             }
         }
+        /*
+        ========================================
+        CSS CHO PHẦN THẢO LUẬN
+        ========================================
+        */
+        #new-comment-form textarea {
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+
+        #new-comment-form textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        #comments-list-container .comment-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        #comments-list-container .comment-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0; /* Ngăn avatar bị co lại */
+        }
+
+        #comments-list-container .comment-body {
+            flex-grow: 1;
+        }
+
+        #comments-list-container .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        #comments-list-container .comment-author {
+            font-weight: 600;
+            color: #333;
+        }
+
+        #comments-list-container .comment-timestamp {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+        }
+
+        #comments-list-container .comment-content {
+            color: #495057;
+            line-height: 1.6;
+            white-space: pre-wrap; /* Giữ lại định dạng xuống dòng */
+        }
+
+        #comments-list-container .comment-actions {
+            margin-top: 8px;
+        }
+
+        #comments-list-container .comment-actions .btn-reply {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+        }
+
+        #comments-list-container .comment-actions .btn-reply:hover {
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+
+        #comments-list-container .comment-replies {
+            margin-top: 16px;
+            padding-left: 24px;
+            border-left: 2px solid #e9ecef;
+        }
     </style>
 </head>
 <body>
@@ -229,6 +312,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 <script src="/js/learn.js"></script>
+<script src="/js/lesson_comment.js"></script>
 
 <!-- Khởi tạo YouTube IFrame API -->
 <script>
@@ -261,13 +345,13 @@
         videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}",
         isCompleted: ${lessonItem.isCompleted},
         lessonTest: <c:if test="${lessonItem.lessonTest != null}">
-            {
-                testId: ${lessonItem.lessonTest.testId},
-                testName: "${fn:escapeXml(lessonItem.lessonTest.testName)}",
-                durationTime: ${lessonItem.lessonTest.durationTime},
-                testCategoryName: "${fn:escapeXml(lessonItem.lessonTest.testCategoryName)}",
-                isCompleted: ${lessonItem.lessonTest.isCompleted}
-            },
+        {
+            testId: ${lessonItem.lessonTest.testId},
+            testName: "${fn:escapeXml(lessonItem.lessonTest.testName)}",
+            durationTime: ${lessonItem.lessonTest.durationTime},
+            testCategoryName: "${fn:escapeXml(lessonItem.lessonTest.testCategoryName)}",
+            isCompleted: ${lessonItem.lessonTest.isCompleted}
+        },
         </c:if><c:if test="${lessonItem.lessonTest == null}">null</c:if>
     };
     </c:forEach>
@@ -279,6 +363,8 @@
         packageId: ${learningData.packageId != null ? learningData.packageId : 'null'},
         defaultLessonId: ${learningData.defaultLesson != null ? learningData.defaultLesson.lessonId : 'null'}
     };
+
+    window.learningConfig = learningConfig;
 
     $(document).ready(function() {
         if (typeof LearningApp !== 'undefined') {
@@ -319,6 +405,10 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="test-tab" data-bs-toggle="tab" data-bs-target="#test"
                             type="button" role="tab" aria-controls="test">Bài kiểm tra cuối bài</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="discussion-tab" data-bs-toggle="tab" data-bs-target="#discussion"
+                            type="button" role="tab" aria-controls="discussion">Thảo luận</button>
                 </li>
             </ul>
             <div class="tab-content" id="lessonTabsContent">
@@ -361,6 +451,42 @@
                             <div id="test-section" class="test-section">
                                 <!-- Nội dung bài kiểm tra sẽ được cập nhật động bởi JavaScript -->
                                 <p id="no-test-message" class="text-muted">Không có bài kiểm tra cuối bài.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="discussion" role="tabpanel" aria-labelledby="discussion-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title h4 fw-semibold mb-4">Thảo luận về bài học</h2>
+
+                            <!-- Form để đăng bình luận mới -->
+                            <div class="mb-4">
+                                <form id="new-comment-form">
+                                    <input type="hidden" name="subjectId"
+                                           value="${learningData.subjectId}">
+                                    <input type="hidden" name="lessonId"
+                                           id="discussion-lesson-id"
+                                           value="${learningData.defaultLesson.lessonId}">
+                                    <input type="hidden" name="packageId"
+                                           value="${learningData.packageId}">
+                                    <div class="mb-2">
+                                        <textarea class="form-control" id="comment-content-input"
+                                                  rows="3" placeholder="Viết bình luận của bạn..."
+                                                  required></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <hr>
+
+                            <!-- Khu vực chứa danh sách các bình luận -->
+                            <div id="comments-list-container">
+                                <p class="text-muted">Đang tải bình luận...</p>
+                                <!-- Các bình luận sẽ được JS tải vào đây -->
                             </div>
                         </div>
                     </div>
