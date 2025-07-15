@@ -9,6 +9,7 @@
     <title>Lịch Sử Luyện Tập</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -92,6 +93,10 @@
             padding: 20px;
             font-size: 1.1rem;
         }
+        #practiceChart {
+            max-height: 400px;
+            margin-top: 20px;
+        }
         @media (max-width: 768px) {
             .main-container {
                 padding: 15px;
@@ -131,17 +136,26 @@
                         <input type="date" id="endDate" name="endDate" class="form-control" value="${endDate}">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label"> </label>
+                        <label for="daysRange" class="form-label">Phạm vi biểu đồ:</label>
+                        <select id="daysRange" name="daysRange" class="form-control">
+                            <option value="7" selected>7 ngày</option>
+                            <option value="30">30 ngày</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label"> </label>
                         <button type="submit" class="btn btn-filter w-100">Lọc</button>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label"> </label>
+                    <div class="col-md-2">
+                        <label class="form-label"> </label>
                         <a href="/practices/history" class="btn btn-secondary w-100">Xóa bộ lọc</a>
                     </div>
                 </div>
                 <input type="hidden" name="page" value="0">
                 <input type="hidden" name="size" value="${pageSize}">
             </form>
+            <!-- Biểu đồ điểm trung bình -->
+            <canvas id="practiceChart"></canvas>
             <!-- Danh sách bài kiểm tra -->
             <c:if test="${not empty testHistoryPage.content}">
                 <table class="table table-hover">
@@ -205,5 +219,93 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
         crossorigin="anonymous"></script>
+<script>
+    let chartInstance = null;
+
+    function drawChart(labels, scores, days) {
+        const ctx = document.getElementById('practiceChart')?.getContext('2d');
+        if (!ctx) return;
+
+        // Hủy biểu đồ cũ nếu có
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Điểm trung bình (Thang 10)',
+                    data: scores,
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#007bff',
+                    pointBorderColor: '#ffffff',
+                    pointHoverBackgroundColor: '#ffffff',
+                    pointHoverBorderColor: '#007bff'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        title: {
+                            display: true,
+                            text: 'Điểm trung bình'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Ngày'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: `Thống kê điểm trung bình ${days} ngày gần nhất (Thang 10)`
+                    }
+                }
+            }
+        });
+    }
+
+    function fetchAverageScore(days) {
+        $.ajax({
+            url: '/practices/average-score',
+            type: 'GET',
+            data: { days: days },
+            success: function (response) {
+                if (response.error) {
+                    console.error(response.error);
+                    return;
+                }
+                const labels = response.labels || [];
+                const scores = response.scores || [];
+                drawChart(labels, scores.map(score => parseFloat(score.toFixed(1))), days);
+            },
+            error: function (xhr, status, error) {
+                console.error('Lỗi khi gọi API:', error);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const daysRangeSelect = document.getElementById('daysRange');
+        fetchAverageScore(daysRangeSelect.value);
+
+        daysRangeSelect.addEventListener('change', function () {
+            fetchAverageScore(this.value);
+        });
+    });
+</script>
 </body>
 </html>
