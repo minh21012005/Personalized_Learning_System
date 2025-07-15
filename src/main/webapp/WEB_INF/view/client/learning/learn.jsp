@@ -267,7 +267,7 @@
                 durationTime: ${lessonItem.lessonTest.durationTime},
                 testCategoryName: "${fn:escapeXml(lessonItem.lessonTest.testCategoryName)}",
                 isCompleted: ${lessonItem.lessonTest.isCompleted}
-            }
+            },
         </c:if><c:if test="${lessonItem.lessonTest == null}">null</c:if>
     };
     </c:forEach>
