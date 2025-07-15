@@ -404,7 +404,7 @@
                                                     <h3 class="h5 fw-semibold">Bài kiểm tra chương</h3>
                                                     <c:forEach var="chapterTest" items="${chapterItem.chapterTests}">
                                                         <div class="list-group-item">
-                                                            <a href="/tests/${chapterTest.testId}" class="text-decoration-none" target="_blank">
+                                                            <a href="/tests/${chapterTest.testId}/${learningData.packageId}" class="text-decoration-none" target="_blank">
                                                                     ${fn:escapeXml(chapterTest.testName)} (${fn:escapeXml(chapterTest.testCategoryName)})
                                                                 <c:if test="${chapterTest.isCompleted}">
                                                                     <span class="test-completed">Hoàn thành</span>
@@ -472,7 +472,7 @@
                                         <h3 class="h5 fw-semibold">Bài kiểm tra chương</h3>
                                         <c:forEach var="chapterTest" items="${chapterItem.chapterTests}">
                                             <div class="list-group-item">
-                                                <a href="/tests/${chapterTest.testId}" class="text-decoration-none" target="_blank">
+                                                <a href="/tests/${chapterTest.testId}/${learningData.packageId}" class="text-decoration-none" target="_blank">
                                                         ${fn:escapeXml(chapterTest.testName)} (${fn:escapeXml(chapterTest.testCategoryName)})
                                                     <c:if test="${chapterTest.isCompleted}">
                                                         <span class="test-completed">Hoàn thành</span>
@@ -501,7 +501,7 @@
                         <h3 class="h5 fw-semibold">Bài kiểm tra môn học</h3>
                         <c:forEach var="subjectTest" items="${learningData.subjectTests}">
                             <div class="list-group-item">
-                                <a href="/tests/${subjectTest.testId}" class="text-decoration-none" target="_blank">
+                                <a href="/tests/${subjectTest.testId}/${learningData.packageId}" class="text-decoration-none" target="_blank">
                                         ${fn:escapeXml(subjectTest.testName)} (${fn:escapeXml(subjectTest.testCategoryName)})
                                     <c:if test="${subjectTest.isCompleted}">
                                         <span class="test-completed">Hoàn thành</span>
