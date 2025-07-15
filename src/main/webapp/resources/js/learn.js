@@ -139,7 +139,7 @@ const LearningApp = (function () {
                         Chi tiết
                     </a>
                 ` : `
-                    <a href="/tests/${test.testId}" class="btn btn-primary btn-test" target="_blank">
+                    <a href="/tests/${test.testId}/${config.packageId}" class="btn btn-primary btn-test" target="_blank">
                         Làm bài kiểm tra
                     </a>
                 `}

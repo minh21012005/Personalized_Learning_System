@@ -21,6 +21,7 @@ import swp.se1941jv.pls.dto.response.tests.TestHistoryDTO;
 import swp.se1941jv.pls.dto.response.tests.TestHistoryListDTO;
 import swp.se1941jv.pls.dto.response.tests.TestSubmissionDto;
 import swp.se1941jv.pls.entity.*;
+import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.repository.*;
 
 import java.time.LocalDate;
@@ -41,14 +42,41 @@ public class TestStudentService {
     QuestionTestRepository questionTestRepository;
     AnswerHistoryTestRepository answerHistoryTestRepository;
     QuestionBankRepository questionBankRepository;
+    PackageRepository packageRepository;
     UserRepository userRepository;
     QuestionService questionService;
     ObjectMapper objectMapper;
 
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public Map<String, Object> startOrResumeTest(Long testId, Long userId) {
+    public Map<String, Object> startOrResumeTest(Long testId, Long packageId, Long userId) {
         Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tìm thấy: " + userId));
+
+        Package currentPkg = packageId != null ? packageRepository.findById(packageId).orElseThrow(
+                () -> new IllegalArgumentException("Gói bài kiểm tra không tìm thấy: " + packageId)
+        ) : null;
+
+        List<Package> packages = new ArrayList<>();
+        user.getUserPackages().stream()
+                .forEach(up -> {
+                    if (up.getEndDate() != null && up.getEndDate().isAfter(LocalDateTime.now())) packages.add(up.getPkg());
+                });
+
+        if (packages.stream().noneMatch(pkg -> pkg.getPackageId().equals(packageId))) {
+            throw new IllegalStateException("Người dùng không có quyền truy cập vào gói bài kiểm tra này.");
+        }
+
+        List<Subject> subjects = currentPkg.getPackageSubjects().stream().map(PackageSubject::getSubject).collect(Collectors.toList());
+        if (!subjects.contains(test.getSubject())) {
+            throw new IllegalStateException("Bài kiểm tra không thuộc về gói bài kiểm tra này.");
+        }
+
+        if( !test.getIsOpen()) {
+            throw new IllegalStateException("Bài kiểm tra đã đóng.");
+        }
 
         // Kiểm tra thời gian hợp lệ
         LocalDateTime now = LocalDateTime.now();
@@ -63,14 +91,14 @@ public class TestStudentService {
         }
 
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tìm thấy: " + userId));
+
         UserTest newUserTest = UserTest.builder()
                 .test(test)
                 .user(user)
                 .timeStart(LocalDateTime.now()) // Reset thời gian bắt đầu
                 .totalQuestions((int) questionTestRepository.countByTestId(testId))
                 .correctAnswers(0)
+                .pkg(currentPkg)
                 .build();
         UserTest userTest = userTestRepository.save(newUserTest);
 
