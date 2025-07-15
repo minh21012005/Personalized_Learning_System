@@ -59,4 +59,6 @@ public interface CommunicationRepository extends JpaRepository<Communication, Lo
                      "WHERE c.id = :id")
        Optional<Communication> findByIdWithDetails(Long id);
 
+        @Query("SELECT c FROM Communication c WHERE c.parentComment IS NULL AND c.lesson.id = :lessonId AND c.commentStatus = 'APPROVED' ORDER BY c.createdAt DESC")
+       List<Communication> findApprovedRootCommentByLessonId(@Param("lessonId") Long lessonId);
 }
