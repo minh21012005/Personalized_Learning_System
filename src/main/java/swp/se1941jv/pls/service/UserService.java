@@ -28,8 +28,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     // Regex để kiểm tra mật khẩu mạnh
-    private static final String PASSWORD_PATTERN =
-            "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_+=\\[\\]{}|;:'\",.<>?/]).{8,}$";
+    private static final String PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_+=\\[\\]{}|;:'\",.<>?/]).{8,}$";
 
     private static final Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
 
@@ -80,8 +79,6 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
-
-
     public User getUserById(Long id) {
         return this.userRepository.findById(id).orElse(null);
     }
@@ -118,7 +115,6 @@ public class UserService {
         return this.userRepository.existsByPhoneNumberAndUserIdNot(phoneNumber, id);
     }
 
-
     public boolean verifyPassword(Long userId, String password) {
         User user = getUserById(userId);
         if (user == null) {
@@ -134,9 +130,9 @@ public class UserService {
             userRepository.save(user);
         }
     }
-//    public Page<User> findUsersWithRole(String roleName, Pageable pageable) {
-//        return userRepository.findAll(UserSpecification.hasRole(roleName), pageable);
-//    }
+    // public Page<User> findUsersWithRole(String roleName, Pageable pageable) {
+    // return userRepository.findAll(UserSpecification.hasRole(roleName), pageable);
+    // }
 
     public Page<User> findUsersWithFilters(String roleName, String fullName, Pageable pageable) {
         return this.userRepository.findAll(UserSpecification.findUsersWithFilters(roleName, fullName), pageable);
@@ -171,7 +167,6 @@ public class UserService {
         user.setResetPasswordTokenExpiry(null);
         this.saveUser(user);
     }
-
 
     // Tạo token xác thực email và lưu vào user
     public String generateEmailVerifyToken(User user) {
@@ -221,7 +216,7 @@ public class UserService {
         if (existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng cho một tài khoản khác.");
         }
-         if (existsByPhoneNumber(request.getPhoneNumber())) {
+        if (existsByPhoneNumber(request.getPhoneNumber())) {
             throw new RuntimeException("Số điện thoại đã được sử dụng cho một tài khoản khác.");
         }
 
@@ -247,6 +242,10 @@ public class UserService {
         student.setAvatar(avatarFileName);
         student.setEmailVerify(true);
         return userRepository.save(student);
+    }
+
+    public int countActiveUser() {
+        return this.userRepository.findAllByIsActiveTrue().size();
     }
 
 }

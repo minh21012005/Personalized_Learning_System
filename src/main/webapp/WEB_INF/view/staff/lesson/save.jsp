@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -102,6 +103,11 @@
         .material-item a, .selected-file-item button {
             z-index: 3;
         }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
         @media (max-width: 767.98px) {
             .sidebar {
                 width: 200px;
@@ -123,7 +129,7 @@
 </head>
 <body>
 <header>
-    <jsp:include page="../layout/header.jsp"/>
+    <jsp:include page="../layout_staff/header.jsp"/>
 </header>
 
 <div class="main-container">
@@ -184,40 +190,60 @@
                                                 class="form-control ${not empty errorVideoSrc ? 'is-invalid' : ''}"
                                                 placeholder="https://www.youtube.com/embed/VIDEO_ID"/>
                                         ${errorVideoSrc}
+                                    <c:if test="${not empty lesson.videoSrc}">
+                                        <div class="mt-3 embed-responsive embed-responsive-16by9">
+                                            <iframe class="embed-responsive-item"
+                                                    src="${lesson.videoSrc}"
+                                                    frameborder="0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowfullscreen>
+                                            </iframe>
+                                        </div>
+                                    </c:if>
                                     <div id="videoSrcError" class="invalid-feedback" style="display: none;">
                                         Vui lòng nhập link nhúng YouTube hợp lệ.
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row mb-3">
                                 <label for="materialsInput" class="col-sm-3 col-form-label">Tài liệu tham khảo (PDF, Word)</label>
                                 <div class="col-sm-9">
                                     <div class="custom-file-input">
-                                        <input type="file" id="materialsInput" name="materialFiles" multiple
-                                               accept=".pdf,.doc,.docx" class="form-control"/>
+                                        <input type="file" id="materialsInput" name="materialFiles" multiple accept=".pdf,.doc,.docx" class="form-control"/>
                                         <label for="materialsInput" class="custom-file-input-label">Chọn tệp tài liệu</label>
                                         <div class="file-name" id="fileNames">Chưa chọn tệp nào</div>
                                         <div class="selected-files-list" id="selectedFilesList"></div>
                                     </div>
-                                    <c:if test="${not empty materialsTemp}">
+                                    <c:if test="${not empty lesson.lessonMaterials}">
                                         <div class="material-list mt-3">
                                             <h6>Tài liệu hiện có:</h6>
-                                            <c:forEach var="material" items="${materialsTemp}" varStatus="status">
+                                            <c:forEach var="material" items="${lesson.lessonMaterials}" varStatus="status">
                                                 <div class="material-item" data-index="${status.index}">
-                                                    <a href="/files/taiLieu/${material}" target="_blank">${material.substring(material.lastIndexOf('/') + 1)}</a>
-                                                    <button type="button" class="btn btn-link text-danger p-0"
-                                                            onclick="removeMaterial(this, ${status.index})">Xóa</button>
-                                                    <input type="hidden" name="materialsTemp" value="${material}"/>
+                                                    <a href="/files/materials/${material.filePath}" target="_blank">${material.fileName}</a>
+                                                    <button type="button" class="btn btn-link text-danger p-0" onclick="removeMaterial(this, ${status.index})">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                    <input type="hidden" name="lessonMaterials[${status.index}].fileName" value="${material.fileName}"/>
+                                                    <input type="hidden" name="lessonMaterials[${status.index}].filePath" value="${material.filePath}"/>
                                                 </div>
                                             </c:forEach>
                                         </div>
                                     </c:if>
                                 </div>
                             </div>
+
                             <div class="card-footer">
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
-                                    <a href="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                                    <c:choose>
+                                        <c:when test="${!isProcess}">
+                                            <button type="submit" class="btn btn-primary">${isEdit ? 'Cập nhật' : 'Lưu'}</button>
+                                            <a href="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Hủy</a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" class="btn btn-secondary">Quay lại</a>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                             </div>
                         </form:form>
@@ -229,9 +255,10 @@
 </div>
 
 <footer>
-    <jsp:include page="../layout/footer.jsp"/>
+    <jsp:include page="../layout_staff/footer.jsp"/>
 </footer>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Initialize Bootstrap tooltips
@@ -245,14 +272,12 @@
     let selectedFiles = [];
 
     materialsInput.addEventListener('change', function () {
-        // Cập nhật danh sách tệp đã chọn
         const newFiles = Array.from(this.files);
         selectedFiles = [...selectedFiles, ...newFiles];
         updateFileList();
     });
 
     function updateFileList() {
-        // Cập nhật giao diện danh sách tệp
         selectedFilesList.innerHTML = '';
         if (selectedFiles.length > 0) {
             const displayText = selectedFiles.length + ' tệp đã chọn';
@@ -268,7 +293,6 @@
         } else {
             fileNames.textContent = 'Chưa chọn tệp nào';
         }
-        // Cập nhật input file để giữ các tệp còn lại
         const dataTransfer = new DataTransfer();
         selectedFiles.forEach(file => dataTransfer.items.add(file));
         materialsInput.files = dataTransfer.files;
@@ -287,7 +311,7 @@
             const materialItem = button.closest('.material-item');
             materialItem.remove();
         }
-    }
+    };
 </script>
 </body>
 </html>

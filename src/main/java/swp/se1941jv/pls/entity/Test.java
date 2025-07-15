@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -33,12 +34,20 @@ public class Test extends BaseEntity {
     @Column(name = "end_at")
     LocalDateTime endAt;
 
+    @Column(name = "is_open")
+    Boolean isOpen; // New field to track open/closed status
+
+    @OneToOne
+    @JoinColumn(name = "lesson_id")
+    @JsonIgnoreProperties("test")
+    private Lesson lesson;
+
     @ManyToOne
     @JoinColumn(name = "test_status_id")
     TestStatus testStatus;
 
     @ManyToOne
-    @JoinColumn(name="chapter_id")
+    @JoinColumn(name = "chapter_id")
     Chapter chapter;
 
     @ManyToOne
@@ -46,17 +55,19 @@ public class Test extends BaseEntity {
     Subject subject;
 
     @OneToMany(mappedBy = "test")
-    List<SubjectTest> subjectTests;
-
-    @OneToMany(mappedBy = "test")
     List<UserTest> userTests;
 
     @Transient
     private List<QuestionBank> randomQuestions;
 
-
     @ManyToOne
     @JoinColumn(name = "test_category_id")
     TestCategory testCategory;
+
+    @Column(name = "max_attempts")
+    Long maxAttempts;
+
+    @Column(name = "reason")
+    private String reason;
 
 }

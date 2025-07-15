@@ -37,6 +37,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
        List<User> findByRole_RoleName(String roleName);
 
+       List<User> findByRole_RoleNameAndIsActive(String role, boolean isActive);
+
        List<User> findAllByIsActiveTrue();
 
        @Query("SELECT u FROM User u WHERE u.isActive = true AND UPPER(u.role.roleName) IN :upperCaseRoleNames")

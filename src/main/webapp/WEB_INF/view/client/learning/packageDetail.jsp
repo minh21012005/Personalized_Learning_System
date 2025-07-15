@@ -147,14 +147,16 @@
                                     </c:otherwise>
                                 </c:choose>
                             </div>
-                            <a href="/packages/detail/subject?subjectId=${subject.subjectId}&packageId=${packageSubject.packageId}" class="btn btn-primary">Bắt đầu học</a>
+                            <a href="/learn?subjectId=${subject.subjectId}&packageId=${packageSubject.packageId}" class="btn btn-primary">Bắt đầu học</a>
                         </div>
                     </div>
                 </c:forEach>
             </div>
         </c:if>
     </div>
+
 </div>
+ <div ><jsp:include page="/student/package/${packageSubject.packageId}/reviews?render=true" />  </div>
 <footer>
     <jsp:include page="../layout/footer.jsp"/>
 </footer>

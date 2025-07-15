@@ -98,13 +98,13 @@
             <body>
                 <!-- Include Header -->
                 <header>
-                    <jsp:include page="../layout/header.jsp" />
+                    <jsp:include page="../layout_staff/header.jsp" />
                 </header>
 
 
                 <!-- Include Sidebar -->
                 <div class="sidebar">
-                    <jsp:include page="../layout/sidebar.jsp" />
+                    <jsp:include page="../layout_staff/sidebar.jsp" />
                 </div>
 
 
@@ -199,16 +199,18 @@
                             <label for="subjects" class="form-label">Môn học</label>
                             <select name="subjects" id="subjects" multiple class="form-select">
                                 <c:choose>
-                                    <c:when test="${not empty subjects}">
-                                        <c:forEach var="subject" items="${subjects}">
-                                            <option value="${subject.subjectId}">
-                                                ${subject.subjectName}</option>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-
-                                    </c:otherwise>
-                                </c:choose>
+                                <c:when test="${not empty subjects}">
+                                    <c:forEach var="subject" items="${subjects}">
+                                        <c:set var="isSelected" value="${selectedSubjectIds != null && selectedSubjectIds.contains(subject.subjectId)}" />
+                                        <option value="${subject.subjectId}" ${isSelected ? 'selected' : ''}>
+                                            ${subject.subjectName}
+                                        </option>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="" disabled>Chọn môn học</option>
+                                </c:otherwise>
+                            </c:choose>
                             </select>
                             <c:if test="${empty subjects}">
                                 <div class="text-muted text-center placeholder-message">
@@ -269,7 +271,7 @@
 
                 <!-- Include Footer -->
                 <footer>
-                    <jsp:include page="../layout/footer.jsp" />
+                    <jsp:include page="../layout_staff/footer.jsp" />
                 </footer>
 
                 <!-- End of <body> -->
@@ -304,7 +306,20 @@
                                 }
                             });
                         }
-                    });
+                        // Đảm bảo MultiSelectTag hiển thị các giá trị đã chọn
+            const subjectsSelect = document.getElementById('subjects');
+            if (subjectsSelect) {
+                const selectedOptions = Array.from(subjectsSelect.options)
+                    .filter(option => option.selected)
+                    .map(option => option.value);
+                if (selectedOptions.length > 0) {
+                    tagSelector.reset(selectedOptions);
+                }
+            }
+        });
+                   
+
+                    
                 </script>
                 <script>
                     // Hàm chung để ngăn dấu chấm/phẩy và chỉ giữ số nguyên

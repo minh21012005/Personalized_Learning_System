@@ -1,10 +1,12 @@
 package swp.se1941jv.pls.controller.staff;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,23 +14,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import swp.se1941jv.pls.dto.response.LessonResponseDTO;
-import swp.se1941jv.pls.dto.response.ChapterResponseDTO;
-import swp.se1941jv.pls.dto.response.SubjectResponseDTO;
+import swp.se1941jv.pls.dto.response.lesson.LessonFormDTO;
+import swp.se1941jv.pls.dto.response.lesson.LessonListDTO;
 import swp.se1941jv.pls.entity.Lesson;
-import swp.se1941jv.pls.entity.Chapter;
-import swp.se1941jv.pls.entity.Subject;
-import swp.se1941jv.pls.exception.ApplicationException;
-import swp.se1941jv.pls.exception.DuplicateNameException;
-import swp.se1941jv.pls.service.ChapterService;
-import swp.se1941jv.pls.service.LessonService;
-import swp.se1941jv.pls.service.SubjectService;
+import swp.se1941jv.pls.entity.LessonMaterial;
 import swp.se1941jv.pls.service.FileUploadService;
+import swp.se1941jv.pls.service.LessonService;
 import swp.se1941jv.pls.util.YouTubeApiClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -36,16 +31,10 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class LessonController {
 
-    private final SubjectService subjectService;
-    private final ChapterService chapterService;
     private final LessonService lessonService;
     private final FileUploadService fileUploadService;
     private final YouTubeApiClient youTubeApiClient;
-    private final ObjectMapper objectMapper;
 
-    /**
-     * Hiển thị danh sách bài học của một chương.
-     */
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
     @GetMapping
     public String showLessons(
@@ -53,312 +42,361 @@ public class LessonController {
             @PathVariable Long chapterId,
             @RequestParam(required = false) String lessonName,
             @RequestParam(required = false) Boolean status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "desc") String sortDir,
             Model model,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
-            Subject subject = validateSubjectAndChapter(subjectId, chapterId);
-            Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
-            List<LessonResponseDTO> lessons = lessonService.findLessonsByChapterId(chapterId, lessonName, status);
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để tiếp tục!");
+                return "redirect:/staff/subject/" + subjectId + "/chapters";
+            }
 
-            model.addAttribute("subject", subject);
-            model.addAttribute("chapter", chapter);
-            model.addAttribute("lessons", lessons);
+            String adjustedSortField = "createdAt";
+            if ("lessonId".equals(sortField)) adjustedSortField = "lessonId";
+            else if ("lessonName".equals(sortField)) adjustedSortField = "lessonName";
+
+            Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            Page<LessonListDTO> lessonPage = lessonService.findLessonsByChapterId(chapterId, lessonName, status, userId, PageRequest.of(page, size, Sort.by(direction, adjustedSortField)));
+
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("lessonPage", lessonPage);
+            model.addAttribute("lessons", lessonPage.getContent());
+            model.addAttribute("lessonName", lessonName);
+            model.addAttribute("status", status);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("sortField", sortField);
+            model.addAttribute("sortDir", sortDir);
+            model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
             return "staff/lesson/show";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         } catch (Exception e) {
             log.error("Error fetching lessons: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lấy danh sách bài học");
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tải danh sách bài học!");
             return "redirect:/staff/subject/" + subjectId + "/chapters";
         }
     }
 
-    /**
-     * Hiển thị form tạo bài học mới.
-     */
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF')")
     @GetMapping("/new")
     public String showCreateLessonForm(
             @PathVariable Long subjectId,
             @PathVariable Long chapterId,
             Model model,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
-            Subject subject = validateSubjectAndChapter(subjectId, chapterId);
-            Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để tiếp tục!");
+                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+            }
 
-            model.addAttribute("subject", subject);
-            model.addAttribute("chapter", chapter);
-            model.addAttribute("lesson", new Lesson());
-            model.addAttribute("materialsTemp", new ArrayList<String>());
+            LessonFormDTO lessonForm = new LessonFormDTO();
+            lessonForm.setChapterId(chapterId);
+
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("lesson", lessonForm);
             model.addAttribute("isEdit", false);
             return "staff/lesson/save";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         } catch (Exception e) {
-            log.error("Error showing create lesson form: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị form tạo bài học");
+            log.error("Error showing lesson form: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị form tạo bài học!");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
     }
 
-    /**
-     * Xử lý tạo bài học mới.
-     */
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
-    @PostMapping
-    public String createLesson(
-            @PathVariable Long subjectId,
-            @PathVariable Long chapterId,
-            @Valid @ModelAttribute("lesson") Lesson lesson,
-            BindingResult bindingResult,
-            @RequestParam MultipartFile[] materialFiles,
-            @RequestParam(required = false) List<String> materialsTemp,
-            RedirectAttributes redirectAttributes,
-            Model model) {
-        return handleLessonSave(subjectId, chapterId, lesson, bindingResult, materialFiles, materialsTemp, redirectAttributes, model, false);
-    }
-
-    /**
-     * Hiển thị form chỉnh sửa bài học.
-     */
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF')")
     @GetMapping("/{lessonId}/edit")
     public String showEditLessonForm(
             @PathVariable Long subjectId,
             @PathVariable Long chapterId,
             @PathVariable Long lessonId,
             Model model,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
-            Subject subject = validateSubjectAndChapter(subjectId, chapterId);
-            Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
-            Lesson lesson = lessonService.getLessonById(lessonId).orElse(null);
-
-            if (lesson == null) {
-                log.warn("Lesson not found: lessonId={}", lessonId);
-                redirectAttributes.addFlashAttribute("errorMessage", "Bài học không tồn tại");
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
                 return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
 
-            List<String> materialsTemp = parseMaterialsJson(lesson.getMaterialsJson());
-            model.addAttribute("subject", subject);
-            model.addAttribute("chapter", chapter);
-            model.addAttribute("lesson", lesson);
-            model.addAttribute("materialsTemp", materialsTemp);
+            lessonService.validateStaffAccess(chapterId,userId);
+
+            Lesson lesson = lessonService.getLessonById(lessonId)
+                    .orElseThrow(() -> new IllegalArgumentException("lesson.message.notFound"));
+
+            LessonFormDTO lessonForm = new LessonFormDTO();
+            lessonForm.setLessonId(lessonId);
+            lessonForm.setLessonName(lesson.getLessonName());
+            lessonForm.setLessonDescription(lesson.getLessonDescription());
+            lessonForm.setVideoSrc(lesson.getVideoSrc());
+            lessonForm.setVideoTime(lesson.getVideoTime());
+            lessonForm.setVideoTitle(lesson.getVideoTitle());
+            lessonForm.setThumbnailUrl(lesson.getThumbnailUrl());
+            lessonForm.setChapterId(chapterId);
+            lessonForm.setLessonMaterials(lesson.getLessonMaterials().stream()
+                    .map(material -> {
+                        LessonFormDTO.LessonMaterialDTO materialDTO = new LessonFormDTO.LessonMaterialDTO();
+                        materialDTO.setFileName(material.getFileName());
+                        materialDTO.setFilePath(material.getFilePath());
+                        return materialDTO;
+                    }).collect(Collectors.toList()));
+
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("lesson", lessonForm);
             model.addAttribute("isEdit", true);
             return "staff/lesson/save";
-        } catch (ApplicationException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         } catch (Exception e) {
-            log.error("Error showing edit lesson form: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị form chỉnh sửa bài học");
+            log.error("Error showing lesson form: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.form");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
     }
 
-    /**
-     * Xử lý cập nhật bài học.
-     */
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @PostMapping
+    public String createLesson(
+            @PathVariable Long subjectId,
+            @PathVariable Long chapterId,
+            @Valid @ModelAttribute("lesson") LessonFormDTO lessonForm,
+            BindingResult bindingResult,
+            @RequestParam(value = "materialFiles", required = false) MultipartFile[] materialFiles,
+            HttpSession session,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+            }
+
+            if (materialFiles != null && materialFiles.length > 0) {
+                if (materialFiles.length > 5) {
+                    bindingResult.rejectValue("lessonMaterials", "error.maxFiles", "Tối đa 5 tệp tài liệu được phép!");
+                }
+                for (MultipartFile file : materialFiles) {
+                    if (file != null && !file.isEmpty()) {
+                        if (file.getSize() > 50 * 1024 * 1024) {
+                            bindingResult.rejectValue("lessonMaterials", "error.fileSize", "Tệp không được vượt quá 50MB!");
+                        }
+                        String contentType = file.getContentType();
+                        if (contentType == null || !Arrays.asList("application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document").contains(contentType)) {
+                            bindingResult.rejectValue("lessonMaterials", "error.fileType", "Chỉ hỗ trợ PDF hoặc Word!");
+                        }
+                    }
+                }
+            }
+
+            if (bindingResult.hasErrors()) {
+                model.addAttribute("subjectId", subjectId);
+                model.addAttribute("chapterId", chapterId);
+                model.addAttribute("isEdit", false);
+                return "staff/lesson/save";
+            }
+
+            // Xử lý materialFiles và gán vào lessonForm.lessonMaterials
+            if (materialFiles != null && materialFiles.length > 0) {
+                List<LessonFormDTO.LessonMaterialDTO> materialDTOs = fileUploadService.handleSaveUploadFiles(materialFiles, "materials");
+                lessonForm.setLessonMaterials(materialDTOs);
+            }
+
+            // Validate YouTube embed URL and get additional details
+            String videoId = youTubeApiClient.extractVideoId(lessonForm.getVideoSrc());
+            if (videoId == null) {
+                bindingResult.rejectValue("videoSrc", "error.lesson", "Link video YouTube không hợp lệ");
+                model.addAttribute("subjectId", subjectId);
+                model.addAttribute("chapterId", chapterId);
+                model.addAttribute("isEdit", false);
+                return "staff/lesson/save";
+            }
+            try {
+                lessonForm.setVideoTime(youTubeApiClient.getVideoDuration(videoId));
+                lessonForm.setVideoTitle(youTubeApiClient.getVideoTitle(videoId));
+                lessonForm.setThumbnailUrl(youTubeApiClient.getThumbnailUrl(videoId));
+            } catch (Exception e) {
+                lessonForm.setVideoTime("N/A");
+                lessonForm.setVideoTitle("Unknown");
+                lessonForm.setThumbnailUrl("");
+            }
+
+            lessonForm.setChapterId(chapterId);
+            lessonService.createLesson(lessonForm, userId);
+            redirectAttributes.addFlashAttribute("message", "Tạo bài học thành công!");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("isEdit", false);
+            return "staff/lesson/save";
+        } catch (Exception e) {
+            log.error("Error creating lesson for chapterId={}, userId={}: {}", chapterId, session.getAttribute("id"), e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tạo bài học!");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        }
+    }
+
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
     @PostMapping("/{lessonId}")
     public String updateLesson(
             @PathVariable Long subjectId,
             @PathVariable Long chapterId,
             @PathVariable Long lessonId,
-            @Valid @ModelAttribute("lesson") Lesson lesson,
+            @Valid @ModelAttribute("lesson") LessonFormDTO lessonForm,
             BindingResult bindingResult,
-            @RequestParam MultipartFile[] materialFiles,
-            @RequestParam(required = false) List<String> materialsTemp,
+            @RequestParam(value = "materialFiles", required = false) MultipartFile[] materialFiles,
+            HttpSession session,
             RedirectAttributes redirectAttributes,
             Model model) {
-        lesson.setLessonId(lessonId);
-        return handleLessonSave(subjectId, chapterId, lesson, bindingResult, materialFiles, materialsTemp, redirectAttributes, model, true);
-    }
-
-    /**
-     * Xử lý nộp bài học (chuyển trạng thái từ DRAFT sang PENDING).
-     */
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
-    @PostMapping("/{lessonId}/submit")
-    public String submitLesson(
-            @PathVariable Long subjectId,
-            @PathVariable Long chapterId,
-            @PathVariable Long lessonId,
-            RedirectAttributes redirectAttributes) {
         try {
-            Subject subject = validateSubjectAndChapter(subjectId, chapterId);
-            lessonService.submitLesson(lessonId);
-            redirectAttributes.addFlashAttribute("message", "Nộp bài học thành công");
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (ApplicationException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (Exception e) {
-            log.error("Error submitting lesson: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi nộp bài học");
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        }
-    }
-
-    /**
-     * Cập nhật trạng thái của các bài học.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/update-status")
-    public String updateLessonsStatus(
-            @PathVariable Long subjectId,
-            @PathVariable Long chapterId,
-            @RequestParam List<Long> lessonIds,
-            RedirectAttributes redirectAttributes) {
-        try {
-            SubjectResponseDTO subject = subjectService.getSubjectResponseById(subjectId);
-            ChapterResponseDTO chapter = chapterService.getChapterResponseById(chapterId, subjectId);
-
-            if (subject == null || chapter == null) {
-                log.warn("Subject or Chapter not found: subjectId={}, chapterId={}", subjectId, chapterId);
-                return "error/404";
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
 
-            lessonService.toggleLessonsStatus(lessonIds);
-            redirectAttributes.addFlashAttribute("message", "Cập nhật trạng thái thành công");
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (ApplicationException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (Exception e) {
-            log.error("Error updating lesson status: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái");
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        }
-    }
-
-    /**
-     * Xử lý logic lưu bài học (tạo mới hoặc cập nhật).
-     */
-    private String handleLessonSave(
-            Long subjectId,
-            Long chapterId,
-            Lesson lesson,
-            BindingResult bindingResult,
-            MultipartFile[] materialFiles,
-            List<String> materialsTemp,
-            RedirectAttributes redirectAttributes,
-            Model model,
-            boolean isEdit) {
-        Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-        Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
-
-        if (subject == null || chapter == null || !chapter.getSubject().getSubjectId().equals(subjectId)) {
-            log.warn("Invalid subject or chapter: subjectId={}, chapterId={}", subjectId, chapterId);
-            return "error/404";
-        }
-
-        List<String> materials = materialsTemp != null ? new ArrayList<>(materialsTemp) : new ArrayList<>();
-
-        if (bindingResult.hasErrors()) {
-            return prepareSaveForm(subject, chapter, lesson, materials, model);
-        }
-
-        try {
-            // Validate video URL và lấy duration
-            String videoId = youTubeApiClient.extractVideoId(lesson.getVideoSrc());
-            if (videoId == null) {
-                bindingResult.rejectValue("videoSrc", "error.lesson", "Đường dẫn video không hợp lệ");
-                return prepareSaveForm(subject, chapter, lesson, materials, model);
-            }
-
-            String videoTime = youTubeApiClient.getVideoDuration(videoId);
-            if (videoTime == null) {
-                bindingResult.rejectValue("videoSrc", "error.lesson", "Không thể lấy thời lượng video");
-                return prepareSaveForm(subject, chapter, lesson, materials, model);
-            }
-
-            // Xử lý file upload, chỉ khi có file hợp lệ
-            List<String> uploadedFiles = new ArrayList<>();
             if (materialFiles != null && materialFiles.length > 0) {
-                // Lọc bỏ các file rỗng
-                List<MultipartFile> validFiles = Arrays.stream(materialFiles)
-                        .filter(file -> !file.isEmpty())
-                        .toList();
-                if (!validFiles.isEmpty()) {
-                    uploadedFiles = fileUploadService.handleSaveUploadFiles(validFiles.toArray(new MultipartFile[0]), "taiLieu");
-                    if (uploadedFiles.isEmpty()) {
-                        bindingResult.reject("error.lesson", "Không thể tải lên tài liệu. Vui lòng kiểm tra định dạng file (PDF, DOC, DOCX).");
-                        return prepareSaveForm(subject, chapter, lesson, materials, model);
+                if (materialFiles.length > 5) {
+                    bindingResult.rejectValue("lessonMaterials", "error.maxFiles", "Tối đa 5 tệp tài liệu được phép!");
+                }
+                for (MultipartFile file : materialFiles) {
+                    if (file != null && !file.isEmpty()) {
+                        if (file.getSize() > 50 * 1024 * 1024) {
+                            bindingResult.rejectValue("lessonMaterials", "error.fileSize", "Tệp không được vượt quá 50MB!");
+                        }
+                        String contentType = file.getContentType();
+                        if (contentType == null || !Arrays.asList("application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document").contains(contentType)) {
+                            bindingResult.rejectValue("lessonMaterials", "error.fileType", "Chỉ hỗ trợ PDF hoặc Word!");
+                        }
                     }
                 }
             }
-            materials.addAll(uploadedFiles);
 
-            lesson.setVideoTime(videoTime);
-            lesson.setMaterialsJson(objectMapper.writeValueAsString(materials));
-            lesson.setChapter(chapter);
-
-            if (!isEdit) {
-                lesson.setLessonStatus(Lesson.LessonStatus.DRAFT);
-                if (lesson.getStatus() == null) {
-                    lesson.setStatus(true); // Đảm bảo trạng thái mặc định
-                }
+            if (bindingResult.hasErrors()) {
+                model.addAttribute("subjectId", subjectId);
+                model.addAttribute("chapterId", chapterId);
+                model.addAttribute("isEdit", true);
+                return "staff/lesson/save";
             }
 
-            if (isEdit) {
-                lessonService.updateLesson(lesson);
-            } else {
-                lessonService.createLesson(lesson);
+            // Validate YouTube embed URL and get additional details
+            String videoId = youTubeApiClient.extractVideoId(lessonForm.getVideoSrc());
+            if (videoId == null) {
+                bindingResult.rejectValue("videoSrc", "error.lesson", "Link video YouTube không hợp lệ");
+                model.addAttribute("subjectId", subjectId);
+                model.addAttribute("chapterId", chapterId);
+                model.addAttribute("isEdit", true);
+                return "staff/lesson/save";
+            }
+            try {
+                lessonForm.setVideoTime(youTubeApiClient.getVideoDuration(videoId));
+                lessonForm.setVideoTitle(youTubeApiClient.getVideoTitle(videoId));
+                lessonForm.setThumbnailUrl(youTubeApiClient.getThumbnailUrl(videoId));
+            } catch (Exception e) {
+                log.warn("YouTube API failed for videoId {}: {}", videoId, e.getMessage());
+                lessonForm.setVideoTime("N/A");
+                lessonForm.setVideoTitle("Unknown");
+                lessonForm.setThumbnailUrl("");
             }
 
-            redirectAttributes.addFlashAttribute("message", isEdit ? "Cập nhật bài học thành công" : "Tạo bài học thành công");
+            lessonForm.setLessonId(lessonId);
+            lessonForm.setChapterId(chapterId);
+            lessonService.updateLesson(lessonForm, userId, materialFiles);
+
+            redirectAttributes.addFlashAttribute("message", "Cập nhật bài học thành công!");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (ApplicationException e) {
-            String field = e instanceof DuplicateNameException ? "lessonName" : null;
-            bindingResult.rejectValue(field, "error.lesson", e.getMessage());
-            return prepareSaveForm(subject, chapter, lesson, materials, model);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("isEdit", true);
+            return "staff/lesson/save";
         } catch (Exception e) {
-            log.error("Error saving lesson: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu bài học");
+            log.error("Error updating lesson for lessonId={}, userId={}: {}", lessonId, session.getAttribute("id"), e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật bài học!");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
     }
 
-    /**
-     * Chuẩn bị dữ liệu cho form khi có lỗi.
-     */
-    private String prepareSaveForm(Subject subject, Chapter chapter, Lesson lesson, List<String> materials, Model model) {
-        model.addAttribute("subject", subject);
-        model.addAttribute("chapter", chapter);
-        model.addAttribute("lesson", lesson);
-        model.addAttribute("materialsTemp", materials);
-        model.addAttribute("isEdit", lesson.getLessonId() != null);
-        return "staff/lesson/save";
-    }
-
-    /**
-     * Kiểm tra tính hợp lệ của subject và chapter.
-     */
-    private Subject validateSubjectAndChapter(Long subjectId, Long chapterId) {
-        Subject subject = subjectService.getSubjectById(subjectId).orElse(null);
-        Chapter chapter = chapterService.getChapterById(chapterId).orElse(null);
-        if (subject == null || chapter == null || !chapter.getSubject().getSubjectId().equals(subjectId)) {
-            throw new ApplicationException("ERROR","Môn học hoặc chương không hợp lệ");
-        }
-        return subject;
-    }
-
-    /**
-     * Parse materialsJson thành List<String>.
-     */
-    private List<String> parseMaterialsJson(String materialsJson) {
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @PostMapping("/{lessonId}/delete")
+    public String deleteLesson(
+            @PathVariable Long subjectId,
+            @PathVariable Long chapterId,
+            @PathVariable Long lessonId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         try {
-            if (materialsJson != null && !materialsJson.isEmpty()) {
-                return objectMapper.readValue(materialsJson, new TypeReference<List<String>>() {});
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
+            lessonService.deleteLesson(lessonId, userId);
+            redirectAttributes.addFlashAttribute("message", "Xóa bài học thành công!");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         } catch (Exception e) {
-            log.warn("Failed to parse materialsJson: {}", e.getMessage());
+            log.error("Error deleting lesson for lessonId={}, userId={}: {}", lessonId, session.getAttribute("id"), e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa bài học!");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
-        return new ArrayList<>();
     }
+
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @GetMapping("/{lessonId}")
+    public String showLessonDetail(
+            @PathVariable Long subjectId,
+            @PathVariable Long chapterId,
+            @PathVariable Long lessonId,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để tiếp tục!");
+                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+            }
+
+            Lesson lesson = lessonService.getLessonById(lessonId)
+                    .orElseThrow(() -> new IllegalArgumentException("Bài học không tồn tại!"));
+
+            LessonListDTO lessonDTO = lessonService.toLessonListDTO(lesson);
+
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("lesson", lessonDTO);
+            return "staff/lesson/detail";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        } catch (Exception e) {
+            log.error("Error showing lesson detail for lessonId={}: {}", lessonId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị chi tiết bài học!");
+            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+        }
+    }
+
 }

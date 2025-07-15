@@ -35,6 +35,7 @@ public class PracticesService {
     UserPackageRepository userPackageRepository;
     SubjectRepository subjectRepository;
     QuestionBankRepository questionBankRepository;
+    TestCategoryRepository testCategoryRepository;
     QuestionService questionService;
     TestRepository testRepository;
     UserTestRepository userTestRepository;
@@ -219,6 +220,7 @@ public class PracticesService {
                                 .options(questionService.getQuestionOptions(question).stream()
                                         .map(AnswerOptionDto::getText)
                                         .collect(Collectors.toList()))
+                                .levelQuestionName(question.getLevelQuestion().getLevelQuestionName())
                                 .build();
                     } catch (Exception e) {
                         // Log the error and return a default DTO or handle appropriately
@@ -243,7 +245,8 @@ public class PracticesService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId);
+        List<UserTest> userTests = userTestRepository.findByTestIdUserId(testId, userId);
+        UserTest userTest = userTests.get(0);
 
         AtomicInteger correctAnswersCount = new AtomicInteger();
 
@@ -325,6 +328,7 @@ public class PracticesService {
                 .startAt(LocalDateTime.now())
                 .endAt(LocalDateTime.now())
                 .testName("Practice Test - " + user.getFullName() + " - " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")))
+                .testCategory(testCategoryRepository.findById(1L).orElseThrow(() -> new RuntimeException("Test category not found: Practice")))
                 .build();
         test = testRepository.save(test);
 
@@ -411,6 +415,7 @@ public class PracticesService {
                                 .options(questionService.getQuestionOptions(question).stream()
                                         .map(AnswerOptionDto::getText)
                                         .collect(Collectors.toList()))
+                                .levelQuestionName(question.getLevelQuestion().getLevelQuestionName())
                                 .build();
                     } catch (Exception e) {
                         return QuestionDisplayDto.builder()
@@ -463,7 +468,11 @@ public class PracticesService {
             return null;
         }
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId);
+        List<UserTest> userTests = userTestRepository.findByTestIdUserId(testId, userId);
+        if (userTests.isEmpty()) {
+            throw new RuntimeException("No user test found for testId: " + testId + " and userId: " + userId);
+        }
+        UserTest userTest = userTests.get(0);
         userTest.setTimeEnd(LocalDateTime.now());
         userTest.setTotalQuestions(userTest.getTotalQuestions() + QUESTIONS_PER_SET);
         userTestRepository.save(userTest);
@@ -499,7 +508,11 @@ public class PracticesService {
             throw new RuntimeException("Không thể xác định người dùng hiện tại.");
         }
 
-        UserTest userTest = userTestRepository.findByTestIdUserId(testId, userId);
+        List<UserTest> userTests = userTestRepository.findByTestIdUserId(testId, userId);
+        if (userTests.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy lịch sử bài kiểm tra cho người dùng hiện tại.");
+        }
+        UserTest userTest = userTests.get(0);
         if (userTest == null) {
             throw new RuntimeException("Không tìm thấy lịch sử bài kiểm tra.");
         }
@@ -562,7 +575,8 @@ public class PracticesService {
         LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
 
-        Page<UserTest> userTestPage = userTestRepository.findByUserIdAndDateRange(userId, startDateTime, endDateTime, pageable);
+        Page<UserTest> userTestPage = userTestRepository.findByUserIdAndDateRange(
+                userId, 1L, startDateTime, endDateTime, pageable);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         List<TestHistoryListDTO> testHistoryList = userTestPage.getContent().stream()

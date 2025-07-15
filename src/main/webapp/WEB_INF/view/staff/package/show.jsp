@@ -145,12 +145,12 @@
             <body>
                 <!-- Header -->
                 <header>
-                    <jsp:include page="../layout/header.jsp" />
+                    <jsp:include page="../layout_staff/header.jsp" />
                 </header>
 
                 <!-- Sidebar -->
                 <div class="sidebar">
-                    <jsp:include page="../layout/sidebar.jsp" />
+                    <jsp:include page="../layout_staff/sidebar.jsp" />
                 </div>
 
                 <!-- Main Content -->
@@ -309,7 +309,7 @@
 
                 <!-- Footer -->
                 <footer>
-                    <jsp:include page="../layout/footer.jsp" />
+                    <jsp:include page="../layout_staff/footer.jsp" />
                 </footer>
 
                 <!-- Bootstrap JS -->

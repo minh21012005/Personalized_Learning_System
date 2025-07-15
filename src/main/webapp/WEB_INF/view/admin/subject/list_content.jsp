@@ -34,7 +34,7 @@
             </a>
         </div>
         <div class="col-auto ms-auto">
-             <a href="<c:url value='/admin/subject/new'/>" class="btn btn-primary btn-sm">
+            <a href="<c:url value='/admin/subject/new'/>" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus-circle"></i> <spring:message code="subject.list.add.new"/>
             </a>
         </div>
@@ -61,7 +61,7 @@
             </th>
             <th><spring:message code="subject.list.image"/></th>
             <th>
-                 <c:url value="/admin/subject" var="sortByNameUrl">
+                <c:url value="/admin/subject" var="sortByNameUrl">
                     <c:param name="filterName" value="${filterName}" />
                     <c:param name="filterGradeId" value="${filterGradeId}" />
                     <c:param name="page" value="${currentPage}" />
@@ -71,12 +71,13 @@
                 </c:url>
                 <a href="${sortByNameUrl}" class="table-header-sort-link">
                     <spring:message code="subject.list.name"/>
-                     <c:if test="${sortField eq 'subjectName'}"><i class="fas fa-sort-${sortDir eq 'asc' ? 'up' : 'down'}"></i></c:if>
+                    <c:if test="${sortField eq 'subjectName'}"><i class="fas fa-sort-${sortDir eq 'asc' ? 'up' : 'down'}"></i></c:if>
                 </a>
             </th>
             <th><spring:message code="subject.list.description"/></th>
             <th><spring:message code="subject.list.grade"/></th>
-            <th><spring:message code="subject.list.active"/></th>
+            <th><spring:message code="subject.list.status"/></th>
+            <th><spring:message code="subject.list.assignedTo"/></th>
             <th>
                 <c:url value="/admin/subject" var="sortByCreatedAtUrl">
                     <c:param name="filterName" value="${filterName}" />
@@ -92,7 +93,7 @@
                 </a>
             </th>
             <th>
-                 <c:url value="/admin/subject" var="sortByUpdatedAtUrl">
+                <c:url value="/admin/subject" var="sortByUpdatedAtUrl">
                     <c:param name="filterName" value="${filterName}" />
                     <c:param name="filterGradeId" value="${filterGradeId}" />
                     <c:param name="page" value="${currentPage}" />
@@ -109,53 +110,78 @@
         </tr>
         </thead>
         <tbody>
-        <c:forEach var="subject" items="${subjects}">
-             <tr>
-                <td>${subject.subjectId}</td>
+        <c:forEach var="subject" items="${subjects}" varStatus="loop">
+            <tr>
+                <td><c:out value="${subject.subjectId}" default=""/></td>
                 <td>
                     <c:choose>
-                        <c:when test="${not empty subject.subjectImage}">
-                            <img src="/img/subjectImg/${subject.subjectImage}"
-                                 alt="${subject.subjectName}" class="subject-img-thumbnail"/>
+                        <c:when test="${not empty subject.subjectImage and subject.subjectImage != ''}">
+                            <img src="/img/subjectImg/<c:out value='${subject.subjectImage}'/>"
+                                 alt="<c:out value='${subject.subjectName}'/>" class="subject-img-thumbnail"/>
                         </c:when>
                         <c:otherwise>
-                            <span class="text-muted"><spring:message code="subject.list.noImage" text="No Image"/></span>
+                            <span class="text-muted"><spring:message code="subject.list.noImage" text="Không có hình ảnh"/></span>
                         </c:otherwise>
                     </c:choose>
                 </td>
-                <td><c:out value="${subject.subjectName}"/></td>
-                <td><c:out value="${subject.subjectDescription}"/></td>
-                <td><c:out value="${subject.grade.gradeName != null ? subject.grade.gradeName : 'N/A'}"/></td>
+                <td><c:out value="${subject.subjectName}" default=""/></td>
+                <td><c:out value="${subject.subjectDescription}" default=""/></td>
+                <td><c:out value="${not empty subject.gradeName ? subject.gradeName : 'N/A'}"/></td>
+                <td>
+                    <c:if test="${not empty subject.status}">
+                        <span class="badge bg-${subject.status == 'DRAFT' ? 'secondary' : subject.status == 'PENDING' ? 'warning' : subject.status == 'APPROVED' ? 'success' : 'danger'}">
+                            <spring:message code="subject.status.${subject.status}"/>
+                            <c:if test="${subject.status == 'PENDING' and not empty subject.submittedByFullName and subject.submittedByFullName != ''}">
+                                (Nộp bởi: <c:out value="${subject.submittedByFullName}"/> lúc <c:out value="${subject.createdAt}"/>)
+                            </c:if>
+                            <c:if test="${subject.status == 'REJECTED' and not empty subject.feedback and subject.feedback != ''}">
+                                <br>Phản hồi: <c:out value="${subject.feedback}"/>
+                            </c:if>
+                        </span>
+                    </c:if>
+                </td>
                 <td>
                     <c:choose>
-                        <c:when test="${subject.isActive}">
-                            <span class="badge bg-success"><spring:message code="label.yes"/></span>
+                        <c:when test="${not empty subject.assignedToFullName and subject.assignedToFullName != ''}">
+                            <c:out value="${subject.assignedToFullName}"/>
                         </c:when>
                         <c:otherwise>
-                            <span class="badge bg-secondary"><spring:message code="label.no"/></span>
+                            <span class="text-muted"><spring:message code="subject.list.notAssigned" text="Chưa được giao"/></span>
                         </c:otherwise>
                     </c:choose>
                 </td>
+                <td><c:out value="${subject.createdAt}" default=""/></td>
+                <td><c:out value="${subject.updatedAt}" default=""/></td>
                 <td>
-                    <c:if test="${subject.createdAt != null}">
-                        ${subject.createdAt.format(customDateFormatter)}
-                    </c:if>
-                </td>
-                <td>
-                    <c:if test="${subject.updatedAt != null}">
-                        ${subject.updatedAt.format(customDateFormatter)}
-                    </c:if>
-                </td>
-                <td>
-                    <a href="<c:url value='/staff/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1" >
-                        <i class="fas fa-eye"></i> View
+                    <a href="<c:url value='/admin/subject/${subject.subjectId}/detail'/>" class="btn btn-sm btn-info me-1" title="<spring:message code="button.detail"/>">
+                        <i class="fas fa-info-circle"></i> <spring:message code="button.detail"/>
                     </a>
                     <a href="<c:url value='/admin/subject/edit/${subject.subjectId}'/>" class="btn btn-sm btn-warning me-1" title="<spring:message code="button.edit"/>">
                         <i class="fas fa-edit"></i> <spring:message code="button.edit"/>
                     </a>
+                    <c:if test="${subject.status == 'DRAFT' and empty subject.assignedToFullName}">
+                        <a href="<c:url value='/admin/subject/assign/${subject.subjectId}'/>" class="btn btn-sm btn-info me-1" title="<spring:message code="button.assign"/>">
+                            <i class="fas fa-user-plus"></i> <spring:message code="button.assign"/>
+                        </a>
+                    </c:if>
+                    <c:if test="${subject.status == 'PENDING'}">
+                        <a href="<c:url value='/admin/subject/review/${subject.subjectId}'/>" class="btn btn-sm btn-info me-1" title="<spring:message code="button.review"/>">
+                            <i class="fas fa-check-circle"></i> <spring:message code="button.review"/>
+                        </a>
+                    </c:if>
+                    <c:if test="${subject.status == 'APPROVED' and not subject.isActive}">
+                        <a href="<c:url value='/admin/subject/publish/${subject.subjectId}'/>" class="btn btn-sm btn-success me-1" title="<spring:message code="button.publish"/>">
+                            <i class="fas fa-upload"></i> <spring:message code="button.publish"/>
+                        </a>
+                    </c:if>
+<%--                    <c:if test="${subject.status == 'APPROVED' or subject.status == 'PUBLISHED'}">--%>
+<%--                        <a href="<c:url value='/admin/subject/revert/${subject.subjectId}'/>" class="btn btn-sm btn-secondary me-1" title="<spring:message code="button.revert"/>">--%>
+<%--                            <i class="fas fa-undo"></i> <spring:message code="button.revert"/>--%>
+<%--                        </a>--%>
+<%--                    </c:if>--%>
                     <a href="<c:url value='/admin/subject/delete/${subject.subjectId}'/>"
                        class="btn btn-sm btn-danger" title="<spring:message code="button.delete"/>"
-                       onclick="return confirm('<spring:message code="confirm.delete.subject.message" arguments="${subject.subjectName}" text="Are you sure you want to delete subject {0}? This action cannot be undone."/>');">
+                       onclick="return confirm('<spring:message code="confirm.delete.subject.message" arguments="${subject.subjectName}" text="Bạn có chắc chắn muốn xóa môn học {0}? Hành động này không thể hoàn tác."/>');">
                         <i class="fas fa-trash-alt"></i> <spring:message code="button.delete"/>
                     </a>
                 </td>
@@ -163,7 +189,7 @@
         </c:forEach>
         <c:if test="${empty subjects}">
             <tr>
-                <td colspan="9" class="text-center text-muted"><spring:message code="subject.list.noSubjectsFound.criteria"/></td>
+                <td colspan="10" class="text-center text-muted"><spring:message code="subject.list.noSubjectsFound.criteria"/></td>
             </tr>
         </c:if>
         </tbody>
@@ -178,7 +204,6 @@
         <div>
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
-                    <%-- Nút First --%>
                     <li class="page-item ${subjectPage.first ? 'disabled' : ''}">
                         <c:url value="/admin/subject" var="firstPageLink">
                             <c:param name="filterName" value="${filterName}" />
@@ -190,7 +215,6 @@
                         </c:url>
                         <a class="page-link" href="${firstPageLink}">««</a>
                     </li>
-                    <%-- Nút Previous --%>
                     <li class="page-item ${subjectPage.first ? 'disabled' : ''}">
                         <c:url value="/admin/subject" var="prevPageLink">
                             <c:param name="filterName" value="${filterName}" />
@@ -202,16 +226,12 @@
                         </c:url>
                         <a class="page-link" href="${prevPageLink}">«</a>
                     </li>
-
-                    <%-- Các nút số trang --%>
-                    <c:set var="windowSize" value="2" /> <%-- Số lượng trang hiển thị ở mỗi bên của trang hiện tại --%>
+                    <c:set var="windowSize" value="2" />
                     <c:set var="startPageLoop" value="${subjectPage.number - windowSize > 0 ? subjectPage.number - windowSize : 0}" />
                     <c:set var="endPageLoop" value="${subjectPage.number + windowSize < subjectPage.totalPages - 1 ? subjectPage.number + windowSize : subjectPage.totalPages - 1}" />
-
-                    <%-- Hiển thị nút trang đầu tiên và "..." nếu cần --%>
                     <c:if test="${startPageLoop > 0}">
                         <c:url value="/admin/subject" var="pageLinkFirstDots">
-                             <c:param name="filterName" value="${filterName}" />
+                            <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="0" />
                             <c:param name="size" value="${pageSize}" />
@@ -220,11 +240,9 @@
                         </c:url>
                         <li class="page-item"><a class="page-link" href="${pageLinkFirstDots}">1</a></li>
                         <c:if test="${startPageLoop > 1}">
-                             <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
                         </c:if>
                     </c:if>
-
-                    <%-- Vòng lặp hiển thị các nút số trang trong "cửa sổ" --%>
                     <c:forEach begin="${startPageLoop}" end="${endPageLoop}" var="i">
                         <li class="page-item ${i == subjectPage.number ? 'active' : ''}">
                             <c:url value="/admin/subject" var="pageLink">
@@ -238,14 +256,12 @@
                             <a class="page-link" href="${pageLink}">${i + 1}</a>
                         </li>
                     </c:forEach>
-
-                    <%-- Hiển thị nút trang cuối cùng và "..." nếu cần --%>
                     <c:if test="${endPageLoop < subjectPage.totalPages - 1}">
                         <c:if test="${endPageLoop < subjectPage.totalPages - 2}">
-                             <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
                         </c:if>
                         <c:url value="/admin/subject" var="pageLinkLastDots">
-                             <c:param name="filterName" value="${filterName}" />
+                            <c:param name="filterName" value="${filterName}" />
                             <c:param name="filterGradeId" value="${filterGradeId}" />
                             <c:param name="page" value="${subjectPage.totalPages - 1}" />
                             <c:param name="size" value="${pageSize}" />
@@ -254,8 +270,6 @@
                         </c:url>
                         <li class="page-item"><a class="page-link" href="${pageLinkLastDots}">${subjectPage.totalPages}</a></li>
                     </c:if>
-
-                    <%-- Nút Next --%>
                     <li class="page-item ${subjectPage.last ? 'disabled' : ''}">
                         <c:url value="/admin/subject" var="nextPageLink">
                             <c:param name="filterName" value="${filterName}" />
@@ -267,7 +281,6 @@
                         </c:url>
                         <a class="page-link" href="${nextPageLink}">»</a>
                     </li>
-                     <%-- Nút Last --%>
                     <li class="page-item ${subjectPage.last ? 'disabled' : ''}">
                         <c:url value="/admin/subject" var="lastPageLink">
                             <c:param name="filterName" value="${filterName}" />

@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = { "packageSubjects", "chapters", "subjectTests", "grade" })
+@ToString(exclude = { "packageSubjects", "chapters", "subjectTests", "grade","statusHistories","assignments" })
 @EqualsAndHashCode(exclude = { "packageSubjects", "chapters", "subjectTests", "grade" })
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Subject extends BaseEntity {
@@ -52,11 +52,13 @@ public class Subject extends BaseEntity {
     @OneToMany(mappedBy = "subject")
     List<Test> tests;
 
-    @OneToMany(mappedBy = "subject")
-    List<SubjectTest> subjectTests;
-
     @ManyToOne
     @JoinColumn(name = "grade_id")
     Grade grade;
 
+    @OneToMany(mappedBy = "subject")
+    List<SubjectStatusHistory> statusHistories;
+
+    @OneToMany(mappedBy = "subject")
+    List<SubjectAssignment> assignments;
 }

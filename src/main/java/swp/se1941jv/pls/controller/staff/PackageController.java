@@ -103,11 +103,12 @@ public class PackageController {
         Long gradeId = newPackage.getGrade() != null ? newPackage.getGrade().getGradeId() : null;
         List<Subject> subjects = gradeId != null ? this.subjectService.getSubjectsByGradeId(gradeId, true)
                 : Collections.emptyList();
+                
 
         // Gắn danh sách môn học và khối lớp vào model để hiển thị lại
         model.addAttribute("grades", grades);
         model.addAttribute("subjects", subjects);
-
+   model.addAttribute("selectedSubjectIds", subjectIds != null ? subjectIds : Collections.emptyList());
         if (bindingResult.hasErrors()) {
             model.addAttribute("subjects", subjects);
             return "staff/package/create";

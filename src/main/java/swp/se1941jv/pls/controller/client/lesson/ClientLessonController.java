@@ -6,14 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.config.SecurityUtils;
 import swp.se1941jv.pls.dto.response.*;
+import swp.se1941jv.pls.dto.response.learningPageData.LearningPageDataDTO;
 import swp.se1941jv.pls.entity.User;
-import swp.se1941jv.pls.exception.ApplicationException;
 import swp.se1941jv.pls.service.*;
 
 import java.util.List;
@@ -74,7 +72,7 @@ public class ClientLessonController {
      * @return Tên view JSP hoặc redirect
      */
     @PreAuthorize("hasAnyRole('STUDENT')")
-    @GetMapping("/packages/detail/subject")
+    @GetMapping("/learn") // Changed mapping for clarity, if it's the main learning page
     public String viewSubject(
             @RequestParam("subjectId") Long subjectId,
             @RequestParam("packageId") Long packageId,
@@ -83,52 +81,31 @@ public class ClientLessonController {
         try {
             Long userId = SecurityUtils.getCurrentUserId();
             if (userId == null) {
-                model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
-                return "redirect:/login";
+                redirectAttributes.addFlashAttribute("error", "Không thể xác định người dùng hiện tại. Vui lòng đăng nhập lại.");
+                return "redirect:/login"; // Always redirect on no user
             }
 
-            // Kiểm tra quyền truy cập gói học
-            if (Boolean.FALSE.equals(subjectService.hasAccessSubjectInPackage(packageId, subjectId, userId))) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập gói học này.");
-                return "redirect:/";
+
+            if (Boolean.FALSE.equals(subjectService.hasAccessSubjectInPackage(packageId, userId, subjectId))) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập gói học này hoặc gói đã hết hạn.");
+                return "redirect:/"; // Redirect to home page or an access denied page
             }
 
-            User user = userService.getUserById(userId);
+            // Fetch all necessary learning data in one optimized call
+            LearningPageDataDTO learningData = subjectService.getLearningPageData(subjectId, packageId, userId);
 
-            if (user == null) {
-                model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
-                return "redirect:/login";
-            }
+            // Add the combined DTO to the model
+            model.addAttribute("learningData", learningData);
 
-            SubjectResponseDTO subject = subjectService.getSubjectResponseDTOById(subjectId,packageId, userId);
 
-            // Lấy danh sách chapter đã phê duyệt
-            List<ChapterResponseDTO> chapters = subject.getListChapter();
-
-            // Lấy lesson đầu tiên của chapter đầu tiên (nếu có) để hiển thị mặc định
-            LessonResponseDTO defaultLesson = chapters.stream()
-                    .filter(chapter -> !chapter.getListLesson().isEmpty())
-                    .findFirst()
-                    .flatMap(chapter -> chapter.getListLesson().stream().findFirst())
-                    .orElse(null);
-
-            // Lấy chapter chứa lesson mặc định
-            ChapterResponseDTO defaultChapter = chapters.stream()
-                    .filter(chapter -> chapter.getListLesson().contains(defaultLesson))
-                    .findFirst()
-                    .orElse(null);
-
-            model.addAttribute("user",user);
-            model.addAttribute("subject", subject);
-            model.addAttribute("chapters", chapters);
-            model.addAttribute("chapter", defaultChapter);
-            model.addAttribute("lesson", defaultLesson);
-            return "client/learning/learn";
-        } catch (ApplicationException e) {
+            return "client/learning/learn"; // Return the name of your JSP file
+        } catch (IllegalArgumentException e) {
+            log.error("Error fetching learning data for subjectId {} in packageId {}: {}", subjectId, packageId, e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị môn học");
+            log.error("An unexpected error occurred while loading learning page for subjectId {} in packageId {}: {}", subjectId, packageId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi không mong muốn khi tải trang học.");
             return "redirect:/";
         }
     }
