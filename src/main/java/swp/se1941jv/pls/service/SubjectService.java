@@ -2,24 +2,23 @@ package swp.se1941jv.pls.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import swp.se1941jv.pls.dto.response.*;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningChapterDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningLessonDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningPageDataDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningTestDTO;
 import swp.se1941jv.pls.dto.response.subject.*;
 import swp.se1941jv.pls.entity.*;
-import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.repository.*;
 
 @Service
@@ -28,14 +27,11 @@ public class SubjectService {
     private final SubjectAssignmentRepository subjectAssignmentRepository;
     private final SubjectStatusHistoryRepository statusHistoryRepository;
     private final UserRepository userRepository;
-    private final ChapterService chapterService;
     private final ChapterRepository chapterRepository;
     private final LessonRepository lessonRepository;
     private final UserPackageRepository userPackageRepository;
     private final PackageSubjectRepository packageSubjectRepository;
-    private final ObjectMapper objectMapper;
     private final LessonProgressRepository lessonProgressRepository;
-    private final PackageRepository packageRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
     private final UserTestRepository userTestRepository;
     private final TestRepository testRepository;
@@ -43,23 +39,20 @@ public class SubjectService {
     public SubjectService(SubjectRepository subjectRepository,
                           SubjectAssignmentRepository subjectAssignmentRepository,
                           SubjectStatusHistoryRepository statusHistoryRepository, UserRepository userRepository,
-                          ChapterService chapterService, ChapterRepository chapterRepository, LessonRepository lessonRepository,
+                           ChapterRepository chapterRepository, LessonRepository lessonRepository,
                           UserPackageRepository userPackageRepository,
-                          PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper,
-                          LessonProgressRepository lessonProgressRepository, PackageRepository packageRepository,
+                          PackageSubjectRepository packageSubjectRepository,
+                          LessonProgressRepository lessonProgressRepository,
                           UserTestRepository userTestRepository, TestRepository testRepository) {
         this.subjectRepository = subjectRepository;
         this.subjectAssignmentRepository = subjectAssignmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.userRepository = userRepository;
-        this.chapterService = chapterService;
         this.chapterRepository = chapterRepository;
         this.lessonRepository = lessonRepository;
         this.userPackageRepository = userPackageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
-        this.objectMapper = objectMapper;
         this.lessonProgressRepository = lessonProgressRepository;
-        this.packageRepository = packageRepository;
         this.userTestRepository = userTestRepository;
         this.testRepository = testRepository;
     }
@@ -498,6 +491,14 @@ public class SubjectService {
         String searchName = (filterName != null && filterName.trim().isEmpty()) ? null : filterName;
         return subjectRepository.findByFilter(searchName, filterGradeId, pageable)
                 .map(this::toSubjectListDTO);
+    }
+
+    public Page<SubjectListDTO> getPendingSubjectsWithDTO(String filterName, String submittedByName, Pageable pageable) {
+        String searchName = (filterName != null && !filterName.trim().isEmpty()) ? filterName.trim() : null;
+        String searchSubmittedBy = (submittedByName != null && !submittedByName.trim().isEmpty()) ? submittedByName.trim() : null;
+
+        Page<Subject> pendingSubjects = subjectRepository.findPendingSubjects(searchName, searchSubmittedBy, pageable);
+        return pendingSubjects.map(this::toSubjectListDTO);
     }
 
     public Optional<SubjectAssignDTO> getSubjectAssignDTOById(Long id) {
@@ -994,7 +995,7 @@ public class SubjectService {
             SubjectStatusHistory status = statusOpt.get();
             builder.submittedByFullName(status.getSubmittedBy() != null ? status.getSubmittedBy().getFullName() : null)
                     .feedback(status.getFeedback());
-            // Lấy người giao từ SubjectStatusHistory (giả định có bản ghi DRAFT với reviewer là người giao)
+            builder.submittedAt(status.getChangedAt() != null ? status.getChangedAt().format(formatter):null);
             if (status.getStatus() == SubjectStatusHistory.SubjectStatus.DRAFT && status.getReviewer() != null) {
                 builder.assignedByFullName(status.getReviewer().getFullName());
             } else {
