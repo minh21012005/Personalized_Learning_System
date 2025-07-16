@@ -15,7 +15,21 @@ import jakarta.validation.constraints.NotNull;
 @ToString(callSuper = true, exclude = {"parentComment", "replies","user"})
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
+@NamedEntityGraph(
+    name = "Communication.withRepliesAndUser",
+    attributeNodes = {
+        @NamedAttributeNode("user"),
+        @NamedAttributeNode(value = "replies", subgraph = "replies-subgraph")
+    },
+    subgraphs = {
+        @NamedSubgraph(
+            name = "replies-subgraph",
+            attributeNodes = {
+                @NamedAttributeNode("user")
+            }
+        )
+    }
+)
 public class Communication extends BaseEntity{
 
     @Getter
