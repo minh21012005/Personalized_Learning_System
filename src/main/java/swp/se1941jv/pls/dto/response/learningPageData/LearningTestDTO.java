@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LearningTestDTO {
+    Long userTestId;
     Long testId;
     String testName;
     Integer durationTime;

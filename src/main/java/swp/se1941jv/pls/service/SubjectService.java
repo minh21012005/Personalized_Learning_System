@@ -830,7 +830,8 @@ public class SubjectService {
                                     Test test = lessonTests.get(0); // Lấy bài kiểm tra đầu tiên (giả định chỉ có một)
                                     Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                                     lessonTest = LearningTestDTO.builder()
-                                            .testId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
+                                            .testId(test.getTestId())
+                                            .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
                                             .testName(test.getTestName())
                                             .durationTime(test.getDurationTime())
                                             .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
@@ -862,7 +863,8 @@ public class SubjectService {
                             .map(test -> {
                                 Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                                 return LearningTestDTO.builder()
-                                        .testId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
+                                        .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
+                                        .testId(test.getTestId())
                                         .testName(test.getTestName())
                                         .durationTime(test.getDurationTime())
                                         .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
@@ -888,7 +890,8 @@ public class SubjectService {
                 .map(test -> {
                     Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                     return LearningTestDTO.builder()
-                            .testId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
+                            .testId(test.getTestId())
+                            .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
                             .testName(test.getTestName())
                             .durationTime(test.getDurationTime())
                             .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")

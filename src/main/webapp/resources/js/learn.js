@@ -129,13 +129,14 @@ const LearningApp = (function () {
         testSection.empty();
         if (lesson.lessonTest) {
             const test = lesson.lessonTest;
+            console.log('Test:', test);
             testSection.append(`
                 <h3 class="h5 fw-semibold">${test.testName}</h3>
                 <p><strong>Loại: </strong>${test.testCategoryName}</p>
                 <p><strong>Thời gian: </strong>${test.durationTime} phút</p>
                 ${test.isCompleted ? `
                     <span class="test-completed">Hoàn thành</span>
-                    <a href="/tests/history/${test.testId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                    <a href="/tests/history/${test.userTestId}" class="btn btn-outline-primary btn-detail" target="_blank">
                         Chi tiết
                     </a>
                 ` : `
