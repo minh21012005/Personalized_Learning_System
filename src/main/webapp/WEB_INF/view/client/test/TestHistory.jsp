@@ -119,7 +119,7 @@
                                 <td class="text-center">${fn:escapeXml(history.startTime)}</td>
                                 <td class="text-center">${fn:escapeXml(history.endTime)}</td>
                                 <td class="text-center">
-                                    <a href="/tests/history/${history.testId}" class="btn btn-success btn-sm">Chi tiết</a>
+                                    <a href="/tests/history/${history.userTestId}" class="btn btn-success btn-sm">Chi tiết</a>
                                 </td>
                             </tr>
                         </c:forEach>

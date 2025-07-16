@@ -98,13 +98,13 @@
             <body>
                 <!-- Include Header -->
                 <header>
-                    <jsp:include page="../layout/header.jsp" />
+                    <jsp:include page="../layout_staff/header.jsp" />
                 </header>
 
 
                 <!-- Include Sidebar -->
                 <div class="sidebar">
-                    <jsp:include page="../layout/sidebar.jsp" />
+                    <jsp:include page="../layout_staff/sidebar.jsp" />
                 </div>
 
 
@@ -271,7 +271,7 @@
 
                 <!-- Include Footer -->
                 <footer>
-                    <jsp:include page="../layout/footer.jsp" />
+                    <jsp:include page="../layout_staff/footer.jsp" />
                 </footer>
 
                 <!-- End of <body> -->

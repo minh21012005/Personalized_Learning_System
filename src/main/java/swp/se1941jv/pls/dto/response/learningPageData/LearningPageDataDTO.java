@@ -13,18 +13,12 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LearningPageDataDTO {
-    // Thông tin tổng quan môn học
     Long subjectId;
     String subjectName;
-
-    // Thông tin người dùng và gói học (cần cho JS)
     Long userId;
     Long packageId;
-
-    // Danh sách Chapter và Lesson
     List<LearningChapterDTO> chapters;
-
-    // Lesson và Chapter mặc định để hiển thị lần đầu
     LearningLessonDTO defaultLesson;
     LearningChapterDTO defaultChapter;
+    List<LearningTestDTO> subjectTests;
 }

@@ -103,11 +103,15 @@
                         <p><strong>Chương:</strong> ${fn:escapeXml(test.chapterName != null ? test.chapterName : 'Chưa xác định')}</p>
                         <p><strong>Bài học:</strong> ${fn:escapeXml(test.lessonName != null ? test.lessonName : 'Chưa xác định')}</p>
                         <p><strong>Thời gian (phút):</strong> ${test.durationTime}</p>
+                        <p><strong>Số lần làm tối đa:</strong> ${test.maxAttempts}</p>
                         <p><strong>Thời gian bắt đầu:</strong> ${fn:escapeXml(test.startAt)}</p>
                         <p><strong>Thời gian kết thúc:</strong> ${fn:escapeXml(test.endAt)}</p>
                         <p><strong>Trạng thái:</strong> ${fn:escapeXml(test.statusName)}</p>
                         <p><strong>Mở/Đóng:</strong> ${test.isOpen ? 'Mở' : 'Đóng'}</p>
                         <p><strong>Danh mục:</strong> ${fn:escapeXml(test.categoryName)}</p>
+                        <c:if test="${not empty test.reason}">
+                            <p><strong>Lý do phê duyệt/từ chối:</strong> ${fn:escapeXml(test.reason)}</p>
+                        </c:if>
                     </div>
                 </div>
                 <h5>Câu hỏi</h5>

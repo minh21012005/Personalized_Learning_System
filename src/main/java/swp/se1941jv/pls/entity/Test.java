@@ -47,7 +47,7 @@ public class Test extends BaseEntity {
     TestStatus testStatus;
 
     @ManyToOne
-    @JoinColumn(name="chapter_id")
+    @JoinColumn(name = "chapter_id")
     Chapter chapter;
 
     @ManyToOne
@@ -63,5 +63,11 @@ public class Test extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "test_category_id")
     TestCategory testCategory;
+
+    @Column(name = "max_attempts")
+    Long maxAttempts;
+
+    @Column(name = "reason")
+    private String reason;
 
 }

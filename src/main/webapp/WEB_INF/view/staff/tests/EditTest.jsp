@@ -17,40 +17,48 @@
             overflow-x: hidden;
             font-family: Arial, sans-serif;
         }
+
         header {
             background-color: #1a252f;
             color: white;
             width: 100%;
         }
+
         .main-container {
             display: flex;
             flex: 1;
         }
+
         .sidebar {
             width: 250px;
             background-color: #1a252f;
             color: white;
             overflow-y: auto;
         }
+
         .content {
             flex: 1;
             padding: 20px;
             background-color: #f8f9fa;
         }
+
         footer {
             background-color: #1a252f;
             color: white;
             height: 40px;
             width: 100%;
         }
+
         .form-label {
             font-weight: 500;
             color: #343a40;
         }
+
         .form-control, .form-select {
             border-radius: 0.25rem;
             border: 1px solid #ced4da;
         }
+
         .btn-select-questions {
             background-color: #28a745;
             border: none;
@@ -60,9 +68,11 @@
             font-weight: 500;
             transition: background-color 0.3s;
         }
+
         .btn-select-questions:hover {
             background-color: #218838;
         }
+
         .btn-submit {
             background-color: #007bff;
             border: none;
@@ -72,9 +82,11 @@
             font-weight: 500;
             transition: background-color 0.3s;
         }
+
         .btn-submit:hover {
             background-color: #0056b3;
         }
+
         .btn-cancel {
             background-color: #6c757d;
             border: none;
@@ -84,18 +96,22 @@
             font-weight: 500;
             transition: background-color 0.3s;
         }
+
         .btn-cancel:hover {
             background-color: #5a6268;
         }
+
         .modal-content {
             border-radius: 0.25rem;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
+
         .modal-header {
             background: linear-gradient(90deg, #007bff, #0056b3);
             color: #ffffff;
             border-radius: 0.25rem 0.25rem 0 0;
         }
+
         .question-list {
             max-height: 400px;
             overflow-y: auto;
@@ -104,6 +120,7 @@
             padding: 10px;
             margin-bottom: 20px;
         }
+
         .question-item {
             padding: 15px;
             border-bottom: 1px solid #e9ecef;
@@ -111,35 +128,43 @@
             border-radius: 0.25rem;
             margin-bottom: 10px;
         }
+
         .question-item:last-child {
             border-bottom: none;
         }
+
         .question-item input[type="checkbox"] {
             margin-right: 10px;
         }
+
         .question-item .chapter-info {
             font-size: 0.9rem;
             color: #6c757d;
             margin-bottom: 10px;
         }
+
         .question-item .options {
             margin-top: 10px;
         }
+
         .question-item .option {
             padding: 8px;
             border-radius: 0.25rem;
             margin-bottom: 5px;
         }
+
         .question-item .option.correct {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+
         .question-item .option.neutral {
             background-color: #ffffff;
             color: #212529;
             border: 1px solid #dee2e6;
         }
+
         .selected-questions {
             padding: 10px;
             border: 1px solid #dee2e6;
@@ -147,40 +172,49 @@
             background-color: #f8f9fa;
             min-height: 50px;
         }
+
         .selected-questions p {
             margin: 0;
             color: #6c757d;
         }
+
         .question-count {
             font-size: 0.9rem;
             font-weight: 500;
             color: #343a40;
             margin-bottom: 10px;
         }
+
         .error-message {
             color: #dc3545;
             font-size: 0.9rem;
             margin-top: 5px;
         }
+
         .mandatory::after {
             content: ' *';
             color: #dc3545;
         }
+
         @media (max-width: 768px) {
             .content {
                 padding: 15px;
             }
+
             h1 {
                 font-size: 1.5rem;
             }
+
             .btn-select-questions, .btn-submit, .btn-cancel {
                 width: 100%;
                 padding: 12px;
                 font-size: 0.9rem;
             }
+
             .question-list {
                 max-height: 300px;
             }
+
             .question-item {
                 padding: 10px;
             }
@@ -232,16 +266,21 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="mb-3 col-6">
-                                    <label for="startAt" class="form-label mandatory">Thời gian bắt đầu</label>
+                                <div class="mb-3 col-4">
+                                    <label for="startAt" class="form-label ">số lần làm tối đa</label>
+                                    <input type="number" class="form-control" id="maxAttempts" name="maxAttempts"
+                                           value="${test.maxAttempts}" >
+                                </div>
+                                <div class="mb-3 col-4">
+                                    <label for="startAt" class="form-label ">Thời gian bắt đầu</label>
                                     <input type="datetime-local" class="form-control" id="startAt" name="startAt"
-                                           value="${test.startAt}" required>
+                                           value="${test.startAt}">
                                     <div id="startAtError" class="error-message"></div>
                                 </div>
-                                <div class="mb-3 col-6">
-                                    <label for="endAt" class="form-label mandatory">Thời gian kết thúc</label>
+                                <div class="mb-3 col-4">
+                                    <label for="endAt" class="form-label">Thời gian kết thúc</label>
                                     <input type="datetime-local" class="form-control" id="endAt" name="endAt"
-                                           value="${test.endAt}" required>
+                                           value="${test.endAt}">
                                     <div id="endAtError" class="error-message"></div>
                                 </div>
                             </div>
@@ -310,7 +349,9 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label mandatory">Câu hỏi đã chọn</label>
-                                <div class="question-count" id="questionCount">Đã chọn: ${fn:length(test.questions)} câu hỏi</div>
+                                <div class="question-count" id="questionCount">Đã chọn: ${fn:length(test.questions)} câu
+                                    hỏi
+                                </div>
                                 <div class="selected-questions" id="selectedQuestions">
                                     <c:choose>
                                         <c:when test="${empty test.questions}">
@@ -318,7 +359,8 @@
                                         </c:when>
                                         <c:otherwise>
                                             <c:forEach var="question" items="${test.questions}">
-                                                <p>Câu hỏi: ${fn:escapeXml(question.content)} (ID: ${question.questionId})</p>
+                                                <p>Câu hỏi: ${fn:escapeXml(question.content)}
+                                                    (ID: ${question.questionId})</p>
                                             </c:forEach>
                                         </c:otherwise>
                                     </c:choose>
@@ -329,8 +371,12 @@
                                 <div id="questionsError" class="error-message"></div>
                             </div>
                             <div class="d-flex gap-2 mb-3">
-                                <button type="submit" class="btn btn-submit" name="action" value="saveDraft">Lưu bản nháp</button>
-                                <button type="submit" class="btn btn-primary" name="action" value="requestApproval">Yêu cầu phê duyệt</button>
+                                <button type="submit" class="btn btn-submit" name="action" value="saveDraft">Lưu bản
+                                    nháp
+                                </button>
+                                <button type="submit" class="btn btn-primary" name="action" value="requestApproval">Yêu
+                                    cầu phê duyệt
+                                </button>
                                 <a href="/staff/tests" class="btn btn-cancel">Hủy</a>
                             </div>
                         </form>
@@ -430,7 +476,7 @@
         var subjectId = $('#subject').val();
         var chapterId = $('#chapter').val();
         var lessonId = $('#lesson').val();
-        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '')+ '&lessonId=' + (lessonId || '');
+        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '') + '&lessonId=' + (lessonId || '');
         $.ajax({
             url: url,
             method: 'GET',
@@ -501,16 +547,8 @@
         }
 
         var startAt = $('#startAt').val();
-        if (!startAt) {
-            $('#startAtError').text('Thời gian bắt đầu là bắt buộc.');
-            isValid = false;
-        }
-
         var endAt = $('#endAt').val();
-        if (!endAt) {
-            $('#endAtError').text('Thời gian kết thúc là bắt buộc.');
-            isValid = false;
-        } else if (startAt && new Date(endAt) <= new Date(startAt)) {
+        if (startAt && endAt && new Date(endAt) <= new Date(startAt)) {
             $('#endAtError').text('Thời gian kết thúc phải sau thời gian bắt đầu.');
             isValid = false;
         }

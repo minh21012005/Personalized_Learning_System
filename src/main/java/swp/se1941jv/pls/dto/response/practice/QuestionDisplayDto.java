@@ -11,5 +11,6 @@ public class QuestionDisplayDto {
     private Long questionId;
     private String content;
     private String image;
+    private String levelQuestionName;
     private List<String> options; // List of options with only text
 }

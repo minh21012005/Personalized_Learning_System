@@ -263,29 +263,24 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="mb-3 col-6">
-                                    <label for="startAt" class="form-label mandatory">Thời gian bắt đầu</label>
+                                <div class="mb-3 col-4">
+                                    <label for="durationTime" class="form-label ">Số lần làm bài tối đa:</label>
+                                    <input type="number" class="form-control" id="maxAttempts" name="maxAttempts"
+                                           >
+                                </div>
+                                <div class="mb-3 col-4">
+                                    <label for="startAt" class="form-label ">Thời gian bắt đầu</label>
                                     <input type="datetime-local" class="form-control" id="startAt" name="startAt"
-                                           required>
+                                           >
                                     <div id="startAtError" class="error-message"></div>
                                 </div>
-                                <div class="mb-3 col-6">
-                                    <label for="endAt" class="form-label mandatory">Thời gian kết thúc</label>
-                                    <input type="datetime-local" class="form-control" id="endAt" name="endAt" required>
+                                <div class="mb-3 col-4">
+                                    <label for="endAt" class="form-label ">Thời gian kết thúc</label>
+                                    <input type="datetime-local" class="form-control" id="endAt" name="endAt" >
                                     <div id="endAtError" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="row">
-<%--                                <div class="mb-3 col-6">--%>
-<%--                                    <label for="testStatus" class="form-label mandatory">Trạng thái</label>--%>
-<%--                                    <select class="form-select" id="testStatus" name="testStatusId" required>--%>
-<%--                                        <option value="">Chọn trạng thái</option>--%>
-<%--                                        <c:forEach var="status" items="${testStatuses}">--%>
-<%--                                            <option value="${status.testStatusId}">${fn:escapeXml(status.testStatusName)}</option>--%>
-<%--                                        </c:forEach>--%>
-<%--                                    </select>--%>
-<%--                                    <div id="testStatusError" class="error-message"></div>--%>
-<%--                                </div>--%>
                                 <div class="mb-3 col-6">
                                     <label for="testCategory" class="form-label mandatory">Danh mục</label>
                                     <select class="form-select" id="testCategory" name="testCategoryId" required>
@@ -510,25 +505,11 @@
         }
 
         var startAt = $('#startAt').val();
-        if (!startAt) {
-            $('#startAtError').text('Thời gian bắt đầu là bắt buộc.');
-            isValid = false;
-        }
-
         var endAt = $('#endAt').val();
-        if (!endAt) {
-            $('#endAtError').text('Thời gian kết thúc là bắt buộc.');
-            isValid = false;
-        } else if (startAt && new Date(endAt) <= new Date(startAt)) {
+        if (startAt && endAt && new Date(endAt) <= new Date(startAt)) {
             $('#endAtError').text('Thời gian kết thúc phải sau thời gian bắt đầu.');
             isValid = false;
         }
-
-        // var testStatus = $('#testStatus').val();
-        // if (!testStatus) {
-        //     $('#testStatusError').text('Trạng thái là bắt buộc.');
-        //     isValid = false;
-        // }
 
         var testCategory = $('#testCategory').val();
         if (!testCategory) {

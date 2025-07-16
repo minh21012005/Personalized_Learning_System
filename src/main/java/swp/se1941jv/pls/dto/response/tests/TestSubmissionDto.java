@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class TestSubmissionDto {
+    private Long userTestId;
     private Long testId;
     private List<QuestionAnswer> answers;
 

@@ -146,7 +146,7 @@
         <form action="/practices/submit-answers" method="post" id="practiceForm" onsubmit="return prepareForm()">
             <c:forEach var="question" items="${questions}" varStatus="loop">
                 <div class="question-card">
-                    <h4>Câu hỏi ${loop.count + currentQuestionIndex}</h4>
+                    <h4>Câu hỏi ${loop.count + currentQuestionIndex} - level : ${question.levelQuestionName}</h4>
                     <p>${fn:escapeXml(question.content)}</p>
                     <c:if test="${not empty question.image}">
                         <img src="/img/question_bank/${fn:escapeXml(question.image)}" alt="Question Image">
