@@ -25,6 +25,11 @@ public class TestStudentController {
     private final TestStudentService testStudentService;
     private final ObjectMapper objectMapper;
 
+    private String handleError(Model model, String errorMessage) {
+        model.addAttribute("errorMessage", errorMessage);
+        return "client/test/error"; // Redirect to the new error page
+    }
+
     @GetMapping("/{testId}/{packageId}")
     @PreAuthorize("hasAnyRole('STUDENT')")
     public String startTest(@PathVariable Long testId, @PathVariable Long packageId, Model model) {
@@ -39,8 +44,7 @@ public class TestStudentController {
             Long userTestId = (Long) testData.get("userTestId");
             return "redirect:/tests/userTest/" + userTestId; // Redirect to new endpoint
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi bắt đầu bài kiểm tra: " + e.getMessage());
-            return "error";
+            return handleError(model, "Lỗi khi tải bài kiểm tra: " + e.getMessage());
         }
     }
 
@@ -103,8 +107,7 @@ public class TestStudentController {
             model.addAttribute("userTestId", userTestId);
             return "client/test/TestResult";
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi nộp bài: " + e.getMessage());
-            return "error";
+            return handleError(model, "Lỗi khi nộp bài: " + e.getMessage());
         }
     }
 
@@ -131,8 +134,7 @@ public class TestStudentController {
             model.addAttribute("endDate", endDate != null ? endDate.toString() : "");
             return "client/test/TestHistory";
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi lấy danh sách lịch sử bài kiểm tra: " + e.getMessage());
-            return "error";
+            return handleError(model, "Lỗi khi lấy danh sách lịch sử bài kiểm tra: " + e.getMessage());
         }
     }
 
@@ -150,8 +152,7 @@ public class TestStudentController {
             model.addAttribute("history", history);
             return "client/test/TestHistoryDetail";
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi lấy chi tiết lịch sử: " + e.getMessage());
-            return "error";
+            return handleError(model, "Lỗi khi lấy chi tiết lịch sử: " + e.getMessage());
         }
     }
 }

@@ -1,11 +1,6 @@
-// Bọc toàn bộ code trong một IIFE (Immediately Invoked Function Expression) để tránh xung đột biến
 (function () {
-    // Chờ cho toàn bộ cấu trúc HTML của trang được tải xong rồi mới chạy code
     document.addEventListener('DOMContentLoaded', function () {
 
-        // --- KIỂM TRA CÁC ĐIỀU KIỆN CẦN THIẾT ---
-
-        // 1. Kiểm tra xem đối tượng learningConfig có tồn tại không
         if (typeof window.learningConfig === 'undefined' || !window.learningConfig) {
             console.error('Lỗi nghiêm trọng: Đối tượng window.learningConfig không được tìm thấy. Script bình luận không thể hoạt động.');
             return;
@@ -58,17 +53,19 @@
     });
 }
 
-function createPendingCommentElement(content) {
+function createPendingCommentElement(content, currentUser) {
     const div = document.createElement('div');
+    div.classList.add('comment-item', 'd-flex', 'mb-3', 'opacity-75');
+    const avatarSrc = currentUser?.avatarUrl ? '/img/avatar/' + currentUser.avatarUrl : '/img/avatar-default.jpg';
+    const authorName = currentUser?.name || 'Bạn';
     div.innerHTML = `
-        <div class="d-flex mb-3 text-muted">
-            <img src="https://via.placeholder.com/40"
-                class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
-            <div>
-                <strong>Bạn (chờ duyệt)</strong>
-                <p class="mb-1 fst-italic">${content}</p>
-                <small class="text-muted">${new Date().toLocaleString('vi-VN')}</small>
-            </div>
+        <div class="flex-shrink-0">
+            <img src="${avatarSrc}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+        </div>
+        <div class="flex-grow-1 ms-3">
+            <strong class="comment-author">${authorName} (đang chờ duyệt)</strong>
+            <p class="comment-content fst-italic mb-1">${content}</p>
+            <small class="text-muted">${new Date().toLocaleString('vi-VN')}</small>
         </div>
     `;
     return div;
@@ -80,7 +77,7 @@ function createPendingCommentElement(content) {
             const div = document.createElement('div');
             div.innerHTML = `
         <div class="d-flex mb-3">
-            <img src="${comment.author?.avatar || 'https://via.placeholder.com/40'}"
+            <img src="${comment.author?.avatarUrl ? "/img/avatar/" + comment.author.avatarUrl : '/img/avatar-default.jpg'}"
                 class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
             <div>
                 <strong>${comment.author?.name || 'Người dùng ẩn danh'}</strong>
@@ -156,7 +153,7 @@ function createPendingCommentElement(content) {
 
     div.innerHTML = `
         <div class="d-flex">
-            <img src="https://via.placeholder.com/40"
+            <img src="${window.learningConfig?.currentUser?.avatarUrl ? '/img/avatar/' + window.learningConfig.currentUser.avatarUrl : '/img/avatar-default.jpg'}"
                 class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
             <div>
                 <strong>Bạn</strong>

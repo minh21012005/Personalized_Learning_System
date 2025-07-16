@@ -2,6 +2,7 @@ package swp.se1941jv.pls.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -59,6 +60,7 @@ public interface CommunicationRepository extends JpaRepository<Communication, Lo
                      "WHERE c.id = :id")
        Optional<Communication> findByIdWithDetails(Long id);
 
-        @Query("SELECT c FROM Communication c WHERE c.parentComment IS NULL AND c.lesson.id = :lessonId AND c.commentStatus = 'APPROVED' ORDER BY c.createdAt DESC")
+       @EntityGraph(value = "Communication.withRepliesAndUser")
+       @Query("SELECT c FROM Communication c WHERE c.parentComment IS NULL AND c.lesson.id = :lessonId AND c.commentStatus = 'APPROVED' ORDER BY c.createdAt DESC")
        List<Communication> findApprovedRootCommentByLessonId(@Param("lessonId") Long lessonId);
 }

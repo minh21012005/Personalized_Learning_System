@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function createCommentRecursive(comment) {
         const author = comment.author || {};
         const authorName = author.name || 'Người dùng ẩn danh';
-        const avatar = author.avatarUrl ? window.API_URLS.images + author.avatarUrl : 'https://via.placeholder.com/40';
+        const avatar = author.avatarUrl ? window.API_URLS.images + author.avatarUrl : '/img/avatar-default.jpg';
         let createdAt = 'Ngày không hợp lệ';
         if (comment.createdAt) {
             try { createdAt = new Date(comment.createdAt).toLocaleString('vi-VN'); } catch (e) { }

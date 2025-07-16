@@ -347,6 +347,7 @@
         lessonTest: <c:if test="${lessonItem.lessonTest != null}">
         {
             testId: ${lessonItem.lessonTest.testId},
+            userTestId: ${lessonItem.lessonTest.userTestId != null ? lessonItem.lessonTest.userTestId : 'null'},
             testName: "${fn:escapeXml(lessonItem.lessonTest.testName)}",
             durationTime: ${lessonItem.lessonTest.durationTime},
             testCategoryName: "${fn:escapeXml(lessonItem.lessonTest.testCategoryName)}",
@@ -537,7 +538,7 @@
                                                                 </c:if>
                                                             </a>
                                                             <c:if test="${chapterTest.isCompleted}">
-                                                                <a href="/tests/history/${chapterTest.testId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                                                                <a href="/tests/history/${chapterTest.userTestId}" class="btn btn-outline-primary btn-detail" target="_blank">
                                                                     Chi tiết
                                                                 </a>
                                                             </c:if>
@@ -605,7 +606,7 @@
                                                     </c:if>
                                                 </a>
                                                 <c:if test="${chapterTest.isCompleted}">
-                                                    <a href="/tests/history/${chapterTest.testId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                                                    <a href="/tests/history/${chapterTest.userTestId}" class="btn btn-outline-primary btn-detail" target="_blank">
                                                         Chi tiết
                                                     </a>
                                                 </c:if>
@@ -634,7 +635,7 @@
                                     </c:if>
                                 </a>
                                 <c:if test="${subjectTest.isCompleted}">
-                                    <a href="/tests/history/${subjectTest.testId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                                    <a href="/tests/history/${subjectTest.userTestId}" class="btn btn-outline-primary btn-detail" target="_blank">
                                         Chi tiết
                                     </a>
                                 </c:if>
