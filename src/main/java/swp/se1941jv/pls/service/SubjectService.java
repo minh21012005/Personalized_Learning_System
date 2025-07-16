@@ -2,10 +2,7 @@ package swp.se1941jv.pls.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -828,7 +825,12 @@ public class SubjectService {
                                 List<Test> lessonTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndLessonLessonId(4L, true, lesson.getLessonId());
                                 if (!lessonTests.isEmpty()) {
                                     Test test = lessonTests.get(0); // Lấy bài kiểm tra đầu tiên (giả định chỉ có một)
-                                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
+
+                                    List<UserTest> userTests = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().sorted(Comparator.comparing(UserTest::getUserTestId).reversed()).collect(Collectors.toList());
+
+                                    Optional<UserTest> userTestOpt = userTests.stream().findFirst();
+
+//                                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                                     lessonTest = LearningTestDTO.builder()
                                             .testId(test.getTestId())
                                             .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
@@ -861,7 +863,10 @@ public class SubjectService {
                     List<Test> chapterTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndChapterChapterId(2L, true, chapter.getChapterId());
                     List<LearningTestDTO> chapterTestDTOs = chapterTests.stream()
                             .map(test -> {
-                                Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
+                                List<UserTest> userTests = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().sorted(Comparator.comparing(UserTest::getUserTestId).reversed()).collect(Collectors.toList());
+
+                                Optional<UserTest> userTestOpt = userTests.stream().findFirst();
+//                                Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                                 return LearningTestDTO.builder()
                                         .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
                                         .testId(test.getTestId())
@@ -888,7 +893,10 @@ public class SubjectService {
         List<Test> subjectTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndSubjectSubjectId(3L, true, subjectId);
         List<LearningTestDTO> subjectTestDTOs = subjectTests.stream()
                 .map(test -> {
-                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
+                    List<UserTest> userTests = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().sorted(Comparator.comparing(UserTest::getUserTestId).reversed()).collect(Collectors.toList());
+
+                    Optional<UserTest> userTestOpt = userTests.stream().findFirst();
+//                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                     return LearningTestDTO.builder()
                             .testId(test.getTestId())
                             .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
