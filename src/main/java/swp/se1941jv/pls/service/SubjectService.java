@@ -42,14 +42,15 @@ public class SubjectService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
     private final UserTestRepository userTestRepository;
     private final TestRepository testRepository;
+
     public SubjectService(SubjectRepository subjectRepository,
                           SubjectAssignmentRepository subjectAssignmentRepository,
                           SubjectStatusHistoryRepository statusHistoryRepository, UserRepository userRepository,
-                          ChapterService chapterService,ChapterRepository chapterRepository,LessonRepository lessonRepository,
+                          ChapterService chapterService, ChapterRepository chapterRepository, LessonRepository lessonRepository,
                           UserPackageRepository userPackageRepository,
                           PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper,
                           LessonProgressRepository lessonProgressRepository, PackageRepository packageRepository,
-                          UserTestRepository userTestRepository,TestRepository testRepository) {
+                          UserTestRepository userTestRepository, TestRepository testRepository) {
         this.subjectRepository = subjectRepository;
         this.subjectAssignmentRepository = subjectAssignmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
@@ -145,7 +146,6 @@ public class SubjectService {
     public Optional<Subject> findById(long id) {
         return this.subjectRepository.findById(id);
     }
-
 
 
 //    public SubjectResponseDTO getSubjectResponseById(Long subjectId) {
@@ -440,7 +440,6 @@ public class SubjectService {
     }
 
 
-
     @Transactional
     public void publishSubject(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
@@ -622,7 +621,7 @@ public class SubjectService {
             throw new IllegalArgumentException("Chỉ có Content Manager mới có thể xóa môn học!");
         }
 
-        if (!subjectRepository.existsById(subjectId)){
+        if (!subjectRepository.existsById(subjectId)) {
             throw new IllegalArgumentException("Môn học không tồn tại");
         }
 
@@ -831,7 +830,7 @@ public class SubjectService {
                                     Test test = lessonTests.get(0); // Lấy bài kiểm tra đầu tiên (giả định chỉ có một)
                                     Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                                     lessonTest = LearningTestDTO.builder()
-                                            .testId(test.getTestId())
+                                            .testId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
                                             .testName(test.getTestName())
                                             .durationTime(test.getDurationTime())
                                             .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
@@ -863,7 +862,7 @@ public class SubjectService {
                             .map(test -> {
                                 Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                                 return LearningTestDTO.builder()
-                                        .testId(test.getTestId())
+                                        .testId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
                                         .testName(test.getTestName())
                                         .durationTime(test.getDurationTime())
                                         .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
@@ -889,7 +888,7 @@ public class SubjectService {
                 .map(test -> {
                     Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
                     return LearningTestDTO.builder()
-                            .testId(test.getTestId())
+                            .testId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
                             .testName(test.getTestName())
                             .durationTime(test.getDurationTime())
                             .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
