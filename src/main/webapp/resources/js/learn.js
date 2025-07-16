@@ -92,6 +92,12 @@ const LearningApp = (function () {
         currentLessonId = lessonId;
         const lesson = lessons[lessonId];
 
+        if (window.learningConfig) {
+        window.learningConfig.currentLessonId = lessonId;
+    }
+    const event = new CustomEvent('lessonChanged', { detail: { lessonId: lessonId } });
+    document.dispatchEvent(event);
+
         updateLessonUI(lesson);
         initializeYouTubePlayer(lessonId);
         loadProgress(lessonId);
