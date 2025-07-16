@@ -37,6 +37,15 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
                      @Param("gradeId") Long gradeId,
                      Pageable pageable);
 
+    @Query("SELECT s FROM Subject s JOIN s.statusHistories sh WHERE sh.status = 'PENDING' " +
+            "AND (:subjectName IS NULL OR LOWER(s.subjectName) LIKE LOWER(CONCAT('%', :subjectName, '%'))) " +
+            "AND (:submittedByName IS NULL OR LOWER(sh.submittedBy.fullName) LIKE LOWER(CONCAT('%', :submittedByName, '%'))) " +
+            "GROUP BY s.subjectId, s.subjectName, s.subjectDescription, s.subjectImage, s.isActive, s.grade " +
+            "ORDER BY MAX(sh.changedAt) DESC")
+    Page<Subject> findPendingSubjects(@Param("subjectName") String subjectName,
+                                      @Param("submittedByName") String submittedByName,
+                                      Pageable pageable);
+
        List<Subject> findAll();
 
        List<Subject> findByIsActiveTrue();

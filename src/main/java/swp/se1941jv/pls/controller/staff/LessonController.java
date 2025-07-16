@@ -100,6 +100,8 @@ public class LessonController {
                 return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
 
+            lessonService.validateStaffAccess(chapterId,userId);
+
             LessonFormDTO lessonForm = new LessonFormDTO();
             lessonForm.setChapterId(chapterId);
 

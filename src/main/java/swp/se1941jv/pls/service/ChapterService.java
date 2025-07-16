@@ -58,6 +58,8 @@ public class ChapterService {
         chapter.setCreatedAt(LocalDateTime.now());
         chapterRepository.save(chapter);
 
+        // Kiểm tra và cập nhật trạng thái subject nếu là REJECTED
+        updateSubjectStatusIfRejected(dto.getSubjectId());
     }
 
     @Transactional
@@ -78,6 +80,9 @@ public class ChapterService {
         chapter.setChapterDescription(dto.getChapterDescription());
         chapter.setUpdatedAt(LocalDateTime.now());
         chapterRepository.save(chapter);
+
+        // Kiểm tra và cập nhật trạng thái subject nếu là REJECTED
+        updateSubjectStatusIfRejected(dto.getSubjectId());
     }
 
     @Transactional
@@ -85,156 +90,12 @@ public class ChapterService {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new IllegalArgumentException("chapter.message.notFound"));
         validateStaffAccess(chapter.getSubject().getSubjectId(), userId);
+
+        // Kiểm tra và cập nhật trạng thái subject nếu là REJECTED
+        updateSubjectStatusIfRejected(chapter.getSubject().getSubjectId());
+
         chapterRepository.deleteById(chapterId);
     }
-
-//    /**
-//     * Phê duyệt chương.
-//     */
-//    @Transactional
-//    public void approveChapter(Long chapterId) {
-//        if (chapterId == null || chapterId <= 0) {
-//            throw new IllegalArgumentException("ID chương không hợp lệ.");
-//        }
-//        Chapter chapter = chapterRepository.findById(chapterId)
-//                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
-//        if (chapter.getChapterStatus() != Chapter.ChapterStatus.PENDING) {
-//            throw new IllegalArgumentException("Chương không ở trạng thái PENDING.");
-//        }
-//        try {
-//            chapter.setChapterStatus(Chapter.ChapterStatus.APPROVED);
-//            chapterRepository.save(chapter);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Lỗi khi phê duyệt chương.", e);
-//        }
-//    }
-
-//    /**
-//     * Từ chối chương.
-//     */
-//    @Transactional
-//    public void rejectChapter(Long chapterId) {
-//        if (chapterId == null || chapterId <= 0) {
-//            throw new IllegalArgumentException("ID chương không hợp lệ.");
-//        }
-//        Chapter chapter = chapterRepository.findById(chapterId)
-//                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
-//        if (chapter.getChapterStatus() != Chapter.ChapterStatus.PENDING) {
-//            throw new IllegalArgumentException("Chương không ở trạng thái PENDING.");
-//        }
-//        try {
-//            chapter.setChapterStatus(Chapter.ChapterStatus.REJECTED);
-//            chapterRepository.save(chapter);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Lỗi khi từ chối chương.", e);
-//        }
-//    }
-
-//    /**
-//     * Lấy danh sách chương theo chapterStatus với phân trang và lọc.
-//     */
-//    public Page<ChapterResponseDTO> findChaptersByChapterStatus(
-//            Long subjectId,
-//            String chapterStatus,
-//            Boolean status,
-//            LocalDateTime startDate,
-//            LocalDateTime endDate,
-//            Long userCreated,
-//            int page,
-//            int size) {
-//        if (page < 0 || size <= 0) {
-//            throw new IllegalArgumentException("Thông số phân trang không hợp lệ.");
-//        }
-//
-//        Specification<Chapter> spec = Specification.where(null);
-//        if (subjectId != null) {
-//            spec = spec.and(ChapterSpecifications.hasSubjectId(subjectId));
-//        }
-//        if (chapterStatus != null && !chapterStatus.trim().isEmpty()) {
-//            spec = spec.and(ChapterSpecifications.hasChapterStatus(chapterStatus));
-//        } else {
-//            spec = spec.and((root, query, cb) -> cb.in(root.get("chapterStatus"))
-//                    .value(Chapter.ChapterStatus.PENDING)
-//                    .value(Chapter.ChapterStatus.APPROVED)
-//                    .value(Chapter.ChapterStatus.REJECTED));
-//        }
-//        if (status != null) {
-//            spec = spec.and(ChapterSpecifications.hasStatus(status));
-//        }
-//        if (startDate != null || endDate != null) {
-//            spec = spec.and(ChapterSpecifications.hasUpdatedAtBetween(startDate, endDate));
-//        }
-//        if (userCreated != null) {
-//            spec = spec.and(ChapterSpecifications.hasUserCreated(userCreated));
-//        }
-//
-//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-//        Page<Chapter> chapters = chapterRepository.findAll(spec, pageable);
-//
-//        return chapters.map(chapter -> ChapterResponseDTO.builder()
-//                .chapterId(chapter.getChapterId())
-//                .chapterName(chapter.getChapterName())
-//                .chapterDescription(chapter.getChapterDescription())
-//                .status(chapter.getStatus())
-//                .chapterStatus(ChapterResponseDTO.ChapterStatusDTO.builder()
-//                        .statusCode(chapter.getChapterStatus().name())
-//                        .description(chapter.getChapterStatus().getDescription())
-//                        .build())
-//                .subjectName(chapter.getSubject().getSubjectName())
-//                .userCreated(chapter.getUserCreated())
-//                .userFullName(userService.getUserFullName(chapter.getUserCreated()))
-//                .updatedAt(chapter.getUpdatedAt())
-//                .build());
-//    }
-
-//    /**
-//     * Lọc danh sách chương theo subjectId, tên, và trạng thái với dữ liệu cơ bản.
-//     */
-//    public List<ChapterResponseDTO> findChaptersBySubjectId(Long subjectId, String chapterName, Boolean status) {
-//        if (subjectId == null || subjectId <= 0) {
-//            throw new IllegalArgumentException("ID môn học không hợp lệ.");
-//        }
-//        if (!subjectRepository.existsById(subjectId)) {
-//            throw new IllegalArgumentException("Môn học không tồn tại.");
-//        }
-//
-//        Specification<Chapter> spec = Specification.where(ChapterSpecifications.hasSubjectId(subjectId));
-//        if (chapterName != null && !chapterName.trim().isEmpty()) {
-//            spec = spec.and(ChapterSpecifications.hasName(chapterName));
-//        }
-//        if (status != null) {
-//            spec = spec.and(ChapterSpecifications.hasStatus(status));
-//        }
-//
-//        try {
-//            return chapterRepository.findAll(spec).stream()
-//                    .map(chapter -> ChapterResponseDTO.builder()
-//                            .chapterId(chapter.getChapterId())
-//                            .chapterName(chapter.getChapterName())
-//                            .chapterDescription(chapter.getChapterDescription())
-//                            .status(chapter.getStatus())
-//                            .chapterStatus(ChapterResponseDTO.ChapterStatusDTO.builder()
-//                                    .statusCode(chapter.getChapterStatus().name())
-//                                    .description(chapter.getChapterStatus().getDescription())
-//                                    .build())
-//                            .listLesson(chapter.getLessons().stream()
-//                                    .map(lesson -> LessonResponseDTO.builder()
-//                                            .lessonId(lesson.getLessonId())
-//                                            .lessonName(lesson.getLessonName())
-//                                            .status(lesson.getStatus())
-//                                            .lessonStatus(LessonResponseDTO.LessonStatusDTO.builder()
-//                                                    .statusCode(lesson.getLessonStatus().name())
-//                                                    .description(lesson.getLessonStatus().getDescription())
-//                                                    .build())
-//                                            .build())
-//                                    .toList())
-//                            .build())
-//                    .toList();
-//        } catch (Exception e) {
-//            log.error("Failed to fetch chapters: {}", e.getMessage(), e);
-//            throw new RuntimeException("Lỗi khi lấy danh sách chương.", e);
-//        }
-//    }
 
     /**
      * Lấy thông tin chương theo ID dưới dạng entity.
@@ -245,62 +106,6 @@ public class ChapterService {
         }
         return chapterRepository.findById(chapterId);
     }
-//
-//    /**
-//     * Lấy thông tin chương dưới dạng DTO đầy đủ theo ID.
-//     */
-//    public ChapterResponseDTO getChapterResponseByChapterId(Long chapterId) {
-//        if (chapterId == null || chapterId <= 0) {
-//            throw new IllegalArgumentException("ID chương không hợp lệ.");
-//        }
-//
-//        Chapter chapter = chapterRepository.findById(chapterId)
-//                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
-//
-//        return ChapterResponseDTO.builder()
-//                .chapterId(chapter.getChapterId())
-//                .chapterName(chapter.getChapterName())
-//                .chapterDescription(chapter.getChapterDescription())
-//                .status(chapter.getStatus())
-//                .chapterStatus(ChapterResponseDTO.ChapterStatusDTO.builder()
-//                        .statusCode(chapter.getChapterStatus().name())
-//                        .description(chapter.getChapterStatus().getDescription())
-//                        .build())
-//                .subjectName(chapter.getSubject() != null ? chapter.getSubject().getSubjectName() : null)
-//                .userCreated(chapter.getUserCreated())
-//                .userFullName(chapter.getUserCreated() != null ? userService.getUserFullName(chapter.getUserCreated()) : null)
-//                .updatedAt(chapter.getUpdatedAt())
-//                .build();
-//    }
-
-//    /**
-//     * Lấy thông tin chương dưới dạng DTO đầy đủ.
-//     */
-//    public ChapterResponseDTO getChapterResponseById(Long chapterId, Long subjectId) {
-//        if (chapterId == null || chapterId <= 0) {
-//            throw new IllegalArgumentException("ID chương không hợp lệ.");
-//        }
-//        if (subjectId == null || subjectId <= 0) {
-//            throw new IllegalArgumentException("ID môn học không hợp lệ.");
-//        }
-//
-//        Chapter chapter = chapterRepository.findById(chapterId)
-//                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại."));
-//        if (!chapter.getSubject().getSubjectId().equals(subjectId)) {
-//            throw new IllegalArgumentException("Chương không thuộc môn học này.");
-//        }
-//        return ChapterResponseDTO.builder()
-//                .chapterId(chapter.getChapterId())
-//                .chapterName(chapter.getChapterName())
-//                .chapterDescription(chapter.getChapterDescription())
-//                .status(chapter.getStatus())
-//                .chapterStatus(ChapterResponseDTO.ChapterStatusDTO.builder()
-//                        .statusCode(chapter.getChapterStatus().name())
-//                        .description(chapter.getChapterStatus().getDescription())
-//                        .build())
-//                .listLesson(new ArrayList<>())
-//                .build();
-//    }
 
     public Page<ChapterListDTO> findChaptersBySubjectId(Long subjectId, String chapterName, Boolean status, Long userId, Pageable pageable) {
         Optional<SubjectAssignment> assignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
@@ -318,14 +123,14 @@ public class ChapterService {
         return chapterRepository.findAll(spec, pageable).map(this::toChapterResponseDTO);
     }
 
-    private void validateStaffAccess(Long subjectId, Long userId) {
+    public void validateStaffAccess(Long subjectId, Long userId) {
         Optional<SubjectAssignment> assignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
         if (assignment.isEmpty() || !assignment.get().getUser().getUserId().equals(userId)) {
-            throw new IllegalArgumentException("subject.message.notAssigned");
+            throw new IllegalArgumentException("Bạn không được phân công cho môn học này.");
         }
         Optional<SubjectStatusHistory> status = statusHistoryRepository.findBySubjectSubjectId(subjectId);
-        if (status.isEmpty() || status.get().getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
-            throw new IllegalArgumentException("subject.message.notDraftForEdit");
+        if (status.isEmpty() || (status.get().getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT && status.get().getStatus() != SubjectStatusHistory.SubjectStatus.REJECTED)) {
+            throw new IllegalArgumentException("Môn học không ở trạng thái DRAFT hoặc REJECTED để chỉnh sửa.");
         }
     }
 
@@ -353,5 +158,12 @@ public class ChapterService {
                 .build();
     }
 
-
+    private void updateSubjectStatusIfRejected(Long subjectId) {
+        Optional<SubjectStatusHistory> status = statusHistoryRepository.findBySubjectSubjectId(subjectId);
+        if (status.isPresent() && status.get().getStatus() == SubjectStatusHistory.SubjectStatus.REJECTED) {
+            SubjectStatusHistory updatedStatus = status.get();
+            updatedStatus.setStatus(SubjectStatusHistory.SubjectStatus.DRAFT);
+            statusHistoryRepository.save(updatedStatus);
+        }
+    }
 }
