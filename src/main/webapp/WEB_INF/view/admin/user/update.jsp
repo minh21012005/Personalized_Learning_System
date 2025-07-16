@@ -101,6 +101,7 @@
                                                 ${errorEmail}
                                             </div>
                                             <form:input type="hidden" path="password" />
+                                            <form:input type="hidden" path="emailVerify" />
                                             <div class="row">
                                                 <div class="col-md-6 col-12 mb-3">
                                                     <c:set var="errorFullName">

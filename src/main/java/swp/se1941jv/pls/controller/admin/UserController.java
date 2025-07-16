@@ -44,9 +44,9 @@ public class UserController {
     }
 
     @GetMapping("/admin/user")
-        public String getUserPage(@RequestParam Optional<String> page,
-                @RequestParam Optional<String> role,
-                @RequestParam Optional<String> name,
+    public String getUserPage(@RequestParam Optional<String> page,
+            @RequestParam Optional<String> role,
+            @RequestParam Optional<String> name,
             Model model) {
         int pageNumber;
         try {
@@ -132,6 +132,7 @@ public class UserController {
         newUser.setAvatar(avatar);
         newUser.setPassword(hassPassword);
         newUser.setRole(this.roleService.getRoleByName(newUser.getRole().getRoleName()));
+        newUser.setEmailVerify(true);
         this.userService.saveUser(newUser);
         return "redirect:/admin/user";
     }
