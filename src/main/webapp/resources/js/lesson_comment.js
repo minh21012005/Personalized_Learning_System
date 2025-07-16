@@ -56,7 +56,7 @@
 function createPendingCommentElement(content, currentUser) {
     const div = document.createElement('div');
     div.classList.add('comment-item', 'd-flex', 'mb-3', 'opacity-75');
-    const avatarSrc = currentUser?.avatarUrl || 'https://i.pravatar.cc/40?u=' + (currentUser?.id || 'pending');
+    const avatarSrc = currentUser?.avatarUrl ? '/img/avatar/' + currentUser.avatarUrl : '/img/avatar-default.jpg';
     const authorName = currentUser?.name || 'Bạn';
     div.innerHTML = `
         <div class="flex-shrink-0">
@@ -77,7 +77,7 @@ function createPendingCommentElement(content, currentUser) {
             const div = document.createElement('div');
             div.innerHTML = `
         <div class="d-flex mb-3">
-            <img src="${comment.author?.avatarUrl  || 'https://via.placeholder.com/40'}"
+            <img src="${comment.author?.avatarUrl ? "/img/avatar/" + comment.author.avatarUrl : '/img/avatar-default.jpg'}"
                 class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
             <div>
                 <strong>${comment.author?.name || 'Người dùng ẩn danh'}</strong>
@@ -153,7 +153,7 @@ function createPendingCommentElement(content, currentUser) {
 
     div.innerHTML = `
         <div class="d-flex">
-            <img src="https://via.placeholder.com/40"
+            <img src="${window.learningConfig?.currentUser?.avatarUrl ? '/img/avatar/' + window.learningConfig.currentUser.avatarUrl : '/img/avatar-default.jpg'}"
                 class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
             <div>
                 <strong>Bạn</strong>
