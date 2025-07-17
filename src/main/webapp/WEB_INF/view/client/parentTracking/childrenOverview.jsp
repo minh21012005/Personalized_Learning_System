@@ -19,12 +19,41 @@
             --card-bg: #ffffff;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; min-height: 100vh; }
-        .content { width: 96%; max-width: 1400px; margin: 0 auto; padding: 24px; }
-        .card { border: none; border-radius: 12px; background-color: var(--card-bg); box-shadow: var(--shadow); }
-        .card-body { padding: 24px; }
-        .child-item { transition: all 0.3s ease; }
-        .child-item:hover { background-color: #f1f5f9; transform: translateY(-2px); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .content {
+            width: 96%;
+            min-height: 80vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .child-item {
+            transition: all 0.3s ease;
+        }
+
+        .child-item:hover {
+            background-color: #f1f5f9;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -55,7 +84,8 @@
                             <tr class="child-item">
                                 <td>${child.fullName}</td>
                                 <td>${child.dob}</td>
-                                <td><a href="/parent/child/${child.userId}/learning" class="btn btn-primary">Xem chi tiết</a></td>
+                                <td><a href="/parent/child/${child.userId}/learning" class="btn btn-primary">Xem chi
+                                    tiết</a></td>
                             </tr>
                         </c:forEach>
                         </tbody>

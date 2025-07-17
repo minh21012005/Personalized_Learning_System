@@ -51,7 +51,7 @@ public class TestStaffService {
         if (currentUserId == null) {
             throw new IllegalStateException("Không thể xác định người dùng hiện tại.");
         }
-        return subjectRepository.findAll();
+        return subjectRepository.findSubjectIsActive(true);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
@@ -102,17 +102,17 @@ public class TestStaffService {
             if (lessonId != null) {
                 Lesson lesson = lessonRepository.findById(lessonId)
                         .orElseThrow(() -> new IllegalArgumentException("Bài học không tìm thấy: " + lessonId));
-                questions = questionBankRepository.findByLesson(lesson);
+                questions = questionBankRepository.findByLessonAndActiveIs(lesson,true);
             } else {
                 chapterRepository.findById(chapterId)
                         .orElseThrow(() -> new IllegalArgumentException("Chương không tìm thấy: " + chapterId));
-                questions = questionBankRepository.findByLessonChapterChapterId(chapterId);
+                questions = questionBankRepository.findByLessonChapterChapterIdAndActiveIs(chapterId, true);
             }
 
         } else if (subjectId != null) {
             subjectRepository.findById(subjectId)
                     .orElseThrow(() -> new IllegalArgumentException("Môn học không tìm thấy: " + subjectId));
-            questions = questionBankRepository.findByLessonChapterSubjectSubjectId(subjectId);
+            questions = questionBankRepository.findByLessonChapterSubjectSubjectIdAndActiveIs(subjectId,true);
         } else {
             return new ArrayList<>();
         }
@@ -235,6 +235,15 @@ public class TestStaffService {
         if (testCategoryId == null) {
             throw new IllegalArgumentException("Danh mục là bắt buộc.");
         }
+
+        if(testCategoryId.equals(2L) && chapterId == null){
+            throw new IllegalArgumentException("Băt Buoộc phải chọn chương cho bài kiểm tra này.");
+        }
+
+        if(testCategoryId.equals(4L) && lessonId == null){
+            throw new IllegalArgumentException("Băt Buoộc phải chọn bài học cho bài kiểm tra này.");
+        }
+
         if (subjectId == null && chapterId == null && lessonId == null) {
             throw new IllegalArgumentException("Phải chọn ít nhất một môn học, chương hoặc bài học.");
         }
@@ -345,6 +354,14 @@ public class TestStaffService {
         }
         if (questionIds == null || questionIds.isEmpty()) {
             throw new IllegalArgumentException("Phải chọn ít nhất một câu hỏi.");
+        }
+
+        if(testCategoryId.equals(2L) && chapterId == null){
+            throw new IllegalArgumentException("Băt Buoộc phải chọn chương cho bài kiểm tra này.");
+        }
+
+        if(testCategoryId.equals(4L) && lessonId == null){
+            throw new IllegalArgumentException("Băt Buoộc phải chọn bài học cho bài kiểm tra này.");
         }
 
         // Fetch existing test

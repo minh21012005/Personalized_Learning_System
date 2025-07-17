@@ -319,13 +319,6 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="isOpen" class="form-label">Trạng thái mở</label>
-                                <select class="form-select" id="isOpen" name="isOpen">
-                                    <option value="true">Mở</option>
-                                    <option value="false" selected>Đóng</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
                                 <label class="form-label mandatory">Câu hỏi đã chọn</label>
                                 <div class="question-count" id="questionCount">Đã chọn: 0 câu hỏi</div>
                                 <div class="selected-questions" id="selectedQuestions">
