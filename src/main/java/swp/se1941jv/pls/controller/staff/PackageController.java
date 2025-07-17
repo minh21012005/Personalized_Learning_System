@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
+import swp.se1941jv.pls.dto.response.subject.SubjectNameDTO;
 import swp.se1941jv.pls.entity.Grade;
 import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.PackageStatus;
@@ -96,19 +98,19 @@ public class PackageController {
     public String createPackage(
             @ModelAttribute("newPackage") @Valid Package newPackage,
             BindingResult bindingResult,
-            @RequestParam(value = "subjects", required = false) List<Long> subjectIds,
+            @RequestParam(value = "abc", required = false) List<Long> subjectIds,
             @RequestParam("file") MultipartFile file,
             Model model) {
         List<Grade> grades = this.gradeService.getAllGradesIsActive();
         Long gradeId = newPackage.getGrade() != null ? newPackage.getGrade().getGradeId() : null;
         List<Subject> subjects = gradeId != null ? this.subjectService.getSubjectsByGradeId(gradeId, true)
                 : Collections.emptyList();
-                
 
         // Gắn danh sách môn học và khối lớp vào model để hiển thị lại
         model.addAttribute("grades", grades);
         model.addAttribute("subjects", subjects);
-   model.addAttribute("selectedSubjectIds", subjectIds != null ? subjectIds : Collections.emptyList());
+        
+        model.addAttribute("selectedSubjectIds", subjectIds != null ? subjectIds : Collections.emptyList());
         if (bindingResult.hasErrors()) {
             model.addAttribute("subjects", subjects);
             return "staff/package/create";
@@ -311,6 +313,15 @@ public class PackageController {
         this.packageService.savePackageWithSubjects(pkg, subjectIds);
 
         return "redirect:/staff/package";
+    }
+
+    @GetMapping("/staff/package/subjects-json")
+    @ResponseBody
+    public List<SubjectNameDTO> getSubjectsJson(@RequestParam("gradeId") Long gradeId) {
+        return subjectService.getSubjectsByGradeId(gradeId, true)
+                .stream()
+                .map(subject -> new SubjectNameDTO(subject.getSubjectId(), subject.getSubjectName()))
+                .collect(Collectors.toList());
     }
 
 }
