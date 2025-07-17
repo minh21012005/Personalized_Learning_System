@@ -51,6 +51,7 @@ public class LessonService {
         Lesson lesson = toLessonEntity(dto);
         lesson.setStatus(false); // Mặc định là FALSE theo yêu cầu
         lesson.setUserCreated(userId);
+        lesson.setIsHidden(false);
         lesson.setCreatedAt(LocalDateTime.now());
         lesson = lessonRepository.save(lesson);
 
@@ -189,6 +190,23 @@ public class LessonService {
         return lessonRepository.findById(lessonId);
     }
 
+    @Transactional
+    public void toggleLessonHiddenStatus(Long lessonId, Long userId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new IllegalArgumentException("Bài học không tồn tại!"));
+        validateStaffAccess(lesson.getChapter().getChapterId(), userId);
+
+
+        lesson.setIsHidden(!lesson.getIsHidden());
+        if (Boolean.TRUE.equals(lesson.getIsHidden())) {
+            lesson.setStatus(false);
+        }
+        lesson.setUpdatedAt(LocalDateTime.now());
+        lessonRepository.save(lesson);
+
+        updateSubjectStatusIfRejected(lesson.getChapter().getChapterId());
+    }
+
     private Lesson toLessonEntity(LessonFormDTO dto) {
         Chapter chapter = chapterRepository.findById(dto.getChapterId())
                 .orElseThrow(() -> new IllegalArgumentException("chapter.message.notFound"));
@@ -214,6 +232,7 @@ public class LessonService {
                 .videoTitle(lesson.getVideoTitle())
                 .thumbnailUrl(lesson.getThumbnailUrl())
                 .status(lesson.getStatus())
+                .isHidden(lesson.getIsHidden())
                 .lessonMaterials(lesson.getLessonMaterials().stream()
                         .map(material -> LessonListDTO.LessonMaterialDTO.builder()
                                 .fileName(material.getFileName())

@@ -38,6 +38,9 @@ public class Lesson extends BaseEntity {
     @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT FALSE")
     Boolean status;
 
+    @Column(name = "is_hidden", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    Boolean isHidden;
+
     @NotBlank(message = "Link video không được để trống")
     @Column(name = "video_src")
     String videoSrc;

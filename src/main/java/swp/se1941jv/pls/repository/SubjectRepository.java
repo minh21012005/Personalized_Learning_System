@@ -55,4 +55,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
     Optional<Subject> findBySubjectId(Long subjectId);
 
+    @Query("SELECT s FROM Subject s " +
+            "LEFT JOIN FETCH s.chapters c " +
+            "LEFT JOIN FETCH c.lessons l " +
+            "WHERE s.subjectId = :subjectId AND (c.isHidden = false OR c.isHidden IS NULL) AND (l.isHidden = false OR l.isHidden IS NULL)")
+    Optional<Subject> findByIdWithNonHiddenChaptersAndLessons(@Param("subjectId") Long subjectId);
 }

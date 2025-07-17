@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Danh sách bài học</title>
-    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
@@ -44,31 +44,44 @@
             height: 40px;
             width: 100%;
         }
+        .subject-img-thumbnail {
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .pagination .page-link {
+            color: #007bff;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        .form-control-sm, .form-select-sm {
+            font-size: 0.875rem;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
         .table-header-sort-link {
             color: inherit;
             text-decoration: none;
         }
         .table-header-sort-link:hover {
             text-decoration: underline;
-        }
-        .pagination .page-link {
-            color: black;
-            border: 1px solid #dee2e6;
-        }
-        .pagination .page-link:hover {
-            background-color: #e9ecef;
-            color: black;
-        }
-        .pagination .page-item.active .page-link {
-            background-color: #d3d3d3;
-            border-color: #d3d3d3;
-            color: black;
-        }
-        .pagination .page-item.disabled .page-link {
-            color: #6c757d;
-            pointer-events: none;
-            background-color: #fff;
-            border-color: #dee2e6;
         }
         @media (max-width: 767.98px) {
             .sidebar {
@@ -105,34 +118,45 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Danh sách bài học trong Môn học ID: <c:out value="${subjectId}"/> - Chương: <c:out value="${lessons[0].chapterName != null ? lessons[0].chapterName : ''}"/></h5>
-                            <a href="<c:url value='/staff/subject/${subjectId}/chapters'/>" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-arrow-left"></i> Quay lại
-                            </a>
+                            <div>
+                                <a href="<c:url value='/staff/subject/${subjectId}/chapters'/>" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-arrow-left"></i> Quay lại
+                                </a>
+                                <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/new'/>" class="btn btn-primary btn-sm ms-2">
+                                    <i class="fas fa-plus-circle"></i> Thêm mới
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
-                        <form action="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons'/>" method="get"
-                              class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                            <div class="d-flex flex-column flex-md-row align-items-md-center mb-2 mb-md-0">
-                                <label for="lessonName" class="mb-0 fw-bold me-md-2">Tên bài học:</label>
-                                <div class="d-flex gap-2 me-md-2">
-                                    <input type="text" id="lessonName" name="lessonName"
-                                           class="form-control form-control-sm"
-                                           value="<c:out value='${lessonName != null ? lessonName : ""}'/>"
-                                           placeholder="Nhập tên bài học...">
+                        <form action="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons'/>" method="get" class="mb-4">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-auto">
+                                    <label for="lessonName" class="col-form-label">Tên bài học:</label>
                                 </div>
-                                <label for="status" class="mb-0 fw-bold me-md-2">Trạng thái:</label>
-                                <div class="d-flex gap-2 me-md-2">
+                                <div class="col-auto">
+                                    <input type="text" id="lessonName" name="lessonName" class="form-control form-control-sm"
+                                           value="<c:out value='${lessonName != null ? lessonName : ""}'/>" placeholder="Nhập tên bài học...">
+                                </div>
+                                <div class="col-auto">
+                                    <label for="status" class="col-form-label">Trạng thái:</label>
+                                </div>
+                                <div class="col-auto">
                                     <select id="status" name="status" class="form-select form-select-sm">
                                         <option value="" ${param.status == null ? 'selected' : ''}>Tất cả trạng thái</option>
                                         <option value="true" ${param.status == 'true' ? 'selected' : ''}>Có</option>
                                         <option value="false" ${param.status == 'false' ? 'selected' : ''}>Không</option>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-outline-primary btn-sm">Lọc</button>
-                                <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons'/>" class="btn btn-outline-secondary btn-sm ms-2">Xóa bộ lọc</a>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-info btn-sm">
+                                        <i class="fas fa-filter"></i> Lọc
+                                    </button>
+                                    <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons'/>" class="btn btn-secondary btn-sm ms-2">
+                                        <i class="fas fa-eraser"></i> Xóa bộ lọc
+                                    </a>
+                                </div>
                             </div>
-                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/new'/>" class="btn btn-primary btn-sm">Thêm mới</a>
                         </form>
 
                         <c:if test="${not empty message}">
@@ -149,11 +173,11 @@
                         </c:if>
 
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover table-striped">
-                                <thead>
+                            <table class="table table-hover table-bordered">
+                                <thead class="table-light">
                                 <tr>
-                                    <th scope="col" class="text-center col-1">ID</th>
-                                    <th scope="col" class="text-center col-2">
+                                    <th class="text-center">ID</th>
+                                    <th class="text-center">
                                         <c:url value="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" var="sortByNameUrl">
                                             <c:param name="lessonName" value="${lessonName != null ? lessonName : ''}"/>
                                             <c:param name="status" value="${status != null ? status : ''}"/>
@@ -167,10 +191,11 @@
                                             <c:if test="${sortField eq 'lessonName'}"><i class="fas fa-sort-${sortDir eq 'asc' ? 'up' : 'down'}"></i></c:if>
                                         </a>
                                     </th>
-                                    <th scope="col" class="text-center col-2">Link video</th>
-                                    <th scope="col" class="text-center col-2">Thời lượng video</th>
-                                    <th scope="col" class="text-center col-1">Trạng thái</th>
-                                    <th scope="col" class="text-center col-2">
+                                    <th class="text-center">Link video</th>
+                                    <th class="text-center">Thời lượng video</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Ẩn</th>
+                                    <th class="text-center">
                                         <c:url value="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" var="sortByCreatedByUrl">
                                             <c:param name="lessonName" value="${lessonName != null ? lessonName : ''}"/>
                                             <c:param name="status" value="${status != null ? status : ''}"/>
@@ -184,7 +209,7 @@
                                             <c:if test="${sortField eq 'userFullName'}"><i class="fas fa-sort-${sortDir eq 'asc' ? 'up' : 'down'}"></i></c:if>
                                         </a>
                                     </th>
-                                    <th scope="col" class="text-center col-2">
+                                    <th class="text-center">
                                         <c:url value="/staff/subject/${subjectId}/chapters/${chapterId}/lessons" var="sortByCreatedAtUrl">
                                             <c:param name="lessonName" value="${lessonName != null ? lessonName : ''}"/>
                                             <c:param name="status" value="${status != null ? status : ''}"/>
@@ -198,7 +223,7 @@
                                             <c:if test="${sortField eq 'createdAt'}"><i class="fas fa-sort-${sortDir eq 'asc' ? 'up' : 'down'}"></i></c:if>
                                         </a>
                                     </th>
-                                    <th scope="col" class="text-center">Hành động</th>
+                                    <th class="text-center">Hành động</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -222,23 +247,39 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
+                                        <td class="text-center">
+                                            <c:choose>
+                                                <c:when test="${lesson.isHidden != null && lesson.isHidden}">
+                                                    <span class="badge bg-warning">Ẩn</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-success">Hiện</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td><c:out value="${lesson.userFullName != null ? lesson.userFullName : 'Không có thông tin'}"/></td>
                                         <td><c:out value="${lesson.createdAt != null ? lesson.createdAt : ''}"/></td>
                                         <td class="text-center">
-                                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}'/>"
-                                               class="btn btn-sm btn-primary me-1" title="Xem">
-                                                <i class="fas fa-eye"></i> Xem
-                                            </a>
-                                            <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}/edit'/>"
-                                               class="btn btn-sm btn-warning me-1" title="Sửa">
-                                                <i class="fas fa-edit"></i> Sửa
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteLessonModal<c:out value="${lesson.lessonId}"/>"
-                                                    title="Xóa">
-                                                <i class="fas fa-trash"></i> Xóa
-                                            </button>
-                                            <!-- Delete Confirmation Modal -->
+                                            <c:if test="${lesson.isHidden != true}">
+                                                <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}'/>"
+                                                   class="btn btn-sm btn-info me-1" title="Xem">
+                                                    <i class="fas fa-eye"></i> Xem
+                                                </a>
+                                                <a href="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}/edit'/>"
+                                                   class="btn btn-sm btn-warning me-1" title="Sửa">
+                                                    <i class="fas fa-edit"></i> Sửa
+                                                </a>
+                                            </c:if>
+                                            <form action="<c:url value='/admin/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}/toggle-hidden'/>" method="post" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-primary me-1" title="${lesson.isHidden ? 'Hiện' : 'Ẩn'}">
+                                                    <i class="fas fa-eye${lesson.isHidden ? '' : '-slash'}"></i> ${lesson.isHidden ? 'Hiện' : 'Ẩn'}
+                                                </button>
+                                            </form>
+<%--                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"--%>
+<%--                                                    data-bs-target="#deleteLessonModal<c:out value="${lesson.lessonId}"/>"--%>
+<%--                                                    title="Xóa">--%>
+<%--                                                <i class="fas fa-trash"></i> Xóa--%>
+<%--                                            </button>--%>
                                             <div class="modal fade" id="deleteLessonModal<c:out value="${lesson.lessonId}"/>"
                                                  tabindex="-1" aria-labelledby="deleteLessonModalLabel<c:out value="${lesson.lessonId}"/>"
                                                  aria-hidden="true">
@@ -267,7 +308,7 @@
                                 </c:forEach>
                                 <c:if test="${empty lessons}">
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted">Không tìm thấy bài học nào.</td>
+                                        <td colspan="9" class="text-center text-muted">Không tìm thấy bài học nào.</td>
                                     </tr>
                                 </c:if>
                                 </tbody>
@@ -275,7 +316,7 @@
                         </div>
 
                         <c:if test="${lessonPage != null && lessonPage.totalPages > 0}">
-                            <div class="pagination-wrapper text-center">
+                            <div class="pagination-wrapper text-center mt-4">
                                 <div class="mb-2">
                                     <small>Hiển thị <c:out value="${lessonPage.numberOfElements != null ? lessonPage.numberOfElements : '0'}"/> trong tổng số <c:out value="${lessonPage.totalElements != null ? lessonPage.totalElements : '0'}"/> mục. Trang <c:out value="${lessonPage.number != null ? lessonPage.number + 1 : '1'}"/> / <c:out value="${lessonPage.totalPages != null ? lessonPage.totalPages : '1'}"/></small>
                                 </div>
