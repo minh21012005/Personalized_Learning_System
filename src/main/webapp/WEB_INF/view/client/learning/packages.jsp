@@ -117,7 +117,6 @@
                             <div class="progress">
                                 <div class="progress-bar bg-primary" style="width: 100%"></div>
                             </div>
-                            <div class="rating">★★★★★ (1200 Ratings)</div>
                             <div class="dates">
                                 <p>Ngày bắt đầu: <span style="font-weight: bold">${packageSubject.startDate}</span></p>
                                 <p>Ngày kết thúc: <span style="font-weight: bold">${packageSubject.endDate}</span></p>

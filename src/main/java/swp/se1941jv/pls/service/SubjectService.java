@@ -411,6 +411,9 @@ public class SubjectService {
 
         // Cập nhật trạng thái chương và bài học nếu APPROVED
         if (newStatus == SubjectStatusHistory.SubjectStatus.APPROVED) {
+
+            subject.setIsActive(true);
+
             for (Chapter chapter : subject.getChapters()) {
                 chapter.setStatus(true);
                 for (Lesson lesson : chapter.getLessons()) {

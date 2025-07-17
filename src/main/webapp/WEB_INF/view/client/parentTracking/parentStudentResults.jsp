@@ -317,7 +317,6 @@
                     <th>Bài kiểm tra</th>
                     <th>Điểm số</th>
                     <th>Ngày hoàn thành</th>
-                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="recentTestsBody">
