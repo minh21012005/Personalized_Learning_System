@@ -81,49 +81,7 @@
                                         </div>
                                     </div>
                                 </section>
-                                <!-- Pagination -->
-                                <div class="pagination-container">
-                                    <c:set var="queryString" value="" />
-                                    <c:if test="${not empty grades}">
-                                        <c:set var="queryString" value="${queryString}&grades=${grades}" />
-                                    </c:if>
-                                    <c:if test="${not empty subjects}">
-                                        <c:set var="queryString" value="${queryString}&subjects=${subjects}" />
-                                    </c:if>
-                                    <c:if test="${not empty sort}">
-                                        <c:set var="queryString" value="${queryString}&sort=${sort}" />
-                                    </c:if>
-                                    <c:if test="${not empty paramName}">
-                                        <c:set var="queryString" value="${queryString}&course=${paramName}" />
-                                    </c:if>
-                                    <c:if test="${totalPage > 1}">
-                                        <nav aria-label="Page navigation example">
-                                            <ul class="pagination justify-content-center">
-                                                <li class="page-item ${currentPage eq 1 ? 'disabled' : ''}">
-                                                    <a class="page-link"
-                                                        href="/parent/course?page=${currentPage - 1}${queryString}"
-                                                        aria-label="Previous">
-                                                        <span aria-hidden="true">
-                                                            < </span>
-                                                    </a>
-                                                </li>
-                                                <c:forEach begin="1" end="${totalPage}" varStatus="loop">
-                                                    <li class="page-item ${loop.index eq currentPage ? 'active' : ''}">
-                                                        <a class="page-link"
-                                                            href="/parent/course?page=${loop.index}${queryString}">${loop.index}</a>
-                                                    </li>
-                                                </c:forEach>
-                                                <li class="page-item ${currentPage eq totalPage ? 'disabled' : ''}">
-                                                    <a class="page-link"
-                                                        href="/parent/course?page=${currentPage + 1}${queryString}"
-                                                        aria-label="Next">
-                                                        <span aria-hidden="true">></span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    </c:if>
-                                </div>
+
                             </div>
 
                             <div id="review-content">

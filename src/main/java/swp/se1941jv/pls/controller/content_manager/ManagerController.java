@@ -22,7 +22,7 @@ import swp.se1941jv.pls.service.SubjectService;
 import java.util.Collections;
 import java.util.List;
 
- @PreAuthorize("hasRole('CONTENT_MANAGER')")
+ @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
 @Controller
 public class ManagerController {
     private final PackageService packageService;

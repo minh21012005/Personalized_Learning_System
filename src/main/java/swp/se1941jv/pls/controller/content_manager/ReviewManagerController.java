@@ -19,7 +19,7 @@ import swp.se1941jv.pls.service.ReviewService;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
- @PreAuthorize("hasRole('CONTENT_MANAGER')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
 @Controller
 @RequestMapping("/admin/reviews")
 

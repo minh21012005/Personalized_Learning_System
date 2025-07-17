@@ -26,15 +26,17 @@
                         background-color: #212529;
                     }
 
-                    .sidebar {
-                        position: fixed;
-                        top: 60px;
-                        bottom: 40px;
-                        left: 0;
-                        width: 250px;
-                        background-color: #212529;
-                        color: #fff;
-                    }
+                      .sidebar {
+                    position: fixed;
+                    top: 50px;
+                    bottom: 40px;
+                    /* dính với footer */
+                    left: 0;
+                    width: 250px;
+                    background-color: #212529;
+                    color: #fff;
+                    overflow-y: auto;
+                }
 
                     .content {
                         margin-left: 250px;
