@@ -36,17 +36,17 @@
                         /* Tăng để chừa không gian header (60px) + thêm chút khoảng cách */
                         padding-bottom: 100px;
                     }
-
-                    .sidebar {
-                        position: fixed;
-                        top: 60px;
-                        bottom: 40px;
-                        left: 0;
-                        width: 250px;
-                        background-color: #212529;
-                        color: #fff;
-                    }
-
+      .sidebar {
+                    position: fixed;
+                    top: 50px;
+                    bottom: 40px;
+                    /* dính với footer */
+                    left: 0;
+                    width: 250px;
+                    background-color: #212529;
+                    color: #fff;
+                    overflow-y: auto;
+                }
 
 
                     footer {
