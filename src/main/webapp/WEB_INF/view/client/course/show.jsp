@@ -122,7 +122,30 @@
                                                 <a href="/parent/course/detail/${pkg.packageId}">
                                                     <h3 class="course-title">${pkg.name}</h3>
                                                 </a>
-
+                                                <c:choose>
+                                                    <c:when test="${pkg.packageType == 'FULL_COURSE'}">
+                                                        <p class="course-author">Loại: Học và luyện tập</p>
+                                                    </c:when>
+                                                    <c:when test="${pkg.packageType == 'PRACTICE_ONLY'}">
+                                                        <p class="course-author">Loại: Chỉ luyện tập</p>
+                                                    </c:when>
+                                                </c:choose>
+                                                <p class="course-author">
+                                                    Thời hạn gói: ${pkg.durationDays} ngày
+                                                </p>
+                                                <p class="course-author">
+                                                    <c:choose>
+                                                        <c:when test="${pkg.averageRating > 0}">
+                                                            Đánh giá:
+                                                            <fmt:formatNumber value="${pkg.averageRating}" type="number"
+                                                                maxFractionDigits="1" />
+                                                            <i class="fa fa-star text-warning"></i>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            Chưa có đánh giá nào
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </p>
                                                 <div class="mt-auto course-bottom">
                                                     <span class="course-price">
                                                         <fmt:formatNumber value="${pkg.price}" type="number"
