@@ -252,31 +252,33 @@
                             <div class="row">
                                 <div class="mb-3 col-9">
                                     <label for="testName" class="form-label mandatory">Tên bài kiểm tra</label>
-                                    <input type="text" class="form-control" id="testName" name="testName" required>
+                                    <input type="text" class="form-control" id="testName" name="testName"
+                                           value="${fn:escapeXml(testName)}" required>
                                     <div id="testNameError" class="error-message"></div>
                                 </div>
                                 <div class="mb-3 col-3">
                                     <label for="durationTime" class="form-label mandatory">Thời gian (phút)</label>
                                     <input type="number" class="form-control" id="durationTime" name="durationTime"
-                                           required min="1">
+                                           value="${durationTime}" required min="1">
                                     <div id="durationTimeError" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="mb-3 col-4">
-                                    <label for="durationTime" class="form-label ">Số lần làm bài tối đa:</label>
+                                    <label for="maxAttempts" class="form-label">Số lần làm bài tối đa:</label>
                                     <input type="number" class="form-control" id="maxAttempts" name="maxAttempts"
-                                           >
+                                           value="${maxAttempts}">
                                 </div>
                                 <div class="mb-3 col-4">
-                                    <label for="startAt" class="form-label ">Thời gian bắt đầu</label>
+                                    <label for="startAt" class="form-label">Thời gian bắt đầu</label>
                                     <input type="datetime-local" class="form-control" id="startAt" name="startAt"
-                                           >
+                                           value="${startAt}">
                                     <div id="startAtError" class="error-message"></div>
                                 </div>
                                 <div class="mb-3 col-4">
-                                    <label for="endAt" class="form-label ">Thời gian kết thúc</label>
-                                    <input type="datetime-local" class="form-control" id="endAt" name="endAt" >
+                                    <label for="endAt" class="form-label">Thời gian kết thúc</label>
+                                    <input type="datetime-local" class="form-control" id="endAt" name="endAt"
+                                           value="${endAt}">
                                     <div id="endAtError" class="error-message"></div>
                                 </div>
                             </div>
@@ -286,7 +288,10 @@
                                     <select class="form-select" id="testCategory" name="testCategoryId" required>
                                         <option value="">Chọn danh mục</option>
                                         <c:forEach var="category" items="${testCategories}">
-                                            <option value="${category.testCategoryId}">${fn:escapeXml(category.name)}</option>
+                                            <option value="${category.testCategoryId}"
+                                                    <c:if test="${category.testCategoryId == testCategoryId}">selected</c:if>>
+                                                    ${fn:escapeXml(category.name)}
+                                            </option>
                                         </c:forEach>
                                     </select>
                                     <div id="testCategoryError" class="error-message"></div>
@@ -299,7 +304,10 @@
                                             onchange="loadChapters(this.value)">
                                         <option value="">Chọn môn học</option>
                                         <c:forEach var="subject" items="${subjects}">
-                                            <option value="${subject.subjectId}">${fn:escapeXml(subject.subjectName)}</option>
+                                            <option value="${subject.subjectId}"
+                                                    <c:if test="${subject.subjectId == subjectId}">selected</c:if>>
+                                                    ${fn:escapeXml(subject.subjectName)}
+                                            </option>
                                         </c:forEach>
                                     </select>
                                     <div id="subjectError" class="error-message"></div>
@@ -309,20 +317,41 @@
                                     <select class="form-select" id="chapter" name="chapterId"
                                             onchange="loadLessons(this.value)">
                                         <option value="">Chọn chương (tùy chọn)</option>
+                                        <c:forEach var="chapter" items="${chapters}">
+                                            <option value="${chapter.chapterId}"
+                                                    <c:if test="${chapter.chapterId == chapterId}">selected</c:if>>
+                                                    ${fn:escapeXml(chapter.chapterName)}
+                                            </option>
+                                        </c:forEach>
                                     </select>
                                 </div>
                                 <div class="mb-3 col-4">
                                     <label for="lesson" class="form-label">Bài học</label>
                                     <select class="form-select" id="lesson" name="lessonId">
                                         <option value="">Chọn bài học (tùy chọn)</option>
+                                        <c:forEach var="lesson" items="${lessons}">
+                                            <option value="${lesson.lessonId}"
+                                                    <c:if test="${lesson.lessonId == lessonId}">selected</c:if>>
+                                                    ${fn:escapeXml(lesson.lessonName)}
+                                            </option>
+                                        </c:forEach>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label mandatory">Câu hỏi đã chọn</label>
-                                <div class="question-count" id="questionCount">Đã chọn: 0 câu hỏi</div>
+                                <div class="question-count" id="questionCount">Đã chọn: ${fn:length(questions)} câu hỏi</div>
                                 <div class="selected-questions" id="selectedQuestions">
-                                    <p>Chưa có câu hỏi nào được chọn.</p>
+                                    <c:choose>
+                                        <c:when test="${empty questions}">
+                                            <p>Chưa có câu hỏi nào được chọn.</p>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="question" items="${questions}">
+                                                <p>Câu hỏi: ${fn:escapeXml(question.content)} (ID: ${question.questionId})</p>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                                 <button type="button" class="btn btn-select-questions" data-bs-toggle="modal"
                                         data-bs-target="#questionModal">Chọn câu hỏi
@@ -334,6 +363,9 @@
                                 <button type="submit" class="btn btn-primary" name="action" value="requestApproval">Yêu cầu phê duyệt</button>
                                 <a href="/staff/tests" class="btn btn-cancel">Hủy</a>
                             </div>
+                            <c:forEach var="questionId" items="${questionIds}">
+                                <input type="hidden" name="questionIds" value="${questionId}">
+                            </c:forEach>
                         </form>
                     </div>
                 </div>
@@ -372,8 +404,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
 <script>
-    let selectedQuestionIds = [];
-    let selectedQuestionTexts = [];
+    let selectedQuestionIds = [<c:forEach var="question" items="${questions}" varStatus="loop">'${question.questionId}'${loop.last ? '' : ','}</c:forEach>];
+    let selectedQuestionTexts = [<c:forEach var="question" items="${questions}" varStatus="loop">'Câu hỏi: ${fn:escapeXml(question.content)} (ID: ${question.questionId})'${loop.last ? '' : ','}</c:forEach>];
 
     function loadChapters(subjectId) {
         $('#chapter').html('<option value="">Chọn chương (tùy chọn)</option>');
@@ -389,10 +421,12 @@
             success: function (data) {
                 var options = '<option value="">Chọn chương (tùy chọn)</option>';
                 data.forEach(function (chapter) {
-                    options += '<option value="' + chapter.chapterId + '">' + chapter.chapterName + '</option>';
+                    options += '<option value="' + chapter.chapterId + '"' +
+                        (chapter.chapterId == ${chapterId != null ? chapterId : '""'} ? ' selected' : '') +
+                        '>' + chapter.chapterName + '</option>';
                 });
                 $('#chapter').html(options);
-                loadQuestions();
+                loadLessons($('#chapter').val());
             },
             error: function () {
                 $('#chapter').html('<option value="">Không có chương</option>');
@@ -412,7 +446,9 @@
             success: function (data) {
                 var options = '<option value="">Chọn bài học (tùy chọn)</option>';
                 data.forEach(function (lesson) {
-                    options += '<option value="' + lesson.lessonId + '">' + lesson.lessonName + '</option>';
+                    options += '<option value="' + lesson.lessonId + '"' +
+                        (lesson.lessonId == ${lessonId != null ? lessonId : '""'} ? ' selected' : '') +
+                        '>' + lesson.lessonName + '</option>';
                 });
                 $('#lesson').html(options);
                 loadQuestions();
@@ -427,7 +463,7 @@
         var subjectId = $('#subject').val();
         var chapterId = $('#chapter').val();
         var lessonId = $('#lesson').val();
-        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '')+ '&lessonId=' + (lessonId || '');
+        var url = '/staff/tests/questions?subjectId=' + (subjectId || '') + '&chapterId=' + (chapterId || '') + '&lessonId=' + (lessonId || '');
         $.ajax({
             url: url,
             method: 'GET',
@@ -483,7 +519,7 @@
 
     function validateForm() {
         var isValid = true;
-        $('#testNameError, #durationTimeError, #startAtError, #endAtError, #testStatusError, #testCategoryError, #subjectError, #questionsError').text('');
+        $('#testNameError, #durationTimeError, #startAtError, #endAtError, #testCategoryError, #subjectError, #questionsError').text('');
 
         var testName = $('#testName').val().trim();
         if (!testName) {
@@ -525,6 +561,14 @@
 
         return isValid;
     }
+
+    // Load chapters and lessons on page load
+    $(document).ready(function () {
+        var subjectId = $('#subject').val();
+        if (subjectId) {
+            loadChapters(subjectId);
+        }
+    });
 
     // Tải lại câu hỏi khi mở modal
     $('#questionModal').on('show.bs.modal', function () {
