@@ -45,17 +45,6 @@
                     </a>
                 </li>
                 <li class="nav-item mb-2">
-                    <a class="nav-link text-white" href="/admin/chapters" style="padding: 8px 15px;">
-                        <i class="bi bi-question-square me-2"></i>  Chương học
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a class="nav-link text-white"
-                    href="/admin/lessons" style="padding: 8px 15px;">
-                        <i class="bi bi-question-square me-2"></i> Bài học
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
             <a class="nav-link text-white ${activePage == 'communication' ? 'bg-primary rounded' : ''}"
                href="/admin/communications" style="padding: 8px 15px;">
                 <i class="bi bi-chat-dots me-2"></i> Giao tiếp

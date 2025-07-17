@@ -168,13 +168,13 @@
                     <!-- Action Buttons -->
                     <div class="mt-3">
                         <c:if test="${pkg.status == 'PENDING'}">
-                            <form action="/manager/package/approve/${pkg.packageId}" method="post"
+                            <form action="/admin/package/approve/${pkg.packageId}" method="post"
                                 style="display:inline;">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                 <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i>
                                     Duyệt</button>
                             </form>
-                            <form action="/manager/package/reject/${pkg.packageId}" method="post"
+                            <form action="/admin/package/reject/${pkg.packageId}" method="post"
                                 style="display:inline;">
                                 <button type="submit" class="btn btn-danger mx-2"><i class="bi bi-x-circle"></i> Từ
                                     chối</button>
@@ -182,7 +182,7 @@
                             </form>
                         </c:if>
                         <c:if test="${pkg.status == 'APPROVED'}">
-                            <form action="/manager/package/edit/${pkg.packageId}" method="post" style="display:inline;">
+                            <form action="/admin/package/edit/${pkg.packageId}" method="post" style="display:inline;">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                 <button type="submit" class="btn btn-warning mx-2">
                                     <i class="bi ${pkg.active ? 'bi-toggle-off' : 'bi-toggle-on'}"></i>
@@ -190,7 +190,7 @@
                                 </button>
                             </form>
                         </c:if>
-                        <a href="/manager/package" class="btn btn-secondary">Quay lại</a>
+                        <a href="/admin/package" class="btn btn-secondary">Quay lại</a>
                     </div>
                 </div>
 

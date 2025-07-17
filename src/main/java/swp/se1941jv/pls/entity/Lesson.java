@@ -65,6 +65,6 @@ public class Lesson extends BaseEntity {
     @OneToMany(mappedBy = "lesson")
     List<QuestionBank> questions;
 
-    @OneToMany(mappedBy = "lesson")
-    List<SubjectTest> subjectTests;
+//    @OneToMany(mappedBy = "lesson")
+//    List<SubjectTest> subjectTests;
 }

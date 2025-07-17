@@ -52,9 +52,6 @@ public class Chapter extends BaseEntity {
     List<Lesson> lessons;
 
     @OneToMany(mappedBy = "chapter")
-    List<SubjectTest> subjectTests;
-
-    @OneToMany(mappedBy = "chapter")
     List<Test> tests;
 
 }

@@ -85,9 +85,7 @@ public class ClientLessonController {
                 return "redirect:/login"; // Always redirect on no user
             }
 
-            // Check access rights for the subject within the package for the user
-            // Assuming subjectService.hasAccessSubjectInPackage now correctly takes subjectId, packageId, userId
-            // as per previous discussion, if not, adjust the service method signature
+
             if (Boolean.FALSE.equals(subjectService.hasAccessSubjectInPackage(packageId, userId, subjectId))) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập gói học này hoặc gói đã hết hạn.");
                 return "redirect:/"; // Redirect to home page or an access denied page

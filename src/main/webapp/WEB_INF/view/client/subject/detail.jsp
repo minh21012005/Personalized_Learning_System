@@ -65,14 +65,15 @@
                             </c:forEach>
                         </div>
                     </section>
+                    <div id="review-content">
+                        <jsp:include page="/subject/${subject.subjectId}/reviews?render=true" />
+                    </div>
                     <div class="back-button">
                         <a href="javascript:history.back()">Quay lại</a>
                     </div>
 
                 </div>
-                <div id="review-content">
-                    <jsp:include page="/subject/${subject.subjectId}/reviews?render=true" />
-                </div>
+
             </main>
 
             <footer>

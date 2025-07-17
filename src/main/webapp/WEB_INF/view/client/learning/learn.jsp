@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -15,7 +16,6 @@
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Font và màu sắc chính */
         :root {
             --primary-color: #0d6efd;
             --secondary-color: #6c757d;
@@ -42,7 +42,6 @@
             padding: 24px;
         }
 
-        /* Sidebar cải tiến */
         .sidebar {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -50,9 +49,6 @@
             padding: 24px;
             max-height: 80vh;
             overflow-y: auto;
-            position: sticky;
-            top: 80px;
-            transition: transform 0.3s ease;
         }
 
         .sidebar h4 {
@@ -61,7 +57,6 @@
             margin-bottom: 20px;
         }
 
-        /* List group item */
         .list-group-item {
             border: none;
             padding: 12px 16px;
@@ -70,6 +65,7 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
+            gap: 8px;
         }
 
         .list-group-item:hover {
@@ -84,8 +80,7 @@
             box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
         }
 
-        /* Badge cho lesson hoàn thành */
-        .lesson-completed {
+        .lesson-completed, .test-completed {
             background-color: #28a745;
             color: white;
             font-size: 0.75rem;
@@ -94,7 +89,6 @@
             margin-left: 8px;
         }
 
-        /* Video container */
         .video-container {
             background-color: #e9ecef;
             border-radius: 12px;
@@ -103,8 +97,6 @@
             position: relative;
             margin-bottom: 24px;
         }
-
-
 
         .video-time {
             font-size: 0.9rem;
@@ -115,7 +107,6 @@
             gap: 6px;
         }
 
-        /* Card cải tiến */
         .card {
             border: none;
             border-radius: 12px;
@@ -132,7 +123,6 @@
             padding: 24px;
         }
 
-        /* Tabs cải tiến */
         .nav-tabs {
             border-bottom: 2px solid #e9ecef;
             margin-bottom: 24px;
@@ -159,7 +149,6 @@
             border-bottom: 3px solid var(--primary-color);
         }
 
-        /* Toggle chapter button */
         .toggle-chapter-btn {
             background: none;
             border: none;
@@ -190,7 +179,6 @@
             transform: rotate(180deg);
         }
 
-        /* Animation cho collapse */
         .chapter-container .collapse {
             transition: height 0.3s ease;
         }
@@ -202,21 +190,23 @@
             overflow: hidden;
         }
 
-        /* Nút quay lại */
-        .btn-back {
+        .btn-back, .btn-test, .btn-detail {
             font-weight: 500;
             border-radius: 8px;
             padding: 10px 20px;
             transition: all 0.3s ease;
         }
 
-        .btn-back:hover {
+        .btn-back:hover, .btn-test:hover, .btn-detail:hover {
             background-color: var(--primary-color);
             color: white;
             transform: translateX(-4px);
         }
 
-        /* Responsive */
+        .test-section {
+            margin-top: 20px;
+        }
+
         @media (max-width: 991.98px) {
             .sidebar {
                 display: none;
@@ -231,6 +221,89 @@
                 padding: 16px;
             }
         }
+        /*
+        ========================================
+        CSS CHO PHẦN THẢO LUẬN
+        ========================================
+        */
+        #new-comment-form textarea {
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+
+        #new-comment-form textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        #comments-list-container .comment-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        #comments-list-container .comment-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0; /* Ngăn avatar bị co lại */
+        }
+
+        #comments-list-container .comment-body {
+            flex-grow: 1;
+        }
+
+        #comments-list-container .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        #comments-list-container .comment-author {
+            font-weight: 600;
+            color: #333;
+        }
+
+        #comments-list-container .comment-timestamp {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+        }
+
+        #comments-list-container .comment-content {
+            color: #495057;
+            line-height: 1.6;
+            white-space: pre-wrap; /* Giữ lại định dạng xuống dòng */
+        }
+
+        #comments-list-container .comment-actions {
+            margin-top: 8px;
+        }
+
+        #comments-list-container .comment-actions .btn-reply {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+        }
+
+        #comments-list-container .comment-actions .btn-reply:hover {
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+
+        #comments-list-container .comment-replies {
+            margin-top: 16px;
+            padding-left: 24px;
+            border-left: 2px solid #e9ecef;
+        }
     </style>
 </head>
 <body>
@@ -239,6 +312,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 <script src="/js/learn.js"></script>
+<script src="/js/lesson_comment.js"></script>
 
 <!-- Khởi tạo YouTube IFrame API -->
 <script>
@@ -250,7 +324,7 @@
     }
 </script>
 
-<!-- Dữ liệu lessons từ server -->
+<!-- Dữ liệu lessons và tests từ server -->
 <script>
     const lessonsData = {};
     <c:forEach var="chapterItem" items="${learningData.chapters}">
@@ -262,11 +336,24 @@
         lessonDescription: "${fn:escapeXml(lessonItem.lessonDescription != null ? lessonItem.lessonDescription : '')}",
         materials: [
             <c:forEach var="material" items="${lessonItem.materials}" varStatus="materialStatus">
-            "${fn:escapeXml(material)}"${materialStatus.last ? '' : ','}
+            {
+                "fileName": "${fn:escapeXml(material.fileName)}",
+                "filePath": "${fn:escapeXml(material.filePath)}"
+            }${materialStatus.last ? '' : ','}
             </c:forEach>
         ],
         videoTime: "${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}",
-        isCompleted: ${lessonItem.isCompleted}
+        isCompleted: ${lessonItem.isCompleted},
+        lessonTest: <c:if test="${lessonItem.lessonTest != null}">
+        {
+            testId: ${lessonItem.lessonTest.testId},
+            userTestId: ${lessonItem.lessonTest.userTestId != null ? lessonItem.lessonTest.userTestId : 'null'},
+            testName: "${fn:escapeXml(lessonItem.lessonTest.testName)}",
+            durationTime: ${lessonItem.lessonTest.durationTime},
+            testCategoryName: "${fn:escapeXml(lessonItem.lessonTest.testCategoryName)}",
+            isCompleted: ${lessonItem.lessonTest.isCompleted}
+        },
+        </c:if><c:if test="${lessonItem.lessonTest == null}">null</c:if>
     };
     </c:forEach>
     </c:forEach>
@@ -278,7 +365,8 @@
         defaultLessonId: ${learningData.defaultLesson != null ? learningData.defaultLesson.lessonId : 'null'}
     };
 
-    // Khởi động ứng dụng
+    window.learningConfig = learningConfig;
+
     $(document).ready(function() {
         if (typeof LearningApp !== 'undefined') {
             LearningApp.init(learningConfig, lessonsData);
@@ -298,13 +386,8 @@
 
     <div class="row">
         <div class="col-lg-8">
-
-
-
-            <div class="video-container ratio ratio-16x9" id="videoContainer" >
-                <iframe id="lessonVideo" frameborder="0"
-                        allow="autoplay"
-                        allowfullscreen></iframe>
+            <div class="video-container ratio ratio-16x9" id="videoContainer">
+                <iframe id="lessonVideo" frameborder="0" allow="autoplay" allowfullscreen></iframe>
             </div>
 
             <ul class="nav nav-tabs" id="lessonTabs" role="tablist">
@@ -319,6 +402,14 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials"
                             type="button" role="tab" aria-controls="materials">Tài liệu môn học</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="test-tab" data-bs-toggle="tab" data-bs-target="#test"
+                            type="button" role="tab" aria-controls="test">Bài kiểm tra cuối bài</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="discussion-tab" data-bs-toggle="tab" data-bs-target="#discussion"
+                            type="button" role="tab" aria-controls="discussion">Thảo luận</button>
                 </li>
             </ul>
             <div class="tab-content" id="lessonTabsContent">
@@ -339,8 +430,8 @@
                                     <c:when test="${not empty learningData.defaultLesson.materials}">
                                         <c:forEach var="material" items="${learningData.defaultLesson.materials}">
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" target="_blank">${fn:escapeXml(material)}</a>
-                                                <a href="/files/taiLieu/${fn:escapeXml(material)}" download="${fn:escapeXml(material)}" class="text-primary">
+                                                <a href="/files/materials/${fn:escapeXml(material.filePath)}" target="_blank">${fn:escapeXml(material.fileName)}</a>
+                                                <a href="/files/materials/${fn:escapeXml(material.filePath)}" download="${fn:escapeXml(material.fileName)}" class="text-primary">
                                                     <i class="bi bi-download"></i>
                                                 </a>
                                             </li>
@@ -351,6 +442,53 @@
                                     </c:otherwise>
                                 </c:choose>
                             </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="test" role="tabpanel" aria-labelledby="test-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title h4 fw-semibold">Bài kiểm tra cuối bài</h2>
+                            <div id="test-section" class="test-section">
+                                <!-- Nội dung bài kiểm tra sẽ được cập nhật động bởi JavaScript -->
+                                <p id="no-test-message" class="text-muted">Không có bài kiểm tra cuối bài.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="discussion" role="tabpanel" aria-labelledby="discussion-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title h4 fw-semibold mb-4">Thảo luận về bài học</h2>
+
+                            <!-- Form để đăng bình luận mới -->
+                            <div class="mb-4">
+                                <form id="new-comment-form">
+                                    <input type="hidden" name="subjectId"
+                                           value="${learningData.subjectId}">
+                                    <input type="hidden" name="lessonId"
+                                           id="discussion-lesson-id"
+                                           value="${learningData.defaultLesson.lessonId}">
+                                    <input type="hidden" name="packageId"
+                                           value="${learningData.packageId}">
+                                    <div class="mb-2">
+                                        <textarea class="form-control" id="comment-content-input"
+                                                  rows="3" placeholder="Viết bình luận của bạn..."
+                                                  required></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <hr>
+
+                            <!-- Khu vực chứa danh sách các bình luận -->
+                            <div id="comments-list-container">
+                                <p class="text-muted">Đang tải bình luận...</p>
+                                <!-- Các bình luận sẽ được JS tải vào đây -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -384,10 +522,35 @@
                                                     </a>
                                                     <span class="video-time">
                                                         <i class="bi bi-collection-play"></i>
-                                                        ${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A')}
+                                                        ${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}
                                                     </span>
                                                 </div>
                                             </c:forEach>
+                                            <c:if test="${not empty chapterItem.chapterTests}">
+                                                <div class="test-section">
+                                                    <h3 class="h5 fw-semibold">Bài kiểm tra chương</h3>
+                                                    <c:forEach var="chapterTest" items="${chapterItem.chapterTests}">
+                                                        <div class="list-group-item">
+                                                            <a href="/tests/${chapterTest.testId}/${learningData.packageId}" class="text-decoration-none" target="_blank">
+                                                                    ${fn:escapeXml(chapterTest.testName)} (${fn:escapeXml(chapterTest.testCategoryName)})
+                                                                <c:if test="${chapterTest.isCompleted}">
+                                                                    <span class="test-completed">Hoàn thành</span>
+                                                                </c:if>
+                                                            </a>
+                                                            <c:if test="${chapterTest.isCompleted}">
+                                                                <a href="/tests/history/${chapterTest.userTestId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                                                                    Chi tiết
+                                                                </a>
+                                                            </c:if>
+                                                        </div>
+                                                    </c:forEach>
+                                                </div>
+                                            </c:if>
+                                            <c:if test="${empty chapterItem.chapterTests}">
+                                                <div class="test-section">
+                                                    <p class="text-muted">Không có bài kiểm tra chương.</p>
+                                                </div>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </div>
@@ -427,14 +590,64 @@
                                         </a>
                                         <span class="video-time">
                                             <i class="bi bi-collection-play"></i>
-                                            ${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : 'N/A')}
+                                            ${fn:escapeXml(lessonItem.videoTime != null ? lessonItem.videoTime : '')}
                                         </span>
                                     </div>
                                 </c:forEach>
+                                <c:if test="${not empty chapterItem.chapterTests}">
+                                    <div class="test-section">
+                                        <h3 class="h5 fw-semibold">Bài kiểm tra chương</h3>
+                                        <c:forEach var="chapterTest" items="${chapterItem.chapterTests}">
+                                            <div class="list-group-item">
+                                                <a href="/tests/${chapterTest.testId}/${learningData.packageId}" class="text-decoration-none" target="_blank">
+                                                        ${fn:escapeXml(chapterTest.testName)} (${fn:escapeXml(chapterTest.testCategoryName)})
+                                                    <c:if test="${chapterTest.isCompleted}">
+                                                        <span class="test-completed">Hoàn thành</span>
+                                                    </c:if>
+                                                </a>
+                                                <c:if test="${chapterTest.isCompleted}">
+                                                    <a href="/tests/history/${chapterTest.userTestId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                                                        Chi tiết
+                                                    </a>
+                                                </c:if>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                </c:if>
+                                <c:if test="${empty chapterItem.chapterTests}">
+                                    <div class="test-section">
+                                        <p class="text-muted">Không có bài kiểm tra chương.</p>
+                                    </div>
+                                </c:if>
                             </div>
                         </div>
                     </div>
                 </c:forEach>
+                <c:if test="${not empty learningData.subjectTests}">
+                    <div class="test-section">
+                        <h3 class="h5 fw-semibold">Bài kiểm tra môn học</h3>
+                        <c:forEach var="subjectTest" items="${learningData.subjectTests}">
+                            <div class="list-group-item">
+                                <a href="/tests/${subjectTest.testId}/${learningData.packageId}" class="text-decoration-none" target="_blank">
+                                        ${fn:escapeXml(subjectTest.testName)} (${fn:escapeXml(subjectTest.testCategoryName)})
+                                    <c:if test="${subjectTest.isCompleted}">
+                                        <span class="test-completed">Hoàn thành</span>
+                                    </c:if>
+                                </a>
+                                <c:if test="${subjectTest.isCompleted}">
+                                    <a href="/tests/history/${subjectTest.userTestId}" class="btn btn-outline-primary btn-detail" target="_blank">
+                                        Chi tiết
+                                    </a>
+                                </c:if>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </c:if>
+                <c:if test="${empty learningData.subjectTests}">
+                    <div class="test-section">
+                        <p class="text-muted">Không có bài kiểm tra môn học.</p>
+                    </div>
+                </c:if>
             </div>
         </div>
     </div>

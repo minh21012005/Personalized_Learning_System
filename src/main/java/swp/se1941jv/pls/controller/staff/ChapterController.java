@@ -98,6 +98,8 @@ public class ChapterController {
 
             Subject subject = subjectService.getSubjectById(subjectId)
                     .orElseThrow(() -> new IllegalArgumentException("subject.message.notFound"));
+
+            chapterService.validateStaffAccess(subjectId, userId);
             ChapterFormDTO chapterForm = new ChapterFormDTO();
             chapterForm.setSubjectId(subjectId);
 
@@ -132,6 +134,9 @@ public class ChapterController {
 
             Subject subject = subjectService.getSubjectById(subjectId)
                     .orElseThrow(() -> new IllegalArgumentException("subject.message.notFound"));
+
+            chapterService.validateStaffAccess(subjectId, userId);
+
             Chapter chapter = chapterService.getChapterById(chapterId)
                     .orElseThrow(() -> new IllegalArgumentException("chapter.message.notFound"));
 

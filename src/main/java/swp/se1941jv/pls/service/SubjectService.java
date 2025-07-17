@@ -2,26 +2,23 @@ package swp.se1941jv.pls.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import swp.se1941jv.pls.dto.response.*;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningChapterDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningLessonDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningPageDataDTO;
+import swp.se1941jv.pls.dto.response.learningPageData.LearningTestDTO;
 import swp.se1941jv.pls.dto.response.subject.*;
 import swp.se1941jv.pls.entity.*;
-import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.repository.*;
 
 @Service
@@ -30,35 +27,34 @@ public class SubjectService {
     private final SubjectAssignmentRepository subjectAssignmentRepository;
     private final SubjectStatusHistoryRepository statusHistoryRepository;
     private final UserRepository userRepository;
-    private final ChapterService chapterService;
     private final ChapterRepository chapterRepository;
     private final LessonRepository lessonRepository;
     private final UserPackageRepository userPackageRepository;
     private final PackageSubjectRepository packageSubjectRepository;
-    private final ObjectMapper objectMapper;
     private final LessonProgressRepository lessonProgressRepository;
-    private final PackageRepository packageRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+    private final UserTestRepository userTestRepository;
+    private final TestRepository testRepository;
 
     public SubjectService(SubjectRepository subjectRepository,
                           SubjectAssignmentRepository subjectAssignmentRepository,
                           SubjectStatusHistoryRepository statusHistoryRepository, UserRepository userRepository,
-                          ChapterService chapterService,ChapterRepository chapterRepository,LessonRepository lessonRepository,
+                           ChapterRepository chapterRepository, LessonRepository lessonRepository,
                           UserPackageRepository userPackageRepository,
-                          PackageSubjectRepository packageSubjectRepository, ObjectMapper objectMapper,
-                          LessonProgressRepository lessonProgressRepository, PackageRepository packageRepository) {
+                          PackageSubjectRepository packageSubjectRepository,
+                          LessonProgressRepository lessonProgressRepository,
+                          UserTestRepository userTestRepository, TestRepository testRepository) {
         this.subjectRepository = subjectRepository;
         this.subjectAssignmentRepository = subjectAssignmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.userRepository = userRepository;
-        this.chapterService = chapterService;
         this.chapterRepository = chapterRepository;
         this.lessonRepository = lessonRepository;
         this.userPackageRepository = userPackageRepository;
         this.packageSubjectRepository = packageSubjectRepository;
-        this.objectMapper = objectMapper;
         this.lessonProgressRepository = lessonProgressRepository;
-        this.packageRepository = packageRepository;
+        this.userTestRepository = userTestRepository;
+        this.testRepository = testRepository;
     }
 
     public List<Subject> getSubjectsByGradeId(Long gradeId, boolean isActive) {
@@ -140,7 +136,6 @@ public class SubjectService {
     public Optional<Subject> findById(long id) {
         return this.subjectRepository.findById(id);
     }
-
 
 
 //    public SubjectResponseDTO getSubjectResponseById(Long subjectId) {
@@ -416,6 +411,9 @@ public class SubjectService {
 
         // Cập nhật trạng thái chương và bài học nếu APPROVED
         if (newStatus == SubjectStatusHistory.SubjectStatus.APPROVED) {
+
+            subject.setIsActive(true);
+
             for (Chapter chapter : subject.getChapters()) {
                 chapter.setStatus(true);
                 for (Lesson lesson : chapter.getLessons()) {
@@ -433,7 +431,6 @@ public class SubjectService {
         statusHistory.setSubmittedBy(null);
         statusHistoryRepository.save(statusHistory);
     }
-
 
 
     @Transactional
@@ -497,6 +494,14 @@ public class SubjectService {
         String searchName = (filterName != null && filterName.trim().isEmpty()) ? null : filterName;
         return subjectRepository.findByFilter(searchName, filterGradeId, pageable)
                 .map(this::toSubjectListDTO);
+    }
+
+    public Page<SubjectListDTO> getPendingSubjectsWithDTO(String filterName, String submittedByName, Pageable pageable) {
+        String searchName = (filterName != null && !filterName.trim().isEmpty()) ? filterName.trim() : null;
+        String searchSubmittedBy = (submittedByName != null && !submittedByName.trim().isEmpty()) ? submittedByName.trim() : null;
+
+        Page<Subject> pendingSubjects = subjectRepository.findPendingSubjects(searchName, searchSubmittedBy, pageable);
+        return pendingSubjects.map(this::toSubjectListDTO);
     }
 
     public Optional<SubjectAssignDTO> getSubjectAssignDTOById(Long id) {
@@ -617,7 +622,7 @@ public class SubjectService {
             throw new IllegalArgumentException("Chỉ có Content Manager mới có thể xóa môn học!");
         }
 
-        if (!subjectRepository.existsById(subjectId)){
+        if (!subjectRepository.existsById(subjectId)) {
             throw new IllegalArgumentException("Môn học không tồn tại");
         }
 
@@ -812,10 +817,40 @@ public class SubjectService {
                     List<LearningLessonDTO> lessonDTOs = chapter.getLessons().stream()
                             .filter(lesson -> lesson.getStatus()) // Chỉ lấy bài học active
                             .map(lesson -> {
-                                Optional<LessonProgress> progressOpt = lessonProgressRepository.findByUserUserIdAndLessonLessonId(userId, lesson.getLessonId());
-                                List<String> materials = lesson.getLessonMaterials().stream()
-                                        .map(LessonMaterial::getFilePath)
+                                Optional<LessonProgress> progressOpt = lessonProgressRepository.findByUserUserIdAndLessonLessonIdAndPackageEntityPackageId(userId, lesson.getLessonId(), packageId);
+                                List<LearningLessonDTO.LessonMaterialDTO> materials = lesson.getLessonMaterials().stream()
+                                        .map(material -> LearningLessonDTO.LessonMaterialDTO.builder()
+                                                .filePath(material.getFilePath())
+                                                .fileName(material.getFileName()) // Nếu không có fileName, trích xuất từ filePath
+                                                .build())
                                         .collect(Collectors.toList());
+                                // Lấy bài kiểm tra bài học (test_category_id = 4)
+                                LearningTestDTO lessonTest = null;
+                                List<Test> lessonTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndLessonLessonId(4L, true, lesson.getLessonId());
+                                if (!lessonTests.isEmpty()) {
+                                    Test test = lessonTests.get(0); // Lấy bài kiểm tra đầu tiên (giả định chỉ có một)
+
+                                    List<UserTest> userTests = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().sorted(Comparator.comparing(UserTest::getUserTestId).reversed()).collect(Collectors.toList());
+
+                                    Optional<UserTest> userTestOpt = userTests.stream().findFirst();
+
+//                                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
+                                    lessonTest = LearningTestDTO.builder()
+                                            .testId(test.getTestId())
+                                            .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
+                                            .testName(test.getTestName())
+                                            .durationTime(test.getDurationTime())
+                                            .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
+                                            .isCompleted(userTestOpt.isPresent() && userTestOpt.get().getTimeEnd() != null)
+                                            .startAt(test.getStartAt())
+                                            .endAt(test.getEndAt())
+                                            .build();
+                                }
+                                // Kiểm tra isCompleted: nếu có bài kiểm tra thì cần hoàn thành cả bài kiểm tra và video
+                                boolean isCompleted = progressOpt.isPresent() && progressOpt.get().getIsCompleted();
+                                if (lessonTest != null) {
+                                    isCompleted = isCompleted && lessonTest.getIsCompleted();
+                                }
                                 return LearningLessonDTO.builder()
                                         .lessonId(lesson.getLessonId())
                                         .lessonName(lesson.getLessonName())
@@ -823,7 +858,28 @@ public class SubjectService {
                                         .videoSrc(lesson.getVideoSrc())
                                         .videoTime(lesson.getVideoTime())
                                         .materials(materials)
-                                        .isCompleted(progressOpt.isPresent() && progressOpt.get().getIsCompleted())
+                                        .isCompleted(isCompleted)
+                                        .lessonTest(lessonTest)
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
+                    // Lấy bài kiểm tra chương (test_category_id = 2)
+                    List<Test> chapterTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndChapterChapterId(2L, true, chapter.getChapterId());
+                    List<LearningTestDTO> chapterTestDTOs = chapterTests.stream()
+                            .map(test -> {
+                                List<UserTest> userTests = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().sorted(Comparator.comparing(UserTest::getUserTestId).reversed()).collect(Collectors.toList());
+
+                                Optional<UserTest> userTestOpt = userTests.stream().findFirst();
+//                                Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
+                                return LearningTestDTO.builder()
+                                        .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
+                                        .testId(test.getTestId())
+                                        .testName(test.getTestName())
+                                        .durationTime(test.getDurationTime())
+                                        .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
+                                        .isCompleted(userTestOpt.isPresent() && userTestOpt.get().getTimeEnd() != null)
+                                        .startAt(test.getStartAt())
+                                        .endAt(test.getEndAt())
                                         .build();
                             })
                             .collect(Collectors.toList());
@@ -832,6 +888,28 @@ public class SubjectService {
                             .chapterName(chapter.getChapterName())
                             .chapterDescription(chapter.getChapterDescription())
                             .listLesson(lessonDTOs)
+                            .chapterTests(chapterTestDTOs)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // Lấy bài kiểm tra môn học (test_category_id = 3)
+        List<Test> subjectTests = testRepository.findByTestCategoryTestCategoryIdAndIsOpenAndSubjectSubjectId(3L, true, subjectId);
+        List<LearningTestDTO> subjectTestDTOs = subjectTests.stream()
+                .map(test -> {
+                    List<UserTest> userTests = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().sorted(Comparator.comparing(UserTest::getUserTestId).reversed()).collect(Collectors.toList());
+
+                    Optional<UserTest> userTestOpt = userTests.stream().findFirst();
+//                    Optional<UserTest> userTestOpt = userTestRepository.findByTestIdUserId(test.getTestId(), userId).stream().findFirst();
+                    return LearningTestDTO.builder()
+                            .testId(test.getTestId())
+                            .userTestId(userTestOpt.map(UserTest::getUserTestId).orElse(test.getTestId()))
+                            .testName(test.getTestName())
+                            .durationTime(test.getDurationTime())
+                            .testCategoryName(test.getTestCategory() != null ? test.getTestCategory().getName() : "N/A")
+                            .isCompleted(userTestOpt.isPresent() && userTestOpt.get().getTimeEnd() != null)
+                            .startAt(test.getStartAt())
+                            .endAt(test.getEndAt())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -865,9 +943,9 @@ public class SubjectService {
                 .chapters(chapterDTOs)
                 .defaultLesson(defaultLesson)
                 .defaultChapter(defaultChapter)
+                .subjectTests(subjectTestDTOs)
                 .build();
     }
-
 
     // --- Hàm ánh xạ DTO ---
 
@@ -920,7 +998,7 @@ public class SubjectService {
             SubjectStatusHistory status = statusOpt.get();
             builder.submittedByFullName(status.getSubmittedBy() != null ? status.getSubmittedBy().getFullName() : null)
                     .feedback(status.getFeedback());
-            // Lấy người giao từ SubjectStatusHistory (giả định có bản ghi DRAFT với reviewer là người giao)
+            builder.submittedAt(status.getChangedAt() != null ? status.getChangedAt().format(formatter):null);
             if (status.getStatus() == SubjectStatusHistory.SubjectStatus.DRAFT && status.getReviewer() != null) {
                 builder.assignedByFullName(status.getReviewer().getFullName());
             } else {

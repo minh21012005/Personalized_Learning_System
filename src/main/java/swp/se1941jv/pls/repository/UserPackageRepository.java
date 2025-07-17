@@ -29,4 +29,5 @@ public interface UserPackageRepository extends JpaRepository<UserPackage, KeyUse
 
     boolean existsByPkg_PackageSubjects_Subject_SubjectId(Long subjectId);
 
+    List<UserPackage> findByUserUserId(Long userId);
 }

@@ -18,6 +18,14 @@ public class LearningLessonDTO {
     String lessonDescription;
     String videoSrc;
     String videoTime;
-    List<String> materials; // Lưu ý: đã là List<String> nên cần xử lý JSON ở backend
+    List<LessonMaterialDTO> materials; // Thay List<String> bằng List<LessonMaterialDTO>
     Boolean isCompleted;
+    LearningTestDTO lessonTest;
+
+    @Data
+    @Builder
+    public static class LessonMaterialDTO {
+        private String fileName;
+        private String filePath;
+    }
 }

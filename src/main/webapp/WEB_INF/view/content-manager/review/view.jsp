@@ -217,29 +217,18 @@
                         }
 
 
-                        .table-bordered td:nth-child(3) {
-                            max-width: 120px;
-                            /* Reduced width to make it smaller, e.g., half the current size */
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
+                     .table-bordered td:nth-child(3),
+.table-bordered td:nth-child(5) {
+    max-width: 300px;
+    word-wrap: break-word;
+    white-space: normal;
+}
 
-                        .table-bordered td:nth-child(4) {
-                            max-width: 40px;
-                            /* Reduced width to make it smaller, e.g., half the current size */
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
 
-                        .table-bordered td:nth-child(5) {
-                            max-width: 300px;
-                            /* Reduced width to make it smaller, e.g., half the current size */
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
+                       .table-bordered td:nth-child(4) {
+    white-space: nowrap;
+}
+                       
 
 
                         .table-bordered td:nth-child(1) {
@@ -298,7 +287,7 @@
                                                         </option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <label>Package/Subject</label>
                                                     <select name="packageId" class="form-select" ${type !='Package'
                                                         ? 'disabled' : '' }>
@@ -399,6 +388,7 @@
                                                             ${review.status}</td>
                                                         <td>
                                                             <c:if test="${review.status == 'PENDING'}">
+                                                                 <div class="d-flex gap-1">
                                                                 <form action="/admin/reviews/${review.reviewId}/approve"
                                                                     method="post" style="display:inline;">
                                                                     <button type="submit"
@@ -409,6 +399,7 @@
                                                                     <button type="submit"
                                                                         class="btn btn-danger btn-sm">Reject</button>
                                                                 </form>
+                                                            </div>
                                                             </c:if>
                                                         </td>
                                                     </tr>

@@ -37,6 +37,9 @@
             <a href="<c:url value='/admin/subject/new'/>" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus-circle"></i> <spring:message code="subject.list.add.new"/>
             </a>
+            <a href="<c:url value='/admin/subject/pending'/>" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus-circle"></i> Danh sách môn học chờ duyệt
+            </a>
         </div>
     </div>
 </form>
@@ -135,7 +138,6 @@
                                 (Nộp bởi: <c:out value="${subject.submittedByFullName}"/> lúc <c:out value="${subject.createdAt}"/>)
                             </c:if>
                             <c:if test="${subject.status == 'REJECTED' and not empty subject.feedback and subject.feedback != ''}">
-                                <br>Phản hồi: <c:out value="${subject.feedback}"/>
                             </c:if>
                         </span>
                     </c:if>
@@ -162,16 +164,6 @@
                     <c:if test="${subject.status == 'DRAFT' and empty subject.assignedToFullName}">
                         <a href="<c:url value='/admin/subject/assign/${subject.subjectId}'/>" class="btn btn-sm btn-info me-1" title="<spring:message code="button.assign"/>">
                             <i class="fas fa-user-plus"></i> <spring:message code="button.assign"/>
-                        </a>
-                    </c:if>
-                    <c:if test="${subject.status == 'PENDING'}">
-                        <a href="<c:url value='/admin/subject/review/${subject.subjectId}'/>" class="btn btn-sm btn-info me-1" title="<spring:message code="button.review"/>">
-                            <i class="fas fa-check-circle"></i> <spring:message code="button.review"/>
-                        </a>
-                    </c:if>
-                    <c:if test="${subject.status == 'APPROVED' and not subject.isActive}">
-                        <a href="<c:url value='/admin/subject/publish/${subject.subjectId}'/>" class="btn btn-sm btn-success me-1" title="<spring:message code="button.publish"/>">
-                            <i class="fas fa-upload"></i> <spring:message code="button.publish"/>
                         </a>
                     </c:if>
 <%--                    <c:if test="${subject.status == 'APPROVED' or subject.status == 'PUBLISHED'}">--%>

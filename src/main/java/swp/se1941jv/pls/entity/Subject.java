@@ -52,9 +52,6 @@ public class Subject extends BaseEntity {
     @OneToMany(mappedBy = "subject")
     List<Test> tests;
 
-    @OneToMany(mappedBy = "subject")
-    List<SubjectTest> subjectTests;
-
     @ManyToOne
     @JoinColumn(name = "grade_id")
     Grade grade;

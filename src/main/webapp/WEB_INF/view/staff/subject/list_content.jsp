@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%-- FORM FILTER --%>
 <form action="<c:url value='/staff/subject'/>" method="GET" class="mb-3">
@@ -100,6 +101,7 @@
                     <c:if test="${sortField eq 'assignedAt'}"><i class="fas fa-sort-${sortDir eq 'asc' ? 'up' : 'down'}"></i></c:if>
                 </a>
             </th>
+            <th><spring:message code="subject.table.feedback" text="Phản hồi"/></th>
             <th><spring:message code="label.actions"/></th>
         </tr>
         </thead>
@@ -110,8 +112,7 @@
                 <td>
                     <c:choose>
                         <c:when test="${not empty subject.subjectImage and subject.subjectImage != ''}">
-                            <img src="/img/subjectImg/<c:out value='${subject.subjectImage}'/>"
-                                 alt="<c:out value='${subject.subjectName}'/>" class="subject-img-thumbnail"/>
+                            <img src="/img/subjectImg/<c:out value='${subject.subjectImage}'/>" alt="<c:out value='${subject.subjectName}'/>" class="subject-img-thumbnail"/>
                         </c:when>
                         <c:otherwise>
                             <span class="text-muted"><spring:message code="subject.list.noImage" text="Không có hình ảnh"/></span>
@@ -128,14 +129,21 @@
                             <c:if test="${subject.status == 'PENDING' and not empty subject.submittedByFullName and subject.submittedByFullName != ''}">
                                 (Nộp bởi: <c:out value="${subject.submittedByFullName}"/> lúc <c:out value="${subject.assignedAt}"/>)
                             </c:if>
-                            <c:if test="${subject.status == 'REJECTED' and not empty subject.feedback and subject.feedback != ''}">
-                                <br>Phản hồi: <c:out value="${subject.feedback}"/>
-                            </c:if>
                         </span>
                     </c:if>
                 </td>
                 <td><c:out value="${not empty subject.assignedByFullName ? subject.assignedByFullName : 'Không có thông tin'}"/></td>
                 <td><c:out value="${subject.assignedAt}" default=""/></td>
+                <td>
+                    <c:choose>
+                        <c:when test="${not empty subject.feedback}">
+                            <button class="feedback-btn" data-feedback="${fn:escapeXml(subject.feedback)}">Xem phản hồi</button>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="no-feedback">Không có phản hồi</span>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
                 <td>
                     <a href="<c:url value='/staff/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1" title="<spring:message code="button.view"/>">
                         <i class="fas fa-eye"></i> <spring:message code="button.view"/>
@@ -152,7 +160,7 @@
         </c:forEach>
         <c:if test="${empty subjects}">
             <tr>
-                <td colspan="9" class="text-center text-muted"><spring:message code="subject.list.noSubjectsFound.criteria"/></td>
+                <td colspan="10" class="text-center text-muted"><spring:message code="subject.list.noSubjectsFound.criteria"/></td>
             </tr>
         </c:if>
         </tbody>

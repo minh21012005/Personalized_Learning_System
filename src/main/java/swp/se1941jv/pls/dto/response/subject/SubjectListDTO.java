@@ -15,6 +15,7 @@ public class SubjectListDTO {
     private Boolean isActive;
     private String gradeName;
     private String createdAt;
+    private String submittedAt;
     private String updatedAt;
     private String assignedAt;
     private String assignedByFullName;

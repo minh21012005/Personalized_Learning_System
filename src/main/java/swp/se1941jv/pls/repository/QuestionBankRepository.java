@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import swp.se1941jv.pls.entity.Lesson;
 import swp.se1941jv.pls.entity.QuestionBank;
 
 import java.util.List;
@@ -25,4 +26,6 @@ public interface QuestionBankRepository extends JpaRepository<QuestionBank, Long
     List<QuestionBank> findByLesson_LessonIdAndDisplayAtEndOfLessonTrue(Long lessonId);
 
     List<QuestionBank> findByLessonLessonId(Long lessonId);
+
+    List<QuestionBank> findByLesson(Lesson lesson);
 }

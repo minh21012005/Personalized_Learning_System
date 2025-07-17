@@ -27,6 +27,10 @@ public class UserTest {
     @JoinColumn(name = "test_id")
     Test test;
 
+    @ManyToOne
+    @JoinColumn(name = "package_id")
+    Package pkg;
+
     @Column(name = "time_start")
     LocalDateTime timeStart;
 

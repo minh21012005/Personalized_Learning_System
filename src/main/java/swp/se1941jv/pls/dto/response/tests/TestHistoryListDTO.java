@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class TestHistoryListDTO {
     private Long testId;
+    private Long userTestId;
     private String testName;
     private int totalQuestions;
     private int correctAnswers;

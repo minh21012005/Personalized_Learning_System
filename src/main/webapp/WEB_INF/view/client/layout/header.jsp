@@ -409,10 +409,11 @@
 
                     </li>
                     <li><a href="/practices">Luyện tập</a></li>
-                    <li><a href="#">Báo cáo học tập</a></li>
+                    <li><a href="/results">Báo cáo học tập</a></li>
                 </c:if>
                 <c:if test="${sessionScope.role eq 'PARENT'}">
                     <li><a href="/parent/course">khóa học</a></li>
+                    <li><a href="/parent/children">Thống kê học tập</a></li>
                 </c:if>
             </ul>
         </div>
@@ -503,7 +504,6 @@
                                 tin cá nhân</a></li>
                             <c:if test="${sessionScope.role eq 'PARENT'}">
                                 <li><a class="dropdown-item" href="/transaction/history">Lịch sử giao dịch</a></li>
-                                <li><a class="dropdown-item" href="/learning/stats">Thống kê học tập</a></li>
                             </c:if>
                             <li>
                                 <form method="post" action="${pageContext.request.contextPath}/logout"

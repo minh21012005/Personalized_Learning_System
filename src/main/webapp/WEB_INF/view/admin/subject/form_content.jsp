@@ -71,11 +71,11 @@
                         </c:if>
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <form:checkbox path="isActive" cssClass="form-check-input" id="isActive" checked="${subject.isActive ? 'checked' : ''}"/>
-                        <form:label path="isActive" cssClass="form-check-label" for="isActive"><spring:message code="subject.form.active.label"/></form:label>
-                        <form:errors path="isActive" cssClass="invalid-feedback d-block"/>
-                    </div>
+<%--                    <div class="mb-3 form-check">--%>
+<%--                        <form:checkbox path="isActive" cssClass="form-check-input" id="isActive" checked="${subject.isActive ? 'checked' : ''}"/>--%>
+<%--                        <form:label path="isActive" cssClass="form-check-label" for="isActive"><spring:message code="subject.form.active.label"/></form:label>--%>
+<%--                        <form:errors path="isActive" cssClass="invalid-feedback d-block"/>--%>
+<%--                    </div>--%>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <a href="<c:url value='/admin/subject'/>" class="btn btn-outline-secondary me-md-2">

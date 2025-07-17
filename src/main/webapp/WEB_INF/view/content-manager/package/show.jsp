@@ -76,7 +76,7 @@
                     <h3>Danh sách gói học</h3>
 
                     <!-- Filter Form -->
-                    <form action="/manager/package" method="get" class="row g-2 mb-4">
+                    <form action="/admin/package" method="get" class="row g-2 mb-4">
                         <div class="col-md-2">
                             <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên"
                                 value="${param.keyword}">
@@ -103,7 +103,7 @@
                         </div>
                         <div class="col-auto">
                             <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Tìm</button>
-                            <a href="/manager/package" class="btn btn-secondary">Xóa lọc</a>
+                            <a href="/admin/package" class="btn btn-secondary">Xóa lọc</a>
                         </div>
                     </form>
 
@@ -167,7 +167,7 @@
                                                     </c:choose>
                                                 </td>
                                                 <td class="text-center">
-                                                    <a href="/manager/package/view/${pkg.packageId}"
+                                                    <a href="/admin/package/view/${pkg.packageId}"
                                                         class="btn btn-success btn-sm"><i class="bi bi-eye"></i> Xem</a>
 
 
@@ -192,18 +192,18 @@
                             <ul class="pagination justify-content-center">
                                 <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                        href="/manager/package?page=${currentPage - 1}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">«</a>
+                                        href="/admin/package?page=${currentPage - 1}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">«</a>
                                 </li>
                                 <c:forEach begin="0" end="${totalPages - 1}" var="i">
                                     <li class="page-item ${currentPage == i ? 'active' : ''}">
                                         <a class="page-link"
-                                            href="/manager/package?page=${i}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">${i
+                                            href="/admin/package?page=${i}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">${i
                                             + 1}</a>
                                     </li>
                                 </c:forEach>
                                 <li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                        href="/manager/package?page=${currentPage + 1}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">»</a>
+                                        href="/admin/package?page=${currentPage + 1}&keyword=${param.keyword}&status=${param.status}&gradeId=${param.gradeId}">»</a>
                                 </li>
                             </ul>
                         </nav>

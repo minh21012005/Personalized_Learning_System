@@ -3,7 +3,10 @@ package swp.se1941jv.pls.controller.client.practice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
@@ -18,6 +21,7 @@ import swp.se1941jv.pls.service.QuestionService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -211,6 +215,52 @@ public class PracticeController {
 
             model.addAttribute("error", "Lỗi khi lấy lịch sử bài kiểm tra: " + e.getMessage());
             return "error";
+        }
+    }
+
+    @GetMapping("/average-score")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getAverageScoreByDay(
+            @RequestParam(value = "days", defaultValue = "7") int days) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Không thể xác định người dùng hiện tại."));
+        }
+
+        try {
+            // Lấy dữ liệu từ 7 hoặc 30 ngày gần nhất
+            LocalDate startDate = LocalDate.now().minusDays(days);
+            LocalDate endDate = LocalDate.now();
+            Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE); // Lấy tất cả dữ liệu
+            Page<TestHistoryListDTO> testHistoryPage = practicesService.getTestHistoryList(userId, startDate, endDate, 0, Integer.MAX_VALUE);
+
+            // Nhóm theo ngày và tính điểm trung bình
+            Map<String, Double> dailyScores = new TreeMap<>();
+            Map<String, Integer> dailyCounts = new HashMap<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            testHistoryPage.getContent().forEach(test -> {
+                String date = LocalDate.parse(test.getStartTime(), DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")).format(formatter);
+                double score = (test.getCorrectAnswers() / (double) test.getTotalQuestions()) * 10;
+                dailyScores.merge(date, score, Double::sum);
+                dailyCounts.merge(date, 1, Integer::sum);
+            });
+
+            // Tính điểm trung bình và tạo danh sách ngày
+            List<String> labels = new ArrayList<>();
+            List<Double> scores = new ArrayList<>();
+            dailyScores.forEach((date, totalScore) -> {
+                labels.add(date);
+                scores.add(totalScore / dailyCounts.get(date));
+            });
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("labels", labels);
+            response.put("scores", scores);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Lỗi khi lấy dữ liệu điểm trung bình: " + e.getMessage()));
         }
     }
 

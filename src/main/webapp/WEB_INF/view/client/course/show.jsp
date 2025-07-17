@@ -122,7 +122,6 @@
                                                 <a href="/parent/course/detail/${pkg.packageId}">
                                                     <h3 class="course-title">${pkg.name}</h3>
                                                 </a>
-                                                <p class="course-author">Tác giả: </p>
 
                                                 <div class="mt-auto course-bottom">
                                                     <span class="course-price">

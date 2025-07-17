@@ -25,9 +25,14 @@ public class TestStudentController {
     private final TestStudentService testStudentService;
     private final ObjectMapper objectMapper;
 
-    @GetMapping("/{testId}")
+    private String handleError(Model model, String errorMessage) {
+        model.addAttribute("errorMessage", errorMessage);
+        return "client/test/error"; // Redirect to the new error page
+    }
+
+    @GetMapping("/{testId}/{packageId}")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String startTest(@PathVariable Long testId, Model model) {
+    public String startTest(@PathVariable Long testId, @PathVariable Long packageId, Model model) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
             model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
@@ -35,40 +40,58 @@ public class TestStudentController {
         }
 
         try {
-            Map<String, Object> testData = testStudentService.startOrResumeTest(testId, userId);
-            model.addAttribute("testId", testId);
+            Map<String, Object> testData = testStudentService.startOrResumeTest(testId, packageId, userId);
+            Long userTestId = (Long) testData.get("userTestId");
+            return "redirect:/tests/userTest/" + userTestId; // Redirect to new endpoint
+        } catch (Exception e) {
+            return handleError(model, "Lỗi khi tải bài kiểm tra: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/userTest/{userTestId}")
+    @PreAuthorize("hasAnyRole('STUDENT')")
+    public String showTestPage(@PathVariable Long userTestId, Model model) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
+            return "redirect:/login";
+        }
+
+        try {
+            Map<String, Object> testData = testStudentService.getTestData(userTestId, userId);
+            model.addAttribute("testId", testData.get("testId"));
             model.addAttribute("questions", testData.get("questions"));
             model.addAttribute("remainingTime", testData.get("remainingTime"));
-            model.addAttribute("userTestId", testData.get("userTestId"));
+            model.addAttribute("userTestId", userTestId);
             model.addAttribute("testName", testData.get("testName"));
             model.addAttribute("savedAnswers", testData.get("savedAnswers"));
             return "client/test/TestPage";
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi bắt đầu bài kiểm tra: " + e.getMessage());
+            model.addAttribute("error", "Lỗi khi tải bài kiểm tra: " + e.getMessage());
             return "error";
         }
     }
 
-    @PostMapping("/save-answers/{testId}")
+    @PostMapping("/save-answers/{userTestId}")
     @PreAuthorize("hasAnyRole('STUDENT')")
     @ResponseBody
-    public String saveAnswers(@PathVariable Long testId, @RequestBody TestSubmissionDto submission) {
+    public String saveAnswers(@PathVariable Long userTestId, @RequestBody TestSubmissionDto submission) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
             return "{\"error\": \"Không thể xác định người dùng hiện tại.\"}";
         }
 
         try {
-            testStudentService.saveTemporaryAnswers(testId, userId, submission.getAnswers());
+            testStudentService.saveTemporaryAnswers(userTestId, submission.getAnswers());
             return "{\"success\": true}";
         } catch (Exception e) {
             return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
 
-    @PostMapping("/submit/{testId}")
+    @PostMapping("/submit/{userTestId}")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String submitTest(@PathVariable Long testId, @RequestBody String submissionData, Model model) {
+    public String submitTest(@PathVariable Long userTestId, @RequestBody String submissionData, Model model) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
             model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
@@ -77,15 +100,14 @@ public class TestStudentController {
 
         try {
             TestSubmissionDto submission = objectMapper.readValue(submissionData, TestSubmissionDto.class);
-            Map<String, Object> result = testStudentService.submitTest(testId, userId, submission);
+            Map<String, Object> result = testStudentService.submitTest(userTestId, submission);
             model.addAttribute("results", result.get("results"));
             model.addAttribute("correctCount", result.get("correctCount"));
             model.addAttribute("totalQuestions", result.get("totalQuestions"));
-            model.addAttribute("testId", testId);
+            model.addAttribute("userTestId", userTestId);
             return "client/test/TestResult";
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi nộp bài: " + e.getMessage());
-            return "error";
+            return handleError(model, "Lỗi khi nộp bài: " + e.getMessage());
         }
     }
 
@@ -112,14 +134,13 @@ public class TestStudentController {
             model.addAttribute("endDate", endDate != null ? endDate.toString() : "");
             return "client/test/TestHistory";
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi lấy danh sách lịch sử bài kiểm tra: " + e.getMessage());
-            return "error";
+            return handleError(model, "Lỗi khi lấy danh sách lịch sử bài kiểm tra: " + e.getMessage());
         }
     }
 
-    @GetMapping("/history/{testId}")
+    @GetMapping("/history/{userTestId}")
     @PreAuthorize("hasAnyRole('STUDENT')")
-    public String showTestHistoryDetail(@PathVariable Long testId, Model model) {
+    public String showTestHistoryDetail(@PathVariable Long userTestId, Model model) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
             model.addAttribute("error", "Không thể xác định người dùng hiện tại.");
@@ -127,12 +148,11 @@ public class TestStudentController {
         }
 
         try {
-            TestHistoryDTO history = testStudentService.getTestHistory(testId, userId);
+            TestHistoryDTO history = testStudentService.getTestHistory(userTestId);
             model.addAttribute("history", history);
             return "client/test/TestHistoryDetail";
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi lấy chi tiết lịch sử: " + e.getMessage());
-            return "error";
+            return handleError(model, "Lỗi khi lấy chi tiết lịch sử: " + e.getMessage());
         }
     }
 }
