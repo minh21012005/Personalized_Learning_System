@@ -403,21 +403,41 @@
                         $('#progressBody').empty();
                         items.forEach(item => {
                             let progressPercentage = item.progressPercentage || 0;
-                            let progressBar = progressPercentage === 100
-                                ? '<div class="progress" aria-label="Hoàn thành"><div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div></div>'
-                                : '<div class="progress" aria-label="' + Math.round(progressPercentage) + '%"><div class="progress-bar bg-primary" role="progressbar" style="width: ' + progressPercentage + '%" aria-valuenow="' + progressPercentage + '" aria-valuemin="0" aria-valuemax="100"></div></div>';
-                            let percentageText = progressPercentage === 100 ? 'Hoàn thành' : Math.round(progressPercentage) + '%';
-                            $('#progressBody').append(`
-                                <tr>
-                                    <td><img src="/img/subjectImg/` + (item.subjectImage || '/img/default-subject.jpg') + `" alt="` + item.subjectName + `"></td>
-                                    <td>` + item.subjectName + `</td>
-                                    <td>` + (item.completedLessons || 0) + `</td>
-                                    <td>` + (item.totalLessons || 0) + `</td>
-                                    <td>` + progressBar + '<span class="progress-percentage">' + percentageText + '</span>' + `</td>
-                                </tr>
-                            `);
+                            let percentageText = progressPercentage === 100
+                                ? 'Hoàn thành'
+                                : Math.round(progressPercentage) + '%';
+
+                            // Tạo progressBar với bg-success khi 100%, bg-primary khi <100%
+                            let progressBar = '<div class="progress" style="height:1.5rem;">'
+                                + '<div class="progress-bar '
+                                +    (progressPercentage === 100 ? 'bg-success' : 'bg-primary')
+                                +  '" style="width:'
+                                +    (progressPercentage === 100 ? 100 : progressPercentage)
+                                +  '%; height:100%;"></div>'
+                                + '</div>';
+
+                            // Append vào table, gom progress + text trong 1 div flex
+                            $('#progressBody').append(
+                                '<tr>'
+                                +   '<td><img src="/img/subjectImg/'
+                                +       (item.subjectImage || 'default-subject.jpg')
+                                +   '" alt="' + item.subjectName + '"></td>'
+                                +   '<td>' + item.subjectName + '</td>'
+                                +   '<td>' + (item.completedLessons || 0) + '</td>'
+                                +   '<td>' + (item.totalLessons || 0) + '</td>'
+                                +   '<td>'
+                                +       '<div class="progress-wrapper" style="display:flex; align-items:center;">'
+                                +           progressBar
+                                +           '<span class="progress-percentage" style="margin-left:0.5rem;">'
+                                +               percentageText
+                                +           '</span>'
+                                +       '</div>'
+                                +   '</td>'
+                                + '</tr>'
+                            );
                         });
-                    } else if (isInitial && endpoint === 'recent-lessons') {
+                    }
+                    else if (isInitial && endpoint === 'recent-lessons') {
                         $('#recentActivitiesBody').empty();
                         items.forEach(item => {
                             $('#recentActivitiesBody').append(`
