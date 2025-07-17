@@ -50,7 +50,6 @@ public class QuestionApprovalController {
         int pageSize = 10;
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
-        // Filter questions with Pending status
         Page<QuestionBank> questionPage = questionService.findQuestionsByCreatorAndFilters(
                 null, // No creator filter for content manager
                 gradeId, subjectId, chapterId, lessonId, levelId, statusId, pageable);
@@ -120,9 +119,6 @@ public class QuestionApprovalController {
         try {
             QuestionBank question = questionBankRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy."));
-            if (!"Pending".equals(question.getStatus().getStatusName())) {
-                throw new IllegalStateException("Chỉ có thể xem chi tiết câu hỏi ở trạng thái Đang xử lý.");
-            }
 
             List<AnswerOptionDto> options = questionService.getQuestionOptions(question);
 
@@ -138,97 +134,53 @@ public class QuestionApprovalController {
 
     @PreAuthorize("hasAnyRole('CONTENT_MANAGER','ADMIN')")
     @PostMapping("/admin/questions/approve/{id}")
-    public String approveQuestion(@PathVariable Long id, Model model) {
+    public String approveQuestion(
+            @PathVariable Long id,
+            @RequestParam(value = "reason", required = false) String reason,
+            Model model) {
         try {
             QuestionBank question = questionBankRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy."));
-            if (!"Pending".equals(question.getStatus().getStatusName())) {
-                throw new IllegalStateException("Chỉ có thể phê duyệt câu hỏi ở trạng thái Đang xử lý.");
-            }
 
             QuestionStatus acceptedStatus = questionStatusRepository.findById(ACCEPTED_STATUS_ID)
                     .orElseThrow(() -> new RuntimeException("Trạng thái Accepted không tìm thấy."));
             question.setStatus(acceptedStatus);
+            question.setActive(true);
+            question.setReason(reason != null ? reason : "Approved without specific reason");
             questionBankRepository.save(question);
 
-            return "redirect:/content-manager/questions?success=true";
+            return "redirect:/admin/questions?success=true";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "redirect:/content-manager/questions";
+            return "redirect:/admin/questions";
         }
     }
 
     @PreAuthorize("hasAnyRole('CONTENT_MANAGER','ADMIN')")
     @PostMapping("/admin/questions/reject/{id}")
-    public String rejectQuestion(@PathVariable Long id, Model model) {
+    public String rejectQuestion(
+            @PathVariable Long id,
+            @RequestParam(value = "reason", required = true) String reason,
+            Model model) {
         try {
+            if (reason == null || reason.trim().isEmpty()) {
+                throw new IllegalArgumentException("Lý do từ chối là bắt buộc.");
+            }
+
             QuestionBank question = questionBankRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Câu hỏi không tìm thấy."));
-            if (!"Pending".equals(question.getStatus().getStatusName())) {
-                throw new IllegalStateException("Chỉ có thể từ chối câu hỏi ở trạng thái Đang xử lý.");
-            }
 
             QuestionStatus rejectedStatus = questionStatusRepository.findById(REJECTED_STATUS_ID)
                     .orElseThrow(() -> new RuntimeException("Trạng thái Rejected không tìm thấy."));
             question.setStatus(rejectedStatus);
+            question.setActive(false);
+            question.setReason(reason);
             questionBankRepository.save(question);
 
-            return "redirect:/content-manager/questions?success=true";
+            return "redirect:/admin/questions?success=true";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "redirect:/content-manager/questions";
+            return "redirect:/admin/questions";
         }
     }
-
-//    @PreAuthorize("hasRole('CONTENT_MANAGER')")
-//    @GetMapping("/api/subjects-by-grade/{gradeId}")
-//    @ResponseBody
-//    public List<SubjectResponseDTO> getSubjectsByGrade(@PathVariable Long gradeId) {
-//        return subjectRepository.findByGradeIdAndIsActive(gradeId, true)
-//                .stream()
-//                .map(subject -> SubjectResponseDTO.builder()
-//                        .subjectId(subject.getSubjectId())
-//                        .subjectName(subject.getSubjectName())
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
-//
-//    @PreAuthorize("hasRole('CONTENT_MANAGER')")
-//    @GetMapping("/api/chapters-by-subject/{subjectId}")
-//    @ResponseBody
-//    public List<ChapterResponseDTO> getChaptersBySubject(@PathVariable Long subjectId) {
-//        return chapterRepository.findBySubjectIdAndIsActive(subjectId, true)
-//                .stream()
-//                .map(chapter -> ChapterResponseDTO.builder()
-//                        .chapterId(chapter.getChapterId())
-//                        .chapterName(chapter.getChapterName())
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
-//
-//    @PreAuthorize("hasRole('CONTENT_MANAGER')")
-//    @GetMapping("/api/lessons-by-chapter/{chapterId}")
-//    @ResponseBody
-//    public List<LessonResponseDTO> getLessonsByChapter(@PathVariable Long chapterId) {
-//        return lessonRepository.findByChapterIdAndIsActive(chapterId, true)
-//                .stream()
-//                .map(lesson -> LessonResponseDTO.builder()
-//                        .lessonId(lesson.getLessonId())
-//                        .lessonName(lesson.getLessonName())
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
-//
-//    @PreAuthorize("hasRole('CONTENT_MANAGER')")
-//    @GetMapping("/api/grades")
-//    @ResponseBody
-//    public List<GradeResponseDTO> getAllGrades() {
-//        return gradeRepository.findByIsActiveTrue()
-//                .stream()
-//                .map(grade -> GradeResponseDTO.builder()
-//                        .gradeId(grade.getGradeId())
-//                        .gradeName(grade.getGradeName())
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
 }

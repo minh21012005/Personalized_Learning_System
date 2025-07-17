@@ -41,8 +41,7 @@ public class TestStaffController {
     public String showCreateTestForm(Model model) {
         try {
             model.addAttribute("subjects", testStaffService.getAllSubjects());
-//            model.addAttribute("testStatuses", testStaffService.getAllTestStatuses());
-            model.addAttribute("testCategories", testStaffService.getAllTestCategories());
+            model.addAttribute("testCategories", testStaffService.getAllTestCategories().stream().filter(testCategory -> testCategory.getTestCategoryId() != 1L).collect(Collectors.toList()));
             model.addAttribute("questions", new ArrayList<>());
             return "staff/tests/CreateTest";
         } catch (Exception e) {
@@ -144,7 +143,7 @@ public class TestStaffController {
             }
 
             Page<TestListDto> testPage = testStaffService.findTestsByCreatorAndFilters(
-                    creatorUserId, subjectId, chapterId,statusId, startAt, endAt, pageable);
+                    creatorUserId, subjectId, chapterId, statusId, startAt, endAt, pageable);
 
             List<TestListDto> tests = testPage.getContent();
             int totalPages = testPage.getTotalPages();
@@ -193,7 +192,7 @@ public class TestStaffController {
     public String showEditTestForm(@PathVariable("testId") Long testId, Model model) {
         try {
             TestDetailDto test = testStaffService.getTestDetails(testId);
-            if(test.getStatusName().equals("Đang Xử Lý") || test.getStatusName().equals("Chấp Nhận")) {
+            if (test.getStatusName().equals("Đang Xử Lý") || test.getStatusName().equals("Chấp Nhận")) {
                 model.addAttribute("error", "Bài kiểm tra đang được phê duyệt không thể chỉnh sửa.");
                 return "error";
             }

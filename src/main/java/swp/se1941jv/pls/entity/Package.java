@@ -86,4 +86,22 @@ public class Package extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Loại gói không được để trống")
     PackageType packageType;
+
+    public double getAverageRating() {
+        if (reviews == null || reviews.isEmpty())
+            return 0.0;
+
+        double sum = 0;
+        int count = 0;
+
+        for (Review review : reviews) {
+            if (review.getRating() != null) {
+                sum += review.getRating();
+                count++;
+            }
+        }
+
+        return count == 0 ? 0.0 : sum / count;
+    }
+
 }
