@@ -102,7 +102,7 @@ public class TestStaffService {
             if (lessonId != null) {
                 Lesson lesson = lessonRepository.findById(lessonId)
                         .orElseThrow(() -> new IllegalArgumentException("Bài học không tìm thấy: " + lessonId));
-                questions = questionBankRepository.findByLessonAndActiveIs(lesson,true);
+                questions = questionBankRepository.findByLessonAndActiveIs(lesson, true);
             } else {
                 chapterRepository.findById(chapterId)
                         .orElseThrow(() -> new IllegalArgumentException("Chương không tìm thấy: " + chapterId));
@@ -112,7 +112,7 @@ public class TestStaffService {
         } else if (subjectId != null) {
             subjectRepository.findById(subjectId)
                     .orElseThrow(() -> new IllegalArgumentException("Môn học không tìm thấy: " + subjectId));
-            questions = questionBankRepository.findByLessonChapterSubjectSubjectIdAndActiveIs(subjectId,true);
+            questions = questionBankRepository.findByLessonChapterSubjectSubjectIdAndActiveIs(subjectId, true);
         } else {
             return new ArrayList<>();
         }
@@ -236,12 +236,12 @@ public class TestStaffService {
             throw new IllegalArgumentException("Danh mục là bắt buộc.");
         }
 
-        if(testCategoryId.equals(2L) && chapterId == null){
-            throw new IllegalArgumentException("Băt Buoộc phải chọn chương cho bài kiểm tra này.");
+        if (testCategoryId.equals(2L) && chapterId == null) {
+            throw new IllegalArgumentException("Bắt buộc phải chọn chương cho bài kiểm tra này.");
         }
 
-        if(testCategoryId.equals(4L) && lessonId == null){
-            throw new IllegalArgumentException("Băt Buoộc phải chọn bài học cho bài kiểm tra này.");
+        if (testCategoryId.equals(4L) && lessonId == null) {
+            throw new IllegalArgumentException("Bắt buộc phải chọn bài học cho bài kiểm tra này.");
         }
 
         if (subjectId == null && chapterId == null && lessonId == null) {
@@ -287,7 +287,7 @@ public class TestStaffService {
         if (lesson != null) {
             test = testRepository.findByLesson(lesson);
             if (test != null) {
-                throw new IllegalArgumentException("Bài học đã được đăng ký cho môn học này.");
+                throw new IllegalArgumentException("bài kiểm tra đã tồn tại cho bài học này: " + lesson.getLessonName());
             }
         }
 
@@ -356,12 +356,12 @@ public class TestStaffService {
             throw new IllegalArgumentException("Phải chọn ít nhất một câu hỏi.");
         }
 
-        if(testCategoryId.equals(2L) && chapterId == null){
-            throw new IllegalArgumentException("Băt Buoộc phải chọn chương cho bài kiểm tra này.");
+        if (testCategoryId.equals(2L) && chapterId == null) {
+            throw new IllegalArgumentException("Bắt buộc phải chọn chương cho bài kiểm tra này.");
         }
 
-        if(testCategoryId.equals(4L) && lessonId == null){
-            throw new IllegalArgumentException("Băt Buoộc phải chọn bài học cho bài kiểm tra này.");
+        if (testCategoryId.equals(4L) && lessonId == null) {
+            throw new IllegalArgumentException("Bắt buộc phải chọn bài học cho bài kiểm tra này.");
         }
 
         // Fetch existing test
@@ -440,6 +440,38 @@ public class TestStaffService {
                 .orElseThrow(() -> new IllegalArgumentException("Trạng thái '" + statusName + "' không tồn tại."));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    public List<QuestionCreateTestDisplayDto> getQuestionsByIds(List<Long> questionIds) {
+        if (questionIds == null || questionIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new IllegalStateException("Không thể xác định người dùng hiện tại.");
+        }
+        List<QuestionBank> questions = questionBankRepository.findAllById(questionIds);
+        return questions.stream().map(question -> {
+            try {
+                List<AnswerOptionDto> options = objectMapper.readValue(
+                        question.getOptions(),
+                        new TypeReference<List<AnswerOptionDto>>() {
+                        }
+                );
+                String chapterName = question.getLesson() != null && question.getLesson().getChapter() != null
+                        ? question.getLesson().getChapter().getChapterName()
+                        : null;
+                return QuestionCreateTestDisplayDto.builder()
+                        .questionId(question.getQuestionId())
+                        .content(question.getContent())
+                        .chapterName(chapterName)
+                        .options(options)
+                        .build();
+            } catch (Exception e) {
+                throw new RuntimeException("Lỗi khi xử lý đáp án câu hỏi ID: " + question.getQuestionId(), e);
+            }
+        }).collect(Collectors.toList());
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public Page<TestListDto> findTestsByCreatorAndFilters(Long creatorUserId, Long subjectId, Long chapterId, Long testStatusId,
                                                           LocalDateTime startAt, LocalDateTime endAt, Pageable pageable) {
@@ -512,7 +544,7 @@ public class TestStaffService {
         Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new IllegalArgumentException("Bài kiểm tra không tìm thấy: " + testId));
 
-        if(!test.getUserCreated().equals(currentUserId)) {
+        if (!test.getUserCreated().equals(currentUserId)) {
             throw new IllegalStateException("Chỉ người tạo bài kiểm tra mới có thể xóa nó.");
         }
 
