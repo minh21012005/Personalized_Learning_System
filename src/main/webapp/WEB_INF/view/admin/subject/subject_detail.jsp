@@ -48,14 +48,6 @@
                     <input type="text" class="form-control" value="${subjectDetail.assignedToFullName != null ? subjectDetail.assignedToFullName : 'Chưa được giao'}" disabled/>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Người nộp:</label>
-                    <input type="text" class="form-control" value="${subjectDetail.submittedByFullName != null ? subjectDetail.submittedByFullName : 'N/A'}" disabled/>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Phản hồi:</label>
-                    <textarea class="form-control" rows="4" disabled><c:out value="${subjectDetail.feedback != null ? subjectDetail.feedback : 'N/A'}"/></textarea>
-                </div>
-                <div class="mb-3">
                     <label class="form-label">Ngày tạo:</label>
                     <input type="text" class="form-control" value="${subjectDetail.createdAt}" disabled/>
                 </div>

@@ -49,9 +49,6 @@ public class QuestionBank extends BaseEntity {
     @Column(name = "active")
     boolean active;
 
-    @Column(name = "display_at_end_of_lesson")
-    boolean displayAtEndOfLesson;
-
     @ManyToOne
     @JoinColumn(name = "level_question_id")
     LevelQuestion levelQuestion;
@@ -70,5 +67,7 @@ public class QuestionBank extends BaseEntity {
     @OneToMany(mappedBy = "question")
     List<QuestionTest> questionTests;
 
+    @Column(name = "reason", columnDefinition = "TEXT")
+    String reason;
 
 }
