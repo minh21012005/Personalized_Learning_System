@@ -126,9 +126,6 @@
                     <c:if test="${not empty subject.status}">
                         <span class="badge bg-${subject.status == 'DRAFT' ? 'secondary' : subject.status == 'PENDING' ? 'warning' : subject.status == 'APPROVED' ? 'success' : 'danger'}">
                             <spring:message code="subject.status.${subject.status}"/>
-                            <c:if test="${subject.status == 'PENDING' and not empty subject.submittedByFullName and subject.submittedByFullName != ''}">
-                                (Nộp bởi: <c:out value="${subject.submittedByFullName}"/> lúc <c:out value="${subject.assignedAt}"/>)
-                            </c:if>
                         </span>
                     </c:if>
                 </td>
@@ -145,13 +142,20 @@
                     </c:choose>
                 </td>
                 <td>
-                    <a href="<c:url value='/staff/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1" title="<spring:message code="button.view"/>">
+                    <a href="<c:url value='/staff/subject/${subject.subjectId}/chapters'/>" class="btn btn-sm btn-primary me-1 mb-1" title="<spring:message code="button.view"/>">
                         <i class="fas fa-eye"></i> <spring:message code="button.view"/>
                     </a>
                     <c:if test="${subject.status == 'DRAFT'}">
                         <form action="<c:url value='/staff/subject/submit/${subject.subjectId}'/>" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-info me-1" title="<spring:message code="button.submit"/>">
+                            <button type="submit" class="btn btn-sm btn-info me-1 mb-1" title="<spring:message code="button.submit"/>">
                                 <i class="fas fa-paper-plane"></i> <spring:message code="button.submit"/>
+                            </button>
+                        </form>
+                    </c:if>
+                    <c:if test="${subject.status == 'PENDING'}">
+                        <form action="<c:url value='/staff/subject/cancel/${subject.subjectId}'/>" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-warning me-1 mb-1" title="<spring:message code="button.cancel"/>">
+                                <i class="fas fa-times"></i> <spring:message code="button.cancel"/>
                             </button>
                         </form>
                     </c:if>

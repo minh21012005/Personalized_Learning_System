@@ -1,7 +1,5 @@
 package swp.se1941jv.pls.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -39,6 +37,9 @@ public class Chapter extends BaseEntity {
 
     @Column(name = "status", columnDefinition = "BOOLEAN DEFAULT TRUE")
     Boolean status;
+
+    @Column(name = "is_hidden", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    Boolean isHidden;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")

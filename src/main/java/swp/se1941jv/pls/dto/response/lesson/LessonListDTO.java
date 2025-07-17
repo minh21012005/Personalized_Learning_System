@@ -16,6 +16,7 @@ public class LessonListDTO {
     private String videoTitle;
     private String thumbnailUrl;
     private Boolean status;
+    private Boolean isHidden;
     private List<LessonMaterialDTO> lessonMaterials;
     private Long chapterId;
     private String chapterName;

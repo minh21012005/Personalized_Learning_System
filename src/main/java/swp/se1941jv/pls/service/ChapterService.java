@@ -54,6 +54,7 @@ public class ChapterService {
 
         Chapter chapter = toChapterEntity(dto);
         chapter.setStatus(false);
+        chapter.setIsHidden(false);
         chapter.setUserCreated(userId);
         chapter.setCreatedAt(LocalDateTime.now());
         chapterRepository.save(chapter);
@@ -123,6 +124,31 @@ public class ChapterService {
         return chapterRepository.findAll(spec, pageable).map(this::toChapterResponseDTO);
     }
 
+    @Transactional
+    public void toggleChapterHiddenStatus(Long chapterId, Long userId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new IllegalArgumentException("chapter.message.notFound"));
+        validateStaffAccess(chapter.getSubject().getSubjectId(), userId);
+
+        boolean newHiddenStatus = !chapter.getIsHidden();
+        chapter.setIsHidden(newHiddenStatus);
+        chapter.setUpdatedAt(LocalDateTime.now());
+
+        // If hiding the chapter, set isHidden = true and status = false for all lessons
+        if (newHiddenStatus) {
+            if (chapter.getLessons() != null) {
+                chapter.getLessons().forEach(lesson -> {
+                    lesson.setIsHidden(true);
+                    lesson.setStatus(false);
+                    lesson.setUpdatedAt(LocalDateTime.now());
+                });
+            }
+        }
+
+        chapterRepository.save(chapter);
+        updateSubjectStatusIfRejected(chapter.getSubject().getSubjectId());
+    }
+
     public void validateStaffAccess(Long subjectId, Long userId) {
         Optional<SubjectAssignment> assignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
         if (assignment.isEmpty() || !assignment.get().getUser().getUserId().equals(userId)) {
@@ -151,6 +177,7 @@ public class ChapterService {
                 .chapterName(chapter.getChapterName())
                 .chapterDescription(chapter.getChapterDescription())
                 .status(chapter.getStatus())
+                .isHidden(chapter.getIsHidden())
                 .subjectName(chapter.getSubject().getSubjectName())
                 .userCreated(chapter.getUserCreated())
                 .userFullName(chapter.getUserCreated() != null ? userService.getUserFullName(chapter.getUserCreated()) : null)

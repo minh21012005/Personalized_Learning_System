@@ -250,14 +250,14 @@ public class SubjectController {
         try {
             Long userId = (Long) session.getAttribute("id");
             subjectService.revertToDraftByContentManager(id, userId);
-            redirectAttributes.addFlashAttribute("successMessage", "subject.message.reverted.success");
-            return "redirect:/admin/subject/edit/" + id;
+            redirectAttributes.addFlashAttribute("successMessage", "Môn học đã được chuyển trạng thái duyệt thành công");
+            return "redirect:/admin/subject";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/admin/subject";
         } catch (Exception e) {
             logger.error("Lỗi khi chuyển trạng thái môn học ID {} về DRAFT: {}", id, e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.revert");
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi chuyển trạng thái duyệt của môn học");
             return "redirect:/admin/subject";
         }
     }
@@ -304,10 +304,6 @@ public class SubjectController {
             return "redirect:/admin/subject";
         }
 
-        if (subjectService.getAssignmentBySubjectId(id).isPresent()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.alreadyAssigned");
-            return "redirect:/admin/subject";
-        }
 
         List<UserAssignDTO> staffs = subjectService.getStaffWithDTO();
         if (staffs.isEmpty()) {
@@ -422,7 +418,10 @@ public class SubjectController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
             model.addAttribute("customDateFormatter", formatter);
             return ADMIN_LAYOUT_VIEW;
-        } catch (Exception e) {
+        }catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.detail");
+            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";
+        }catch (Exception e) {
             logger.error("Lỗi khi lấy chi tiết chương ID {}: {}", chapterId, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.detail");
             return "redirect:/admin/subject/" + subjectId + "/detail";
@@ -445,7 +444,11 @@ public class SubjectController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
             model.addAttribute("customDateFormatter", formatter);
             return ADMIN_LAYOUT_VIEW;
-        } catch (Exception e) {
+        }catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.detail");
+            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";
+        }
+        catch (Exception e) {
             logger.error("Lỗi khi lấy chi tiết bài học ID {}: {}", lessonId, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.detail");
             return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";

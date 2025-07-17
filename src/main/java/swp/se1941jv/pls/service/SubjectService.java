@@ -19,6 +19,7 @@ import swp.se1941jv.pls.dto.response.learningPageData.LearningPageDataDTO;
 import swp.se1941jv.pls.dto.response.learningPageData.LearningTestDTO;
 import swp.se1941jv.pls.dto.response.subject.*;
 import swp.se1941jv.pls.entity.*;
+import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.repository.*;
 
 @Service
@@ -43,7 +44,8 @@ public class SubjectService {
                           UserPackageRepository userPackageRepository,
                           PackageSubjectRepository packageSubjectRepository,
                           LessonProgressRepository lessonProgressRepository,
-                          UserTestRepository userTestRepository, TestRepository testRepository) {
+                          UserTestRepository userTestRepository, TestRepository testRepository
+    ) {
         this.subjectRepository = subjectRepository;
         this.subjectAssignmentRepository = subjectAssignmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
@@ -101,27 +103,6 @@ public class SubjectService {
         return subjectRepository.findById(id);
     }
 
-    @Transactional
-    public Subject saveSubject(Subject subject) {
-        if (subject.getSubjectId() == null) {
-            subject.setIsActive(false);
-            subject = subjectRepository.save(subject);
-            // Ghi trạng thái DRAFT ban đầu
-            SubjectStatusHistory statusHistory = SubjectStatusHistory.builder()
-                    .subject(subject)
-                    .status(SubjectStatusHistory.SubjectStatus.DRAFT)
-                    .changedAt(LocalDateTime.now())
-                    .build();
-            statusHistoryRepository.save(statusHistory);
-        } else {
-            subject = subjectRepository.save(subject);
-        }
-        return subject;
-    }
-
-    public void deleteSubjectById(Long id) {
-        subjectRepository.deleteById(id);
-    }
 
     public List<Subject> findAllSubjects() {
 
@@ -137,118 +118,6 @@ public class SubjectService {
         return this.subjectRepository.findById(id);
     }
 
-
-//    public SubjectResponseDTO getSubjectResponseById(Long subjectId) {
-//
-//
-//        if (subjectId == null || subjectId <= 0) {
-//            throw new IllegalArgumentException("ID môn học không hợp lệ");
-//        }
-//
-//        try {
-//            Subject subject =  subjectRepository.findById(subjectId)
-//                    .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại"));
-//            return SubjectResponseDTO.builder()
-//                    .subjectId(subject.getSubjectId())
-//                    .subjectName(subject.getSubjectName())
-//                    .listChapter(chapterService.findChaptersBySubjectId(subjectId,null,null))
-//                    .build();
-//        } catch (Exception e) {
-//            throw new RuntimeException("Lỗi khi lấy thông tin môn học");
-//        }
-//    }
-
-//    public Boolean hasAccessSubjectInPackage(Long packageId, Long userId, Long subjectId) {
-//        return userPackageRepository.existsByUser_UserIdAndPkg_PackageIdAndPkg_PackageSubjects_Subject_SubjectIdAndEndDateAfter(userId, packageId, subjectId, LocalDateTime.now());
-//    }
-//
-//    public LearningPageDataDTO getLearningPageData(Long subjectId, Long packageId, Long userId) {
-//        // 1. Tải Subject, Chapters, Lessons đã được tối ưu hóa bằng phương thức riêng
-//        // Bây giờ bạn gọi phương thức mới: findByIdWithChaptersAndLessons
-//        Subject subject = subjectRepository.findBySubjectId(subjectId)
-//                .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại"));
-//
-//        // 2. Lấy User và Package một lần duy nhất
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại"));
-//        Package packageEntity = packageRepository.findById(packageId)
-//                .orElseThrow(() -> new IllegalArgumentException("Gói học không tồn tại"));
-//
-//        // 3. Lấy tất cả LessonProgress cho User, Subject, Package này trong một truy vấn
-//        List<LessonProgress> allLessonProgresses = lessonProgressRepository
-//                .findByUserAndSubjectAndPackageEntity(user, subject, packageEntity);
-//
-//        // Tạo Map để tra cứu trạng thái hoàn thành nhanh chóng
-//        Map<Long, Boolean> lessonCompletionMap = allLessonProgresses.stream()
-//                .collect(Collectors.toMap(
-//                        lp -> lp.getLesson().getLessonId(),
-//                        LessonProgress::getIsCompleted,
-//                        (existing, replacement) -> replacement
-//                ));
-//
-//        // 4. Ánh xạ từ Entity sang DTO mới
-//        List<LearningChapterDTO> learningChapters = subject.getChapters().stream()
-//                .filter(chapter -> chapter.getStatus() && chapter.getChapterStatus() == Chapter.ChapterStatus.APPROVED)
-//                .map(chapter -> mapToLearningChapterDTO(chapter, lessonCompletionMap))
-//                .toList();
-//
-//        // 5. Xác định lesson và chapter mặc định
-//        LearningLessonDTO defaultLesson = learningChapters.stream()
-//                .filter(chapterDto -> chapterDto.getListLesson() != null && !chapterDto.getListLesson().isEmpty())
-//                .findFirst()
-//                .flatMap(chapterDto -> chapterDto.getListLesson().stream().findFirst())
-//                .orElse(null);
-//
-//        LearningChapterDTO defaultChapter = learningChapters.stream()
-//                .filter(chapterDto -> chapterDto.getListLesson() != null && chapterDto.getListLesson().contains(defaultLesson))
-//                .findFirst()
-//                .orElse(null);
-//
-//        // 6. Xây dựng và trả về LearningPageDataDTO
-//        return LearningPageDataDTO.builder()
-//                .subjectId(subject.getSubjectId())
-//                .subjectName(subject.getSubjectName())
-//                .userId(userId)
-//                .packageId(packageId)
-//                .chapters(learningChapters)
-//                .defaultLesson(defaultLesson)
-//                .defaultChapter(defaultChapter)
-//                .build();
-//    }
-//
-//    private LearningChapterDTO mapToLearningChapterDTO(Chapter chapter, Map<Long, Boolean> lessonCompletionMap) {
-//        List<LearningLessonDTO> learningLessons = chapter.getLessons().stream()
-//                .filter(lesson -> lesson.getStatus() && lesson.getLessonStatus() == Lesson.LessonStatus.APPROVED)
-//                .map(lesson -> mapToLearningLessonDTO(lesson, lessonCompletionMap.getOrDefault(lesson.getLessonId(), false)))
-//                .toList();
-//
-//        return LearningChapterDTO.builder()
-//                .chapterId(chapter.getChapterId())
-//                .chapterName(chapter.getChapterName())
-//                .chapterDescription(chapter.getChapterDescription())
-//                .listLesson(learningLessons)
-//                .build();
-//    }
-
-//    private LearningLessonDTO mapToLearningLessonDTO(Lesson lesson, boolean isCompleted) {
-//        List<String> materials;
-//        try {
-//            materials = objectMapper.readValue(lesson.getMaterialsJson(), new TypeReference<List<String>>() {});
-//        } catch (Exception e) {
-//            materials = Collections.emptyList();
-//        }
-//
-//        return LearningLessonDTO.builder()
-//                .lessonId(lesson.getLessonId())
-//                .lessonName(lesson.getLessonName())
-//                .lessonDescription(lesson.getLessonDescription())
-//                .videoSrc(lesson.getVideoSrc())
-//                .videoTime(lesson.getVideoTime())
-//                .materials(materials)
-//                .isCompleted(isCompleted)
-//                .build();
-//    }
-
     @Transactional
     public void assignSubject(Long subjectId, Long userId, Long contentManagerId, String assignmentFeedback) {
         Subject subject = subjectRepository.findById(subjectId)
@@ -261,17 +130,18 @@ public class SubjectService {
 
         // Nếu môn học đang ở trạng thái PENDING, chuyển về DRAFT trước khi giao lại
         SubjectStatusHistory statusHistory = latestStatus.get();
-        if (statusHistory.getStatus() == SubjectStatusHistory.SubjectStatus.PENDING) {
-            statusHistory.setStatus(SubjectStatusHistory.SubjectStatus.DRAFT);
-            statusHistory.setChangedAt(LocalDateTime.now());
-            statusHistory.setFeedback(assignmentFeedback != null && !assignmentFeedback.trim().isEmpty() ?
-                    "Chuyển về DRAFT để giao lại: " + assignmentFeedback :
-                    "Chuyển về DRAFT để giao lại bởi Content Manager ID " + contentManagerId);
-            statusHistory.setSubmittedBy(null);
-            statusHistory.setReviewer(null);
-            statusHistoryRepository.save(statusHistory);
-        } else if (statusHistory.getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
+        if (statusHistory.getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
             throw new IllegalArgumentException("Chỉ có thể giao môn học ở trạng thái DRAFT!");
+        }
+
+        // Check if the request is to unassign the subject
+        if (userId == null || userId == 0) {
+            // Delete existing assignment if any
+            Optional<SubjectAssignment> existingAssignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
+            if (existingAssignment.isPresent()) {
+                subjectAssignmentRepository.delete(existingAssignment.get());
+            }
+            return; // Exit early since no new assignment is needed
         }
 
         User user = userRepository.findById(userId)
@@ -327,18 +197,27 @@ public class SubjectService {
             throw new IllegalArgumentException("Chỉ có STAFF được giao môn học này mới có thể nộp duyệt!");
         }
 
-        if (subject.getChapters().isEmpty()) {
-            throw new IllegalArgumentException("Môn học phải có ít nhất một chương!");
+        // Lọc các chương không ẩn
+        List<Chapter> nonHiddenChapters = subject.getChapters().stream()
+                .filter(chapter -> chapter.getIsHidden() == null || !chapter.getIsHidden())
+                .collect(Collectors.toList());
+
+        if (nonHiddenChapters.isEmpty()) {
+            throw new IllegalArgumentException("Môn học phải có ít nhất một chương không ẩn!");
         }
 
-        for (Chapter chapter : subject.getChapters()) {
+        for (Chapter chapter : nonHiddenChapters) {
             if (!chapter.getStatus().equals(Boolean.FALSE)) {
                 throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải ở trạng thái không hoạt động trước khi nộp duyệt!");
             }
-            if (chapter.getLessons().isEmpty()) {
-                throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải có ít nhất một bài học!");
+            // Lọc các bài học không ẩn
+            List<Lesson> nonHiddenLessons = chapter.getLessons().stream()
+                    .filter(lesson -> lesson.getIsHidden() == null || !lesson.getIsHidden())
+                    .collect(Collectors.toList());
+            if (nonHiddenLessons.isEmpty()) {
+                throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải có ít nhất một bài học không ẩn!");
             }
-            for (Lesson lesson : chapter.getLessons()) {
+            for (Lesson lesson : nonHiddenLessons) {
                 if (!lesson.getStatus().equals(Boolean.FALSE)) {
                     throw new IllegalArgumentException("Bài học " + lesson.getLessonName() + " phải ở trạng thái không hoạt động trước khi nộp duyệt!");
                 }
@@ -365,6 +244,7 @@ public class SubjectService {
         subjectRepository.save(subject);
     }
 
+
     @Transactional
     public void reviewSubject(Long subjectId, String status, String feedback, Long reviewerId) {
         Subject subject = subjectRepository.findById(subjectId)
@@ -382,18 +262,27 @@ public class SubjectService {
             throw new IllegalArgumentException("Chỉ có thể duyệt môn học ở trạng thái PENDING!");
         }
 
-        if (subject.getChapters().isEmpty()) {
-            throw new IllegalArgumentException("Môn học phải có ít nhất một chương!");
+        // Filter non-hidden chapters
+        List<Chapter> nonHiddenChapters = subject.getChapters().stream()
+                .filter(chapter -> chapter.getIsHidden() == null || !chapter.getIsHidden())
+                .collect(Collectors.toList());
+
+        if (nonHiddenChapters.isEmpty()) {
+            throw new IllegalArgumentException("Môn học phải có ít nhất một chương không ẩn!");
         }
 
-        for (Chapter chapter : subject.getChapters()) {
+        for (Chapter chapter : nonHiddenChapters) {
             if (!chapter.getStatus().equals(Boolean.FALSE)) {
                 throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải ở trạng thái không hoạt động trước khi duyệt!");
             }
-            if (chapter.getLessons().isEmpty()) {
-                throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải có ít nhất một bài học!");
+            // Filter non-hidden lessons
+            List<Lesson> nonHiddenLessons = chapter.getLessons().stream()
+                    .filter(lesson -> lesson.getIsHidden() == null || !lesson.getIsHidden())
+                    .collect(Collectors.toList());
+            if (nonHiddenLessons.isEmpty()) {
+                throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải có ít nhất một bài học không ẩn!");
             }
-            for (Lesson lesson : chapter.getLessons()) {
+            for (Lesson lesson : nonHiddenLessons) {
                 if (!lesson.getStatus().equals(Boolean.FALSE)) {
                     throw new IllegalArgumentException("Bài học " + lesson.getLessonName() + " phải ở trạng thái không hoạt động trước khi duyệt!");
                 }
@@ -411,13 +300,14 @@ public class SubjectService {
 
         // Cập nhật trạng thái chương và bài học nếu APPROVED
         if (newStatus == SubjectStatusHistory.SubjectStatus.APPROVED) {
-
             subject.setIsActive(true);
 
-            for (Chapter chapter : subject.getChapters()) {
+            for (Chapter chapter : nonHiddenChapters) {
                 chapter.setStatus(true);
                 for (Lesson lesson : chapter.getLessons()) {
-                    lesson.setStatus(true);
+                    if (lesson.getIsHidden() == null || !lesson.getIsHidden()) {
+                        lesson.setStatus(true);
+                    }
                 }
             }
             subjectRepository.save(subject);
@@ -428,7 +318,6 @@ public class SubjectService {
         statusHistory.setChangedAt(LocalDateTime.now());
         statusHistory.setReviewer(reviewer);
         statusHistory.setFeedback(newStatus == SubjectStatusHistory.SubjectStatus.REJECTED ? feedback : null);
-        statusHistory.setSubmittedBy(null);
         statusHistoryRepository.save(statusHistory);
     }
 
@@ -443,18 +332,27 @@ public class SubjectService {
             throw new IllegalArgumentException("Chỉ có thể xuất bản môn học ở trạng thái APPROVED!");
         }
 
-        if (subject.getChapters().isEmpty()) {
-            throw new IllegalArgumentException("Môn học phải có ít nhất một chương!");
+        // Filter non-hidden chapters
+        List<Chapter> nonHiddenChapters = subject.getChapters().stream()
+                .filter(chapter -> chapter.getIsHidden() == null || !chapter.getIsHidden())
+                .collect(Collectors.toList());
+
+        if (nonHiddenChapters.isEmpty()) {
+            throw new IllegalArgumentException("Môn học phải có ít nhất một chương không ẩn!");
         }
 
-        for (Chapter chapter : subject.getChapters()) {
+        for (Chapter chapter : nonHiddenChapters) {
             if (!chapter.getStatus()) {
                 throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải ở trạng thái hoạt động!");
             }
-            if (chapter.getLessons().isEmpty()) {
-                throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải có ít nhất một bài học!");
+            // Filter non-hidden lessons
+            List<Lesson> nonHiddenLessons = chapter.getLessons().stream()
+                    .filter(lesson -> lesson.getIsHidden() == null || !lesson.getIsHidden())
+                    .collect(Collectors.toList());
+            if (nonHiddenLessons.isEmpty()) {
+                throw new IllegalArgumentException("Chương " + chapter.getChapterName() + " phải có ít nhất một bài học không ẩn!");
             }
-            for (Lesson lesson : chapter.getLessons()) {
+            for (Lesson lesson : nonHiddenLessons) {
                 if (!lesson.getStatus()) {
                     throw new IllegalArgumentException("Bài học " + lesson.getLessonName() + " phải ở trạng thái hoạt động!");
                 }
@@ -464,6 +362,7 @@ public class SubjectService {
         subject.setIsActive(true);
         subjectRepository.save(subject);
     }
+
 
     //Lấy thông tin giao việc của một Subject để hiển thị trong danh sách.
     public Optional<SubjectAssignment> getAssignmentBySubjectId(Long subjectId) {
@@ -478,16 +377,6 @@ public class SubjectService {
     public List<User> getStaff() {
         return userRepository.findByRole_RoleNameAndIsActive("STAFF", true);
     }
-
-//    public Page<Subject> getPendingSubjects(Pageable pageable) {
-//        return subjectRepository.findAll(pageable).map(subject -> {
-//            Optional<SubjectStatusHistory> latestStatus = statusHistoryRepository.findTopBySubjectSubjectIdOrderByChangedAtDesc(subject.getSubjectId());
-//            if (latestStatus.isPresent() && latestStatus.get().getStatus() == SubjectStatusHistory.SubjectStatus.PENDING) {
-//                return subject;
-//            }
-//            return null;
-//        }).filter(s -> s != null);
-//    }
 
     // --- Hàm mới sử dụng DTO ---
     public Page<SubjectListDTO> getAllSubjectsWithDTO(String filterName, Long filterGradeId, Pageable pageable) {
@@ -587,29 +476,37 @@ public class SubjectService {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại!"));
 
-        Optional<SubjectStatusHistory> latestStatus = statusHistoryRepository.findBySubjectSubjectId(subjectId);
-        if (latestStatus.isEmpty()) {
+        Optional<SubjectStatusHistory> latestStatusOpt = statusHistoryRepository.findBySubjectSubjectId(subjectId);
+        if (latestStatusOpt.isEmpty()) {
             throw new IllegalArgumentException("Không tìm thấy lịch sử trạng thái của môn học!");
         }
 
-        if (latestStatus.get().getStatus() == SubjectStatusHistory.SubjectStatus.DRAFT) {
+        if (latestStatusOpt.get().getStatus() == SubjectStatusHistory.SubjectStatus.DRAFT) {
             throw new IllegalArgumentException("Môn học đã ở trạng thái DRAFT!");
         }
 
-        // Nếu môn học đã xuất bản, hủy xuất bản
-        if (subject.getIsActive()) {
-            subject.setIsActive(false);
-            subjectRepository.save(subject);
+        // Update status for non-hidden chapters and lessons
+        if (subject.getChapters() != null) {
+            for (Chapter chapter : subject.getChapters()) {
+                if (chapter.getIsHidden() == null || !chapter.getIsHidden()) {
+                    chapter.setStatus(false);
+                    if (chapter.getLessons() != null) {
+                        for (Lesson lesson : chapter.getLessons()) {
+                            if (lesson.getIsHidden() == null || !lesson.getIsHidden()) {
+                                lesson.setStatus(false);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        // Ghi log chuyển trạng thái
-        SubjectStatusHistory statusHistory = SubjectStatusHistory.builder()
-                .subject(subject)
-                .status(SubjectStatusHistory.SubjectStatus.DRAFT)
-                .changedAt(LocalDateTime.now())
-                .feedback("Chuyển về DRAFT bởi Content Manager")
-                .build();
-        statusHistoryRepository.save(statusHistory);
+        subject.setIsActive(false);
+        subjectRepository.save(subject);
+
+        SubjectStatusHistory latestStatus = latestStatusOpt.get();
+        latestStatus.setStatus(SubjectStatusHistory.SubjectStatus.DRAFT);
+        statusHistoryRepository.save(latestStatus);
     }
 
     @Transactional
@@ -692,6 +589,7 @@ public class SubjectService {
                 .feedback(status.getFeedback()));
 
         List<ChapterDetailDTO> chapters = subject.getChapters().stream()
+                .filter(chapter -> chapter.getIsHidden() != null && !chapter.getIsHidden()) // Filter chapters with isHidden = false
                 .map(chapter -> ChapterDetailDTO.builder()
                         .chapterId(chapter.getChapterId())
                         .chapterName(chapter.getChapterName())
@@ -708,9 +606,13 @@ public class SubjectService {
     }
 
     public Optional<ChapterDetailDTO> getChapterDetailDTOById(Long chapterId, Long subjectId) {
-        Optional<Chapter> chapterOpt = chapterRepository.findByIdWithLessons(chapterId);
+        Optional<Chapter> chapterOpt = chapterRepository.findByIdWithNonHiddenLessons(chapterId);
         if (chapterOpt.isEmpty() || !chapterOpt.get().getSubject().getSubjectId().equals(subjectId)) {
             return Optional.empty();
+        }
+
+        if (Boolean.TRUE.equals(chapterOpt.get().getIsHidden())) {
+            throw  new IllegalArgumentException("Chương học này đã bị ẩn");
         }
 
         Chapter chapter = chapterOpt.get();
@@ -728,19 +630,10 @@ public class SubjectService {
                                 .lessonName(lesson.getLessonName())
                                 .lessonDescription(lesson.getLessonDescription())
                                 .status(lesson.getStatus())
-                                .videoSrc(lesson.getVideoSrc())
-                                .videoTime(lesson.getVideoTime())
-                                .videoTitle(lesson.getVideoTitle())
-                                .thumbnailUrl(lesson.getThumbnailUrl())
                                 .createdAt(lesson.getCreatedAt() != null ? lesson.getCreatedAt().format(formatter) : null)
                                 .userCreatedFullName(lesson.getUserCreated() != null ? userRepository.findById(lesson.getUserCreated())
                                         .map(User::getFullName).orElse(null) : null)
-                                .lessonMaterials(lesson.getLessonMaterials().stream()
-                                        .map(material -> LessonDetailDTO.LessonMaterialDTO.builder()
-                                                .fileName(material.getFileName())
-                                                .filePath(material.getFilePath())
-                                                .build())
-                                        .collect(Collectors.toList()))
+
                                 .build())
                         .collect(Collectors.toList()))
                 .build());
@@ -752,6 +645,11 @@ public class SubjectService {
                 !lessonOpt.get().getChapter().getSubject().getSubjectId().equals(subjectId)) {
             return Optional.empty();
         }
+
+        if (Boolean.TRUE.equals(lessonOpt.get().getIsHidden())) {
+            throw new IllegalArgumentException("Bài học này đã bị ẩn");
+        }
+
 
         Lesson lesson = lessonOpt.get();
         return Optional.of(LessonDetailDTO.builder()
@@ -798,7 +696,7 @@ public class SubjectService {
 
     public LearningPageDataDTO getLearningPageData(Long subjectId, Long packageId, Long userId) {
         // Kiểm tra quyền truy cập
-        if (!hasAccessSubjectInPackage(packageId, userId, subjectId)) {
+        if (Boolean.FALSE.equals(hasAccessSubjectInPackage(packageId, userId, subjectId))) {
             throw new IllegalArgumentException("Bạn không có quyền truy cập môn học này trong gói học!");
         }
 
@@ -1032,5 +930,37 @@ public class SubjectService {
                 .submittedAt(statusHistory.getChangedAt())
                 .status(statusHistory.getStatus().name())
                 .build();
+    }
+
+    @Transactional
+    public void cancelSubmission(Long subjectId, Long userId) {
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new IllegalArgumentException("Môn học không tồn tại"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại!"));
+
+        if (!"STAFF".equals(user.getRole().getRoleName())) {
+            throw new IllegalArgumentException("Chỉ có STAFF mới có thể hủy nộp duyệt môn học!");
+        }
+
+        Optional<SubjectStatusHistory> latestStatus = statusHistoryRepository.findBySubjectSubjectId(subjectId);
+        if (latestStatus.isEmpty() || latestStatus.get().getStatus() != SubjectStatusHistory.SubjectStatus.PENDING) {
+            throw new IllegalArgumentException("Chỉ có thể hủy nộp môn học ở trạng thái PENDING!");
+        }
+
+        Optional<SubjectAssignment> assignment = subjectAssignmentRepository.findBySubjectSubjectId(subjectId);
+        if (assignment.isEmpty() || !assignment.get().getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Chỉ có STAFF được giao môn học này mới có thể hủy nộp duyệt!");
+        }
+
+        SubjectStatusHistory statusHistory = latestStatus.get();
+        statusHistory.setStatus(SubjectStatusHistory.SubjectStatus.DRAFT);
+        statusHistory.setChangedAt(LocalDateTime.now());
+        statusHistory.setFeedback("Hủy nộp duyệt bởi " + user.getFullName());
+        statusHistory.setReviewer(null);
+        statusHistoryRepository.save(statusHistory);
+
+        subjectRepository.save(subject);
     }
 }
