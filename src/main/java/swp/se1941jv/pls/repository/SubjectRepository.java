@@ -18,6 +18,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
        @Query("SELECT s FROM Subject s WHERE s.grade.gradeId = :gradeId AND s.isActive = :isActive")
        List<Subject> findByGradeIdAndIsActive(@Param("gradeId") Long gradeId, @Param("isActive") boolean isActive);
 
+    @Query("SELECT s FROM Subject s WHERE s.isActive = :isActive")
+    List<Subject> findSubjectIsActive(@Param("isActive") boolean isActive);
+
        // Sử dụng naming convention cho phân trang và tìm kiếm
        Page<Subject> findByGradeGradeIdAndIsActiveAndSubjectNameContainingIgnoreCase(
                      Long gradeId, boolean isActive, String subjectName, Pageable pageable);
