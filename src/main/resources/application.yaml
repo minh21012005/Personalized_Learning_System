@@ -8,7 +8,7 @@ spring:
     password: ${DBMS_PASSWORD:Swp1941@}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
   session:
     store-type: jdbc

@@ -421,26 +421,6 @@
                                 <div class="invalid-feedback">Vui lòng chọn mức độ.</div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Trạng thái</label>
-                                <div class="d-flex gap-3">
-                                    <div class="form-check">
-                                        <form:radiobutton path="active" value="true" class="form-check-input" label="Kích hoạt"/>
-                                    </div>
-                                    <div class="form-check">
-                                        <form:radiobutton path="active" value="false" class="form-check-input" label="Vô hiệu hóa"/>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Hiển thị cuối bài học</label>
-                                <div class="form-check">
-                                    <form:checkbox path="displayAtEndOfLesson" class="form-check-input"/>
-                                    <label class="form-check-label">Có</label>
-                                </div>
-                            </div>
-
                             <div class="d-flex gap-2 mb-3">
                                 <button type="submit" class="btn btn-primary">Tạo</button>
                                 <a href="/staff/questions" class="btn btn-secondary">Hủy</a>

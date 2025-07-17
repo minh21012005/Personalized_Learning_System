@@ -23,9 +23,5 @@ public interface QuestionBankRepository extends JpaRepository<QuestionBank, Long
 
     List<QuestionBank> findByLessonChapterSubjectSubjectId(Long lessonChapterSubjectSubjectId);
 
-    List<QuestionBank> findByLesson_LessonIdAndDisplayAtEndOfLessonTrue(Long lessonId);
-
-    List<QuestionBank> findByLessonLessonId(Long lessonId);
-
     List<QuestionBank> findByLesson(Lesson lesson);
 }

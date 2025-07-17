@@ -64,6 +64,36 @@
     <script>
         $(document).ready(function () {
             MathJax.typeset();
+
+            // Handle approval button click
+            $('.approve-btn').click(function (e) {
+                e.preventDefault();
+                $('#approveModal').modal('show');
+            });
+
+            // Handle rejection button click
+            $('.reject-btn').click(function (e) {
+                e.preventDefault();
+                $('#rejectModal').modal('show');
+            });
+
+            // Handle approval form submission
+            $('#submitApprove').click(function () {
+                var reason = $('#approveReason').val();
+                $('#approveReasonInput').val(reason);
+                $('#approveForm').submit();
+            });
+
+            // Handle rejection form submission
+            $('#submitReject').click(function () {
+                var reason = $('#rejectReason').val();
+                if (!reason || reason.trim() === '') {
+                    alert('Vui lòng nhập lý do từ chối.');
+                    return;
+                }
+                $('#rejectReasonInput').val(reason);
+                $('#rejectForm').submit();
+            });
         });
     </script>
 </head>
@@ -96,7 +126,8 @@
                             <p><c:out value="${question.content}" escapeXml="false"/></p>
                             <c:if test="${not empty question.image}">
                                 <p><strong>Hình ảnh:</strong></p>
-                                <img style="width: 500px;height:auto;" src="/img/question_bank/${question.image}" alt="Question Image" class="question-image">
+                                <img style="width: 500px;height:auto;" src="/img/question_bank/${question.image}"
+                                     alt="Question Image" class="question-image">
                             </c:if>
                             <p><strong>Đáp án:</strong></p>
                             <ul>
@@ -112,19 +143,83 @@
                             <p><strong>Chương:</strong> ${question.chapter.chapterName}</p>
                             <p><strong>Bài học:</strong> ${question.lesson.lessonName}</p>
                             <p><strong>Mức độ:</strong> ${question.levelQuestion.levelQuestionName}</p>
-                            <p><strong>Trạng thái:</strong> Đang xử lý</p>
+                            <p><strong>Trạng thái:</strong>
+                                <c:choose>
+                                    <c:when test="${question.status.statusName == 'Pending'}">Đang xử lý</c:when>
+                                    <c:when test="${question.status.statusName == 'Accepted'}">Chấp nhận</c:when>
+                                    <c:when test="${question.status.statusName == 'Rejected'}">Từ chối</c:when>
+                                    <c:otherwise>${question.status.statusName}</c:otherwise>
+                                </c:choose>
+                            </p>
+                            <c:if test="${not empty question.reason}">
+                                <p><strong>Lý do:</strong> <c:out value="${question.reason}" escapeXml="false"/></p>
+                            </c:if>
                             <div class="d-flex gap-2">
-                                <form action="/admin/questions/approve/${question.questionId}" method="post">
-                                    <button type="submit" class="btn btn-primary approve-btn">Phê duyệt</button>
-                                </form>
-                                <form action="/admin/questions/reject/${question.questionId}" method="post">
-                                    <button type="submit" class="btn btn-danger reject-btn">Từ chối</button>
-                                </form>
+                                <button type="button" class="btn btn-primary approve-btn">Phê duyệt</button>
+                                <button type="button" class="btn btn-danger reject-btn">Từ chối</button>
                                 <a href="/admin/questions" class="btn btn-secondary">Quay lại</a>
                             </div>
                         </div>
                     </div>
                 </c:if>
+
+                <!-- Approval Modal -->
+                <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="approveModalLabel">Phê duyệt câu hỏi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="approveForm" action="/admin/questions/approve/${question.questionId}"
+                                      method="post">
+                                    <div class="mb-3">
+                                        <label for="approveReason" class="form-label">Lý do phê duyệt (không bắt
+                                            buộc):</label>
+                                        <textarea class="form-control" id="approveReason" rows="4"></textarea>
+                                        <input type="hidden" name="reason" id="approveReasonInput">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-primary" id="submitApprove">Xác nhận</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rejection Modal -->
+                <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="rejectModalLabel">Từ chối câu hỏi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="rejectForm" action="/admin/questions/reject/${question.questionId}"
+                                      method="post">
+                                    <div class="mb-3">
+                                        <label for="rejectReason" class="form-label">Lý do từ chối (bắt buộc):</label>
+                                        <textarea class="form-control" id="rejectReason" rows="4"
+                                                  required></textarea>
+                                        <input type="hidden" name="reason" id="rejectReasonInput">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-danger" id="submitReject">Xác nhận</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
