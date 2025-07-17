@@ -270,7 +270,7 @@
                                                     <i class="fas fa-edit"></i> Sửa
                                                 </a>
                                             </c:if>
-                                            <form action="<c:url value='/admin/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}/toggle-hidden'/>" method="post" style="display:inline;">
+                                            <form action="<c:url value='/staff/subject/${subjectId}/chapters/${chapterId}/lessons/${lesson.lessonId}/toggle-hidden'/>" method="post" style="display:inline;">
                                                 <button type="submit" class="btn btn-sm btn-primary me-1" title="${lesson.isHidden ? 'Hiện' : 'Ẩn'}">
                                                     <i class="fas fa-eye${lesson.isHidden ? '' : '-slash'}"></i> ${lesson.isHidden ? 'Hiện' : 'Ẩn'}
                                                 </button>
