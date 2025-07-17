@@ -66,6 +66,8 @@ public class ClientCommunicationService {
         Communication parentComm = communicationRepository.findById(parentId)
                 .orElseThrow(() -> new NoSuchElementException("Parent comment not found with id: " + parentId));
         newComm.setParentComment(parentComm);
+        Communication rootComm = findRootComment(parentComm);
+        rootComm.setLastActivityAt(LocalDateTime.now());
     }
 
     Communication savedComm = communicationRepository.save(newComm);
@@ -101,5 +103,13 @@ public class ClientCommunicationService {
         for (Communication reply : comment.getReplies()) {
             loadAndFilterApprovedReplies(reply);
         }
+    }
+
+    private Communication findRootComment(Communication comment) {
+    Communication current = comment;
+    while (current.getParentComment() != null) {
+        current = current.getParentComment();
+    }
+    return current;
     }
 }
