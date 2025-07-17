@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kết quả học tập</title>
+    <title>Theo dõi kết quả học tập của con</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -256,11 +256,11 @@
 </header>
 <div class="content">
     <div class="mb-4">
-        <a href="/learn" class="btn btn-outline-primary btn-view-more">
-            <i class="bi bi-arrow-left me-2"></i>Quay lại học tập
+        <a href="/parent/children" class="btn btn-outline-primary btn-view-more">
+            <i class="bi bi-arrow-left me-2"></i>Quay lại danh sách con
         </a>
     </div>
-    <h1 class="mb-4 fw-bold">Kết quả học tập</h1>
+    <h1 class="mb-4 fw-bold">Theo dõi kết quả học tập của con</h1>
 
     <!-- Bài học gần đây -->
     <div class="card mb-4">
@@ -317,7 +317,6 @@
                     <th>Bài kiểm tra</th>
                     <th>Điểm số</th>
                     <th>Ngày hoàn thành</th>
-                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="recentTestsBody">
@@ -341,7 +340,6 @@
                     <th>Số bài hoàn thành</th>
                     <th>Tổng số bài</th>
                     <th>Tiến độ (%)</th>
-                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="progressBody">
@@ -358,8 +356,8 @@
 </footer>
 
 <script>
-    // Truyền userId từ server-side qua JavaScript bằng cách nối xâu
-    var userId = "<c:out value='${userId}'/>"; // Sử dụng c:out để tránh XSS
+    // Truyền childId từ server-side qua JavaScript bằng cách nối xâu
+    var childId = "<c:out value='${childId}'/>"; // Sử dụng c:out để tránh XSS
 
     let onlineTimeData = { labels: [], datasets: [] };
     let onlineTimeChart = null; // Biến để lưu instance Chart
@@ -372,9 +370,9 @@
         function loadData(endpoint, targetBody, loadMoreButton, loaderId, totalItemsKey, isInitial, startDate, endDate, timeRange) {
             $(loaderId).parent().addClass('loading'); // Hiển thị loader
             $.ajax({
-                url: '/api/' + endpoint,
+                url: '/api/parent/' + endpoint,
                 method: 'GET',
-                data: { userId: userId, page: currentPage, size: pageSize, startDate: startDate, endDate: endDate, timeRange: timeRange },
+                data: { childId: childId, page: currentPage, size: pageSize, startDate: startDate, endDate: endDate, timeRange: timeRange },
                 success: function(response) {
                     const items = response.data;
                     const totalItems = response.total || items.length;
@@ -404,29 +402,26 @@
                     } else if (isInitial && endpoint === 'learning-progress') {
                         $('#progressBody').empty();
                         items.forEach(item => {
-                            var progressPercentage = item.progressPercentage || 0;
-                            var percentageText = progressPercentage === 100
+                            let progressPercentage = item.progressPercentage || 0;
+                            let percentageText = progressPercentage === 100
                                 ? 'Hoàn thành'
                                 : Math.round(progressPercentage) + '%';
 
-                            // Tạo progressBar với 2 trường hợp bg-success hoặc bg-primary
-                            var progressBar = '<div class="progress" style="height:1.5rem;">'
-                                +   '<div class="progress-bar '
-                                +       (progressPercentage === 100 ? 'bg-success' : 'bg-primary')
-                                +       '" style="width:'
-                                +       (progressPercentage === 100 ? 100 : progressPercentage)
-                                +       '%; height:100%;">'
-                                +   '</div>'
+                            // Tạo progressBar với bg-success khi 100%, bg-primary khi <100%
+                            let progressBar = '<div class="progress" style="height:1.5rem;">'
+                                + '<div class="progress-bar '
+                                +    (progressPercentage === 100 ? 'bg-success' : 'bg-primary')
+                                +  '" style="width:'
+                                +    (progressPercentage === 100 ? 100 : progressPercentage)
+                                +  '%; height:100%;"></div>'
                                 + '</div>';
 
-                            // Append về bảng, gom progressBar + percentageText trong cùng 1 div
+                            // Append vào table, gom progress + text trong 1 div flex
                             $('#progressBody').append(
                                 '<tr>'
-                                +   '<td>'
-                                +       '<img src="/img/subjectImg/'
-                                +           (item.subjectImage || 'default-subject.jpg')
-                                +       '" alt="' + item.subjectName + '">'
-                                +   '</td>'
+                                +   '<td><img src="/img/subjectImg/'
+                                +       (item.subjectImage || 'default-subject.jpg')
+                                +   '" alt="' + item.subjectName + '"></td>'
                                 +   '<td>' + item.subjectName + '</td>'
                                 +   '<td>' + (item.completedLessons || 0) + '</td>'
                                 +   '<td>' + (item.totalLessons || 0) + '</td>'
@@ -437,14 +432,6 @@
                                 +               percentageText
                                 +           '</span>'
                                 +       '</div>'
-                                +   '</td>'
-                                +   '<td>'
-                                +       '<a href="/learn?subjectId='
-                                +           item.subjectId
-                                +           '&packageId=' + item.packageId
-                                +       '" class="btn btn-primary action-btn">'
-                                +           'Bắt đầu học'
-                                +       '</a>'
                                 +   '</td>'
                                 + '</tr>'
                             );
@@ -469,7 +456,6 @@
                                     <td>` + item.testName + `</td>
                                     <td>` + (item.score ? item.score.toFixed(2) : '0.00') + `</td>
                                     <td>` + (item.timeEnd || 'Chưa hoàn thành') + `</td>
-                                    <td><a href="/tests/history/` + item.testId + `" class="btn btn-info action-btn" target="_blank">Xem lịch sử</a></td>
                                 </tr>
                             `);
                         });
@@ -546,25 +532,16 @@
         // Xử lý nút lọc ngày và timeRange
         $('#filterDate').click(function() {
             currentPage = 0;
-            $('#dailyOnlineTimeBody').empty();
             const startDate = $('#startDate').val();
             const endDate = $('#endDate').val();
             const timeRange = $('#timeRange').val();
-            loadData('daily-online-time', '#dailyOnlineTimeBody', '#loadMoreOnlineTime', '#loaderOnlineTime', null, true, startDate, endDate, timeRange);
+            loadData('daily-online-time', null, null, '#loaderOnlineTime', null, true, startDate, endDate, timeRange);
         });
 
         // Xử lý nút "Xem thêm"
         $('#loadMoreActivities').click(function() {
             currentPage++;
             loadData('recent-lessons', '#recentActivitiesBody', '#loadMoreActivities', '#loaderActivities', 'total', false, null, null, 'day');
-        });
-
-        $('#loadMoreOnlineTime').click(function() {
-            currentPage++;
-            const startDate = $('#startDate').val();
-            const endDate = $('#endDate').val();
-            const timeRange = $('#timeRange').val();
-            loadData('daily-online-time', '#dailyOnlineTimeBody', '#loadMoreOnlineTime', '#loaderOnlineTime', null, false, startDate, endDate, timeRange);
         });
 
         $('#loadMoreTests').click(function() {

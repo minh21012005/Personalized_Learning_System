@@ -60,8 +60,8 @@
         .table-fixed th,
         .table-fixed td {
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            /*text-overflow: ellipsis;*/
+            /*white-space: nowrap;*/
         }
 
         .col-id {
@@ -98,6 +98,9 @@
 
         .col-action {
             width: 15%;
+        }
+        .col-reason {
+            width: 12%;
         }
 
         /*.pagination-container {*/
@@ -315,6 +318,7 @@
                                 <th scope="col" class="text-center col-lesson">Bài học</th>
                                 <th scope="col" class="text-center col-level">Mức độ</th>
                                 <th scope="col" class="text-center col-status">Trạng thái</th>
+                                <th scope="col" class="text-center col-reason">Lý do</th>
                                 <th scope="col" class="text-center col-action">Thao tác</th>
                             </tr>
                             </thead>
@@ -335,6 +339,9 @@
                                             <c:when test="${question.status.statusName == 'Rejected'}">Từ chối</c:when>
                                             <c:otherwise>${question.status.statusName}</c:otherwise>
                                         </c:choose>
+                                    </td>
+                                    <td class="text-center col-reason">
+                                        <c:out value="${question.reason != null ? question.reason : '-'}" escapeXml="false"/>
                                     </td>
                                     <td class="text-center col-action">
                                         <div class="gap-2">

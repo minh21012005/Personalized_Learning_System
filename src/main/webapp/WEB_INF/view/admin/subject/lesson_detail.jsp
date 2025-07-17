@@ -18,6 +18,11 @@
 </style>
 
 <div class="row justify-content-center">
+    <div class="text-start mb-2">
+        <a href="<c:url value='/admin/subject/${subjectId}/chapters/${chapterId}/detail'/>" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
     <div class="col-md-10 col-lg-8">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
@@ -110,12 +115,6 @@
                         </c:if>
                         </tbody>
                     </table>
-                </div>
-
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                    <a href="<c:url value='/admin/subject/${subjectId}/chapters/${chapterId}/detail'/>" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Quay lại
-                    </a>
                 </div>
             </div>
         </div>

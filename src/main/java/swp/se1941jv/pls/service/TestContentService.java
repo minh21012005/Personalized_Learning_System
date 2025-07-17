@@ -48,7 +48,7 @@ public class TestContentService {
         if (currentUserId == null) {
             throw new IllegalStateException("Không thể xác định người dùng hiện tại.");
         }
-        return subjectRepository.findAll();
+        return subjectRepository.findSubjectIsActive(true);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")

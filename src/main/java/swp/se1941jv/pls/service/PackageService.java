@@ -156,7 +156,7 @@ public class PackageService {
         userPackages.stream()
                 .filter(userPackage -> {
                     LocalDateTime endDate = userPackage.getEndDate();
-                    return endDate == null || !endDate.isBefore(now);
+                    return (endDate == null || !endDate.isBefore(now)) && userPackage.getPkg().getPackageType().equals(Package.PackageType.FULL_COURSE);
                 })
                 .forEach(userPackage -> {
                     PackageSubjectDTO packageSubject = PackageSubjectDTO.builder()

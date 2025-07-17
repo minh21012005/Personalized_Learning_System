@@ -59,44 +59,48 @@
         .table-fixed th,
         .table-fixed td {
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            /*text-overflow: ellipsis;*/
+            /*white-space: nowrap;*/
         }
 
         .col-id {
-            width: 10%;
+            width: 8%;
         }
 
         .col-content {
-            width: 25%;
+            width: 20%;
         }
 
         .col-grade {
-            width: 10%;
+            width: 8%;
         }
 
         .col-subject {
-            width: 15%;
+            width: 12%;
         }
 
         .col-chapter {
-            width: 15%;
+            width: 12%;
         }
 
         .col-lesson {
-            width: 15%;
+            width: 12%;
         }
 
         .col-level {
-            width: 10%;
+            width: 8%;
         }
 
         .col-status {
-            width: 10%;
+            width: 8%;
+        }
+
+        .col-reason {
+            width: 12%;
         }
 
         .col-action {
-            width: 15%;
+            width: 20%;
         }
 
         .pagination .page-item {
@@ -301,6 +305,7 @@
                                 <th scope="col" class="text-center col-lesson">Bài học</th>
                                 <th scope="col" class="text-center col-level">Mức độ</th>
                                 <th scope="col" class="text-center col-status">Trạng thái</th>
+                                <th scope="col" class="text-center col-reason">Lý do</th>
                                 <th scope="col" class="text-center col-action">Thao tác</th>
                             </tr>
                             </thead>
@@ -322,18 +327,20 @@
                                             <c:otherwise>${question.status.statusName}</c:otherwise>
                                         </c:choose>
                                     </td>
+                                    <td class="text-center col-reason">
+                                        <c:out value="${question.reason != null ? question.reason : '-'}" escapeXml="false"/>
+                                    </td>
                                     <td class="text-center col-action">
                                         <div class="d-flex gap-2 justify-content-center">
                                             <div><a href="/admin/questions/${question.questionId}"
-                                                    class="btn btn-success btn-sm">Chi tiết</a><div>
-
+                                                    class="btn btn-success btn-sm">Chi tiết</a></div>
                                             <c:if test="${question.status.statusName == 'Pending'}">
                                                 <form action="/admin/questions/approve/${question.questionId}" method="post" style="display:block;margin-top: 5px">
-
+                                                    <input type="hidden" name="reason" value="đồng ý phê duyệt"/>
                                                     <button type="submit" class="btn btn-primary btn-sm approve-btn">Phê duyệt</button>
                                                 </form>
                                                 <form action="/admin/questions/reject/${question.questionId}" method="post" style="display:block; margin-top: 5px">
-
+                                                    <input type="hidden" name="reason" value="từ chối phê duyệt"/>
                                                     <button type="submit" class="btn btn-danger btn-sm reject-btn">Từ chối</button>
                                                 </form>
                                             </c:if>

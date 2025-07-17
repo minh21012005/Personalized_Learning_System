@@ -28,4 +28,5 @@ public interface PackageSubjectRepository extends JpaRepository<PackageSubject, 
     boolean existsBySubjectSubjectId(Long subjectId);
 
 
+    List<PackageSubject> findPackageSubjectBySubjectSubjectId(Long subjectId);
 }

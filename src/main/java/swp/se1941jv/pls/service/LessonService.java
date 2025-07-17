@@ -51,12 +51,16 @@ public class LessonService {
         Lesson lesson = toLessonEntity(dto);
         lesson.setStatus(false); // Mặc định là FALSE theo yêu cầu
         lesson.setUserCreated(userId);
+        lesson.setIsHidden(false);
         lesson.setCreatedAt(LocalDateTime.now());
         lesson = lessonRepository.save(lesson);
 
         if (dto.getLessonMaterials() != null && !dto.getLessonMaterials().isEmpty()) {
             saveLessonMaterials(lesson, dto.getLessonMaterials());
         }
+
+        // Kiểm tra và cập nhật trạng thái subject nếu là REJECTED
+        updateSubjectStatusIfRejected(dto.getChapterId());
     }
 
     @Transactional
@@ -130,6 +134,9 @@ public class LessonService {
         lesson.setUpdatedAt(LocalDateTime.now());
 
         lessonRepository.save(lesson);
+
+        // Kiểm tra và cập nhật trạng thái subject nếu là REJECTED
+        updateSubjectStatusIfRejected(dto.getChapterId());
     }
 
     @Transactional
@@ -137,6 +144,9 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new IllegalArgumentException("Bài học không tồn tại!"));
         validateStaffAccess(lesson.getChapter().getChapterId(), userId);
+
+        // Kiểm tra và cập nhật trạng thái subject nếu là REJECTED
+        updateSubjectStatusIfRejected(lesson.getChapter().getChapterId());
 
         // Delete associated test if exists
         if (lesson.getTest() != null) {
@@ -180,173 +190,22 @@ public class LessonService {
         return lessonRepository.findById(lessonId);
     }
 
-
-//    /**
-//     * Lấy thông tin bài học theo ID dưới dạng DTO đầy đủ.
-//     */
-//    public LessonResponseDTO getLessonResponseById(Long lessonId) {
-//        if (lessonId == null || lessonId <= 0) {
-//            throw new IllegalArgumentException("ID bài học không hợp lệ.");
-//        }
-//
-//        Lesson lesson = lessonRepository.findById(lessonId)
-//                .orElseThrow(() -> new IllegalArgumentException("Bài học không tồn tại."));
-//        List<String> materials = new ArrayList<>();
-//        try {
-//            if (lesson.getMaterialsJson() != null && !lesson.getMaterialsJson().isEmpty()) {
-//                materials = objectMapper.readValue(lesson.getMaterialsJson(), new TypeReference<>() {});
-//            }
-//        } catch (Exception e) {
-//            log.warn("Failed to parse materials for lessonId={}: {}", lesson.getLessonId(), e.getMessage());
-//        }
-//
-//        return LessonResponseDTO.builder()
-//                .lessonId(lesson.getLessonId())
-//                .lessonName(lesson.getLessonName())
-//                .lessonDescription(lesson.getLessonDescription())
-//                .videoSrc(lesson.getVideoSrc())
-//                .videoTime(lesson.getVideoTime())
-//                .status(lesson.getStatus())
-//                .lessonStatus(LessonResponseDTO.LessonStatusDTO.builder()
-//                        .statusCode(lesson.getLessonStatus().name())
-//                        .description(lesson.getLessonStatus().getDescription())
-//                        .build())
-//                .materials(materials)
-//                .build();
-//    }
-//
-//    /**
-//     * Lấy danh sách bài học đã được phê duyệt (APPROVED) của một chương.
-//     */
-//    public List<LessonResponseDTO> getApprovedLessonsByChapterId(Long chapterId) {
-//        if (chapterId == null || chapterId <= 0) {
-//            throw new IllegalArgumentException("ID chương không hợp lệ.");
-//        }
-//
-//        return findLessonsByChapterId(chapterId, null, null).stream()
-//                .filter(lesson -> "APPROVED".equals(lesson.getLessonStatus().getStatusCode()))
-//                .toList();
-//    }
+    @Transactional
+    public void toggleLessonHiddenStatus(Long lessonId, Long userId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new IllegalArgumentException("Bài học không tồn tại!"));
+        validateStaffAccess(lesson.getChapter().getChapterId(), userId);
 
 
-//    /**
-//     * Tìm danh sách bài học theo các bộ lọc với phân trang và sắp xếp, chỉ lấy PENDING, APPROVED, REJECTED.
-//     */
-//    public Page<LessonResponseDTO> findLessonsByFilters(
-//            Long subjectId, Long chapterId, String lessonStatus, Boolean status,
-//            LocalDate startDate, LocalDate endDate, Long userCreated,
-//            int page, int size, Sort sort) {
-//        if (page < 0) {
-//            throw new IllegalArgumentException("Số trang không hợp lệ (phải lớn hơn hoặc bằng 0).");
-//        }
-//        if (size <= 0 || size > 100) { // Giới hạn kích thước trang để tránh tải quá nhiều dữ liệu
-//            throw new IllegalArgumentException("Kích thước trang không hợp lệ (phải lớn hơn 0 và không quá 100).");
-//        }
-//
-//        // Validation cho ngày tháng
-//        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-//            throw new IllegalArgumentException("Ngày bắt đầu không thể sau ngày kết thúc.");
-//        }
-//
-//        Specification<Lesson> spec = Specification.where(null);
-//
-//        if (subjectId != null) {
-//            spec = spec.and(LessonSpecifications.hasSubjectId(subjectId));
-//        }
-//        if (chapterId != null) {
-//            spec = spec.and(LessonSpecifications.hasChapterId(chapterId));
-//        }
-//        if (lessonStatus != null && !lessonStatus.trim().isEmpty()) {
-//            spec = spec.and(LessonSpecifications.hasLessonStatus(lessonStatus));
-//        } else {
-//            spec = spec.and((root, query, cb) -> cb.in(root.get("lessonStatus"))
-//                    .value(Lesson.LessonStatus.PENDING)
-//                    .value(Lesson.LessonStatus.APPROVED)
-//                    .value(Lesson.LessonStatus.REJECTED));
-//        }
-//        if (status != null) {
-//            spec = spec.and(LessonSpecifications.hasStatus(status));
-//        }
-//        if (startDate != null || endDate != null) {
-//            spec = spec.and(LessonSpecifications.hasUpdatedAtBetween(startDate, endDate));
-//        }
-//        if (userCreated != null) {
-//            spec = spec.and(LessonSpecifications.hasUserCreated(userCreated));
-//        }
-//
-//        PageRequest pageRequest = PageRequest.of(page, size, sort);
-//        return lessonRepository.findAll(spec, pageRequest).map(lesson -> {
-//            String userFullName = lesson.getChapter() != null && lesson.getChapter().getUserCreated() != null
-//                    ? userService.getUserFullName(lesson.getChapter().getUserCreated())
-//                    : "Chưa có thông tin";
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//            return LessonResponseDTO.builder()
-//                    .lessonId(lesson.getLessonId())
-//                    .lessonName(lesson.getLessonName())
-//                    .lessonDescription(lesson.getLessonDescription())
-//                    .videoSrc(lesson.getVideoSrc())
-//                    .videoTime(lesson.getVideoTime())
-//                    .status(lesson.getStatus())
-//                    .lessonStatus(LessonResponseDTO.LessonStatusDTO.builder()
-//                            .statusCode(lesson.getLessonStatus().name())
-//                            .description(lesson.getLessonStatus().getDescription())
-//                            .build())
-//                    .materials(new ArrayList<>())
-//                    .chapterId(lesson.getChapter() != null ? lesson.getChapter().getChapterId() : null)
-//                    .chapterName(lesson.getChapter() != null ? lesson.getChapter().getChapterName() : "Chưa có dữ liệu")
-//                    .userFullName(userFullName)
-//                    .subjectName(lesson.getChapter() != null && lesson.getChapter().getSubject() != null
-//                            ? lesson.getChapter().getSubject().getSubjectName()
-//                            : "Chưa có dữ liệu")
-//                    .updatedAt(lesson.getUpdatedAt().format(formatter))
-//                    .build();
-//        });
-//    }
-//
-//    /**
-//     * Lấy thông tin bài học đầy đủ theo ID dưới dạng DTO.
-//     */
-//    public LessonResponseDTO getFullLessonResponseById(Long lessonId) {
-//        if (lessonId == null || lessonId <= 0) {
-//            throw new IllegalArgumentException("ID bài học không hợp lệ.");
-//        }
-//
-//        Lesson lesson = lessonRepository.findById(lessonId)
-//                .orElseThrow(() -> new IllegalArgumentException("Bài học không tồn tại."));
-//        List<String> materials = new ArrayList<>();
-//        try {
-//            if (lesson.getMaterialsJson() != null && !lesson.getMaterialsJson().isEmpty()) {
-//                materials = objectMapper.readValue(lesson.getMaterialsJson(), new TypeReference<>() {});
-//            }
-//        } catch (Exception e) {
-//            log.warn("Failed to parse materials for lessonId={}: {}", lesson.getLessonId(), e.getMessage());
-//        }
-//
-//        String userFullName = lesson.getChapter() != null && lesson.getChapter().getUserCreated() != null
-//                ? userService.getUserFullName(lesson.getChapter().getUserCreated())
-//                : "Chưa có thông tin";
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//        return LessonResponseDTO.builder()
-//                .lessonId(lesson.getLessonId())
-//                .lessonName(lesson.getLessonName())
-//                .lessonDescription(lesson.getLessonDescription())
-//                .videoSrc(lesson.getVideoSrc())
-//                .videoTime(lesson.getVideoTime())
-//                .status(lesson.getStatus())
-//                .lessonStatus(LessonResponseDTO.LessonStatusDTO.builder()
-//                        .statusCode(lesson.getLessonStatus().name())
-//                        .description(lesson.getLessonStatus().getDescription())
-//                        .build())
-//                .materials(materials)
-//                .chapterId(lesson.getChapter() != null ? lesson.getChapter().getChapterId() : null)
-//                .chapterName(lesson.getChapter() != null ? lesson.getChapter().getChapterName() : "Chưa có dữ liệu")
-//                .userFullName(userFullName)
-//                .subjectName(lesson.getChapter() != null && lesson.getChapter().getSubject() != null
-//                        ? lesson.getChapter().getSubject().getSubjectName()
-//                        : "Chưa có dữ liệu")
-//                .updatedAt(lesson.getUpdatedAt().format(formatter))
-//                .build();
-//    }
+        lesson.setIsHidden(!lesson.getIsHidden());
+        if (Boolean.TRUE.equals(lesson.getIsHidden())) {
+            lesson.setStatus(false);
+        }
+        lesson.setUpdatedAt(LocalDateTime.now());
+        lessonRepository.save(lesson);
+
+        updateSubjectStatusIfRejected(lesson.getChapter().getChapterId());
+    }
 
     private Lesson toLessonEntity(LessonFormDTO dto) {
         Chapter chapter = chapterRepository.findById(dto.getChapterId())
@@ -373,6 +232,7 @@ public class LessonService {
                 .videoTitle(lesson.getVideoTitle())
                 .thumbnailUrl(lesson.getThumbnailUrl())
                 .status(lesson.getStatus())
+                .isHidden(lesson.getIsHidden())
                 .lessonMaterials(lesson.getLessonMaterials().stream()
                         .map(material -> LessonListDTO.LessonMaterialDTO.builder()
                                 .fileName(material.getFileName())
@@ -408,8 +268,20 @@ public class LessonService {
             throw new IllegalArgumentException("Chỉ có STAFF được giao môn học này mới có thể thao tác!");
         }
         Optional<SubjectStatusHistory> status = statusHistoryRepository.findBySubjectSubjectId(subjectId);
-        if (status.isEmpty() || status.get().getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
-            throw new IllegalArgumentException("Chỉ có thể thao tác trên môn học ở trạng thái DRAFT!");
+        if (status.isEmpty() || (status.get().getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT && status.get().getStatus() != SubjectStatusHistory.SubjectStatus.REJECTED)) {
+            throw new IllegalArgumentException("Chỉ có thể thao tác trên môn học ở trạng thái DRAFT hoặc REJECTED!");
+        }
+    }
+
+    private void updateSubjectStatusIfRejected(Long chapterId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new IllegalArgumentException("Chương không tồn tại!"));
+        Long subjectId = chapter.getSubject().getSubjectId();
+        Optional<SubjectStatusHistory> status = statusHistoryRepository.findBySubjectSubjectId(subjectId);
+        if (status.isPresent() && status.get().getStatus() == SubjectStatusHistory.SubjectStatus.REJECTED) {
+            SubjectStatusHistory updatedStatus = status.get();
+            updatedStatus.setStatus(SubjectStatusHistory.SubjectStatus.DRAFT);
+            statusHistoryRepository.save(updatedStatus);
         }
     }
 }

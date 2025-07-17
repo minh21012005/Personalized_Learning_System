@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Danh sách chương</title>
-    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
@@ -43,6 +43,38 @@
             color: white;
             height: 40px;
             width: 100%;
+        }
+        .subject-img-thumbnail {
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .pagination .page-link {
+            color: #007bff;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        .form-control-sm, .form-select-sm {
+            font-size: 0.875rem;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
         }
         .table-header-sort-link {
             color: inherit;
@@ -86,13 +118,18 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Danh sách chương trong Môn học ID: <c:out value="${subject != null ? subject.subjectId : ''}"/></h5>
-                            <a href="<c:url value='/staff/subject'/>" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-arrow-left"></i> Quay lại
-                            </a>
+                            <div>
+                                <a href="<c:url value='/staff/subject'/>" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-arrow-left"></i> Quay lại
+                                </a>
+                                <a href="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters/new'/>" class="btn btn-primary btn-sm ms-2">
+                                    <i class="fas fa-plus-circle"></i> Thêm mới
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
-                        <form action="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters'/>" method="GET" class="mb-3">
+                        <form action="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters'/>" method="GET" class="mb-4">
                             <div class="row g-3 align-items-center">
                                 <div class="col-auto">
                                     <label for="chapterName" class="col-form-label">Tên chương:</label>
@@ -122,10 +159,6 @@
                             </div>
                         </form>
 
-                        <a href="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters/new'/>" class="btn btn-primary mb-3">
-                            <i class="fas fa-plus"></i> Thêm mới
-                        </a>
-
                         <c:if test="${not empty message}">
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     ${message}
@@ -141,7 +174,7 @@
 
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
-                                <thead>
+                                <thead class="table-light">
                                 <tr>
                                     <th>
                                         <c:url value="/staff/subject/${subject != null ? subject.subjectId : ''}/chapters" var="sortByIdUrl">
@@ -173,6 +206,7 @@
                                     </th>
                                     <th>Mô tả</th>
                                     <th>Trạng thái</th>
+                                    <th>Ẩn</th>
                                     <th>
                                         <c:url value="/staff/subject/${subject != null ? subject.subjectId : ''}/chapters" var="sortByCreatedByUrl">
                                             <c:param name="chapterName" value="${chapterName != null ? chapterName : ''}"/>
@@ -220,23 +254,40 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${chapter.isHidden != null && chapter.isHidden}">
+                                                    <span class="badge bg-warning">Ẩn</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-success">Hiện</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td><c:out value="${chapter.userFullName != null ? chapter.userFullName : 'Không có thông tin'}"/></td>
                                         <td><c:out value="${chapter.createdAt != null ? chapter.createdAt : ''}"/></td>
                                         <td>
-                                            <a href="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters/${chapter.chapterId != null ? chapter.chapterId : ""}/lessons'/>"
-                                               class="btn btn-sm btn-primary me-1" title="Xem">
-                                                <i class="fas fa-eye"></i> Xem
-                                            </a>
-                                            <a href="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters/${chapter.chapterId != null ? chapter.chapterId : ""}/edit'/>"
-                                               class="btn btn-sm btn-warning me-1" title="Sửa">
-                                                <i class="fas fa-edit"></i> Sửa
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteChapterModal${chapter.chapterId != null ? chapter.chapterId : ''}"
-                                                    title="Xóa">
-                                                <i class="fas fa-trash"></i> Xóa
-                                            </button>
-                                            <!-- Delete Confirmation Modal -->
+                                            <c:if test="${chapter.isHidden != true}">
+                                                <a href="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters/${chapter.chapterId != null ? chapter.chapterId : ""}/lessons'/>"
+                                                   class="btn btn-sm btn-info me-1" title="Xem">
+                                                    <i class="fas fa-eye"></i> Xem
+                                                </a>
+                                                <a href="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters/${chapter.chapterId != null ? chapter.chapterId : ""}/edit'/>"
+                                                   class="btn btn-sm btn-warning me-1" title="Sửa">
+                                                    <i class="fas fa-edit"></i> Sửa
+                                                </a>
+                                            </c:if>
+
+                                            <form action="<c:url value='/staff/subject/${subject != null ? subject.subjectId : ""}/chapters/${chapter.chapterId != null ? chapter.chapterId : ""}/toggle-hidden'/>" method="post" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-primary me-1" title="${chapter.isHidden ? 'Hiện' : 'Ẩn'}">
+                                                    <i class="fas fa-eye${chapter.isHidden ? '' : '-slash'}"></i> ${chapter.isHidden ? 'Hiện' : 'Ẩn'}
+                                                </button>
+                                            </form>
+<%--                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"--%>
+<%--                                                    data-bs-target="#deleteChapterModal${chapter.chapterId != null ? chapter.chapterId : ''}"--%>
+<%--                                                    title="Xóa">--%>
+<%--                                                <i class="fas fa-trash"></i> Xóa--%>
+<%--                                            </button>--%>
                                             <div class="modal fade" id="deleteChapterModal${chapter.chapterId != null ? chapter.chapterId : ''}" tabindex="-1"
                                                  aria-labelledby="deleteChapterModalLabel${chapter.chapterId != null ? chapter.chapterId : ''}" aria-hidden="true">
                                                 <div class="modal-dialog">
@@ -264,7 +315,7 @@
                                 </c:forEach>
                                 <c:if test="${empty chapters}">
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">Không tìm thấy chương nào.</td>
+                                        <td colspan="8" class="text-center text-muted">Không tìm thấy chương nào.</td>
                                     </tr>
                                 </c:if>
                                 </tbody>
@@ -272,7 +323,7 @@
                         </div>
 
                         <c:if test="${chapterPage != null && chapterPage.totalPages > 0}">
-                            <div class="pagination-wrapper text-center">
+                            <div class="pagination-wrapper text-center mt-4">
                                 <div class="mb-2">
                                     <small>Hiển thị <c:out value="${chapterPage.numberOfElements != null ? chapterPage.numberOfElements : '0'}"/> trong tổng số <c:out value="${chapterPage.totalElements != null ? chapterPage.totalElements : '0'}"/> mục. Trang <c:out value="${chapterPage.number != null ? chapterPage.number + 1 : '1'}"/> / <c:out value="${chapterPage.totalPages != null ? chapterPage.totalPages : '1'}"/></small>
                                 </div>

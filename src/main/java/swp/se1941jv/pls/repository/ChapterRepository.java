@@ -28,8 +28,8 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long>, JpaSpec
 
     boolean existsByChapterNameAndSubject_SubjectId(String chapterName,Long subjectId);
 
-    @Query("SELECT c FROM Chapter c LEFT JOIN FETCH c.lessons WHERE c.chapterId = :chapterId")
-    Optional<Chapter> findByIdWithLessons(@Param("chapterId") Long chapterId);
+    @Query("SELECT c FROM Chapter c LEFT JOIN FETCH c.lessons l WHERE c.chapterId = :chapterId AND (l.isHidden = false OR l.isHidden IS NULL)")
+    Optional<Chapter> findByIdWithNonHiddenLessons(@Param("chapterId") Long chapterId);
 
     List<Chapter> findBySubjectSubjectId(Long subjectId);
 }
