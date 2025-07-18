@@ -452,15 +452,7 @@ public class SubjectService {
                     .build();
             statusHistoryRepository.save(statusHistory);
         } else {
-            subject = subjectRepository.save(subject);
-            // Ghi log chỉnh sửa
-            SubjectStatusHistory statusHistory = SubjectStatusHistory.builder()
-                    .subject(subject)
-                    .status(SubjectStatusHistory.SubjectStatus.DRAFT)
-                    .changedAt(LocalDateTime.now())
-                    .feedback("Chỉnh sửa bởi Content Manager")
-                    .build();
-            statusHistoryRepository.save(statusHistory);
+            subjectRepository.save(subject);
         }
     }
 

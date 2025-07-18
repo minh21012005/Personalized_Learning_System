@@ -113,6 +113,8 @@ public class SubjectController {
         Pageable pageable = PageRequest.of(page, size);
         Page<SubjectListDTO> subjectPage = subjectService.getPendingSubjectsWithDTO(filterName, submittedByName, pageable);
 
+
+
         model.addAttribute("subjectPage", subjectPage);
         model.addAttribute("subjects", subjectPage.getContent());
         model.addAttribute("viewName", "pending_list");
@@ -388,6 +390,10 @@ public class SubjectController {
             if (subjectDetailOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
                 return "redirect:/admin/subject";
+            }
+
+            if (subjectDetailOpt.get().getStatus().equals("PENDING")) {
+                model.addAttribute("isPending", true);
             }
 
             model.addAttribute("subjectDetail", subjectDetailOpt.get());

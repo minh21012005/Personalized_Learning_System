@@ -4,9 +4,18 @@
 
 <div class="row justify-content-center">
     <div class="text-start mb-2">
-        <a href="<c:url value='/admin/subject'/>" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Quay lại
-        </a>
+        <c:choose>
+            <c:when test="${isPending != null && isPending == true}">
+                <a href="<c:url value='/admin/subject/pending'/>" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a href="<c:url value='/admin/subject'/>" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </c:otherwise>
+        </c:choose>
     </div>
     <div class="col-md-10 col-lg-8">
         <div class="card shadow-sm">

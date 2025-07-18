@@ -43,8 +43,8 @@
                 <a href="<c:url value='/admin/subject/new'/>" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-circle"></i> Thêm môn học mới
                 </a>
-                <a href="<c:url value='/admin/subject/pending'/>" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus-circle"></i> Môn học chờ duyệt
+                <a href="<c:url value='/admin/subject/pending'/>" class="btn btn-dark btn-sm">
+                    <i class="fas fa-file"></i> Danh sách môn học chờ duyệt
                 </a>
             </div>
         </div>
