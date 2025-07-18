@@ -177,7 +177,7 @@
                                             </c:if>
                                             <c:if
                                                 test="${empty transaction.confirmedAt and empty transaction.rejectedAt}">
-                                                Chưa xử lí
+                                                Không có
                                             </c:if>
                                         </span>
                                     </div>

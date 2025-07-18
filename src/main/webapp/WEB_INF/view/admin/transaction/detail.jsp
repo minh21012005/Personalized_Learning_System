@@ -167,7 +167,7 @@
                                                     <th>Người xử lý</th>
                                                     <td>
                                                         <c:out value="${transaction.processedBy.fullName}"
-                                                            default="Chưa xử lý" />
+                                                            default="Không có" />
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -183,7 +183,7 @@
                                                         </c:if>
                                                         <c:if
                                                             test="${empty transaction.confirmedAt and empty transaction.rejectedAt}">
-                                                            Chưa xử lí
+                                                            Không có
                                                         </c:if>
                                                     </td>
                                                 </tr>

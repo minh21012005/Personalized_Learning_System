@@ -150,7 +150,11 @@
                                                                                 value="${cartPackage.pkg.packageId}" />
                                                                         </c:forEach>
                                                                         <button type="submit"
-                                                                            class="checkout-button">Thanh toán</button>
+                                                                            class="checkout-button">Thanh toán thủ
+                                                                            công</button>
+                                                                        <button type="button" class="checkout-button"
+                                                                            id="vnpayAutoBtn">Thanh toán tự động qua
+                                                                            VNPAY</button>
                                                                     </form>
                                                                 </div>
                                                             </div>
@@ -224,6 +228,21 @@
                             </div>
                         </div>
                     </footer>
+                    <div id="studentPopup" class="popup-overlay" style="display: none;">
+                        <div class="popup-content">
+                            <h3>Chọn học sinh</h3>
+                            <select id="studentSelect">
+                                <option value="">-- Chọn học sinh --</option>
+                                <c:forEach var="student" items="${students}">
+                                    <option value="${student.userId}">${student.fullName}</option>
+                                </c:forEach>
+                            </select>
+                            <div class="popup-actions">
+                                <button id="confirmVnpayPayment">Thanh toán</button>
+                                <button onclick="closePopup()">Hủy</button>
+                            </div>
+                        </div>
+                    </div>
                     <script>
                         // Initialize Lucide icons
                         lucide.createIcons();
@@ -254,6 +273,57 @@
                             });
                         </script>
                     </c:if>
+                    <script>
+                        // Mở popup khi nhấn nút
+                        document.getElementById("vnpayAutoBtn").addEventListener("click", function () {
+                            document.getElementById("studentPopup").style.display = "flex";
+                        });
+
+                        // Đóng popup
+                        function closePopup() {
+                            document.getElementById("studentPopup").style.display = "none";
+                        }
+
+                        document.getElementById("confirmVnpayPayment").addEventListener("click", function () {
+                            const studentId = document.getElementById("studentSelect").value;
+                            if (!studentId) {
+                                alert("Vui lòng chọn học sinh trước khi thanh toán.");
+                                return;
+                            }
+
+                            // Tạo form ẩn để gửi yêu cầu
+                            const form = document.createElement("form");
+                            form.method = "GET"; // hoặc "GET" tùy theo Controller
+                            form.action = "/create-payment"; // <-- Controller bạn muốn gọi
+
+                            // Thêm studentId
+                            const studentInput = document.createElement("input");
+                            studentInput.type = "hidden";
+                            studentInput.name = "studentId";
+                            studentInput.value = studentId;
+                            form.appendChild(studentInput);
+
+                            // Thêm danh sách package từ cartPackages
+                            <c:forEach var="cartPackage" items="${cartPackages}">
+                                const pkgInput${cartPackage.pkg.packageId} = document.createElement("input");
+                                pkgInput${cartPackage.pkg.packageId}.type = "hidden";
+                                pkgInput${cartPackage.pkg.packageId}.name = "packages";
+                                pkgInput${cartPackage.pkg.packageId}.value = "${cartPackage.pkg.packageId}";
+                                form.appendChild(pkgInput${cartPackage.pkg.packageId});
+                            </c:forEach>
+
+                            // Thêm tổng tiền
+                            const totalInput = document.createElement("input");
+                            totalInput.type = "hidden";
+                            totalInput.name = "price";
+                            totalInput.value = "${totalPrice}";
+                            form.appendChild(totalInput);
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        });
+                    </script>
+
                 </body>
 
                 </html>
