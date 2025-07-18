@@ -149,12 +149,12 @@
                                                                             <input type="hidden" name="packages"
                                                                                 value="${cartPackage.pkg.packageId}" />
                                                                         </c:forEach>
+                                                                        <button type="button" class="checkout-button"
+                                                                            id="vnpayAutoBtn">Thanh toán bằng
+                                                                            VNPAY</button>
                                                                         <button type="submit"
                                                                             class="checkout-button">Thanh toán thủ
                                                                             công</button>
-                                                                        <button type="button" class="checkout-button"
-                                                                            id="vnpayAutoBtn">Thanh toán tự động qua
-                                                                            VNPAY</button>
                                                                     </form>
                                                                 </div>
                                                             </div>
