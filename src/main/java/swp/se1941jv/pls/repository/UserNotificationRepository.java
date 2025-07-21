@@ -22,4 +22,8 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      Page<UserNotification> findByUser(User user, Pageable pageable);
      List<UserNotification> findByUserAndIsReadFalse(User user);
 
+    @Modifying
+    @Query("UPDATE UserNotification un SET un.isRead = true WHERE un.user = :user AND un.isRead = false")
+    int markAllAsReadForUser(@Param("user") User user);
+
 }

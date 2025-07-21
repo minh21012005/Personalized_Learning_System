@@ -242,4 +242,33 @@ public class NotificationService {
         sendNotificationForRole("CONTENT_MANAGER", title, content, link, thumbnail);
     }
 
+    public List<UserNotification> getRecentNotificationsForUser(User currentUser, int limit) {
+        if (currentUser == null) return Collections.emptyList();
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "notification.createdAt"));
+        return userNotificationRepository.findByUser(currentUser, pageable).getContent();
+    }
+
+    @Transactional
+    public boolean markNotificationAsRead(User user, Long notificationId) {
+        KeyUserNotification key = new KeyUserNotification(user.getUserId(), notificationId);
+        Optional<UserNotification> userNotificationOpt = userNotificationRepository.findById(key);
+        if (userNotificationOpt.isPresent() && !userNotificationOpt.get().getIsRead()) {
+            UserNotification userNotification = userNotificationOpt.get();
+            userNotification.setIsRead(true);
+            userNotificationRepository.save(userNotification);
+            logger.info("Marked notification {} as read for user {}", notificationId, user.getUserId());
+            return true;
+        }
+        logger.debug("Notification {} for user {} was already read or not found.", notificationId, user.getUserId());
+        return false;
+    }
+
+    @Transactional
+    public int markAllNotificationsAsRead(User user) {
+        if (user == null) return 0;
+        int updatedCount = userNotificationRepository.markAllAsReadForUser(user);
+        logger.info("Marked all {} unread notifications as read for user {}", updatedCount, user.getUserId());
+        return updatedCount;
+    }
+
 }
