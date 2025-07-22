@@ -172,7 +172,7 @@ public class ChapterController {
         try {
             Long userId = (Long) session.getAttribute("id");
             if (userId == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để thực hiện thao tác này.");
                 return "redirect:/staff/subject/{subjectId}/chapters";
             }
 
@@ -184,7 +184,7 @@ public class ChapterController {
 
             chapterForm.setSubjectId(subjectId);
             chapterService.createChapter(chapterForm, userId);
-            redirectAttributes.addFlashAttribute("message", "chapter.message.created.success");
+            redirectAttributes.addFlashAttribute("message", "Tạo chương học thành công!");
             return "redirect:/staff/subject/{subjectId}/chapters";
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
@@ -193,7 +193,7 @@ public class ChapterController {
             return "staff/chapter/save";
         } catch (Exception e) {
             log.error("Error creating chapter: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.create");
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tạo Chương học!");
             return "redirect:/staff/subject/{subjectId}/chapters";
         }
     }
@@ -211,7 +211,7 @@ public class ChapterController {
         try {
             Long userId = (Long) session.getAttribute("id");
             if (userId == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để thực hiện thao tác này.");
                 return "redirect:/staff/subject/{subjectId}/chapters";
             }
 
@@ -224,7 +224,7 @@ public class ChapterController {
             chapterForm.setSubjectId(subjectId);
             chapterForm.setChapterId(chapterId);
             chapterService.updateChapter(chapterForm, userId);
-            redirectAttributes.addFlashAttribute("message", "chapter.message.updated.success");
+            redirectAttributes.addFlashAttribute("message", "Chương học đã được cập nhật thành công!");
             return "redirect:/staff/subject/{subjectId}/chapters";
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
@@ -233,36 +233,10 @@ public class ChapterController {
             return "staff/chapter/save";
         } catch (Exception e) {
             log.error("Error updating chapter: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.update");
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật Chương học!");
             return "redirect:/staff/subject/{subjectId}/chapters";
         }
     }
-
-//    @PreAuthorize("hasRole('STAFF')")
-//    @PostMapping("/{chapterId}/delete")
-//    public String deleteChapter(
-//            @PathVariable Long subjectId,
-//            @PathVariable Long chapterId,
-//            HttpSession session,
-//            RedirectAttributes redirectAttributes) {
-//        try {
-//            Long userId = (Long) session.getAttribute("id");
-//            if (userId == null) {
-//                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
-//                return "redirect:/staff/subject/{subjectId}/chapters";
-//            }
-//            chapterService.deleteChapter(chapterId, userId);
-//            redirectAttributes.addFlashAttribute("message", "chapter.message.deleted.success");
-//            return "redirect:/staff/subject/{subjectId}/chapters";
-//        } catch (IllegalArgumentException e) {
-//            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-//            return "redirect:/staff/subject/{subjectId}/chapters";
-//        } catch (Exception e) {
-//            log.error("Error deleting chapter: {}", e.getMessage(), e);
-//            redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.delete");
-//            return "redirect:/staff/subject/{subjectId}/chapters";
-//        }
-//    }
 
     @PreAuthorize("hasRole('STAFF')")
     @PostMapping("/{chapterId}/toggle-hidden")
@@ -274,7 +248,7 @@ public class ChapterController {
         try {
             Long userId = (Long) session.getAttribute("id");
             if (userId == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để thực hiện thao tác này.");
                 return "redirect:/staff/subject/{subjectId}/chapters";
             }
             chapterService.toggleChapterHiddenStatus(chapterId, userId);

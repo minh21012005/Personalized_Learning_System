@@ -134,7 +134,7 @@
 
 <div class="main-container">
     <div class="sidebar d-flex flex-column">
-        <jsp:include page="../layout/sidebar.jsp"/>
+        <jsp:include page="../layout_staff/sidebar.jsp"/>
     </div>
     <div class="content">
         <main>
