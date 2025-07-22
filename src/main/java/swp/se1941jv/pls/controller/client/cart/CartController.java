@@ -35,6 +35,7 @@ public class CartController {
         HttpSession session = request.getSession();
         long userId = (long) session.getAttribute("id");
         User user = this.userService.getUserById(userId);
+        List<User> students = user.getChildren();
         Cart cart = this.cartService.getCartByUser(user);
         List<CartPackage> cartPackages = cart == null ? new ArrayList<>() : cart.getCartPackages();
         double totalPrice = 0;
@@ -43,6 +44,7 @@ public class CartController {
         }
         model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("cartPackages", cartPackages);
+        model.addAttribute("students", students);
         return "client/cart/show";
     }
 
