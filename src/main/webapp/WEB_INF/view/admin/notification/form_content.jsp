@@ -51,8 +51,8 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group mb-3">
-                        <label for="link" class="form-label">Link <span class="text-danger">*</span>:</label>
-                        <input type="text" class="form-control" id="link" name="link" value="<c:out value='${link}' escapeXml='true'/>" required maxlength="255">
+                        <label for="link" class="form-label">Link:</label>
+                        <input type="text" class="form-control" id="link" name="link" value="<c:out value='${link}' escapeXml='true'/>" maxlength="255">
                         <small class="form-text text-muted">Ví dụ: /page/detail/123 hoặc https://example.com</small>
                     </div>
                 </div>

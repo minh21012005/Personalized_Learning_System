@@ -25,7 +25,7 @@
     }
 
     .notification-body-scrollable {
-    max-height: 70vh;
+    max-height: 150vh;
     overflow-y: auto;
     overflow-x: hidden;
     }
@@ -35,10 +35,10 @@
         padding: 0;
         margin: 0;
     }
-    
+
     .notification-item-card {
         display: flex;
-        align-items: center; /* Căn giữa theo chiều dọc */
+        align-items: center;
         padding: 0.75rem 1rem;
         border-bottom: 1px solid #e9ecef;
         text-decoration: none !important;

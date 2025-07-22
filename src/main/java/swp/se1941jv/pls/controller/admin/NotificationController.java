@@ -172,7 +172,6 @@ public class NotificationController {
 
         if (title == null || title.trim().isEmpty()) model.addAttribute("errorMessage", "Tiêu đề không được để trống!");
         else if (content == null || content.trim().isEmpty()) model.addAttribute("errorMessage", "Nội dung không được để trống!");
-        else if (link == null || link.trim().isEmpty()) model.addAttribute("errorMessage", "Link không được để trống!");
 
         if (model.containsAttribute("errorMessage")) {
              logger.warn("Validation failed for updating notification ID {}: {}", id, model.getAttribute("errorMessage"));
@@ -273,7 +272,7 @@ public class NotificationController {
     private boolean isValidNotificationInput(String title, String content, String link, String targetType, List<String> targetValue, Model model) {
         if (title == null || title.trim().isEmpty()) { model.addAttribute("errorMessage", "Tiêu đề không được để trống!"); return false; }
         if (content == null || content.trim().isEmpty()) { model.addAttribute("errorMessage", "Nội dung không được để trống!"); return false; }
-        if (link == null || link.trim().isEmpty()) { model.addAttribute("errorMessage", "Link không được để trống!"); return false; }
+      //if (link == null || link.trim().isEmpty()) { model.addAttribute("errorMessage", "Link không được để trống!"); return false; }
         if (targetType == null || targetType.trim().isEmpty()) { model.addAttribute("errorMessage", "Đối tượng nhận không được để trống!"); return false; }
         if (targetValue == null || targetValue.isEmpty()) { model.addAttribute("errorMessage", "Vui lòng chọn ít nhất một giá trị cho đối tượng nhận!"); return false; }
         return true;
