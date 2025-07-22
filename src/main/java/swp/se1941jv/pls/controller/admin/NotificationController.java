@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import swp.se1941jv.pls.entity.Notification;
@@ -59,7 +60,9 @@ public class NotificationController {
     @PostMapping("/create")
     public String processCreateNotification(
             @RequestParam String title, @RequestParam String content, @RequestParam String link,
-            @RequestParam(required = false) String thumbnail, @RequestParam String targetType,
+            @RequestParam(required = false) String thumbnail,
+            @RequestParam(name = "thumbnailFile", required = false) MultipartFile thumbnailFile,
+            @RequestParam String targetType,
             @RequestParam(value = "targetValue", required = false) List<String> targetValue,
             RedirectAttributes redirectAttributes, Model model) {
 
@@ -81,7 +84,7 @@ public class NotificationController {
 
         try {
             Notification createdNotification = notificationService.createNotification(
-                    title, content, link, thumbnail, targetType, targetValue);
+                    title, content, link, thumbnail,thumbnailFile, targetType, targetValue);
             logger.info("Notification created successfully with ID: {}", createdNotification.getNotificationId());
             redirectAttributes.addFlashAttribute("successMessage", "Gửi thông báo thành công!");
             return "redirect:/admin/notification/show";
@@ -162,7 +165,7 @@ public class NotificationController {
     public String processUpdateNotification(@PathVariable("id") Long id,
                                          @RequestParam String title, @RequestParam String content,
                                          @RequestParam String link, @RequestParam(required = false) String thumbnail,
-
+                                         @RequestParam(name = "thumbnailFile", required = false) MultipartFile thumbnailFile,
                                          RedirectAttributes redirectAttributes, Model model) {
         logger.info("Processing update for notification ID: {}", id);
 
@@ -189,7 +192,7 @@ public class NotificationController {
         }
 
         try {
-            notificationService.updateNotification(id, title, content, link, thumbnail);
+            notificationService.updateNotification(id, title, content, link, thumbnail,thumbnailFile);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông báo thành công!");
             return "redirect:/admin/notification/show";
         } catch (IllegalArgumentException ex) {

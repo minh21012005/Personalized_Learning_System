@@ -36,12 +36,6 @@
                 <li>
                     <hr class="dropdown-divider my-0">
                 </li>
-                <li>
-                    <a class="dropdown-item text-center text-primary small py-2"
-                       href="${pageContext.request.contextPath}/admin/notification">
-                        Xem tất cả thông báo
-                    </a>
-                </li>
             </ul>
         </div>
 

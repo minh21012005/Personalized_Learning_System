@@ -1,5 +1,6 @@
 package swp.se1941jv.pls.service;
 
+import swp.se1941jv.pls.service.UploadService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import swp.se1941jv.pls.entity.Package;
 import swp.se1941jv.pls.entity.keys.KeyUserNotification;
 import swp.se1941jv.pls.repository.*;
 import org.springframework.data.domain.Sort;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,11 +39,24 @@ public class NotificationService {
     private final PackageRepository packageRepository;
     private final SubjectRepository subjectRepository;
     private final RoleRepository roleRepository;
+    private final UploadService uploadService;
 
     @Transactional
     public Notification createNotification(
-            String title, String content, String link, String thumbnail,
+            String title, String content, String link, String thumbnail, MultipartFile thumbnailFile,
             String targetType, List<?> targetValue) {
+
+
+            String finalThumbnailUrl = thumbnail;
+            final String THUMBNAIL_FOLDER = "thumbnails";
+
+        if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+        String savedFileName = uploadService.handleSaveUploadFile(thumbnailFile, THUMBNAIL_FOLDER);
+        if (savedFileName != null && !savedFileName.isEmpty()) {
+            finalThumbnailUrl = "/img/" + THUMBNAIL_FOLDER + "/" + savedFileName;
+        }
+    }
+
         if (targetValue == null || targetValue.isEmpty()) {
             throw new IllegalArgumentException("Giá trị đối tượng nhận không được để trống.");
         }
@@ -116,7 +131,7 @@ public class NotificationService {
         }
         
         Notification notification = Notification.builder()
-                .title(title).content(content).link(link).thumbnail(thumbnail)
+                .title(title).content(content).link(link).thumbnail(finalThumbnailUrl)
                 .targetType(targetType).build();
         Notification savedNotification = notificationRepository.save(notification);
         logger.info("Notification created with ID: {}", savedNotification.getNotificationId());
@@ -154,14 +169,26 @@ public class NotificationService {
     }
 
     @Transactional
-    public Notification updateNotification(Long id, String title, String content, String link, String thumbnail) {
+    public Notification updateNotification(Long id, String title, String content, String link, String thumbnailUrl, MultipartFile thumbnailFile) {
         Notification existingNotification = notificationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông báo với ID: " + id));
+
+        String finalThumbnailUrl = thumbnailUrl;
+        final String THUMBNAIL_FOLDER = "thumbnails";
+
+        if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+         String savedFileName = uploadService.handleSaveUploadFile(thumbnailFile, THUMBNAIL_FOLDER);
+         if (savedFileName != null && !savedFileName.isEmpty()) {
+            finalThumbnailUrl = "/img/" + THUMBNAIL_FOLDER + "/" + savedFileName;
+         }
+    }
+
         existingNotification.setTitle(title);
         existingNotification.setContent(content);
         existingNotification.setLink(link);
-        existingNotification.setThumbnail(thumbnail);
-        
+        existingNotification.setThumbnail(finalThumbnailUrl);
+
+
         logger.info("Updating notification ID: {}", id);
         return notificationRepository.save(existingNotification);
     }
@@ -221,7 +248,7 @@ public class NotificationService {
     public void sendNotificationForRole(String roleName, String title, String content, String link, String thumbnail){
         logger.info("Prepare send notification for role: {}", roleName);
         try {
-            createNotification(title, content, link, thumbnail, "ROLE", Collections.singletonList(roleName.toUpperCase()));
+            createNotification(title, content, link, thumbnail,null, "ROLE", Collections.singletonList(roleName.toUpperCase()));
             logger.info("Successfully initiated notification process for role: {}", roleName);
         } catch (Exception e) {
             logger.error("Failed send notification for role: {}", roleName, e.getMessage());
@@ -270,5 +297,7 @@ public class NotificationService {
         logger.info("Marked all {} unread notifications as read for user {}", updatedCount, user.getUserId());
         return updatedCount;
     }
+
+     
 
 }
