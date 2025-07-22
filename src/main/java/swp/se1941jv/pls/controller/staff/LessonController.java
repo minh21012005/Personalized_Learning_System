@@ -100,6 +100,8 @@ public class LessonController {
                 return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
             }
 
+            lessonService.validateStaffAccess(chapterId,userId);
+
             LessonFormDTO lessonForm = new LessonFormDTO();
             lessonForm.setChapterId(chapterId);
 
@@ -337,32 +339,32 @@ public class LessonController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
-    @PostMapping("/{lessonId}/delete")
-    public String deleteLesson(
-            @PathVariable Long subjectId,
-            @PathVariable Long chapterId,
-            @PathVariable Long lessonId,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-        try {
-            Long userId = (Long) session.getAttribute("id");
-            if (userId == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
-                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-            }
-            lessonService.deleteLesson(lessonId, userId);
-            redirectAttributes.addFlashAttribute("message", "Xóa bài học thành công!");
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        } catch (Exception e) {
-            log.error("Error deleting lesson for lessonId={}, userId={}: {}", lessonId, session.getAttribute("id"), e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa bài học!");
-            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
-        }
-    }
+//    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+//    @PostMapping("/{lessonId}/delete")
+//    public String deleteLesson(
+//            @PathVariable Long subjectId,
+//            @PathVariable Long chapterId,
+//            @PathVariable Long lessonId,
+//            HttpSession session,
+//            RedirectAttributes redirectAttributes) {
+//        try {
+//            Long userId = (Long) session.getAttribute("id");
+//            if (userId == null) {
+//                redirectAttributes.addFlashAttribute("errorMessage", "subject.message.loginRequired");
+//                return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+//            }
+//            lessonService.deleteLesson(lessonId, userId);
+//            redirectAttributes.addFlashAttribute("message", "Xóa bài học thành công!");
+//            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+//        } catch (IllegalArgumentException e) {
+//            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+//            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+//        } catch (Exception e) {
+//            log.error("Error deleting lesson for lessonId={}, userId={}: {}", lessonId, session.getAttribute("id"), e.getMessage(), e);
+//            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa bài học!");
+//            return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
+//        }
+//    }
 
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
     @GetMapping("/{lessonId}")
@@ -397,6 +399,24 @@ public class LessonController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hiển thị chi tiết bài học!");
             return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
         }
+    }
+
+    @PostMapping("/{lessonId}/toggle-hidden")
+    public String toggleLessonHidden(@PathVariable("subjectId") Long subjectId,
+                                     @PathVariable("chapterId") Long chapterId,
+                                     @PathVariable("lessonId") Long lessonId,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            lessonService.toggleLessonHiddenStatus(lessonId, userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Trạng thái ẩn của bài học đã được cập nhật!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi thay đổi trạng thái ẩn của bài học!");
+        }
+        return "redirect:/staff/subject/" + subjectId + "/chapters/" + chapterId + "/lessons";
     }
 
 }

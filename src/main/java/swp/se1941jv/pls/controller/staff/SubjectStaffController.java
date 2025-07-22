@@ -132,4 +132,28 @@ public class SubjectStaffController {
             return "redirect:/staff/subject";
         }
     }
+
+    @PostMapping("/cancel/{id}")
+    public String cancelSubjectSubmission(@PathVariable("id") Long id,
+                                          HttpSession session,
+                                          RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để hủy nộp duyệt môn học!");
+                return "redirect:/staff/subject";
+            }
+
+            subjectService.cancelSubmission(id, userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Hủy nộp  môn học thành công");
+            return "redirect:/staff/subject";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/staff/subject";
+        } catch (Exception e) {
+            logger.error("Lỗi khi hủy nộp duyệt môn học ID {}: {}", id, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hủy nộp môn học");
+            return "redirect:/staff/subject";
+        }
+    }
 }

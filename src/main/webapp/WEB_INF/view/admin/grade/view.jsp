@@ -19,15 +19,15 @@
 
                 .sidebar {
                     position: fixed;
-                    top: 55px;
+                    top: 50px;
+                    bottom: 40px;
+                    /* dính với footer */
                     left: 0;
                     width: 250px;
-                    height: calc(100vh - 60px - 40px);
-                    z-index: 1;
                     background-color: #212529;
+                    color: #fff;
                     overflow-y: auto;
                 }
-
                 header {
                     position: fixed;
                     top: 0;

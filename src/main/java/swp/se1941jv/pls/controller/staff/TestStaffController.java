@@ -24,6 +24,7 @@ import swp.se1941jv.pls.entity.TestStatus;
 import swp.se1941jv.pls.service.TestStaffService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,8 +42,7 @@ public class TestStaffController {
     public String showCreateTestForm(Model model) {
         try {
             model.addAttribute("subjects", testStaffService.getAllSubjects());
-//            model.addAttribute("testStatuses", testStaffService.getAllTestStatuses());
-            model.addAttribute("testCategories", testStaffService.getAllTestCategories());
+            model.addAttribute("testCategories", testStaffService.getAllTestCategories().stream().filter(testCategory -> testCategory.getTestCategoryId() != 1L).collect(Collectors.toList()));
             model.addAttribute("questions", new ArrayList<>());
             return "staff/tests/CreateTest";
         } catch (Exception e) {
@@ -117,9 +117,29 @@ public class TestStaffController {
                     subjectId, chapterId, lessonId, questionIds, isOpen, "saveDraft".equals(action));
             return "redirect:/staff/tests";
         } catch (Exception e) {
-            logger.error("Error creating test: {}", e.getMessage(), e);
             model.addAttribute("error", "Lỗi khi tạo bài kiểm tra: " + e.getMessage());
-            return "error";
+            // Re-populate the form with previously entered data
+            model.addAttribute("testName", testName);
+            model.addAttribute("durationTime", durationTime);
+            model.addAttribute("maxAttempts", maxAttempts);
+            model.addAttribute("startAt", startAt);
+            model.addAttribute("endAt", endAt);
+            model.addAttribute("testCategoryId", testCategoryId);
+            model.addAttribute("subjectId", subjectId);
+            model.addAttribute("chapterId", chapterId);
+            model.addAttribute("lessonId", lessonId);
+            model.addAttribute("isOpen", isOpen);
+            model.addAttribute("questionIds", questionIds != null ? questionIds : new ArrayList<Long>());
+
+            // Fetch related data for dropdowns and questions
+            model.addAttribute("subjects", testStaffService.getAllSubjects());
+            model.addAttribute("testCategories", testStaffService.getAllTestCategories().stream()
+                    .filter(testCategory -> testCategory.getTestCategoryId() != 1L)
+                    .collect(Collectors.toList()));
+            model.addAttribute("chapters", subjectId != null ? testStaffService.getChaptersBySubject(subjectId) : new ArrayList<>());
+            model.addAttribute("lessons", chapterId != null ? testStaffService.getLessonsByChapter(chapterId) : new ArrayList<>());
+            model.addAttribute("questions", questionIds != null ? testStaffService.getQuestionsByIds(questionIds) : new ArrayList<>());
+            return "staff/tests/CreateTest";
         }
     }
 
@@ -144,7 +164,7 @@ public class TestStaffController {
             }
 
             Page<TestListDto> testPage = testStaffService.findTestsByCreatorAndFilters(
-                    creatorUserId, subjectId, chapterId,statusId, startAt, endAt, pageable);
+                    creatorUserId, subjectId, chapterId, statusId, startAt, endAt, pageable);
 
             List<TestListDto> tests = testPage.getContent();
             int totalPages = testPage.getTotalPages();
@@ -193,7 +213,7 @@ public class TestStaffController {
     public String showEditTestForm(@PathVariable("testId") Long testId, Model model) {
         try {
             TestDetailDto test = testStaffService.getTestDetails(testId);
-            if(test.getStatusName().equals("Đang Xử Lý") || test.getStatusName().equals("Chấp Nhận")) {
+            if (test.getStatusName().equals("Đang Xử Lý") || test.getStatusName().equals("Chấp Nhận")) {
                 model.addAttribute("error", "Bài kiểm tra đang được phê duyệt không thể chỉnh sửa.");
                 return "error";
             }
@@ -241,7 +261,28 @@ public class TestStaffController {
         } catch (Exception e) {
             logger.error("Error updating test {}: {}", testId, e.getMessage(), e);
             model.addAttribute("error", "Lỗi khi cập nhật bài kiểm tra: " + e.getMessage());
-            return "error";
+            // Fetch the existing test details to preserve original data
+            TestDetailDto test = testStaffService.getTestDetails(testId);
+            // Update with submitted data
+            test.setTestName(testName);
+            test.setDurationTime(durationTime);
+            test.setMaxAttempts(maxAttempts);
+            test.setStartAt(startAt != null ? startAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")) : null);
+            test.setEndAt(endAt != null ? endAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")) : null);
+            test.setCategoryId(testCategoryId);
+            test.setSubjectId(subjectId);
+            test.setChapterId(chapterId);
+            test.setLessonId(lessonId);
+            test.setIsOpen(isOpen);
+            test.setQuestions(questionIds != null ? testStaffService.getQuestionsByIds(questionIds) : new ArrayList<>());
+
+            // Populate related data for dropdowns
+            model.addAttribute("test", test);
+            model.addAttribute("subjects", testStaffService.getAllSubjects());
+            model.addAttribute("testCategories", testStaffService.getAllTestCategories());
+            model.addAttribute("chapters", subjectId != null ? testStaffService.getChaptersBySubject(subjectId) : new ArrayList<>());
+            model.addAttribute("lessons", chapterId != null ? testStaffService.getLessonsByChapter(chapterId) : new ArrayList<>());
+            return "staff/tests/EditTest";
         }
     }
 

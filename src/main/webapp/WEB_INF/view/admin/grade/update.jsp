@@ -20,21 +20,17 @@
                         /* Prevent horizontal scroll from fixed elements */
                     }
 
-                    .sidebar {
-                        position: fixed;
-                        top: 55px;
-                        /* Below header height */
-                        left: 0;
-                        width: 250px;
-                        height: calc(100vh - 60px - 40px);
-                        /* Subtract header and footer heights */
-                        z-index: 1;
-                        /* Behind header and footer */
-                        background-color: #212529;
-                        /* Dark background to match image */
-                        overflow-y: auto;
-                        /* Scrollable if content exceeds height */
-                    }
+                      .sidebar {
+                    position: fixed;
+                    top: 60px;
+                    bottom: 40px;
+                    /* dính với footer */
+                    left: 0;
+                    width: 250px;
+                    background-color: #212529;
+                    color: #fff;
+                    overflow-y: auto;
+                }
 
                     header {
                         position: fixed;

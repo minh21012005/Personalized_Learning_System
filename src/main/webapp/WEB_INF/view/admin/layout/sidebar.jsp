@@ -40,6 +40,11 @@
                     </a>
                 </li>
                 <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="/admin/package" style="padding: 8px 15px;">
+        <i class="bi bi-mortarboard me-2"></i> Gói học
+    </a>
+</li>
+                <li class="nav-item mb-2">
                     <a class="nav-link text-white" href="/admin/questions" style="padding: 8px 15px;">
                         <i class="bi bi-question-square me-2"></i> Câu hỏi
                     </a>
@@ -49,6 +54,14 @@
                href="/admin/communications" style="padding: 8px 15px;">
                 <i class="bi bi-chat-dots me-2"></i> Giao tiếp
             </a>
+            <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="/admin/reviews" style="padding: 8px 15px;">
+        <i class="bi bi-star-fill me-2"></i> Đánh giá
+    </a>
+</li>
+
+
+
         </li>
             </ul>
         </div>

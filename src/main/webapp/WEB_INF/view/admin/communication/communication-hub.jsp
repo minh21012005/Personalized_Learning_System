@@ -268,7 +268,7 @@
             stats: '<c:url value="/api/communications/hub/statistics"/>',
             comment: '<c:url value="/api/communications"/>',
             lesson: '<c:url value="/api/communications/lesson"/>',
-            images: '<c:url value="/images/"/>'
+            images: '<c:url value="/img/avatar/"/>'
         };
     </script>
     <script src="<c:url value='/js/communication-hub.js'/>"></script>

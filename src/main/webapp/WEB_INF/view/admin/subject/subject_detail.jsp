@@ -1,9 +1,25 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+
 <div class="row justify-content-center">
+    <div class="text-start mb-2">
+        <c:choose>
+            <c:when test="${isPending != null && isPending == true}">
+                <a href="<c:url value='/admin/subject/pending'/>" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a href="<c:url value='/admin/subject'/>" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </c:otherwise>
+        </c:choose>
+    </div>
     <div class="col-md-10 col-lg-8">
         <div class="card shadow-sm">
+
             <div class="card-header bg-primary text-white">
                 <h3 class="mb-0">Chi tiết môn học - <c:out value="${subjectDetail.subjectName}"/></h3>
             </div>
@@ -47,14 +63,7 @@
                     <label class="form-label">Được giao cho:</label>
                     <input type="text" class="form-control" value="${subjectDetail.assignedToFullName != null ? subjectDetail.assignedToFullName : 'Chưa được giao'}" disabled/>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Người nộp:</label>
-                    <input type="text" class="form-control" value="${subjectDetail.submittedByFullName != null ? subjectDetail.submittedByFullName : 'N/A'}" disabled/>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Phản hồi:</label>
-                    <textarea class="form-control" rows="4" disabled><c:out value="${subjectDetail.feedback != null ? subjectDetail.feedback : 'N/A'}"/></textarea>
-                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Ngày tạo:</label>
                     <input type="text" class="form-control" value="${subjectDetail.createdAt}" disabled/>
@@ -105,12 +114,6 @@
                         </c:if>
                         </tbody>
                     </table>
-                </div>
-
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                    <a href="<c:url value='/admin/subject'/>" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Quay lại
-                    </a>
                 </div>
             </div>
         </div>

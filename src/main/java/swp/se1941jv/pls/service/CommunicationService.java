@@ -75,7 +75,13 @@ public class CommunicationService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Long> rootIdsPage = communicationRepository.findRootCommunicationIds(status,keyword,startDate, endDate,pageable);
+        Page<Long> rootIdsPage;
+        if(keyword != null && !keyword.trim().isEmpty()){
+            rootIdsPage = communicationRepository.findRootCommunicationIdsWithKeywordSearch(status, keyword, startDate, endDate, pageable);
+        } else {
+            rootIdsPage = communicationRepository.findRootCommunicationIds(status,null,startDate, endDate,pageable);
+        }
+
         List<Long> rootIdsOnCurrentPage = rootIdsPage.getContent();
 
         System.out.println("SERVICE: Found " + rootIdsOnCurrentPage.size() + " IDs for page " + page + ". Total elements in DB: " + rootIdsPage.getTotalElements());

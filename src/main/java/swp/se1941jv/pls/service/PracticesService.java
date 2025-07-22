@@ -175,12 +175,18 @@ public class PracticesService {
         List<ChapterResponseDTO> chapterResponseDTOS = new ArrayList<>();
 
         if (subject != null) {
-            chapterResponseDTOS = subject.getChapters().stream()
+            chapterResponseDTOS = subject.getChapters()
+                    .stream().filter(
+                            chapter -> chapter.getStatus() != null && chapter.getStatus() == true
+                    ).toList()
+                    .stream()
                     .map(chapter -> ChapterResponseDTO.builder()
                             .chapterId(chapter.getChapterId())
                             .chapterName(chapter.getChapterName())
                             .chapterDescription(chapter.getChapterDescription())
-                            .listLesson(chapter.getLessons().stream().map(lesson -> LessonResponseDTO.builder()
+                            .listLesson(chapter.getLessons().stream().filter(
+                                    lesson -> lesson.getStatus() != null && lesson.getStatus() == true
+                            ).toList().stream().map(lesson -> LessonResponseDTO.builder()
                                     .lessonId(lesson.getLessonId())
                                     .lessonName(lesson.getLessonName())
                                     .lessonDescription(lesson.getLessonDescription())

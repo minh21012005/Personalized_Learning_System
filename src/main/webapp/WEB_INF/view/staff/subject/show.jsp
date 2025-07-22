@@ -62,7 +62,6 @@
             width: 100%;
         }
 
-        
         .table {
             background-color: #ffffff;
             font-size: 1rem;
@@ -83,8 +82,8 @@
         }
 
         .table thead th {
-            background-color: #ffffff; /* NỀN TRẮNG CHO HEADER BẢNG */
-            color: #212529;            /* CHỮ MÀU ĐEN/XÁM ĐẬM */
+            background-color: #ffffff;
+            color: #212529;
             font-weight: 600;
             border-bottom: 2px solid #dee2e6;
             border-top: none;
@@ -106,7 +105,6 @@
         .table-hover tbody tr:hover {
             background-color: #f0f0f0 !important;
         }
-        /* --- KẾT THÚC CSS CHO BẢNG --- */
 
         .subject-img-thumbnail {
             max-width: 70px;
@@ -114,111 +112,198 @@
             object-fit: cover;
         }
 
-        /* --- CSS CHO PHÂN TRANG (THEO YÊU CẦU MỚI) --- */
         .pagination-wrapper {
             margin-top: 1.5rem;
             margin-bottom: 1rem;
         }
 
         .pagination .page-link {
-            color: #212529; /* MÀU CHỮ ĐEN/XÁM ĐẬM MẶC ĐỊNH CHO TẤT CẢ CÁC NÚT */
-            background-color: #ffffff; /* Nền trắng mặc định */
+            color: #212529;
+            background-color: #ffffff;
             border: 1px solid #dee2e6;
             margin-left: -1px;
         }
+
         .pagination .page-item:first-child .page-link {
             margin-left: 0;
             border-top-left-radius: .25rem;
             border-bottom-left-radius: .25rem;
         }
+
         .pagination .page-item:last-child .page-link {
             border-top-right-radius: .25rem;
             border-bottom-right-radius: .25rem;
         }
 
-        /* Khi hover vào các nút không active và không disabled */
         .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
             z-index: 2;
-            color: #000000; /* Giữ màu chữ đen/xám đậm khi hover */
-            background-color: #e9ecef; /* Nền xám nhạt khi hover */
+            color: #000000;
+            background-color: #e9ecef;
             border-color: #dee2e6;
         }
 
-        /* Nút trang hiện tại (active) */
         .pagination .page-item.active .page-link {
             z-index: 3;
-            color: #212529; /* CHỮ MÀU ĐEN/XÁM ĐẬM */
-            background-color: #e0e0e0; /* NỀN MÀU XÁM NHẠT (Ví dụ, bạn có thể dùng #e9ecef hoặc một màu xám khác) */
-            border-color: #adb5bd;     /* Viền xám đậm hơn một chút cho nút active */
+            color: #212529;
+            background-color: #e0e0e0;
+            border-color: #adb5bd;
         }
-        /* Bỏ box-shadow mặc định của Bootstrap cho nút active nếu có */
+
         .pagination .page-item.active .page-link:focus,
         .pagination .page-item.active .page-link:hover {
             box-shadow: none;
-            background-color: #d3d3d3; /* Màu nền xám nhạt hơn một chút khi hover nút active */
+            background-color: #d3d3d3;
             color: #212529;
         }
 
-        
         .pagination .page-item.disabled .page-link {
-            color: #adb5bd; 
+            color: #adb5bd;
             pointer-events: none;
-            background-color: #ffffff; 
+            background-color: #ffffff;
             border-color: #dee2e6;
         }
-        
 
+        /* Modal styles */
+        .modal-dialog {
+            max-width: 600px;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background-color: #1a252f;
+            color: white;
+            border-bottom: 1px solid #dee2e6;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+            justify-content: flex-end;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .feedback-btn {
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .feedback-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .no-feedback {
+            color: #6c757d;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <jsp:include page="../layout_staff/header.jsp" />
-    </header>
+<header>
+    <jsp:include page="../layout_staff/header.jsp" />
+</header>
 
-    <div class="main-container">
-        <div class="sidebar">
-            <jsp:include page="../layout_staff/sidebar.jsp" />
-        </div>
-
-        <div class="content">
-            <main>
-                <div class="container-fluid px-4">
-                    <c:if test="${not empty successMessage}">
-                        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                            <spring:message code="${successMessage}" text="${successMessage}"/>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    </c:if>
-                    <c:if test="${not empty errorMessage}">
-                        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-                                <spring:message code="${errorMessage}" text="${errorMessage}"/>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    </c:if>
-                    <c:if test="${not empty errorMessageGlobal}">
-                        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-                            <spring:message code="${errorMessageGlobal}" text="${errorMessageGlobal}"/>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    </c:if>
-
-                    <c:choose>
-                        <c:when test="${not empty viewName}">
-                            <jsp:include page="${viewName}.jsp" />
-                        </c:when>
-<%--                        <c:otherwise>--%>
-<%--                            <p class="mt-3"><spring:message code="admin.welcomeMessage" text="Welcome to the Admin!"/></p>--%>
-<%--                        </c:otherwise>--%>
-                    </c:choose>
-                </div>
-            </main>
-        </div>
+<div class="main-container">
+    <div class="sidebar">
+        <jsp:include page="../layout_staff/sidebar.jsp" />
     </div>
 
-    <footer>
-        <jsp:include page="../layout_staff/footer.jsp" />
-    </footer>
+    <div class="content">
+        <main>
+            <div class="container-fluid px-4">
+                <c:if test="${not empty successMessage}">
+                    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                        <spring:message code="${successMessage}" text="${successMessage}"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
+                <c:if test="${not empty errorMessage}">
+                    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                        <spring:message code="${errorMessage}" text="${errorMessage}"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
+                <c:if test="${not empty errorMessageGlobal}">
+                    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                        <spring:message code="${errorMessageGlobal}" text="${errorMessageGlobal}"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <c:choose>
+                    <c:when test="${not empty viewName}">
+                        <jsp:include page="${viewName}.jsp" />
+                    </c:when>
+                </c:choose>
+            </div>
+        </main>
+    </div>
+</div>
+
+<footer>
+    <jsp:include page="../layout_staff/footer.jsp" />
+</footer>
+
+<!-- Modal for Feedback -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackModalLabel">Phản hồi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="feedbackContent">
+                <!-- Nội dung phản hồi sẽ được chèn vào đây qua JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Hàm hiển thị modal phản hồi
+    function showFeedbackModal(feedback) {
+        const feedbackContent = document.getElementById('feedbackContent');
+        if (feedback && feedback.trim() !== "") {
+            feedbackContent.innerHTML = '<p>' + feedback.replace(/\n/g, '<br>') + '</p>'; // Sử dụng nối chuỗi
+        } else {
+            feedbackContent.innerHTML = '<p class="no-feedback">Không có phản hồi.</p>';
+        }
+        new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+    }
+
+    // Gắn sự kiện cho các nút "Xem phản hồi"
+    document.addEventListener("DOMContentLoaded", function() {
+        const feedbackButtons = document.querySelectorAll('.feedback-btn');
+        feedbackButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const feedback = this.getAttribute('data-feedback');
+                showFeedbackModal(feedback);
+            });
+        });
+    });
+</script>
 </body>
 </html>

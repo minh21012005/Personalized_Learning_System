@@ -18,6 +18,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
        @Query("SELECT s FROM Subject s WHERE s.grade.gradeId = :gradeId AND s.isActive = :isActive")
        List<Subject> findByGradeIdAndIsActive(@Param("gradeId") Long gradeId, @Param("isActive") boolean isActive);
 
+    @Query("SELECT s FROM Subject s WHERE s.isActive = :isActive")
+    List<Subject> findSubjectIsActive(@Param("isActive") boolean isActive);
+
        // Sử dụng naming convention cho phân trang và tìm kiếm
        Page<Subject> findByGradeGradeIdAndIsActiveAndSubjectNameContainingIgnoreCase(
                      Long gradeId, boolean isActive, String subjectName, Pageable pageable);
@@ -37,6 +40,15 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
                      @Param("gradeId") Long gradeId,
                      Pageable pageable);
 
+    @Query("SELECT s FROM Subject s JOIN s.statusHistories sh WHERE sh.status = 'PENDING' " +
+            "AND (:subjectName IS NULL OR LOWER(s.subjectName) LIKE LOWER(CONCAT('%', :subjectName, '%'))) " +
+            "AND (:submittedByName IS NULL OR LOWER(sh.submittedBy.fullName) LIKE LOWER(CONCAT('%', :submittedByName, '%'))) " +
+            "GROUP BY s.subjectId, s.subjectName, s.subjectDescription, s.subjectImage, s.isActive, s.grade " +
+            "ORDER BY MAX(sh.changedAt) DESC")
+    Page<Subject> findPendingSubjects(@Param("subjectName") String subjectName,
+                                      @Param("submittedByName") String submittedByName,
+                                      Pageable pageable);
+
        List<Subject> findAll();
 
        List<Subject> findByIsActiveTrue();
@@ -46,4 +58,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
     Optional<Subject> findBySubjectId(Long subjectId);
 
+    @Query("SELECT s FROM Subject s " +
+            "LEFT JOIN FETCH s.chapters c " +
+            "LEFT JOIN FETCH c.lessons l " +
+            "WHERE s.subjectId = :subjectId AND (c.isHidden = false OR c.isHidden IS NULL) AND (l.isHidden = false OR l.isHidden IS NULL)")
+    Optional<Subject> findByIdWithNonHiddenChaptersAndLessons(@Param("subjectId") Long subjectId);
 }

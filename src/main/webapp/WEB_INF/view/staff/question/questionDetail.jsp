@@ -159,10 +159,12 @@
                             <h5 class="fw-semibold">Kích hoạt</h5>
                             <p>${question.active ? 'Có' : 'Không'}</p>
                         </div>
-                        <div class="mb-3">
-                            <h5 class="fw-semibold">Hiển thị cuối bài học</h5>
-                            <p>${question.displayAtEndOfLesson ? 'Có' : 'Không'}</p>
-                        </div>
+                        <c:if test="${not empty question.reason}">
+                            <div class="mb-3">
+                                <h5 class="fw-semibold">Lý do</h5>
+                                <p><c:out value="${question.reason}" escapeXml="false"/></p>
+                            </div>
+                        </c:if>
                         <div class="d-flex gap-2">
                             <a href="/staff/questions" class="btn btn-secondary">Quay lại</a>
                         </div>

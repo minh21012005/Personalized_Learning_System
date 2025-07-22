@@ -64,6 +64,7 @@ public class SubjectController {
         model.addAttribute("customDateFormatter", formatter);
         model.addAttribute("subjectImageFolder", SUBJECT_IMAGE_TARGET_FOLDER);
     }
+
     @GetMapping
     public String listSubjects(Model model,
                                @RequestParam(name = "filterName", required = false) String filterName,
@@ -72,8 +73,7 @@ public class SubjectController {
                                @RequestParam(name = "size", defaultValue = "10") int size,
                                @RequestParam(name = "sortField", defaultValue = "createdAt") String sortField,
                                @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
-        Sort.Direction direction = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
+        Sort.Direction direction = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sortOrder = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page, size, sortOrder);
         Page<SubjectListDTO> subjectPage = subjectService.getAllSubjectsWithDTO(filterName, filterGradeId, pageable);
@@ -95,6 +95,39 @@ public class SubjectController {
         return ADMIN_LAYOUT_VIEW;
     }
 
+    @GetMapping("/pending")
+    public String listPendingSubjects(Model model,
+                                      @RequestParam(name = "filterName", required = false) String filterName,
+                                      @RequestParam(name = "submittedByName", required = false) String submittedByName,
+                                      @RequestParam(name = "page", defaultValue = "0") int page,
+                                      @RequestParam(name = "size", defaultValue = "10") int size,
+                                      HttpSession session) {
+        Long userId = (Long) session.getAttribute("id");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại!"));
+        if (!"CONTENT_MANAGER".equals(user.getRole().getRoleName())) {
+            return "redirect:/admin/subject";
+        }
+
+        // Sử dụng Pageable mặc định, sắp xếp đã được xử lý trong query
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SubjectListDTO> subjectPage = subjectService.getPendingSubjectsWithDTO(filterName, submittedByName, pageable);
+
+
+
+        model.addAttribute("subjectPage", subjectPage);
+        model.addAttribute("subjects", subjectPage.getContent());
+        model.addAttribute("viewName", "pending_list");
+        model.addAttribute("filterName", filterName);
+        model.addAttribute("submittedByName", submittedByName);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+        model.addAttribute("customDateFormatter", formatter);
+        model.addAttribute("subjectImageFolder", SUBJECT_IMAGE_TARGET_FOLDER);
+        return "admin/subject/pendingList";
+    }
+
     @GetMapping("/new")
     public String showCreateSubjectForm(Model model) {
         populateFormModel(model, "Tạo môn học mới", new SubjectFormDTO());
@@ -103,11 +136,11 @@ public class SubjectController {
 
     @PostMapping("/save")
     public String saveOrUpdateSubject(@Valid @ModelAttribute("subject") SubjectFormDTO subject,
-            BindingResult result,
-            @RequestParam("imageFile") MultipartFile imageFile,
-            RedirectAttributes redirectAttributes,
+                                      BindingResult result,
+                                      @RequestParam("imageFile") MultipartFile imageFile,
+                                      RedirectAttributes redirectAttributes,
                                       HttpSession session,
-            Model model) {
+                                      Model model) {
         String pageTitle = subject.getSubjectId() == null ? "Create New Subject" : "Edit Subject";
 
         if (subject.getGradeId() != null) {
@@ -219,14 +252,14 @@ public class SubjectController {
         try {
             Long userId = (Long) session.getAttribute("id");
             subjectService.revertToDraftByContentManager(id, userId);
-            redirectAttributes.addFlashAttribute("successMessage", "subject.message.reverted.success");
-            return "redirect:/admin/subject/edit/" + id;
+            redirectAttributes.addFlashAttribute("successMessage", "Môn học đã được chuyển trạng thái duyệt thành công");
+            return "redirect:/admin/subject";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/admin/subject";
         } catch (Exception e) {
             logger.error("Lỗi khi chuyển trạng thái môn học ID {} về DRAFT: {}", id, e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.revert");
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi chuyển trạng thái duyệt của môn học");
             return "redirect:/admin/subject";
         }
     }
@@ -273,10 +306,6 @@ public class SubjectController {
             return "redirect:/admin/subject";
         }
 
-        if (subjectService.getAssignmentBySubjectId(id).isPresent()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.alreadyAssigned");
-            return "redirect:/admin/subject";
-        }
 
         List<UserAssignDTO> staffs = subjectService.getStaffWithDTO();
         if (staffs.isEmpty()) {
@@ -351,7 +380,7 @@ public class SubjectController {
             logger.error("Lỗi khi duyệt môn học ID {}: {}", subjectId, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi duyệt môn học!");
         }
-        return "redirect:/admin/subject";
+        return "redirect:/admin/subject/pending";
     }
 
     @GetMapping("/{subjectId}/detail")
@@ -361,6 +390,10 @@ public class SubjectController {
             if (subjectDetailOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "subject.message.notFound");
                 return "redirect:/admin/subject";
+            }
+
+            if (subjectDetailOpt.get().getStatus().equals("PENDING")) {
+                model.addAttribute("isPending", true);
             }
 
             model.addAttribute("subjectDetail", subjectDetailOpt.get());
@@ -391,7 +424,10 @@ public class SubjectController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
             model.addAttribute("customDateFormatter", formatter);
             return ADMIN_LAYOUT_VIEW;
-        } catch (Exception e) {
+        }catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.detail");
+            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";
+        }catch (Exception e) {
             logger.error("Lỗi khi lấy chi tiết chương ID {}: {}", chapterId, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "chapter.message.error.detail");
             return "redirect:/admin/subject/" + subjectId + "/detail";
@@ -414,10 +450,35 @@ public class SubjectController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
             model.addAttribute("customDateFormatter", formatter);
             return ADMIN_LAYOUT_VIEW;
-        } catch (Exception e) {
+        }catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.detail");
+            return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";
+        }
+        catch (Exception e) {
             logger.error("Lỗi khi lấy chi tiết bài học ID {}: {}", lessonId, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "lesson.message.error.detail");
             return "redirect:/admin/subject/" + subjectId + "/chapters/" + chapterId + "/detail";
         }
+    }
+
+    @GetMapping("/publish/{id}")
+    public String publishSubject(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = (Long) session.getAttribute("id");
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại!"));
+            if (!"CONTENT_MANAGER".equals(user.getRole().getRoleName())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có Content Manager mới có thể xuất bản môn học!");
+                return "redirect:/admin/subject";
+            }
+            subjectService.publishSubject(id);
+            redirectAttributes.addFlashAttribute("successMessage", "subject.message.published.success");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Lỗi khi xuất bản môn học ID {}: {}", id, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "subject.message.error.publish");
+        }
+        return "redirect:/admin/subject";
     }
 }

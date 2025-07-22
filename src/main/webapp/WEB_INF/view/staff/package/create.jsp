@@ -179,44 +179,34 @@
                                         <form:errors path="grade.gradeId" cssClass="invalid-feedback" />
                                     </c:set>
                                     <label for="gradeId" class="form-label">Khối lớp</label>
-                                    <form:select path="grade.gradeId"
-                                        class="form-select ${not empty errorGrade ? 'is-invalid' : ''}" id="gradeId"
-                                        onchange="this.form.submit()">
+                                    <form:select path="grade.gradeId" class="form-select" id="gradeId">
                                         <form:option value="" label="-- Chọn khối lớp --" />
                                         <c:forEach var="grade" items="${grades}">
                                             <form:option value="${grade.gradeId}">${grade.gradeName}</form:option>
                                         </c:forEach>
                                     </form:select>
+
                                     ${errorGrade}
                                 </div>
 
 
                         </div>
                         <div class="mb-3">
-                            <c:set var="errorGrade">
-                                <form:errors path="grade.gradeId" cssClass="invalid-feedback" />
-                            </c:set>
-                            <label for="subjects" class="form-label">Môn học</label>
-                            <select name="subjects" id="subjects" multiple class="form-select">
-                                <c:choose>
-                                <c:when test="${not empty subjects}">
-                                    <c:forEach var="subject" items="${subjects}">
-                                        <c:set var="isSelected" value="${selectedSubjectIds != null && selectedSubjectIds.contains(subject.subjectId)}" />
-                                        <option value="${subject.subjectId}" ${isSelected ? 'selected' : ''}>
-                                            ${subject.subjectName}
-                                        </option>
-                                    </c:forEach>
-                                </c:when>
-                                <c:otherwise>
-                                    <option value="" disabled>Chọn môn học</option>
-                                </c:otherwise>
-                            </c:choose>
-                            </select>
-                            <c:if test="${empty subjects}">
-                                <div class="text-muted text-center placeholder-message">
-                                    <i class="bi bi-exclamation-circle me-1"></i> Danh sách môn học đang trống
-                                </div>
-                            </c:if>
+                            <label for="subjectIds" class="form-label">Môn học</label>
+                            <div id="subjects-wrapper">
+                                <select name="subjectIds" id="subjects" multiple="multiple" class="form-select">
+                                    <c:choose>
+                                        <c:when test="${not empty subjects}">
+                                            <c:forEach var="subject" items="${subjects}">
+                                                <option value="${subject.subjectId}">${subject.subjectName}</option>
+                                            </c:forEach>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <option value="" disabled>Chọn môn học</option>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </select>
+                            </div>
                             <c:if test="${not empty subjectsError}">
                                 <div class="invalid-feedback">${subjectsError}</div>
                             </c:if>
@@ -257,13 +247,9 @@
                         <form:hidden path="status" value="PENDING" />
                         <form:errors path="status" cssClass="invalid-feedback" />
 
-
-
-
-
-
                         <button type="submit" class="btn btn-primary">Lưu</button>
                         <a href="/staff/package" class="btn btn-secondary">Hủy</a>
+                        <input name="abc" type="hidden" id="s">
                         </form:form>
                     </div>
                 </div>
@@ -279,73 +265,102 @@
                     src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@4.0.1/dist/js/multi-select-tag.min.js"></script>
                 <!-- Bootstrap 5 JS -->
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
                 <script>
-                    var tagSelector = new MultiSelectTag('subjects', {
-                        maxSelection: 5,              // default unlimited.
-                        required: true,               // default false.
-                        placeholder: 'Search tags',   // default 'Search'.
-                        onChange: function (selected) { // Callback when selection changes.
-                            console.log('Selection changed:', selected);
-                        }
+    document.addEventListener('DOMContentLoaded', function () {
+        const gradeSelect = document.getElementById('gradeId');
+
+        function initMultiSelect() {
+            const realSelect = document.querySelector('#subjects');
+            if (realSelect) {
+                realSelect.setAttribute('name', 'subjectIds');
+                realSelect.removeAttribute('disabled');
+                realSelect.style.position = 'absolute';
+                realSelect.style.opacity = '0';
+                realSelect.style.pointerEvents = 'none';
+
+                
+                realSelect.addEventListener('change', function () {
+                    const selectedSubjects = Array.from(this.selectedOptions).map(opt => opt.textContent);
+                    console.log("📌 Môn học đang chọn:", selectedSubjects);
+                });
+document.addEventListener('click', function () {
+        const select = document.querySelector('#subjects');
+        const selectedIds = Array.from(select.selectedOptions).map(opt => opt.value.trim());
+        const hid = document.querySelector("#s");
+
+        if (hid) {
+            hid.value = selectedIds.join(','); // Ví dụ: "1,3,5"
+            console.log("📤 Danh sách ID môn học:", selectedIds);
+        }
+    });
+
+            }
+
+            new MultiSelectTag('subjects', {
+                maxSelection: 5,
+                required: true,
+                placeholder: 'Search tags',
+            });
+        }
+
+      
+        initMultiSelect();
+
+        
+        gradeSelect.addEventListener('change', function (event) {
+            const gradeId = event.target.value.trim();
+            if (!gradeId) return;
+
+            fetch('/staff/package/subjects-json?gradeId=' + gradeId)
+                .then(res => res.json())
+                .then(subjects => {
+                    const wrapper = document.getElementById('subjects-wrapper');
+                    wrapper.innerHTML = ''; // Xóa select cũ
+
+                    // Tạo select mới
+                    const select = document.createElement('select');
+                    select.setAttribute('id', 'subjects');
+                    select.setAttribute('multiple', 'multiple');
+                    select.className = 'form-select';
+
+                    if (Array.isArray(subjects) && subjects.length > 0) {
+                        subjects.forEach(sub => {
+                            const option = document.createElement('option');
+                            option.value = sub.subjectId;
+                            option.textContent = sub.subjectName || '(No name)';
+                            select.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.disabled = true;
+                        select.appendChild(option);
                     }
 
-                    );
+                    wrapper.appendChild(select);
 
+                  
+                    initMultiSelect();
+                })
+                .catch(err => {
+                    console.error("❌ Lỗi khi fetch:", err);
+                });
+        });
 
-                    // Ngăn người dùng thêm giá trị tùy ý
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const searchInput = document.querySelector('.multi-select-tag .search-input');
-                        if (searchInput) {
-                            searchInput.addEventListener('keydown', function (e) {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault(); // Ngăn hành vi mặc định của Enter
-                                    if (!this.value || !Array.from(document.getElementById('subjects').options).some(opt => opt.text.toLowerCase().includes(this.value.toLowerCase()))) {
-                                        this.value = ''; // Xóa giá trị nếu không hợp lệ
-                                    }
-                                }
-                            });
-                        }
-                        // Đảm bảo MultiSelectTag hiển thị các giá trị đã chọn
-            const subjectsSelect = document.getElementById('subjects');
-            if (subjectsSelect) {
-                const selectedOptions = Array.from(subjectsSelect.options)
-                    .filter(option => option.selected)
-                    .map(option => option.value);
-                if (selectedOptions.length > 0) {
-                    tagSelector.reset(selectedOptions);
-                }
+       
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const select = document.querySelector('#subjects');
+            const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+            console.log("📤 Môn học gửi đi:", selected);
+
+            if (selected.length === 0) {
+                e.preventDefault();
+                alert("⚠️ Bạn phải chọn ít nhất một môn học!");
             }
         });
-                   
-
-                    
-                </script>
-                <script>
-                    // Hàm chung để ngăn dấu chấm/phẩy và chỉ giữ số nguyên
-                    function restrictToIntegers(inputElement) {
-                        // Ngăn nhập dấu chấm và dấu phẩy
-                        inputElement.addEventListener("keypress", function (e) {
-                            if (e.key === '.' || e.key === ',') {
-                                e.preventDefault();
-                            }
-                        });
-
-                        // Chỉ giữ lại số nguyên
-                        inputElement.addEventListener("input", function () {
-                            let value = this.value.replace(/\D/g, ''); // Chỉ giữ lại số
-                            this.value = value;
-                        });
-                    }
-
-                    // Áp dụng cho trường price
-                    restrictToIntegers(document.getElementById("price"));
-
-                    // Áp dụng cho trường durationDays
-                    restrictToIntegers(document.getElementById("durationDays"));
+    });
+</script>
 
 
-                </script>
 
             </body>
 
