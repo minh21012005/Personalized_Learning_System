@@ -24,12 +24,16 @@
         text-decoration: underline;
     }
 
+    .notification-body-scrollable {
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    }
+
     .notification-item-list {
         list-style: none;
         padding: 0;
         margin: 0;
-        max-height: 450px; /* Giới hạn chiều cao và cho phép cuộn */
-        overflow-y: auto;
     }
     
     .notification-item-card {
@@ -111,14 +115,16 @@
     .loader-container {
         padding: 1rem; text-align: center;
     }
+
+
 </style>
 
 <div class="notification-dropdown-header d-flex justify-content-between align-items-center">
     <span>Thông báo</span>
     <a href="javascript:void(0);" id="clientMarkAllAsReadLink" class="small fw-normal" style="display: none;">Đánh dấu tất cả đã đọc</a>
 </div>
-
-<ul class="notification-item-list" id="clientNotificationItemList">
+<div class="notification-body-scrollable">
+<ul class="notification-item-list" id="clientNotificationItemList" data-total="${totalNotifications}">
     <c:choose>
         <c:when test="${not empty clientUserNotifications}">
             <jsp:include page="notification_items_fragment.jsp" />
@@ -128,7 +134,7 @@
         </c:otherwise>
     </c:choose>
 </ul>
-
+</div>
 <div class="notification-dropdown-footer">
     <c:if test="${currentSize < totalNotifications}">
         <div class="footer-action" id="clientLoadMoreNotifications">Tải thêm</div>

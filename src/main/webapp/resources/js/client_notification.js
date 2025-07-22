@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     const contextPath = typeof window.APP_CONTEXT_PATH !== 'undefined' ? window.APP_CONTEXT_PATH : '';
+    
 
     // Elements
     const notificationDropdownToggle = document.getElementById('clientNotificationDropdownToggle');
@@ -12,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // State
     let currentPage = 0; 
     let isLoading = false; 
+    let totalNotifications = 0;
 
     /**
      * Lấy và cập nhật số lượng thông báo chưa đọc trên badge.
@@ -42,6 +44,11 @@ function fetchInitialNotificationList() {
         .then(response => response.ok ? response.text() : '<div class="no-notification-message text-danger">Lỗi khi tải thông báo.</div>')
         .then(html => {
             dropdownContentActualEl.innerHTML = html;
+            const itemList = document.getElementById('clientNotificationItemList');
+            if (itemList) {
+                // Đọc tổng số thông báo từ data attribute và lưu vào biến toàn cục
+                totalNotifications = parseInt(itemList.dataset.total, 10) || 0;
+            }
             addEventListenersToNewItems();
         })
         .catch(error => {
@@ -67,27 +74,36 @@ function fetchInitialNotificationList() {
         if(spinner) spinner.style.display = 'block';
 
         fetch(`${contextPath}/notification/client/load-more?page=${currentPage}&size=5`)
-            .then(response => response.ok ? response.text() : '')
-            .then(html => {
-                if(spinner) spinner.style.display = 'none';
+        .then(response => response.ok ? response.text() : '')
+        .then(html => {
+            if (spinner) spinner.style.display = 'none';
 
-                if (html.trim()) {
-                    const itemList = document.getElementById('clientNotificationItemList');
-                    itemList.insertAdjacentHTML('beforeend', html);
-                    if(loadMoreBtn) loadMoreBtn.style.display = 'block'; // Hiển thị lại nút
-                    addEventListenersToNewItems(); // Gắn listener cho các mục mới được tải
+            if (html.trim()) {
+                const itemList = document.getElementById('clientNotificationItemList');
+                itemList.insertAdjacentHTML('beforeend', html);
+                addEventListenersToNewItems();
+
+                const currentDisplayedCount = itemList.children.length;
+                if (currentDisplayedCount >= totalNotifications) {
+                    // Nếu đã hiển thị đủ, ẩn nút đi
+                    if (loadMoreBtn) loadMoreBtn.parentElement.style.display = 'none';
                 } else {
-                    // Nếu không còn dữ liệu, ẩn luôn nút "Tải thêm"
-                    if(loadMoreBtn) loadMoreBtn.parentElement.style.display = 'none';
+                    // Nếu chưa, hiển thị lại nút
+                    if (loadMoreBtn) loadMoreBtn.style.display = 'block';
                 }
-            })
-            .catch(error => {
-                console.error('Error loading more notifications:', error);
-                if(loadMoreBtn) loadMoreBtn.style.display = 'block';
-            })
-            .finally(() => {
-                isLoading = false;
-            });
+
+            } else {
+                // Nếu server trả về rỗng, chắc chắn là hết
+                if (loadMoreBtn) loadMoreBtn.parentElement.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading more notifications:', error);
+            if (loadMoreBtn) loadMoreBtn.style.display = 'block';
+        })
+        .finally(() => {
+            isLoading = false;
+        });
     }
 
     /**
