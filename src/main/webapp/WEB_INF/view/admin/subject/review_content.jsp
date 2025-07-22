@@ -57,7 +57,7 @@
                             <i class="fas fa-times-circle"></i> Hủy
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-check-circle"></i> Duyệt môn học
+                            <i class="fas fa-check-circle"></i> Lưu
                         </button>
                     </div>
                 </form>

@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1941jv.pls.dto.response.subject.*;
 import swp.se1941jv.pls.entity.*;
+import swp.se1941jv.pls.repository.SubjectStatusHistoryRepository;
 import swp.se1941jv.pls.repository.UserRepository;
 import swp.se1941jv.pls.service.GradeService;
 import swp.se1941jv.pls.service.SubjectService;
@@ -35,14 +36,18 @@ public class SubjectController {
     private final GradeService gradeService;
     private final UploadService uploadService;
     private final UserRepository userRepository;
+    private final SubjectStatusHistoryRepository subjectStatusHistoryRepository;
     private static final String ADMIN_LAYOUT_VIEW = "admin/subject/show";
     private static final String SUBJECT_IMAGE_TARGET_FOLDER = "subjectImg";
 
-    public SubjectController(SubjectService subjectService, GradeService gradeService, UploadService uploadService, UserRepository userRepository) {
+    public SubjectController(SubjectService subjectService, GradeService gradeService,
+                             UploadService uploadService, UserRepository userRepository,
+                             SubjectStatusHistoryRepository subjectStatusHistoryRepository) {
         this.subjectService = subjectService;
         this.gradeService = gradeService;
         this.uploadService = uploadService;
         this.userRepository = userRepository;
+        this.subjectStatusHistoryRepository = subjectStatusHistoryRepository;
     }
 
     private void addGradesToModelForFilter(Model model) {
@@ -141,7 +146,7 @@ public class SubjectController {
                                       RedirectAttributes redirectAttributes,
                                       HttpSession session,
                                       Model model) {
-        String pageTitle = subject.getSubjectId() == null ? "Create New Subject" : "Edit Subject";
+        String pageTitle = subject.getSubjectId() == null ? "Tạo môn học mới" : "Sửa môn học";
 
         if (subject.getGradeId() != null) {
             Optional<Grade> selectedGradeOpt = gradeService.getGradeById(subject.getGradeId());
@@ -150,7 +155,7 @@ public class SubjectController {
                     result.addError(new FieldError("subject", "gradeId",
                             subject.getGradeId(),
                             false,
-                            new String[] { "NotActive.subject.grade" },
+                            new String[] { "Không có khối lớp nào" },
                             null,
                             "Khối lớp được chọn không hoạt động. Vui lòng chọn khối lớp hoạt động."));
                 }
@@ -192,7 +197,7 @@ public class SubjectController {
             } else {
                 populateFormModel(model, pageTitle, subject);
                 model.addAttribute("errorMessageGlobal",
-                        "Could not save image file. The file might be empty, invalid, or an upload error occurred.");
+                        "Không thể lưu tệp hình ảnh. Tệp có thể rỗng, không hợp lệ hoặc xảy ra lỗi khi tải lên.");
                 if (subject.getSubjectId() != null && oldImageName != null) {
                     subject.setSubjectImage(oldImageName);
                     model.addAttribute("currentSubjectImage", oldImageName);
@@ -204,12 +209,12 @@ public class SubjectController {
         try {
             Long userId = (Long) session.getAttribute("id");
             subjectService.saveSubjectWithDTO(subject, userId);
-            redirectAttributes.addFlashAttribute("successMessage", "subject.message.saved.success");
+            redirectAttributes.addFlashAttribute("successMessage", "Lưu môn học thành công");
             return "redirect:/admin/subject";
         } catch (Exception e) {
             logger.error("Error saving subject (ID: {}): {}", subject.getSubjectId(), e.getMessage(), e);
             populateFormModel(model, pageTitle, subject);
-            model.addAttribute("errorMessageGlobal", "subject.message.error.save");
+            model.addAttribute("errorMessageGlobal", "Có lỗi xảy ra khi lưu môn học");
             if (subject.getSubjectImage() != null) {
                 model.addAttribute("currentSubjectImage", subject.getSubjectImage());
             }
@@ -231,9 +236,16 @@ public class SubjectController {
             Optional<SubjectFormDTO> subjectOptional = subjectService.getSubjectFormDTOById(id);
             if (subjectOptional.isPresent()) {
                 SubjectFormDTO subjectToEdit = subjectOptional.get();
+
+                SubjectStatusHistory subjectStatusHistory = subjectStatusHistoryRepository.findBySubjectSubjectId(subjectToEdit.getSubjectId())
+                                .orElseThrow(() -> new IllegalArgumentException("Lịch sử môn học không tồn tại"));
+
+                if (subjectStatusHistory.getStatus() != SubjectStatusHistory.SubjectStatus.DRAFT) {
+                    throw  new IllegalArgumentException("Không thể chỉnh sửa môn học");
+                }
+
                 populateFormModel(model, "Sửa môn học", subjectToEdit);
                 model.addAttribute("currentSubjectImage", subjectToEdit.getSubjectImage());
-                // Thêm thông tin về SubjectAssignment nếu có
                 Optional<SubjectAssignment> assignmentOpt = subjectService.getAssignmentBySubjectId(id);
                 assignmentOpt.ifPresent(assignment -> model.addAttribute("assignedTo", assignment.getUser().getFullName()));
                 return ADMIN_LAYOUT_VIEW;

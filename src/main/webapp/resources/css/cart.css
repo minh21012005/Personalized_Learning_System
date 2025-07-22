@@ -422,22 +422,69 @@ a {
     color: var(--grey-900);
 }
 
+/* Updated checkout button styles */
 .checkout-button {
     width: 100%;
-    background-color: var(--primary-600);
-    color: var(--white);
+    padding: 12px 0;
+    /* Reduced padding for a more compact look */
     border: none;
-    border-radius: 4px;
-    padding: 24px 0;
+    border-radius: 6px;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    margin-top: 16px;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    /* Space for icons */
 }
 
-.checkout-button:hover {
+/* Manual payment button */
+.checkout-button[type="submit"] {
+    background-color: var(--grey-100);
+    /* Light grey background for secondary action */
+    color: var(--grey-900);
+    border: 1px solid var(--greyborder);
+    /* Subtle border to distinguish */
+
+}
+
+.checkout-button[type="submit"]:hover {
+    background-color: var(--grey-300);
+    transform: translateY(-1px);
+}
+
+/* VNPAY payment button */
+.checkout-button#vnpayAutoBtn {
+    background-color: var(--primary-600);
+    /* Blue for primary action */
+    color: var(--white);
+    margin-bottom: 12px;
+    /* Space between buttons */
+}
+
+.checkout-button#vnpayAutoBtn:hover {
     background-color: rgba(37, 99, 235, 0.9);
+    transform: translateY(-1px);
+    /* Subtle lift effect on hover */
+}
+
+/* Optional: Add icon support for buttons */
+.checkout-button::before {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.checkout-button[type="submit"]::before {
+    content: '\f3d1';
+    /* Font Awesome credit card icon for manual payment */
+}
+
+.checkout-button#vnpayAutoBtn::before {
+    content: '\f09d';
+    /* Font Awesome bolt icon for VNPAY (automatic) */
 }
 
 /* Footer styles */
@@ -450,17 +497,14 @@ a {
 
 .footer-container {
     max-width: none;
-    /* hoặc có thể giữ 1280px nếu muốn giới hạn chiều rộng */
     width: 100%;
     margin: 0 auto;
     padding: 0 60px;
-    /* giảm từ 20px còn 40px (hoặc 0 nếu muốn sát hẳn) */
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 32px;
 }
-
 
 .company-info {
     display: flex;
@@ -538,21 +582,17 @@ a {
 .toastify-success,
 .toastify-fail {
     transition: all 0.3s ease-in-out;
-    /* Hiệu ứng mượt mà khi xuất hiện/biến mất */
 }
 
 .toastify-success:hover,
 .toastify-fail:hover {
     transform: translateY(-2px);
-    /* Hiệu ứng nâng nhẹ khi hover */
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    /* Bóng lớn hơn khi hover */
 }
 
 .toastify-success .toast-close,
 .toastify-fail .toast-close {
     color: #fff;
-    /* Màu nút đóng */
     font-size: 14px;
     margin-left: 10px;
     cursor: pointer;
@@ -598,6 +638,103 @@ a {
     background-color: #0056b3;
 }
 
+/* Popup overlay */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* Popup content */
+.popup-content {
+    background-color: #ffffff;
+    padding: 24px 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 420px;
+    font-family: 'Inter', sans-serif;
+    animation: fadeIn 0.25s ease-in-out;
+}
+
+.popup-content h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+/* Select box */
+.popup-content select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-bottom: 24px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.popup-content select:focus {
+    border-color: #007BFF;
+}
+
+/* Button group */
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Buttons */
+.popup-actions button {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-weight: 500;
+}
+
+.popup-actions button:first-child {
+    background-color: #007BFF;
+    color: white;
+}
+
+.popup-actions button:first-child:hover {
+    background-color: #0056b3;
+}
+
+.popup-actions button:last-child {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.popup-actions button:last-child:hover {
+    background-color: #c7c7c7;
+}
+
+/* Smooth animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
@@ -637,6 +774,11 @@ a {
     .footer-container {
         flex-direction: column;
         gap: 40px;
+    }
+
+    .checkout-button {
+        padding: 10px 0;
+        font-size: 14px;
     }
 }
 

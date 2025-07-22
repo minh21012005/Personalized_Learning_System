@@ -14,7 +14,7 @@
         <h5 class="mb-0">${currentIsEditMode ? 'Chỉnh sửa thông báo' : 'Tạo thông báo mới'}</h5>
     </div>
     <div class="card-body">
-        <form action="${currentFormAction}" method="post" id="notificationForm">
+        <form action="${currentFormAction}" method="post" id="notificationForm" enctype="multipart/form-data">
          
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             <c:if test="${currentIsEditMode && not empty notificationId}">
@@ -51,16 +51,17 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group mb-3">
-                        <label for="link" class="form-label">Link <span class="text-danger">*</span>:</label>
-                        <input type="text" class="form-control" id="link" name="link" value="<c:out value='${link}' escapeXml='true'/>" required maxlength="255">
+                        <label for="link" class="form-label">Link:</label>
+                        <input type="text" class="form-control" id="link" name="link" value="<c:out value='${link}' escapeXml='true'/>" maxlength="255">
                         <small class="form-text text-muted">Ví dụ: /page/detail/123 hoặc https://example.com</small>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group mb-3">
-                        <label for="thumbnail" class="form-label">Thumbnail (URL ảnh):</label>
+                        <label for="thumbnail" class="form-label">Thumbnail (URL hoặc tải lên):</label>
                         <input type="url" class="form-control" id="thumbnail" name="thumbnail" value="<c:out value='${thumbnail}' escapeXml='true'/>" maxlength="255">
-                        <small class="form-text text-muted">URL ảnh hợp lệ (http:// hoặc https://).</small>
+                        <input class="form-control" type="file" id="thumbnailFile" name="thumbnailFile" accept="image/png, image/jpeg, image/gif">
+                        <small class="form-text text-muted">Tải ảnh từ thiết bị hoặc nhập URL ảnh hợp lệ (http:// hoặc https://).</small>
                     </div>
                 </div>
             </div>

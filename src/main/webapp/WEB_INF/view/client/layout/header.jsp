@@ -443,12 +443,6 @@
                     <li>
                         <hr class="dropdown-divider my-0">
                     </li>
-                    <li>
-                        <a class="dropdown-item text-center text-primary small py-2 dropdown-footer-link"
-                           href="${pageContext.request.contextPath}/notification/client/all">
-                            Xem tất cả thông báo
-                        </a>
-                    </li>
                 </ul>
             </div>
             <c:if test="${sessionScope.role eq 'PARENT'}">

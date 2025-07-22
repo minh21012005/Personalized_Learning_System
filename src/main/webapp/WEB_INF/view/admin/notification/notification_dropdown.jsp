@@ -4,120 +4,82 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <style>
-    .notification-dropdown-custom-header {
-        font-size: 1.1rem;
+        .notification-dropdown-header {
+        display: flex; /* Bật flexbox để căn chỉnh */
+        justify-content: space-between; /* Đẩy các item ra hai bên */
+        align-items: center; /* Căn giữa theo chiều dọc */
+        font-size: 1rem;
         font-weight: 600;
-        padding: 0.75rem 1.25rem;
-        color: #343a40;
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .notification-item-card {
-        display: flex;
-        align-items: flex-start;
         padding: 0.85rem 1.25rem;
         border-bottom: 1px solid #e9ecef;
-        background-color: #ffffff;
-        text-decoration: none !important;
-        color: inherit;
+    }
+    /* Thêm style cho link để nó nhỏ và không quá nổi bật */
+    .notification-dropdown-header .mark-all-read-link {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #0d6efd;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .notification-dropdown-header .mark-all-read-link:hover {
+        text-decoration: underline;
+    }
+
+    .notification-item-list {
+        list-style: none; padding: 0; margin: 0; max-height: 450px; overflow-y: auto;
+    }
+    .notification-item-card {
+        display: flex; align-items: flex-start; padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid #e9ecef; text-decoration: none !important; color: inherit;
         transition: background-color 0.15s ease-in-out;
     }
-    .notification-item-card:last-of-type {
-        border-bottom: none;
+    .notification-item-card:last-of-type { border-bottom: none; }
+    .notification-item-card:hover { background-color: #f8f9fa; }
+    .notification-item-card.is-unread { background-color: #eef2f7; }
+    .thumbnail-container {
+        flex-shrink: 0; margin-right: 1rem;
     }
-    .notification-item-card.is-read { /* Giữ lại class này nếu bạn muốn style khác cho thông báo đã đọc từ server */
-        background-color: #f7f9fc; 
+    .thumbnail-img, .thumbnail-placeholder {
+        width: 48px; height: 48px; object-fit: cover; border-radius: 8px;
     }
-    .notification-item-card.is-read .title,
-    .notification-item-card.is-read .summary,
-    .notification-item-card.is-read .meta-info {
-        color: #6c757d;
+    .thumbnail-placeholder {
+        background-color: #e9ecef; display: flex; align-items: center; justify-content: center; color: #adb5bd;
     }
-     .notification-item-card.is-read .title {
-        font-weight: 500;
+    .thumbnail-placeholder .fas { font-size: 1.4rem; }
+    .content-container {
+        flex-grow: 1; min-width: 0;
     }
-    .notification-item-card:hover {
-        background-color: #eef2f7;
+    .title {
+        font-weight: 600; color: #343a40; font-size: 0.9rem; margin-bottom: 0.2rem;
+        line-height: 1.4; word-break: break-word;
     }
-    .notification-item-card .thumbnail-container {
-        flex-shrink: 0;
-        margin-right: 1rem;
+    .summary {
+        font-size: 0.85rem; color: #495057; margin-bottom: 0.3rem; line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; text-overflow: ellipsis;
     }
-    .notification-item-card .thumbnail-img,
-    .notification-item-card .thumbnail-placeholder {
-        width: 48px;
-        height: 48px;
-        object-fit: cover;
-        border-radius: 8px;
+    .meta-info {
+        font-size: 0.75rem; color: #6c757d;
     }
-    .notification-item-card .thumbnail-placeholder {
-        background-color: #e9ecef;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #adb5bd;
+    .indicator-container {
+        flex-shrink: 0; width: 24px; padding-left: 12px;
+        display: flex; justify-content: center; padding-top: 5px;
     }
-     .notification-item-card .thumbnail-placeholder .fas,
-     .notification-item-card .thumbnail-placeholder .bi {
-        font-size: 1.4rem; 
+    .unread-dot {
+        width: 8px; height: 8px; background-color: #0d6efd; border-radius: 50%;
     }
-    .notification-item-card .content-container {
-        flex-grow: 1;
-        min-width: 0; 
-    }
-    .notification-item-card .title {
-        font-weight: 600; 
-        color: #343a40; 
-        font-size: 0.9rem; 
-        margin-bottom: 0.2rem;
-        line-height: 1.3;
-        display: block; 
-        word-break: break-word; 
-    }
-    .notification-item-card .meta-info { 
-        font-size: 0.75rem;
-        color: #6c757d; 
-        margin-bottom: 0.3rem;
-        display: block; 
-    }
-    .notification-item-card .summary {
-        font-size: 0.85rem; 
-        color: #495057;
-        margin-bottom: 0; 
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2; 
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        word-break: break-word; 
-    }
-    .notification-dropdown-footer {
-        padding: 0.5rem 0; 
-    }
-    .notification-dropdown-footer .dropdown-item {
-        font-size: 0.875rem; 
-        color: #007bff; 
-        padding-top: 0.6rem;
-        padding-bottom: 0.6rem;
-    }
-    .notification-dropdown-footer .dropdown-item:hover {
-        background-color: #e9ecef;
-        color: #0056b3;
-    }
-    .no-notification-message-custom {
-        padding: 1.5rem 1.25rem;
-        text-align: center;
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
+    .notification-dropdown-footer { padding: 0.5rem 0; border-top: 1px solid #e9ecef; }
+    .footer-action { font-size: 0.875rem; color: #007bff; text-align: center; padding: 0.6rem; cursor: pointer; }
+    .footer-action:hover { background-color: #f8f9fa; }
+    .no-notification-message, .loader-container { padding: 2rem 1.25rem; text-align: center; color: #6c757d; font-size: 0.9rem; }
 </style>
 
-<div class="notification-dropdown-custom-header">
-    Thông báo
+<div class="notification-dropdown-header">
+    <span>Thông báo</span>
+    <a href="javascript:void(0);" id="clientMarkAllAsReadLink" class="mark-all-read-link" style="display: none;">
+        Đánh dấu tất cả đã đọc
+    </a>
 </div>
-<hr class="dropdown-divider my-0" style="margin-top: 0 !important; margin-bottom: 0 !important;">
 
 <c:choose>
     <c:when test="${not empty adminUserNotifications}">
