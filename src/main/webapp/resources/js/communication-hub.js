@@ -318,13 +318,41 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyDateFilter() {
         const startDate = fpStartDate.selectedDates[0];
         const endDate = fpEndDate.selectedDates[0];
-        currentStartDate = startDate ? startDate.toISOString().split('T')[0] + 'T00:00:00' : null;
-        currentEndDate = endDate ? endDate.toISOString().split('T')[0] + 'T23:59:59' : null;
+
+        if (startDate) {
+            const year = startDate.getFullYear();
+            const month = String(startDate.getMonth() + 1).padStart(2, '0');
+            const day = String(startDate.getDate()).padStart(2, '0');
+            currentStartDate = `${year}-${month}-${day}T00:00:00`;
+        } else {
+            currentStartDate = null;
+        }
+
+        if (endDate) {
+            const year = endDate.getFullYear();
+            const month = String(endDate.getMonth() + 1).padStart(2, '0');
+            const day = String(endDate.getDate()).padStart(2, '0');
+            currentEndDate = `${year}-${month}-${day}T23:59:59`;
+        } else {
+            currentEndDate = null;
+        }
+
         fetchAndRenderHub(0, currentStatusFilter, currentKeyword, currentStartDate, currentEndDate);
     }
-    fpStartDate = flatpickr(startDateInput, { dateFormat: "d-m-Y", onChange: function (selectedDates) { if (fpEndDate) fpEndDate.set('minDate', selectedDates[0]); } });
-    fpEndDate = flatpickr(endDateInput, { dateFormat: "d-m-Y" });
+
+    fpStartDate = flatpickr(startDateInput, {
+        dateFormat: "d-m-Y",
+        onChange: function (selectedDates) {
+            if (fpEndDate) fpEndDate.set('minDate', selectedDates[0]);
+        }
+    });
+
+    fpEndDate = flatpickr(endDateInput, {
+        dateFormat: "d-m-Y"
+    });
+
     dateFilterButton.addEventListener('click', applyDateFilter);
+
     dateClearButton.addEventListener('click', function () {
         fpStartDate.clear();
         fpEndDate.clear();
