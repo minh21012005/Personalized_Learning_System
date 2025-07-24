@@ -43,7 +43,7 @@ public class UserController {
         this.uploadService = uploadService;
     }
 
-    @GetMapping("/admin/user")
+    @GetMapping("/super-admin/user")
     public String getUserPage(@RequestParam Optional<String> page,
             @RequestParam Optional<String> role,
             @RequestParam Optional<String> name,
@@ -90,7 +90,7 @@ public class UserController {
         return "admin/user/show";
     }
 
-    @GetMapping("admin/user/create")
+    @GetMapping("super-admin/user/create")
     public String getUserCreatePage(Model model) {
         List<Role> roles = roleService.getAllRoles();
         model.addAttribute("roles", roles);
@@ -98,7 +98,7 @@ public class UserController {
         return "admin/user/create";
     }
 
-    @PostMapping("/admin/user/create")
+    @PostMapping("/super-admin/user/create")
     public String createUser(Model model, @ModelAttribute("newUser") @Valid User newUser,
             BindingResult newUserBindingResult,
             @RequestParam("file") MultipartFile file) {
@@ -134,7 +134,7 @@ public class UserController {
         newUser.setRole(this.roleService.getRoleByName(newUser.getRole().getRoleName()));
         newUser.setEmailVerify(true);
         this.userService.saveUser(newUser);
-        return "redirect:/admin/user";
+        return "redirect:/super-admin/user";
     }
 
     // Hàm kiểm tra content type của file có phải là ảnh hợp lệ
@@ -145,7 +145,7 @@ public class UserController {
                         contentType.equals("image/jpeg"));
     }
 
-    @GetMapping("/admin/user/{id}")
+    @GetMapping("/super-admin/user/{id}")
     public String getDetailUserPage(Model model, @PathVariable long id) {
         User user = this.userService.getUserById(id);
         if (user == null) {
@@ -169,7 +169,7 @@ public class UserController {
         return "admin/user/detail";
     }
 
-    @GetMapping("/admin/user/update/{id}")
+    @GetMapping("/super-admin/user/update/{id}")
     public String getUpdateUserPage(Model model, @PathVariable long id) {
         User user = this.userService.getUserById(id);
         if (user == null) {
@@ -183,7 +183,7 @@ public class UserController {
         return "admin/user/update";
     }
 
-    @PostMapping("/admin/user/update")
+    @PostMapping("/super-admin/user/update")
     public String updateUser(Model model, @ModelAttribute("user") @Valid User newUser,
             BindingResult newUserBindingResult,
             @RequestParam("file") MultipartFile file) {
@@ -218,6 +218,6 @@ public class UserController {
         }
         newUser.setRole(this.roleService.getRoleByName(newUser.getRole().getRoleName()));
         this.userService.saveUser(newUser);
-        return "redirect:/admin/user";
+        return "redirect:/super-admin/user";
     }
 }

@@ -138,7 +138,7 @@
             <div class="main-container">
                 <!-- Sidebar -->
                 <div class="sidebar d-flex flex-column">
-                    <jsp:include page="../layout/sidebar.jsp" />
+                    <jsp:include page="../layout-admin/sidebar.jsp" />
                 </div>
 
                 <!-- Main Content Area -->
@@ -149,7 +149,7 @@
                                 <div class="row col-12 mx-auto">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <!-- Bộ lọc role -->
-                                        <form action="/admin/user" method="get"
+                                        <form action="/super-admin/user" method="get"
                                             class="d-flex align-items-center gap-2 flex-wrap">
                                             <label for="role" class="mb-0 fw-bold me-2">Vai trò:</label>
                                             <select name="role" id="role" class="form-select form-select-sm w-auto">
@@ -177,7 +177,7 @@
 
 
                                         <!-- Nút tạo user -->
-                                        <a href="/admin/user/create" class="btn btn-primary">Tạo tài khoản</a>
+                                        <a href="/super-admin/user/create" class="btn btn-primary">Tạo tài khoản</a>
                                     </div>
 
                                     <hr />
@@ -200,9 +200,9 @@
                                                     <td class="col-role">${user.role.roleDescription}</td>
                                                     <td class="text-center col-action">
                                                         <div class="d-flex justify-content-center gap-2">
-                                                            <a href="/admin/user/${user.userId}"
+                                                            <a href="/super-admin/user/${user.userId}"
                                                                 class="btn btn-success btn-sm">Chi tiết</a>
-                                                            <a href="/admin/user/update/${user.userId}"
+                                                            <a href="/super-admin/user/update/${user.userId}"
                                                                 class="btn btn-warning btn-sm">Cập nhật</a>
                                                         </div>
                                                     </td>
@@ -227,7 +227,7 @@
 
                                                     <!-- First Page -->
                                                     <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                                        <a class="page-link" href="/admin/user?page=1${queryString}"
+                                                        <a class="page-link" href="/super-admin/user?page=1${queryString}"
                                                             aria-label="First">
                                                             <span aria-hidden="true">««</span>
                                                         </a>
@@ -236,7 +236,7 @@
                                                     <!-- Previous Page -->
                                                     <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                                         <a class="page-link"
-                                                            href="/admin/user?page=${currentPage - 1}${queryString}"
+                                                            href="/super-admin/user?page=${currentPage - 1}${queryString}"
                                                             aria-label="Previous">
                                                             <span aria-hidden="true">«</span>
                                                         </a>
@@ -259,14 +259,14 @@
                                                         <li
                                                             class="page-item ${loop.index == currentPage ? 'active' : ''}">
                                                             <a class="page-link"
-                                                                href="/admin/user?page=${loop.index}${queryString}">${loop.index}</a>
+                                                                href="/super-admin/user?page=${loop.index}${queryString}">${loop.index}</a>
                                                         </li>
                                                     </c:forEach>
 
                                                     <!-- Next Page -->
                                                     <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
                                                         <a class="page-link"
-                                                            href="/admin/user?page=${currentPage + 1}${queryString}"
+                                                            href="/super-admin/user?page=${currentPage + 1}${queryString}"
                                                             aria-label="Next">
                                                             <span aria-hidden="true">»</span>
                                                         </a>
@@ -275,7 +275,7 @@
                                                     <!-- Last Page -->
                                                     <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
                                                         <a class="page-link"
-                                                            href="/admin/user?page=${totalPage}${queryString}"
+                                                            href="/super-admin/user?page=${totalPage}${queryString}"
                                                             aria-label="Last">
                                                             <span aria-hidden="true">»»</span>
                                                         </a>

@@ -102,7 +102,7 @@
 </header>
 <div class="main-container">
     <div class="content">
-        <h2>Các gói học của ban</h2>
+        <h2>Các gói học của bạn</h2>
         <c:if test="${empty packageSubjects}">
             <p>Không có gói học nào.</p>
         </c:if>

@@ -471,40 +471,11 @@ h2 {
     border-radius: 8px;
 }
 
-/* Footer */
-.footer {
-    background-color: var(--grey-800);
-    color: var(--grey-300);
-    padding: 60px 20px;
-    /* Giảm padding trên/dưới để footer gọn hơn */
-}
-
-.footer-content {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 30px;
-    /* Giảm gap để nội dung sát nhau hơn */
-    align-items: flex-start;
-}
 
 .company-info {
     flex: 1;
     max-width: 350px;
     /* Giảm max-width để gọn hơn */
-}
-
-.footer-logo {
-    margin-bottom: 15px;
-    width: 120px;
-    /* Tăng kích thước logo footer */
-}
-
-.footer-links {
-    display: flex;
-    gap: 40px;
-    /* Giảm gap giữa các cột */
-    flex-wrap: wrap;
 }
 
 .link-column h3 {

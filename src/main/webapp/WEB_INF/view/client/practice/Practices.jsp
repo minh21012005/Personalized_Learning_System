@@ -61,7 +61,7 @@
         }
 
         .package-card .card-title {
-            color:#212529;
+            color: #212529;
             font-size: 18px;
             margin-bottom: 10px;
         }
@@ -95,18 +95,19 @@
         }
 
         .btn-history {
-            background-color: #007bff!important;
-            color: #ffffff!important;
-            border: none!important;
-            border-radius: 6px!important;
-            padding: 10px 20px!important;
-            font-size: 1rem!important;
-            font-weight: 500!important;
-            transition: background-color 0.3s!important;
-            margin-bottom: 20px!important;
+            background-color: #007bff !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 10px 20px !important;
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            transition: background-color 0.3s !important;
+            margin-bottom: 20px !important;
         }
+
         .btn-history:hover {
-            background-color: #0056b3!important;
+            background-color: #0056b3 !important;
         }
 
     </style>
@@ -135,7 +136,7 @@
                             <div class="progress">
                                 <div class="progress-bar bg-primary" style="width: 100%"></div>
                             </div>
-                                                            <div class="rating">★★★★★ (1200 Ratings)</div>
+
                             <div class="dates">
                                 <p>Ngày bắt đầu: <span style="font-weight: bold">${packagePractice.startDate}</span></p>
                                 <p>Ngày kết thúc: <span style="font-weight: bold">${packagePractice.endDate}</span></p>
