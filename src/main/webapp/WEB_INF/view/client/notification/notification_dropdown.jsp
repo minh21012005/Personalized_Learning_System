@@ -93,8 +93,8 @@
     .meta-info { font-size: 0.75rem; color: #6c757d; margin-bottom: 0.3rem; }
     .summary {
         font-size: 0.85rem; color: #495057; margin: 0; line-height: 1.4;
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-        overflow: hidden; text-overflow: ellipsis;
+        white-space: normal; /* Cho phép ngắt dòng tự nhiên */
+        word-wrap: break-word;
     }
     
     .notification-dropdown-footer {

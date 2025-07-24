@@ -402,8 +402,8 @@
                 </button>
             </div>
             <ul>
-                <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
                 <c:if test="${ sessionScope.role  eq 'STUDENT'}">
+                    <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
                     <li>
                         <a href="/packages">Gói học của tôi</a>
 
@@ -412,6 +412,7 @@
                     <li><a href="/results">Báo cáo học tập</a></li>
                 </c:if>
                 <c:if test="${sessionScope.role eq 'PARENT'}">
+                    <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
                     <li><a href="/parent/course">khóa học</a></li>
                     <li><a href="/parent/children">Thống kê học tập</a></li>
                 </c:if>
@@ -421,45 +422,79 @@
         <%-- Header Right --%>
         <div class="header-right">
             <%-- Notification Dropdown --%>
-            <div class="nav-item dropdown icon-btn notification-dropdown-container">
-                <button type="button" class="bell-btn icon-btn position-relative border-0 bg-transparent p-0"
-                        id="clientNotificationDropdownToggle" data-bs-toggle="dropdown"
-                        data-bs-auto-close="outside" aria-expanded="false" title="Thông báo">
-                    <i class="fa-regular fa-bell" style="font-size: 22px;"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge-custom"
-                          id="clientUnreadNotificationBadge" style="display: none;">
+            <c:if test="${sessionScope.role eq 'PARENT'}">
+                <div class="nav-item dropdown icon-btn notification-dropdown-container">
+                    <button type="button" class="bell-btn icon-btn position-relative border-0 bg-transparent p-0"
+                            id="clientNotificationDropdownToggle" data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside" aria-expanded="false" title="Thông báo">
+                        <i class="fa-regular fa-bell" style="font-size: 22px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge-custom"
+                              id="clientUnreadNotificationBadge" style="display: none;">
                         <span id="clientUnreadNotificationCount">0</span>
                     </span>
-                </button>
-                <ul class="dropdown-menu shadow border-0 mt-2 notification-dropdown-menu"
-                    aria-labelledby="clientNotificationDropdownToggle" id="clientNotificationDropdownMenu">
-                    <div id="clientNotificationDropdownContentLoading" class="text-center p-4" style="display: none;">
-                        <div class="spinner-border text-primary spinner-border-sm" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                    </button>
+                    <ul class="dropdown-menu shadow border-0 mt-2 notification-dropdown-menu"
+                        aria-labelledby="clientNotificationDropdownToggle" id="clientNotificationDropdownMenu">
+                        <div id="clientNotificationDropdownContentLoading" class="text-center p-4"
+                             style="display: none;">
+                            <div class="spinner-border text-primary spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
                         </div>
-                    </div>
-                    <div id="clientNotificationDropdownContentActual">
-                    </div>
-                    <li>
-                        <hr class="dropdown-divider my-0">
-                    </li>
-                </ul>
-            </div>
+                        <div id="clientNotificationDropdownContentActual">
+                        </div>
+                        <li>
+                            <hr class="dropdown-divider my-0">
+                        </li>
+                    </ul>
+                </div>
+            </c:if>
+            <c:if test="${sessionScope.role eq 'STUDENT'}">
+                <div class="nav-item dropdown icon-btn notification-dropdown-container">
+                    <button type="button" class="bell-btn icon-btn position-relative border-0 bg-transparent p-0"
+                            id="clientNotificationDropdownToggle" data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside" aria-expanded="false" title="Thông báo">
+                        <i class="fa-regular fa-bell" style="font-size: 22px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge-custom"
+                              id="clientUnreadNotificationBadge" style="display: none;">
+                        <span id="clientUnreadNotificationCount">0</span>
+                    </span>
+                    </button>
+                    <ul class="dropdown-menu shadow border-0 mt-2 notification-dropdown-menu"
+                        aria-labelledby="clientNotificationDropdownToggle" id="clientNotificationDropdownMenu">
+                        <div id="clientNotificationDropdownContentLoading" class="text-center p-4"
+                             style="display: none;">
+                            <div class="spinner-border text-primary spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div id="clientNotificationDropdownContentActual">
+                        </div>
+                        <li>
+                            <hr class="dropdown-divider my-0">
+                        </li>
+                    </ul>
+                </div>
+            </c:if>
             <c:if test="${sessionScope.role eq 'PARENT'}">
                 <div class="dropdown">
-        <a href="#" class="action-icon" style="color: #64748B" data-bs-toggle="dropdown" aria-expanded="false" title="Quản lý con">
-            <i class="fa fa-user-plus"></i>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-                <a class="dropdown-item" href="${pageContext.request.contextPath}/invite/create">1. Liên kết tài khoản </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="${pageContext.request.contextPath}/parent/create-student">2. Tạo tài khoản mới cho con</a>
-            </li>
-        </ul>
-    </div>
-                <a style="color: #64748B" class="action-icon" href="/parent/cart"><i class="fa fa-shopping-cart"></i></a>
+                    <a href="#" class="action-icon" style="color: #64748B" data-bs-toggle="dropdown"
+                       aria-expanded="false" title="Quản lý con">
+                        <i class="fa fa-user-plus"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="${pageContext.request.contextPath}/invite/create">1. Liên kết
+                                tài khoản </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="${pageContext.request.contextPath}/parent/create-student">2.
+                                Tạo tài khoản mới cho con</a>
+                        </li>
+                    </ul>
+                </div>
+                <a style="color: #64748B" class="action-icon" href="/parent/cart"><i
+                        class="fa fa-shopping-cart"></i></a>
             </c:if>
 
             <%-- User Info/Login Button - Sử dụng JSTL --%>

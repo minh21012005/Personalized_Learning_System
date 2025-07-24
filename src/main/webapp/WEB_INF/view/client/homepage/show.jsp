@@ -6,23 +6,18 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="UTF-8" />
-    <title>Byway Homescreen</title>
+    <title>PLS</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    
     <c:if test="${_csrf != null}">
         <meta name="_csrf" content="${_csrf.token}"/>
         <meta name="_csrf_header" content="${_csrf.parameterName}"/>
     </c:if>
-    
     <style>
-        /* Import Inter font */
-        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+        /* Import Poppins font for a modern look */
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
 
         /* Reset styles */
         * {
@@ -30,11 +25,15 @@
             margin: 0;
             padding: 0;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         html, body {
-            font-family: "Inter", sans-serif;
+            font-family: "Poppins", sans-serif;
             overflow-x: hidden;
+            margin: 0;
+            height: 100%;
+            background-color: #f9fafb;
         }
 
         a {
@@ -43,408 +42,231 @@
         }
 
         button:focus-visible {
-            outline: 2px solid #4a90e2;
+            outline: 2px solid #1e40af;
+            outline-offset: 2px;
         }
 
         /* Homescreen styles */
         .homescreen {
-            background-color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            margin-top: 80px; /* Adjust based on header height */
+            min-height: 100vh;
+            background: linear-gradient(180deg, #f9fafb 0%, #dbeafe 100%);
         }
 
         .main-frame {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 60px;
-            max-width: 1280px;
             width: 100%;
-            padding: 0 20px;
+            max-width: 1600px;
+            padding: 0 32px;
         }
 
-        /* Hero Section */
-        .hero-section {
+        /* Slider Section */
+        .slider-section {
+            width: 100%;
+            height: 85vh;
+            position: relative;
+            margin-top: 100px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            min-height: 600px;
-            background-color: #ffffff;
-            padding: 40px 0;
+            flex-direction: row;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
         }
 
-        .hero-content {
-            flex: 1;
+        .content-section {
+            width: 50%;
+            padding: 48px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
-            max-width: 600px;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
         }
 
-        .hero-title {
-            font-size: 40px;
+        .carousel-container {
+            width: 50%;
+            height: 100%;
+            position: relative;
+        }
+
+        .carousel {
+            width: 100%;
+            height: 100%;
+        }
+
+        .carousel-inner {
+            width: 100%;
+            height: 100%;
+        }
+
+        .carousel-inner .carousel-item {
+            width: 100%;
+            height: 85vh;
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .carousel-inner .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.75) contrast(1.1);
+            transition: transform 0.4s ease;
+        }
+
+        .carousel-inner .carousel-item img:hover {
+            transform: scale(1.03);
+        }
+
+        .content-section .content-item {
+            display: none;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .content-section .content-item.active {
+            display: block;
+        }
+
+        .content-section h5 {
+            font-size: 36px;
             font-weight: 700;
-            color: #0f172a;
-            line-height: 1.2;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            line-height: 1.3;
         }
 
-        .hero-description {
-            font-size: 16px;
+        .content-section p {
+            font-size: 18px;
             font-weight: 400;
-            color: #334155;
+            color: #4b5563;
+            margin-bottom: 28px;
             line-height: 1.6;
         }
 
         .cta-button {
-            background-color: #3b82f6;
+            background: linear-gradient(90deg, #3b82f6 0%, #1e40af 100%);
             color: #ffffff;
-            padding: 10px 24px;
+            padding: 14px 40px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .cta-button:hover {
-            background-color: #2563eb;
+            background: linear-gradient(90deg, #2563eb 0%, #1e3a8a 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .hero-graphic {
-            flex: 1;
-            position: relative;
-            max-width: 513px;
-            height: 536px;
+        /* Carousel Controls */
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 10%;
+            background: rgba(0, 0, 0, 0.4);
+            transition: background 0.3s ease;
+            border-radius: 0 24px 24px 0;
         }
 
-        .graphic-overlap {
-            position: relative;
-            width: 100%;
-            height: 100%;
+        .carousel-control-prev {
+            border-radius: 24px 0 0 24px;
         }
 
-        .graphic-circle {
-            position: absolute;
-            width: 217px;
-            height: 217px;
-            top: 45px;
-            right: 50px;
-            background-color: #60a5fa;
-            border-radius: 50%;
-            background-image: url(https://c.animaapp.com/mb5881k9TTFl8D/img/image-8-1.png);
-            background-size: cover;
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover {
+            background: rgba(0, 0, 0, 0.6);
         }
 
-        .main-image {
-            position: absolute;
-            width: 184px;
-            height: 205px;
-            top: 163px;
-            left: 50px;
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
-        .secondary-image {
-            position: absolute;
-            width: 184px;
-            height: 142px;
-            top: 107px;
-            left: 50px;
-        }
-
-        .ellipse-1 {
-            position: absolute;
-            width: 237px;
-            height: 114px;
-            top: 268px;
-            left: 33px;
-        }
-
-        .ellipse-2 {
-            position: absolute;
-            width: 153px;
-            height: 249px;
-            top: 25px;
-            right: 0;
-        }
-
-        .additional-image {
-            position: absolute;
-            width: 174px;
-            height: 165px;
-            top: 0;
-            right: 50px;
-        }
-
-        .small-circle {
-            position: absolute;
-            width: 35px;
-            height: 35px;
-            top: 261px;
-            right: 50px;
-            background-color: #0f172a;
-            border-radius: 50%;
-        }
-
-        .polygon {
-            position: absolute;
-            width: 19px;
-            height: 19px;
-            top: 269px;
-            right: 42px;
-        }
-
-        .dot-pattern-1, .dot-pattern-2 {
-            position: absolute;
-            display: grid;
-            grid-template-columns: repeat(7, 12px);
-            gap: 7px;
-        }
-
-        .dot-pattern-1 {
-            top: 38px;
-            left: 233px;
-        }
-
-        .dot-pattern-2 {
-            top: 176px;
-            left: 16px;
-            transform: rotate(-81.92deg);
-        }
-
-        .dot {
-            width: 4px;
-            height: 4px;
-            background-color: #e2e8f0;
-            border-radius: 50%;
-        }
-
-        .community-section {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 311px;
-            height: 239px;
-        }
-
-        .community-image {
-            position: absolute;
-            width: 222px;
-            height: 222px;
-            top: 0;
-            left: 72px;
-            background-color: #facc15;
-            border-radius: 50%;
-            overflow: hidden;
-        }
-
-        .community-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .community-info {
-            position: absolute;
-            top: 102px;
-            left: 0;
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-            width: 167px;
-            text-align: center;
-        }
-
-        .avatar-group {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 8px;
-        }
-
-        .avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            margin-left: -15px;
-            border: 2px solid #ffffff;
-        }
-
-        .avatar:first-child {
-            margin-left: 0;
-        }
-
-        .community-text {
-            font-size: 12px;
-            color: #0f172a;
-        }
-
-        .ellipse-3 {
-            position: absolute;
-            width: 150px;
-            height: 213px;
-            top: 26px;
-            right: 0;
-        }
-
-        /* Stats Section */
-        .stats-section {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            padding: 40px 20px;
-            background-color: #f8fafc;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: 400;
-            color: #0f172a;
-        }
-
-        .stat-description {
-            font-size: 14px;
-            color: #0f172a;
-            text-align: center;
-        }
-
-        .divider {
-            width: 4px;
-            height: 55px;
-        }
-
-        /* Category Section */
-        .category-section {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            width: 100%;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .section-title {
-            font-size: 24px;
-            font-weight: 400;
-            color: #0f172a;
-        }
-
-        .see-all-button {
-            background: none;
-            border: none;
-            color: #3b82f6;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .category-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            width: 100%;
-        }
-
-        .category-card {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.12);
-            transition: transform 0.3s;
-        }
-
-        .category-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .category-icon {
-            width: 80px;
-            height: 80px;
-            background-color: #e0f2fe;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-        }
-
-        .category-icon img {
-            width: 40px;
-            height: 40px;
-        }
-
-        .category-name {
-            font-size: 20px;
-            font-weight: 400;
-            color: #0f172a;
-        }
-
-        .course-count {
-            font-size: 16px;
-            color: #334155;
+        /* Animation Keyframes */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero-section {
+        @media (max-width: 992px) {
+            .slider-section {
+                height: 75vh;
                 flex-direction: column;
-                text-align: center;
             }
 
-            .hero-content {
-                max-width: 100%;
-                margin-bottom: 40px;
+            .content-section,
+            .carousel-container {
+                width: 100%;
+                height: 50%;
             }
 
-            .hero-graphic {
-                max-width: 100%;
-                height: 400px;
+            .content-section {
+                padding: 24px;
             }
 
-            .graphic-circle, .main-image, .secondary-image, .additional-image {
-                width: 150px;
-                height: 150px;
+            .carousel-inner .carousel-item {
+                height: 37.5vh;
             }
 
-            .ellipse-1, .ellipse-2, .ellipse-3 {
-                display: none; /* Hide decorative ellipses on mobile */
+            .content-section h5 {
+                font-size: 28px;
             }
 
-            .community-section {
-                width: 250px;
-                height: 200px;
+            .content-section p {
+                font-size: 16px;
             }
 
-            .community-image {
-                width: 150px;
-                height: 150px;
-                left: 50px;
+            .cta-button {
+                padding: 12px 32px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .slider-section {
+                height: 65vh;
+                margin-top: 16px;
+                border-radius: 16px;
             }
 
-            .stats-section {
-                flex-direction: column;
-                gap: 20px;
+            .carousel-inner .carousel-item {
+                height: 32.5vh;
             }
 
-            .divider {
-                display: none;
+            .content-section {
+                padding: 16px;
+            }
+
+            .content-section h5 {
+                font-size: 22px;
+            }
+
+            .content-section p {
+                font-size: 14px;
+            }
+
+            .cta-button {
+                padding: 10px 24px;
+                font-size: 14px;
+            }
+
+            .carousel-control-prev,
+            .carousel-control-next {
+                width: 15%;
             }
         }
     </style>
@@ -456,125 +278,56 @@
 
 <main class="homescreen">
     <div class="main-frame">
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="hero-content">
-                <h1 class="hero-title">Unlock Your Potential with Byway</h1>
-                <p class="hero-description">
-                    Welcome to Byway, where learning knows no bounds. We believe that education is the key to personal
-                    and professional growth, and we're here to guide you on your journey to success.
-                </p>
-                <button class="cta-button">Start your instructor journey</button>
-            </div>
-            <div class="hero-graphic">
-                <div class="graphic-overlap">
-                    <div class="dot-pattern-1">
-                        <!-- 49 dots for a 7x7 grid -->
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                    </div>
-                    <div class="dot-pattern-2">
-                        <!-- 49 dots for a 7x7 grid -->
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                    </div>
-                    <div class="graphic-circle"></div>
-                    <div class="image-container">
-                        <img class="main-image" src="https://c.animaapp.com/mb5881k9TTFl8D/img/image-6-1.png" alt="Hero Image" />
-                    </div>
-                    <img class="secondary-image" src="https://c.animaapp.com/mb5881k9TTFl8D/img/image-6.png" alt="Secondary Image" />
-                    <img class="ellipse-1" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-55.svg" alt="Ellipse 1" />
-                    <img class="ellipse-2" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-54.svg" alt="Ellipse 2" />
-                    <img class="additional-image" src="https://c.animaapp.com/mb5881k9TTFl8D/img/image-8.png" alt="Additional Image" />
-                    <div class="small-circle"></div>
-                    <img class="polygon" src="https://c.animaapp.com/mb5881k9TTFl8D/img/polygon-1.svg" alt="Polygon" />
-                    <div class="community-section">
-                        <div class="community-image">
-                            <img class="community-img" src="https://c.animaapp.com/mb5881k9TTFl8D/img/image-7.png" alt="Community Image" />
+        <!-- Slider Section for Latest Packages -->
+        <section class="slider-section">
+            <div class="content-section">
+                <c:choose>
+                    <c:when test="${empty latestPackages}">
+                        <div class="content-item active">
+                            <h5>No Courses Available</h5>
+                            <p>Discover our upcoming courses and start your journey!</p>
+                            <a href="/courses" class="btn cta-button">Explore Courses</a>
                         </div>
-                        <div class="community-info">
-                            <div class="avatar-group">
-                                <img class="avatar" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-65.png" alt="Avatar" />
-                                <img class="avatar" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-62.png" alt="Avatar" />
-                                <img class="avatar" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-64.png" alt="Avatar" />
-                                <img class="avatar" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-63.png" alt="Avatar" />
-                                <img class="avatar" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-66.png" alt="Avatar" />
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="pkg" items="${latestPackages}" varStatus="status">
+                            <div class="content-item ${status.first ? 'active' : ''}">
+                                <h5>${fn:escapeXml(pkg.name)}</h5>
+                                <p>${fn:escapeXml(pkg.description != null && not empty pkg.description ? pkg.description : 'Embark on an exciting learning adventure!')}</p>
+<%--                                <a href="#" class="btn cta-button">Start Learning</a>--%>
                             </div>
-                            <p class="community-text">Join our community of 1200+ Students</p>
-                        </div>
-                        <img class="ellipse-3" src="https://c.animaapp.com/mb5881k9TTFl8D/img/ellipse-57.svg" alt="Ellipse 3" />
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+            <div class="carousel-container">
+                <div id="latestCoursesCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <c:choose>
+                            <c:when test="${empty latestPackages}">
+                                <div class="carousel-item active">
+                                    <img src="https://via.placeholder.com/1920x1080?text=Explore+Our+Courses" class="d-block w-100" alt="No Courses Available">
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <c:forEach var="pkg" items="${latestPackages}" varStatus="status">
+                                    <div class="carousel-item ${status.first ? 'active' : ''}">
+                                        <img src="/img/package/${fn:escapeXml(pkg.imageUrl != null && not empty pkg.imageUrl ? pkg.imageUrl : 'https://via.placeholder.com/1920x1080')}" class="d-block w-100" alt="${fn:escapeXml(pkg.name)}">
+                                    </div>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Stats Section -->
-        <section class="stats-section">
-            <div class="stat-item">
-                <div class="stat-number">250+</div>
-                <p class="stat-description">Courses by our best mentors</p>
-            </div>
-            <img class="divider" src="https://c.animaapp.com/mb5881k9TTFl8D/img/line-1.svg" alt="Divider" />
-            <div class="stat-item">
-                <div class="stat-number">1000+</div>
-                <p class="stat-description">Active students</p>
-            </div>
-            <img class="divider" src="https://c.animaapp.com/mb5881k9TTFl8D/img/line-1.svg" alt="Divider" />
-            <div class="stat-item">
-                <div class="stat-number">15+</div>
-                <p class="stat-description">Categories available</p>
-            </div>
-            <img class="divider" src="https://c.animaapp.com/mb5881k9TTFl8D/img/line-1.svg" alt="Divider" />
-            <div class="stat-item">
-                <div class="stat-number">2400+</div>
-                <p class="stat-description">Hours of content</p>
-            </div>
-        </section>
-
-        <!-- Category Section -->
-        <section class="category-section">
-            <div class="section-header">
-                <h2 class="section-title">Top Categories</h2>
-                <button class="see-all-button">See All</button>
-            </div>
-            <div class="category-list">
-                <div class="category-card">
-                    <div class="category-icon">
-                        <img src="https://c.animaapp.com/mb5881k9TTFl8D/img/telescope.svg" alt="Astrology Icon" />
-                    </div>
-                    <h3 class="category-name">Astrology</h3>
-                    <p class="course-count">11 Courses</p>
-                </div>
-                <div class="category-card">
-                    <div class="category-icon">
-                        <i class="bi bi-code-slash" style="font-size: 40px; color: #334155;"></i>
-                    </div>
-                    <h3 class="category-name">Development</h3>
-                    <p class="course-count">12 Courses</p>
-                </div>
-                <div class="category-card">
-                    <div class="category-icon">
-                        <i class="bi bi-briefcase" style="font-size: 40px; color: #334155;"></i>
-                    </div>
-                    <h3 class="category-name">Marketing</h3>
-                    <p class="course-count">12 Courses</p>
-                </div>
-                <div class="category-card">
-                    <div class="category-icon">
-                        <i class="bi bi-lightning" style="font-size: 40px; color: #334155;"></i>
-                    </div>
-                    <h3 class="category-name">Physics</h3>
-                    <p class="course-count">14 Courses</p>
+                    <c:if test="${not empty latestPackages}">
+                        <button class="carousel-control-prev" type="button" data-bs-target="#latestCoursesCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#latestCoursesCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </c:if>
                 </div>
             </div>
         </section>
@@ -584,5 +337,20 @@
 <footer>
     <jsp:include page="../layout/footer.jsp" />
 </footer>
+
+<script>
+    // Sync content with carousel slides
+    document.addEventListener('DOMContentLoaded', function () {
+        const carousel = document.getElementById('latestCoursesCarousel');
+        const contentItems = document.querySelectorAll('.content-item');
+
+        carousel.addEventListener('slid.bs.carousel', function (event) {
+            // Remove active class from all content items
+            contentItems.forEach(item => item.classList.remove('active'));
+            // Add active class to the corresponding content item
+            contentItems[event.to].classList.add('active');
+        });
+    });
+</script>
 </body>
 </html>

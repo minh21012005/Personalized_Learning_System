@@ -54,11 +54,11 @@ public class CommunicationService {
 
     @Transactional(readOnly = true)
     public HubStatistics getHubStatistics() {
-        long total = communicationRepository.countRootCommunications(null, null,null, null);
-        long pending = communicationRepository.countRootCommunications(CommentStatus.PENDING, null, null, null);
-        long approved = communicationRepository.countRootCommunications(CommentStatus.APPROVED, null, null, null);
-        long rejected = communicationRepository.countRootCommunications(CommentStatus.REJECTED, null, null, null);
-        long hidden = communicationRepository.countRootCommunications(CommentStatus.HIDDEN, null, null, null);
+        long total = communicationRepository.countAllByStatus(null);
+        long pending = communicationRepository.countAllByStatus(CommentStatus.PENDING);
+        long approved = communicationRepository.countAllByStatus(CommentStatus.APPROVED);
+        long rejected = communicationRepository.countAllByStatus(CommentStatus.REJECTED);
+        long hidden = communicationRepository.countAllByStatus(CommentStatus.HIDDEN);
         return new HubStatistics(total, pending, approved, rejected, hidden);
     }
 

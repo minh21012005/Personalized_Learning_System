@@ -195,27 +195,16 @@ public class ReviewService {
         }
     }
 
-    public Page<Review> filterReviews(String type, Long packageId, Long subjectId, ReviewStatus status, Integer rating,
+    public Page<Review> filterReviews(String type, Long packageId, ReviewStatus status, Integer rating,
             String comment, Pageable pageable) {
         Specification<Review> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Xử lý type (Package hoặc Subject)
-            if (type != null && !type.isEmpty()) {
-                if ("Package".equals(type)) {
-                    if (packageId != null) {
+            if (packageId != null) {
                         predicates.add(criteriaBuilder.equal(root.get("pkg").get("packageId"), packageId));
                     } else {
                         predicates.add(criteriaBuilder.isNotNull(root.get("pkg")));
                     }
-                } else if ("Subject".equals(type)) {
-                    if (subjectId != null) {
-                        predicates.add(criteriaBuilder.equal(root.get("subject").get("subjectId"), subjectId));
-                    } else {
-                        predicates.add(criteriaBuilder.isNotNull(root.get("subject")));
-                    }
-                }
-            }
 
             // Lọc theo trạng thái (không mặc định là APPROVED)
             if (status != null) {

@@ -29,16 +29,16 @@ public interface CommunicationRepository extends JpaRepository<Communication, Lo
                      @Param("endDate") LocalDateTime endDate,
                      Pageable pageable);
 
-       @Query(value = "SELECT count(c.id) FROM Communication c " +
-                     "WHERE c.parentComment IS NULL " +
-                     "AND (:status IS NULL OR c.commentStatus = :status) " +
-                     "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-                     "AND (CAST(:startDate AS timestamp) IS NULL OR c.createdAt >= :startDate) " +
-                     "AND (CAST(:endDate AS timestamp) IS NULL OR c.createdAt <= :endDate)")
-       long countRootCommunications(@Param("status") CommentStatus status,
-                     @Param("keyword") String keyword,
-                     @Param("startDate") LocalDateTime startDate,
-                     @Param("endDate") LocalDateTime endDate);
+       // @Query(value = "SELECT count(c.id) FROM Communication c " +
+       //               "WHERE c.parentComment IS NULL " +
+       //               "AND (:status IS NULL OR c.commentStatus = :status) " +
+       //               "AND (:keyword IS NULL OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+       //               "AND (CAST(:startDate AS timestamp) IS NULL OR c.createdAt >= :startDate) " +
+       //               "AND (CAST(:endDate AS timestamp) IS NULL OR c.createdAt <= :endDate)")
+       // long countRootCommunications(@Param("status") CommentStatus status,
+       //               @Param("keyword") String keyword,
+       //               @Param("startDate") LocalDateTime startDate,
+       //               @Param("endDate") LocalDateTime endDate);
 
        @Query("SELECT DISTINCT c FROM Communication c " +
                      "LEFT JOIN FETCH c.user u " +
@@ -80,4 +80,7 @@ public interface CommunicationRepository extends JpaRepository<Communication, Lo
                      @Param("startDate") LocalDateTime startDate,
                      @Param("endDate") LocalDateTime endDate,
                      Pageable pageable);
+
+       @Query("SELECT count(c.id) FROM Communication c WHERE (:status IS NULL OR c.commentStatus = :status)")
+       long countAllByStatus(@Param("status") CommentStatus status);
 }

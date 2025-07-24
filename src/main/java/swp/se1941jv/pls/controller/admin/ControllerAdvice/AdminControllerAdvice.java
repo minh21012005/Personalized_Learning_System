@@ -15,8 +15,16 @@ public class AdminControllerAdvice {
 
         if (uri.startsWith("/admin/user")) {
             model.addAttribute("activePage", "user");
+        } else if (uri.startsWith("/admin/transaction")) {
+            model.addAttribute("activePage", "transaction");
+        } else if (uri.startsWith("/admin/notification")) {
+            model.addAttribute("activePage", "notification");
         } else if (uri.startsWith("/admin/grade")) {
             model.addAttribute("activePage", "grade");
+        } else if (uri.startsWith("/admin/subject")) {
+            model.addAttribute("activePage", "subject");
+        } else if (uri.startsWith("/admin/package")) {
+            model.addAttribute("activePage", "package");
         } else if (uri.startsWith("/admin/subject")) {
             model.addAttribute("activePage", "subject");
         } else if (uri.equals("/admin")) {
@@ -29,7 +37,13 @@ public class AdminControllerAdvice {
             model.addAttribute("activePage", "tests");
         } else if (uri.startsWith("/admin/tests")) {
             model.addAttribute("activePage", "tests");
-        }else {
+        } else if (uri.startsWith("/admin/reviews")) {
+            model.addAttribute("activePage", "reviews");
+        } else if (uri.startsWith("/staff/subject")) {
+            model.addAttribute("activePage", "subject");
+        } else if (uri.startsWith("/staff/package")) {
+            model.addAttribute("activePage", "package");
+        } else {
             model.addAttribute("activePage", ""); // không chọn gì
         }
     }

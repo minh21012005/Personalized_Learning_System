@@ -13,7 +13,6 @@ import swp.se1941jv.pls.entity.Review;
 import swp.se1941jv.pls.entity.ReviewStatus;
 import swp.se1941jv.pls.repository.PackageRepository;
 import swp.se1941jv.pls.repository.ReviewRepository;
-import swp.se1941jv.pls.repository.SubjectRepository;
 import swp.se1941jv.pls.service.ReviewService;
 
 import java.net.URLEncoder;
@@ -34,38 +33,35 @@ public class ReviewManagerController {
     @Autowired
     private PackageRepository packageRepository;
 
-    @Autowired
-    private SubjectRepository subjectRepository;
+   
 
     @GetMapping
     public String listReviews(
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) String packageId, // Changed to String
-            @RequestParam(required = false) String subjectId, // Changed to String
-            @RequestParam(required = false) String status, // Changed to String
-            @RequestParam(required = false) String rating, // Changed to String
+            @RequestParam(required = false) String packageId, 
+            
+            @RequestParam(required = false) String status, 
+            @RequestParam(required = false) String rating, 
             @RequestParam(required = false) String comment,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
         try {
-            // Prepare filter data for dropdowns
+            
             model.addAttribute("packages", packageRepository.findAll());
-            model.addAttribute("subjects", subjectRepository.findAll());
+            
             model.addAttribute("statuses", ReviewStatus.values());
             model.addAttribute("ratings", List.of(1, 2, 3, 4, 5));
 
-            // Handle packageId and subjectId
+            
             Long packageIdLong = null;
-            Long subjectIdLong = null;
+            
             if (packageId != null && !packageId.equals("all") && !packageId.isEmpty()) {
                 packageIdLong = Long.parseLong(packageId);
             }
-            if (subjectId != null && !subjectId.equals("all") && !subjectId.isEmpty()) {
-                subjectIdLong = Long.parseLong(subjectId);
-            }
+           
 
-            // Handle status and rating
+        
             ReviewStatus statusEnum = null;
             Integer ratingInt = null;
             if (status != null && !status.isEmpty()) {
@@ -77,10 +73,10 @@ public class ReviewManagerController {
 
             String cmt = comment == null ? "" : comment.trim();
             Pageable pageable = PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "createdAt"));
-            Page<Review> reviewPage = reviewService.filterReviews(type, packageIdLong, subjectIdLong, statusEnum,
+            Page<Review> reviewPage = reviewService.filterReviews(type, packageIdLong, statusEnum,
                     ratingInt, cmt, pageable);
 
-            // Add attributes to model
+        
             model.addAttribute("reviews", reviewPage.getContent());
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", reviewPage.getTotalPages());
@@ -88,7 +84,7 @@ public class ReviewManagerController {
             model.addAttribute("size", size);
             model.addAttribute("type", type);
             model.addAttribute("packageId", packageId);
-            model.addAttribute("subjectId", subjectId);
+            
             model.addAttribute("status", status);
             model.addAttribute("rating", rating);
             model.addAttribute("comment", cmt);
