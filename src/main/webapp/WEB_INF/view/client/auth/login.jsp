@@ -42,19 +42,12 @@
         }
 
         .login-right {
-            /*background: linear-gradient(135deg, #045bd8 0%, #2a5298 100%);*/
-            /*color: white;*/
-            /*!*padding: 40px;*!*/
-            /*display: flex;*/
-            /*flex-direction: column;*/
-            /*justify-content: center;*/
-            /*position: relative;*/
             background: url("/img/login.jpg") no-repeat center center;
             background-size: cover;
         }
 
         .logo img {
-            height: 40px; /* Adjust based on your logo size */
+            height: 90px; /* Adjust based on your logo size */
         }
 
         h2 {
@@ -204,20 +197,7 @@
                 <img src="/img/logo.jpg" alt="PLS Logo">
             </div>
             <h2 class="mt-3">Đăng nhập vào Tài khoản của bạn</h2>
-            <p class="text-muted mb-4">Chào mừng bạn trở lại! Chọn phương thức đăng nhập:</p>
-
-            <!-- Nút Đăng nhập bằng Mạng xã hội -->
-            <a href="#" style="text-decoration: none; " class="social-login-btn">
-                <img src="https://www.google.com/favicon.ico" alt="Google">
-                Google
-            </a>
-            <a href="#" style="text-decoration: none; "  class="social-login-btn">
-                <img src="https://www.facebook.com/favicon.ico" alt="Facebook">
-                Facebook
-            </a>
-
-            <!-- Đường phân cách -->
-            <div class="divider">hoặc tiếp tục với email</div>
+            <p class="text-muted mb-4">Chào mừng bạn trở lại!</p>
 
             <!-- Form Email/Mật khẩu -->
             <form action="/login" method="post">
@@ -239,10 +219,6 @@
                     <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
                 </div>
                 <div class="d-flex justify-content-between mb-4">
-                    <%--                    <div class="form-check">--%>
-                    <%--                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">--%>
-                    <%--                        <label class="form-check-label" for="rememberMe">Ghi nhớ tôi</label>--%>
-                    <%--                    </div>--%>
                     <a href="/forgot-password" class="forgot-password">Quên mật khẩu?</a>
                 </div>
                 <div>
