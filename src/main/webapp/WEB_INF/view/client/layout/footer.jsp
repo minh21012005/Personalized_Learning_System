@@ -5,40 +5,44 @@
             <!-- Company Info -->
             <div class="col-12 col-md-4 mb-4">
                 <div class="footer-info">
-                    <img class="footer-logo mb-3" src="https://c.animaapp.com/mb5881k9TTFl8D/img/image-4-1.png" alt="Byway Logo" style="width: 111px; height: 40px;">
+                    <img class="footer-logo mb-3" src="/img/logo.jpg" alt="Learning System Logo" style="width: 100px;">
                     <p class="footer-description">
-                        Empowering learners through accessible and engaging online education.<br>
-                        Byway is a leading online learning platform dedicated to providing high-quality, flexible, and affordable educational experiences.
+                        Personalized Learning System empowers students, parents, and educators with accessible, high-quality online education tailored to individual needs.
                     </p>
                 </div>
             </div>
-            <!-- Get Help -->
+            <!-- Explore -->
             <div class="col-12 col-md-2 mb-4">
                 <div class="footer-links">
-                    <h5 class="links-title mb-3">Get Help</h5>
-                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Contact Us</a>
-                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Latest Articles</a>
-                    <a href="#" class="link-item d-block text-white text-decoration-none">FAQ</a>
+                    <h5 class="links-title mb-3">Explore</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">View Subjects</a></li>
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">View Packages</a></li>
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Register</a></li>
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Login</a></li>
+                    </ul>
                 </div>
             </div>
-            <!-- Programs -->
+            <!-- Account & Learning -->
             <div class="col-12 col-md-2 mb-4">
                 <div class="footer-links">
-                    <h5 class="links-title mb-3">Programs</h5>
-                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Art & Design</a>
-                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Business</a>
-                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">IT & Software</a>
-                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Languages</a>
-                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Programming</a>
+                    <h5 class="links-title mb-3">Account & Learning</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Manage Profile</a></li>
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Forgot Password</a></li>
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Learning Statistics</a></li>
+                        <li><a href="#" class="link-item d-block mb-2 text-white text-decoration-none">Buy Packages</a></li>
+                    </ul>
                 </div>
             </div>
-            <!-- Contact Us -->
+            <!-- Support -->
             <div class="col-12 col-md-4 mb-4">
                 <div class="contact-info">
-                    <h5 class="links-title mb-3">Contact Us</h5>
-                    <p class="link-item mb-2">Address: 123 Main Street, Anytown, CA 12345</p>
-                    <p class="link-item mb-2">Tel: +(123) 456-7890</p>
-                    <p class="link-item mb-2">Mail: bywayedu@webkul.in</p>
+                    <h5 class="links-title mb-3">Support</h5>
+                    <p class="link-item mb-2">Address: Khu công nghệ cao Láng-Hòa lạc</p>
+                    <p class="link-item mb-2">Tel: 0333009273</p>
+                    <p class="link-item mb-2">Mail: support@learningsystem.edu</p>
+                    <a href="#" class="link-item d-block mb-2 text-white text-decoration-none">FAQ</a>
                     <img class="footer-image mt-3" src="https://c.animaapp.com/mb5881k9TTFl8D/img/image-3-1.png" alt="Footer Image" style="width: 296px; height: 40px;">
                 </div>
             </div>
