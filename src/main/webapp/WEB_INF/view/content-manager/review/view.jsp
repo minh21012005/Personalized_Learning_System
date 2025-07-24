@@ -275,24 +275,12 @@
                                         <!-- Filter Panel -->
                                         <form method="get" action="/admin/reviews" class="mb-4">
                                             <div class="row">
-                                                <div class="col-md-2">
-                                                    <label>Loại đánh giá</label>
-                                                    <select name="type" class="form-select">
-                                                        <option value="">Tất cả</option>
-                                                        <option value="Package" ${type=='Package' ? 'selected' : '' }>
-                                                            Package
-                                                        </option>
-                                                        <option value="Subject" ${type=='Subject' ? 'selected' : '' }>
-                                                            Subject
-                                                        </option>
-                                                    </select>
-                                                </div>
+                                               
                                                 <div class="col-md-3">
-                                                    <label>Package/Subject</label>
-                                                    <select name="packageId" class="form-select" ${type !='Package'
-                                                        ? 'disabled' : '' }>
-                                                        <option value="">Chọn Package</option>
-                                                        <option value="" ${packageId=='all' ? 'selected' : '' }>Tất cả
+                                                    <label>Package</label>
+                                                    <select name="packageId" class="form-select">
+                                                        <option value="">Tất cả</option>
+                                                      
                                                         </option>
                                                         <c:forEach var="pkg" items="${packages}">
                                                             <option value="${pkg.packageId}" ${packageId==pkg.packageId
@@ -301,18 +289,7 @@
                                                             </option>
                                                         </c:forEach>
                                                     </select>
-                                                    <select name="subjectId" class="form-select" ${type !='Subject'
-                                                        ? 'disabled' : '' }>
-                                                        <option value="">Chọn Subject</option>
-                                                        <option value="" ${subjectId=='all' ? 'selected' : '' }>Tất cả
-                                                        </option>
-                                                        <c:forEach var="subject" items="${subjects}">
-                                                            <option value="${subject.subjectId}"
-                                                                ${subjectId==subject.subjectId ? 'selected' : '' }>
-                                                                ${subject.subjectName}
-                                                            </option>
-                                                        </c:forEach>
-                                                    </select>
+                                                 
                                                 </div>
                                                 <div class="col-md-2">
                                                     <label>Trạng thái</label>
@@ -370,14 +347,7 @@
                                                     <tr>
                                                         <td>${loop.index + 1 + (currentPage * size)}</td>
                                                         <td>${review.reviewId}</a></td>
-                                                        <td>
-                                                            <c:choose>
-                                                                <c:when test="${review.pkg != null}">${review.pkg.name}
-                                                                </c:when>
-                                                                <c:when test="${review.subject != null}">
-                                                                    ${review.subject.subjectName}</c:when>
-                                                            </c:choose>
-                                                        </td>
+                                                        <td>${review.pkg.name}                                                       </td>
                                                         <td>
                                                             <c:forEach begin="1" end="${review.rating}">⭐</c:forEach>
                                                         </td>
@@ -412,19 +382,19 @@
                                                 <ul class="pagination justify-content-center">
                                                     <li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
                                                         <a class="page-link"
-                                                            href="/admin/reviews?page=${currentPage - 1}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">«</a>
+                                                            href="/admin/reviews?page=${currentPage - 1}&type=${type}&packageId=${packageId}&status=${status}&rating=${rating}&comment=${comment}">«</a>
                                                     </li>
                                                     <c:forEach begin="0" end="${totalPages - 1}" var="i">
                                                         <li class="page-item ${currentPage == i ? 'active' : ''}">
                                                             <a class="page-link"
-                                                                href="/admin/reviews?page=${i}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">${i
+                                                                href="/admin/reviews?page=${i}&type=${type}&packageId=${packageId}&status=${status}&rating=${rating}&comment=${comment}">${i
                                                                 + 1}</a>
                                                         </li>
                                                     </c:forEach>
                                                     <li
                                                         class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
                                                         <a class="page-link"
-                                                            href="/admin/reviews?page=${currentPage + 1}&type=${type}&packageId=${packageId}&subjectId=${subjectId}&status=${status}&rating=${rating}&comment=${comment}">»</a>
+                                                            href="/admin/reviews?page=${currentPage + 1}&type=${type}&packageId=${packageId}&status=${status}&rating=${rating}&comment=${comment}">»</a>
                                                     </li>
                                                 </ul>
                                             </nav>
