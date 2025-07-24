@@ -3,9 +3,9 @@ spring:
     name: SWP_SE1941JV_GR2_PLS
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DBMS_URL:jdbc:mysql://10.8.0.1:3308/SWP_DB}
-    username: ${DBMS_USER:team_swp}
-    password: ${DBMS_PASSWORD:Swp1941@}
+    url: jdbc:mysql://localhost:3306/pls
+    username: root
+    password: 21012005
   jpa:
     hibernate:
       ddl-auto: none
