@@ -399,35 +399,10 @@ body {
     color: #FFFFFF;
 }
 
-/* Footer */
-.footer {
-    background-color: var(--grey-800);
-    color: var(--grey-300);
-    padding: 60px 20px;
-}
-
-.footer-content {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 30px;
-    align-items: flex-start;
-}
 
 .company-info {
     flex: 1;
     max-width: 350px;
-}
-
-.footer-logo {
-    margin-bottom: 15px;
-    width: 120px;
-}
-
-.footer-links {
-    display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
 }
 
 .link-column h3 {

@@ -74,7 +74,10 @@ public class SecurityConfiguration {
                         .requestMatchers("/transaction/**").hasRole("PARENT")
 
                         .requestMatchers("/admin/**")
-                        .hasAnyRole("ADMIN", "CONTENT_MANAGER")
+                        .hasAnyRole( "CONTENT_MANAGER")
+
+                        .requestMatchers("/super-admin/**")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers("/student/**")
                         .hasAnyRole("STUDENT", "ADMIN")
